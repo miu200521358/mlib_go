@@ -209,9 +209,17 @@ func (vw *ViewWindow) render() {
 
 	// 物理デバッグ描画
 	vw.physics.DrawDebugLines(vw.shader, highlightEnabled, vw.list.shared.IsShowJoint(), drawRigidBodyFront)
-	vw.physics.DrawDebugHighlight(vw.shader, drawRigidBodyFront)
 
-	if vw.tooltipRenderer != nil {
+	// 剛体デバッグが有効な場合のみハイライト描画
+	if drawRigidBodyFront || drawRigidBodyBack {
+		vw.physics.DrawDebugHighlight(vw.shader, drawRigidBodyFront)
+	}
+
+	// 剛体デバッグ状態変更の検出とハイライトクリア
+	vw.physics.CheckAndClearHighlightOnDebugChange(drawRigidBodyFront || drawRigidBodyBack)
+
+	// 剛体デバッグが有効な場合のみツールチップを表示
+	if (drawRigidBodyFront || drawRigidBodyBack) && vw.tooltipRenderer != nil {
 		if hover := vw.physics.DebugHoverInfo(); hover != nil && hover.RigidBody != nil {
 			text := fmt.Sprintf("%s(G%d)", hover.RigidBody.Name(), int(hover.RigidBody.CollisionGroup))
 			vw.tooltipRenderer.Render(text, float32(vw.cursorX), float32(vw.cursorY), w, h)

@@ -10,21 +10,22 @@ import (
 )
 
 type MPhysics struct {
-	world              bt.BtDiscreteDynamicsWorld   // ワールド
-	drawer             bt.BtMDebugDraw              // デバッグビューワー
-	liner              *mDebugDrawLiner             // ライナー
-	highlightBuffer    *mgl.VertexBufferHandle      // ハイライト用頂点バッファ
-	highlightVertices  []float32                    // ハイライト用頂点配列
-	debugHover         *physics.DebugRigidBodyHover // デバッグ用ホバー情報
-	debugHoverRigid    *rigidBodyValue              // デバッグ用ホバー剛体
-	debugHoverDistance float64                      // デバッグ用ホバー距離
-	config             physics.PhysicsConfig        // 設定パラメータ
-	DeformSpf          float32                      // デフォームspf
-	PhysicsSpf         float32                      // 物理spf
-	joints             map[int][]*jointValue        // ジョイント
-	rigidBodies        map[int][]*rigidBodyValue    // 剛体
-	windCfg            physics.WindConfig           // 風の設定
-	simTimeAcc         float32                      // 経過時間[秒]
+	world                   bt.BtDiscreteDynamicsWorld   // ワールド
+	drawer                  bt.BtMDebugDraw              // デバッグビューワー
+	liner                   *mDebugDrawLiner             // ライナー
+	highlightBuffer         *mgl.VertexBufferHandle      // ハイライト用頂点バッファ
+	highlightVertices       []float32                    // ハイライト用頂点配列
+	debugHover              *physics.DebugRigidBodyHover // デバッグ用ホバー情報
+	debugHoverRigid         *rigidBodyValue              // デバッグ用ホバー剛体
+	debugHoverDistance      float64                      // デバッグ用ホバー距離
+	prevRigidBodyDebugState bool                         // 前回の剛体デバッグ状態
+	config                  physics.PhysicsConfig        // 設定パラメータ
+	DeformSpf               float32                      // デフォームspf
+	PhysicsSpf              float32                      // 物理spf
+	joints                  map[int][]*jointValue        // ジョイント
+	rigidBodies             map[int][]*rigidBodyValue    // 剛体
+	windCfg                 physics.WindConfig           // 風の設定
+	simTimeAcc              float32                      // 経過時間[秒]
 }
 
 // NewMPhysics は物理エンジンのインスタンスを生成します

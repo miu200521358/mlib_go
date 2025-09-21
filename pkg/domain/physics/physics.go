@@ -50,6 +50,7 @@ type IPhysics interface {
 	DrawDebugHighlight(shader rendering.IShader, isDrawRigidBodyFront bool)
 	UpdateDebugHoverByRigidBody(modelIndex int, rigidBody *pmx.RigidBody, enable bool)
 	DebugHoverInfo() *DebugRigidBodyHover
+	CheckAndClearHighlightOnDebugChange(currentDebugState bool)
 
 	// 風関連
 	EnableWind(enable bool)
