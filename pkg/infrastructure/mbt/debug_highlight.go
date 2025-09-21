@@ -194,15 +194,15 @@ func (mp *MPhysics) rebuildHighlightVertices(rb *rigidBodyValue) {
 
 // appendBoxHighlightWithSize は指定サイズのBox形状を描画します
 func (mp *MPhysics) appendBoxHighlightWithSize(world *mmath.MMat4, hx, hy, hz float64) {
-	corners := []vec3{
-		{-hx, -hy, -hz},
-		{hx, -hy, -hz},
-		{hx, hy, -hz},
-		{-hx, hy, -hz},
-		{-hx, -hy, hz},
-		{hx, -hy, hz},
-		{hx, hy, hz},
-		{-hx, hy, hz},
+	corners := []*mmath.MVec3{
+		{X: -hx, Y: -hy, Z: -hz},
+		{X: hx, Y: -hy, Z: -hz},
+		{X: hx, Y: hy, Z: -hz},
+		{X: -hx, Y: hy, Z: -hz},
+		{X: -hx, Y: -hy, Z: hz},
+		{X: hx, Y: -hy, Z: hz},
+		{X: hx, Y: hy, Z: hz},
+		{X: -hx, Y: hy, Z: hz},
 	}
 
 	indices := []int{
@@ -221,15 +221,15 @@ func (mp *MPhysics) appendBoxHighlightWithSize(world *mmath.MMat4, hx, hy, hz fl
 func (mp *MPhysics) appendGenericBoxHighlight(world *mmath.MMat4, size float64) {
 	hx, hy, hz := size, size, size
 
-	corners := []vec3{
-		{-hx, -hy, -hz},
-		{hx, -hy, -hz},
-		{hx, hy, -hz},
-		{-hx, hy, -hz},
-		{-hx, -hy, hz},
-		{hx, -hy, hz},
-		{hx, hy, hz},
-		{-hx, hy, hz},
+	corners := []*mmath.MVec3{
+		{X: -hx, Y: -hy, Z: -hz},
+		{X: hx, Y: -hy, Z: -hz},
+		{X: hx, Y: hy, Z: -hz},
+		{X: -hx, Y: hy, Z: -hz},
+		{X: -hx, Y: -hy, Z: hz},
+		{X: hx, Y: -hy, Z: hz},
+		{X: hx, Y: hy, Z: hz},
+		{X: -hx, Y: hy, Z: hz},
 	}
 
 	indices := []int{
@@ -248,7 +248,7 @@ func (mp *MPhysics) appendSphereHighlight(world *mmath.MMat4, radius float64) {
 	latSegments := 12
 	lonSegments := 24
 
-	var vertices []vec3
+	var vertices []*mmath.MVec3
 	var indices []int
 
 	for lat := 0; lat < latSegments; lat++ {
@@ -264,10 +264,10 @@ func (mp *MPhysics) appendSphereHighlight(world *mmath.MMat4, radius float64) {
 			phi1 := float64(lon) / float64(lonSegments) * 2 * math.Pi
 			phi2 := float64(lon+1) / float64(lonSegments) * 2 * math.Pi
 
-			p1 := vec3{r1 * math.Cos(phi1), y1, r1 * math.Sin(phi1)}
-			p2 := vec3{r2 * math.Cos(phi1), y2, r2 * math.Sin(phi1)}
-			p3 := vec3{r2 * math.Cos(phi2), y2, r2 * math.Sin(phi2)}
-			p4 := vec3{r1 * math.Cos(phi2), y1, r1 * math.Sin(phi2)}
+			p1 := &mmath.MVec3{X: r1 * math.Cos(phi1), Y: y1, Z: r1 * math.Sin(phi1)}
+			p2 := &mmath.MVec3{X: r2 * math.Cos(phi1), Y: y2, Z: r2 * math.Sin(phi1)}
+			p3 := &mmath.MVec3{X: r2 * math.Cos(phi2), Y: y2, Z: r2 * math.Sin(phi2)}
+			p4 := &mmath.MVec3{X: r1 * math.Cos(phi2), Y: y1, Z: r1 * math.Sin(phi2)}
 
 			base := len(vertices)
 			vertices = append(vertices, p1, p2, p3, p4)
@@ -285,7 +285,7 @@ func (mp *MPhysics) appendCapsuleHighlight(world *mmath.MMat4, radius, halfHeigh
 	segments := 16
 	capSegments := segments / 2
 
-	var vertices []vec3
+	var vertices []*mmath.MVec3
 	var indices []int
 
 	// Cylinder
@@ -293,10 +293,10 @@ func (mp *MPhysics) appendCapsuleHighlight(world *mmath.MMat4, radius, halfHeigh
 		phi1 := float64(i) / float64(segments) * 2 * math.Pi
 		phi2 := float64(i+1) / float64(segments) * 2 * math.Pi
 
-		top1 := vec3{radius * math.Cos(phi1), halfHeight, radius * math.Sin(phi1)}
-		top2 := vec3{radius * math.Cos(phi2), halfHeight, radius * math.Sin(phi2)}
-		bottom1 := vec3{radius * math.Cos(phi1), -halfHeight, radius * math.Sin(phi1)}
-		bottom2 := vec3{radius * math.Cos(phi2), -halfHeight, radius * math.Sin(phi2)}
+		top1 := &mmath.MVec3{X: radius * math.Cos(phi1), Y: halfHeight, Z: radius * math.Sin(phi1)}
+		top2 := &mmath.MVec3{X: radius * math.Cos(phi2), Y: halfHeight, Z: radius * math.Sin(phi2)}
+		bottom1 := &mmath.MVec3{X: radius * math.Cos(phi1), Y: -halfHeight, Z: radius * math.Sin(phi1)}
+		bottom2 := &mmath.MVec3{X: radius * math.Cos(phi2), Y: -halfHeight, Z: radius * math.Sin(phi2)}
 
 		base := len(vertices)
 		vertices = append(vertices, top1, bottom1, top2, bottom2)
@@ -321,10 +321,10 @@ func (mp *MPhysics) appendCapsuleHighlight(world *mmath.MMat4, radius, halfHeigh
 			phi1 := float64(lon) / float64(segments) * 2 * math.Pi
 			phi2 := float64(lon+1) / float64(segments) * 2 * math.Pi
 
-			p1 := vec3{r1 * math.Cos(phi1), y1, r1 * math.Sin(phi1)}
-			p2 := vec3{r2 * math.Cos(phi1), y2, r2 * math.Sin(phi1)}
-			p3 := vec3{r2 * math.Cos(phi2), y2, r2 * math.Sin(phi2)}
-			p4 := vec3{r1 * math.Cos(phi2), y1, r1 * math.Sin(phi2)}
+			p1 := &mmath.MVec3{X: r1 * math.Cos(phi1), Y: y1, Z: r1 * math.Sin(phi1)}
+			p2 := &mmath.MVec3{X: r2 * math.Cos(phi1), Y: y2, Z: r2 * math.Sin(phi1)}
+			p3 := &mmath.MVec3{X: r2 * math.Cos(phi2), Y: y2, Z: r2 * math.Sin(phi2)}
+			p4 := &mmath.MVec3{X: r1 * math.Cos(phi2), Y: y1, Z: r1 * math.Sin(phi2)}
 
 			base := len(vertices)
 			vertices = append(vertices, p1, p2, p3, p4)
@@ -350,10 +350,10 @@ func (mp *MPhysics) appendCapsuleHighlight(world *mmath.MMat4, radius, halfHeigh
 			phi1 := float64(lon) / float64(segments) * 2 * math.Pi
 			phi2 := float64(lon+1) / float64(segments) * 2 * math.Pi
 
-			p1 := vec3{r1 * math.Cos(phi1), y1, r1 * math.Sin(phi1)}
-			p2 := vec3{r2 * math.Cos(phi1), y2, r2 * math.Sin(phi1)}
-			p3 := vec3{r2 * math.Cos(phi2), y2, r2 * math.Sin(phi2)}
-			p4 := vec3{r1 * math.Cos(phi2), y1, r1 * math.Sin(phi2)}
+			p1 := &mmath.MVec3{X: r1 * math.Cos(phi1), Y: y1, Z: r1 * math.Sin(phi1)}
+			p2 := &mmath.MVec3{X: r2 * math.Cos(phi1), Y: y2, Z: r2 * math.Sin(phi1)}
+			p3 := &mmath.MVec3{X: r2 * math.Cos(phi2), Y: y2, Z: r2 * math.Sin(phi2)}
+			p4 := &mmath.MVec3{X: r1 * math.Cos(phi2), Y: y1, Z: r1 * math.Sin(phi2)}
 
 			base := len(vertices)
 			vertices = append(vertices, p1, p2, p3, p4)
@@ -367,14 +367,14 @@ func (mp *MPhysics) appendCapsuleHighlight(world *mmath.MMat4, radius, halfHeigh
 	mp.appendVertices(world, vertices, indices)
 }
 
-func (mp *MPhysics) appendVertices(world *mmath.MMat4, vertices []vec3, indices []int) {
+func (mp *MPhysics) appendVertices(world *mmath.MMat4, vertices []*mmath.MVec3, indices []int) {
 	color := []float32{float32(highlightColorR), float32(highlightColorG), float32(highlightColorB), float32(highlightColorA)}
 	for _, idx := range indices {
 		if idx < 0 || idx >= len(vertices) {
 			continue
 		}
 		local := vertices[idx]
-		worldPos := world.MulVec3(&mmath.MVec3{X: local.x, Y: local.y, Z: local.z})
+		worldPos := world.MulVec3(&mmath.MVec3{X: local.X, Y: local.Y, Z: local.Z})
 		mp.highlightVertices = append(mp.highlightVertices,
 			-float32(worldPos.X), // X軸反転
 			float32(worldPos.Y),
@@ -382,157 +382,4 @@ func (mp *MPhysics) appendVertices(world *mmath.MMat4, vertices []vec3, indices 
 			color[0], color[1], color[2], color[3],
 		)
 	}
-}
-
-func raySphereIntersection(origin, dir vec3, radius float64) (float64, bool) {
-	a := dir.dot(dir)
-	if math.Abs(a) < epsilon {
-		return 0, false
-	}
-	b := 2 * origin.dot(dir)
-	c := origin.dot(origin) - radius*radius
-	discriminant := b*b - 4*a*c
-	if discriminant < 0 {
-		return 0, false
-	}
-	sqrtDisc := math.Sqrt(discriminant)
-	invDenom := 1 / (2 * a)
-	t0 := (-b - sqrtDisc) * invDenom
-	t1 := (-b + sqrtDisc) * invDenom
-	if t0 >= 0 && t0 <= 1 {
-		return t0, true
-	}
-	if t1 >= 0 && t1 <= 1 {
-		return t1, true
-	}
-	return 0, false
-}
-
-func rayAabbIntersection(origin, dir, min, max vec3) (float64, bool) {
-	tMin := 0.0
-	tMax := 1.0
-
-	for axis := 0; axis < 3; axis++ {
-		var o, d, minVal, maxVal float64
-		switch axis {
-		case 0:
-			o, d, minVal, maxVal = origin.x, dir.x, min.x, max.x
-		case 1:
-			o, d, minVal, maxVal = origin.y, dir.y, min.y, max.y
-		case 2:
-			o, d, minVal, maxVal = origin.z, dir.z, min.z, max.z
-		}
-
-		if math.Abs(d) < epsilon {
-			if o < minVal || o > maxVal {
-				return 0, false
-			}
-			continue
-		}
-
-		invD := 1 / d
-		t1 := (minVal - o) * invD
-		t2 := (maxVal - o) * invD
-		if t1 > t2 {
-			t1, t2 = t2, t1
-		}
-
-		if t1 > tMin {
-			tMin = t1
-		}
-		if t2 < tMax {
-			tMax = t2
-		}
-		if tMax < tMin {
-			return 0, false
-		}
-	}
-
-	if tMin >= 0 && tMin <= 1 {
-		return tMin, true
-	}
-	if tMax >= 0 && tMax <= 1 {
-		return tMax, true
-	}
-	return 0, false
-}
-
-func rayCapsuleIntersection(origin, dir vec3, halfHeight, radius float64) (float64, bool) {
-	minT := math.MaxFloat64
-	hit := false
-
-	a := dir.x*dir.x + dir.z*dir.z
-	if math.Abs(a) > epsilon {
-		b := 2 * (origin.x*dir.x + origin.z*dir.z)
-		c := origin.x*origin.x + origin.z*origin.z - radius*radius
-		discriminant := b*b - 4*a*c
-		if discriminant >= 0 {
-			sqrtDisc := math.Sqrt(discriminant)
-			invDenom := 1 / (2 * a)
-			t0 := (-b - sqrtDisc) * invDenom
-			t1 := (-b + sqrtDisc) * invDenom
-			if t0 > t1 {
-				t0, t1 = t1, t0
-			}
-			if t0 >= 0 {
-				y := origin.y + dir.y*t0
-				if t0 <= 1 && y >= -halfHeight && y <= halfHeight {
-					minT = t0
-					hit = true
-				}
-			}
-			if t1 >= 0 && (!hit || t1 < minT) {
-				y := origin.y + dir.y*t1
-				if t1 <= 1 && y >= -halfHeight && y <= halfHeight {
-					minT = t1
-					hit = true
-				}
-			}
-		}
-	} else if origin.x*origin.x+origin.z*origin.z <= radius*radius {
-		if dir.y > epsilon {
-			t := (-halfHeight - origin.y) / dir.y
-			if t >= 0 && t <= 1 {
-				minT = t
-				hit = true
-			}
-		} else if dir.y < -epsilon {
-			t := (halfHeight - origin.y) / dir.y
-			if t >= 0 && t <= 1 {
-				minT = t
-				hit = true
-			}
-		}
-	}
-
-	if t, ok := raySphereIntersection(origin.sub(vec3{0, halfHeight, 0}), dir, radius); ok {
-		if t >= 0 && t <= 1 && (!hit || t < minT) {
-			minT = t
-			hit = true
-		}
-	}
-	if t, ok := raySphereIntersection(origin.sub(vec3{0, -halfHeight, 0}), dir, radius); ok {
-		if t >= 0 && t <= 1 && (!hit || t < minT) {
-			minT = t
-			hit = true
-		}
-	}
-
-	return minT, hit
-}
-
-type vec3 struct {
-	x, y, z float64
-}
-
-func vec3FromBt(v bt.BtVector3) vec3 {
-	return vec3{float64(v.GetX()), float64(v.GetY()), float64(v.GetZ())}
-}
-
-func (v vec3) sub(o vec3) vec3 {
-	return vec3{v.x - o.x, v.y - o.y, v.z - o.z}
-}
-
-func (v vec3) dot(o vec3) float64 {
-	return v.x*o.x + v.y*o.y + v.z*o.z
 }

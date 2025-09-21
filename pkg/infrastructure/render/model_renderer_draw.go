@@ -9,6 +9,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/physics"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/rendering"
 	"github.com/miu200521358/mlib_go/pkg/domain/state"
@@ -114,7 +115,7 @@ func (mr *ModelRenderer) drawNormal(windowIndex int, shader rendering.IShader, p
 }
 
 // drawBone は、ボーン表示（ラインとポイント）の描画処理を行います。
-func (mr *ModelRenderer) drawBone(windowIndex int, shader rendering.IShader, bones *pmx.Bones, shared *state.SharedState, paddedMatrixes []float32, width, height int) {
+func (mr *ModelRenderer) drawBone(windowIndex int, shader rendering.IShader, bones *pmx.Bones, shared *state.SharedState, paddedMatrixes []float32, width, height int, debugBoneHover []*physics.DebugBoneHover) {
 	// モデルの前面にボーンを描画するため、深度テストの設定を変更
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.ALWAYS)
@@ -129,7 +130,7 @@ func (mr *ModelRenderer) drawBone(windowIndex int, shader rendering.IShader, bon
 	// --- ボーンライン描画 ---
 	mr.boneLineBufferHandle.Bind()
 	// 取得したデバッグカラー情報で更新
-	boneLineIndexes, boneLineDeltas := mr.fetchBoneLineDeltas(bones, shared)
+	boneLineIndexes, boneLineDeltas := mr.fetchBoneLineDeltas(bones, shared, debugBoneHover)
 	mr.boneLineBufferHandle.UpdateBoneDeltas(boneLineIndexes, boneLineDeltas)
 
 	mr.boneLineIbo.Bind()
@@ -147,7 +148,7 @@ func (mr *ModelRenderer) drawBone(windowIndex int, shader rendering.IShader, bon
 	// --- ボーンポイント描画 ---
 	mr.bonePointBufferHandle.Bind()
 	// 取得したデバッグカラー情報で更新
-	bonePointIndexes, bonePointDeltas := mr.fetchBonePointDeltas(bones, shared)
+	bonePointIndexes, bonePointDeltas := mr.fetchBonePointDeltas(bones, shared, debugBoneHover)
 	mr.bonePointBufferHandle.UpdateBoneDeltas(bonePointIndexes, bonePointDeltas)
 
 	mr.bonePointIbo.Bind()
@@ -272,26 +273,40 @@ func (mr *ModelRenderer) drawSelectedVertex(
 // --- 内部ヘルパー関数 ---
 
 // fetchBoneLineDeltas は、ボーンライン描画用のデバッグカラー情報を取得します。
-func (mr *ModelRenderer) fetchBoneLineDeltas(bones *pmx.Bones, shared *state.SharedState) ([]int, [][]float32) {
+func (mr *ModelRenderer) fetchBoneLineDeltas(bones *pmx.Bones, shared *state.SharedState, debugBoneHover []*physics.DebugBoneHover) ([]int, [][]float32) {
 	indexes := make([]int, len(mr.boneLineIndexes))
 	deltas := make([][]float32, len(mr.boneLineIndexes))
 	for i, boneIndex := range mr.boneLineIndexes {
 		indexes[i] = i
 		if bone, err := bones.Get(boneIndex); err == nil {
-			deltas[i] = getBoneDebugColor(bone, shared)
+			isHover := false
+			for _, hover := range debugBoneHover {
+				if hover.Bone.Index() == bone.Index() && mr.Model.Index() == hover.ModelIndex {
+					isHover = true
+					break
+				}
+			}
+			deltas[i] = getBoneDebugColor(bone, shared, isHover)
 		}
 	}
 	return indexes, deltas
 }
 
 // fetchBonePointDeltas は、ボーンポイント描画用のデバッグカラー情報を取得します。
-func (mr *ModelRenderer) fetchBonePointDeltas(bones *pmx.Bones, shared *state.SharedState) ([]int, [][]float32) {
+func (mr *ModelRenderer) fetchBonePointDeltas(bones *pmx.Bones, shared *state.SharedState, debugBoneHover []*physics.DebugBoneHover) ([]int, [][]float32) {
 	indexes := make([]int, len(mr.bonePointIndexes))
 	deltas := make([][]float32, len(mr.bonePointIndexes))
 	for i, boneIndex := range mr.bonePointIndexes {
 		indexes[i] = i
 		if bone, err := bones.Get(boneIndex); err == nil {
-			deltas[i] = getBoneDebugColor(bone, shared)
+			isHover := false
+			for _, hover := range debugBoneHover {
+				if hover.Bone.Index() == bone.Index() && mr.Model.Index() == hover.ModelIndex {
+					isHover = true
+					break
+				}
+			}
+			deltas[i] = getBoneDebugColor(bone, shared, isHover)
 		}
 	}
 	return indexes, deltas

@@ -15,10 +15,10 @@ func (mp *MPhysics) DebugBoneHoverInfo() []*physics.DebugBoneHover {
 
 // UpdateDebugHoverByBones は複数ボーンによるハイライト情報を更新します
 func (mp *MPhysics) UpdateDebugHoverByBones(closestBones []*physics.DebugBoneHover, enable bool) {
-	mlog.I("複数ボーンハイライト開始: enable=%v, bone数=%d", enable, len(closestBones))
+	mlog.V("複数ボーンハイライト開始: enable=%v, bone数=%d", enable, len(closestBones))
 
 	if !enable || len(closestBones) == 0 {
-		mlog.I("複数ボーンハイライト無効またはbonesが空 - クリア")
+		mlog.V("複数ボーンハイライト無効またはbonesが空 - クリア")
 		mp.clearDebugBoneHover()
 		return
 	}
@@ -32,7 +32,7 @@ func (mp *MPhysics) UpdateDebugHoverByBones(closestBones []*physics.DebugBoneHov
 			boneNames = append(boneNames, bone.Bone.Name())
 		}
 	}
-	mlog.I("複数ボーンハイライト設定完了: %d個のボーン [%s]", len(closestBones), strings.Join(boneNames, ", "))
+	mlog.V("複数ボーンハイライト設定完了: %d個のボーン [%s]", len(closestBones), strings.Join(boneNames, ", "))
 }
 
 // CheckAndClearBoneExpiredHighlight は2秒経過したボーンハイライトを自動的にクリアします
@@ -44,7 +44,7 @@ func (mp *MPhysics) CheckAndClearBoneExpiredHighlight() {
 
 	// 2秒経過をチェック
 	if time.Since(mp.debugBoneHoverStartTime) >= 2*time.Second {
-		mlog.I("ボーンハイライト自動クリア: 2秒経過しました")
+		mlog.V("ボーンハイライト自動クリア: 2秒経過しました")
 		mp.clearDebugBoneHover()
 	}
 }

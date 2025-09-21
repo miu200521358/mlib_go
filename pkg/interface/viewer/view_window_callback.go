@@ -278,21 +278,21 @@ func (vw *ViewWindow) selectRigidBodyByCursor(xpos, ypos float64) {
 	// ハイライト機能の更新
 	if hasHit && ok && pmxRB != nil {
 		vw.physics.UpdateDebugHoverByRigidBody(modelIdx, pmxRB, true)
-		mlog.I("pick: ndc=(%.3f,%.3f) from=%v to=%v hasHit=%v frac=%.5f model=%d name=%s",
+		mlog.V("pick: ndc=(%.3f,%.3f) from=%v to=%v hasHit=%v frac=%.5f model=%d name=%s",
 			ndcX, ndcY, rayFrom, rayTo, hasHit, frac, modelIdx, pmxRB.Name())
 	} else {
 		vw.physics.UpdateDebugHoverByRigidBody(0, nil, false)
-		mlog.I("pick: ndc=(%.3f,%.3f) from=%v to=%v hasHit=%v frac=%.5f (no hit)",
+		mlog.V("pick: ndc=(%.3f,%.3f) from=%v to=%v hasHit=%v frac=%.5f (no hit)",
 			ndcX, ndcY, rayFrom, rayTo, hasHit, frac)
 	}
 }
 
 // selectBoneByCursor は指定されたマウス座標から最も近いボーンを選択します
 func (vw *ViewWindow) selectBoneByCursor(xpos, ypos float64) {
-	mlog.I("ボーン選択処理開始: x=%.1f, y=%.1f", xpos, ypos)
+	mlog.V("ボーン選択処理開始: x=%.1f, y=%.1f", xpos, ypos)
 
 	if len(vw.vmdDeltas) == 0 || vw.vmdDeltas[0] == nil {
-		mlog.I("VmdDeltasが存在しない - ボーン選択中止")
+		mlog.V("VmdDeltasが存在しない - ボーン選択中止")
 		return
 	}
 
@@ -359,10 +359,10 @@ func (vw *ViewWindow) selectBoneByCursor(xpos, ypos float64) {
 	closestBones := boneDistances[closestDistance] // 最も近い距離のボーン群
 
 	if len(closestBones) > 0 {
-		mlog.I("ボーン選択成功: %d個のボーン (最短距離=%.3f)", len(closestBones), closestDistance)
+		mlog.V("ボーン選択成功: %d個のボーン (最短距離=%.3f)", len(closestBones), closestDistance)
 		vw.physics.UpdateDebugHoverByBones(closestBones, true)
 	} else {
-		mlog.I("近いボーンが見つかりませんでした")
+		mlog.V("近いボーンが見つかりませんでした")
 		vw.physics.UpdateDebugHoverByBones(nil, false)
 	}
 }

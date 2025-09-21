@@ -204,7 +204,7 @@ func (vw *ViewWindow) render() {
 		}
 
 		// モデルをレンダリング
-		modelRenderer.Render(vw.shader, vw.list.shared, vw.vmdDeltas[i])
+		modelRenderer.Render(vw.shader, vw.list.shared, vw.vmdDeltas[i], vw.physics.DebugBoneHoverInfo())
 	}
 
 	// 物理デバッグ描画

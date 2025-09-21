@@ -29,6 +29,7 @@ var (
 	boneColorsTranslate      = []float32{0.70, 1.0, 0.54, 1.0}
 	boneColorsRotate         = []float32{0.56, 0.78, 1.0, 1.0}
 	boneColorsInvisible      = []float32{0.82, 0.82, 0.82, 1.0}
+	boneColorsHighlight      = []float32{1.0, 0.0, 0.0, 1.0} // ハイライト用赤色
 )
 
 // newBoneGl はボーンの先端位置データをGPU頂点用に詰める
@@ -62,46 +63,74 @@ func newTailBoneGl(bone *pmx.Bone) []float32 {
 }
 
 // getBoneDebugColor はボーンの種類(IK, 付与親, 固定軸, etc.)を見てカラーを返す
-func getBoneDebugColor(bone *pmx.Bone, shared *state.SharedState) []float32 {
+func getBoneDebugColor(bone *pmx.Bone, shared *state.SharedState, isHover bool) []float32 {
 	// IK系
 	if (shared.IsShowBoneAll() || shared.IsShowBoneVisible() || shared.IsShowBoneIk()) && bone.IsIK() {
+		if isHover {
+			return boneColorsHighlight
+		}
 		return boneColorsIK
 	} else if (shared.IsShowBoneAll() || shared.IsShowBoneVisible() || shared.IsShowBoneIk()) &&
 		len(bone.IkLinkBoneIndexes) > 0 {
+		if isHover {
+			return boneColorsHighlight
+		}
 		return boneColorsIKLink
 	} else if (shared.IsShowBoneAll() || shared.IsShowBoneVisible() || shared.IsShowBoneIk()) &&
 		len(bone.IkTargetBoneIndexes) > 0 {
+		if isHover {
+			return boneColorsHighlight
+		}
 		return boneColorsIKTarget
 	}
 
 	// 付与親系
 	if (shared.IsShowBoneAll() || shared.IsShowBoneVisible() || shared.IsShowBoneEffector()) &&
 		(bone.IsEffectorRotation() || bone.IsEffectorTranslation()) {
+		if isHover {
+			return boneColorsHighlight
+		}
 		return boneColorsEffect
 	} else if (shared.IsShowBoneAll() || shared.IsShowBoneVisible() || shared.IsShowBoneEffector()) &&
 		len(bone.EffectiveBoneIndexes) > 0 {
+		if isHover {
+			return boneColorsHighlight
+		}
 		return boneColorsEffectEffector
 	}
 
 	// 固定軸
 	if (shared.IsShowBoneAll() || shared.IsShowBoneVisible() || shared.IsShowBoneFixed()) &&
 		bone.HasFixedAxis() {
+		if isHover {
+			return boneColorsHighlight
+		}
 		return boneColorsFixed
 	}
 
 	// 移動/回転
 	if (shared.IsShowBoneAll() || shared.IsShowBoneVisible() || shared.IsShowBoneTranslate()) &&
 		bone.CanTranslate() {
+		if isHover {
+			return boneColorsHighlight
+		}
 		return boneColorsTranslate
 	} else if (shared.IsShowBoneAll() || shared.IsShowBoneVisible() || shared.IsShowBoneRotate()) &&
 		bone.CanRotate() {
+		if isHover {
+			return boneColorsHighlight
+		}
 		return boneColorsRotate
 	}
 
 	// 非表示
 	if shared.IsShowBoneAll() && !bone.IsVisible() {
+		if isHover {
+			return boneColorsHighlight
+		}
 		return boneColorsInvisible
 	}
+
 	// それ以外は色なし(透明)
 	return []float32{0.0, 0.0, 0.0, 0.0}
 }
