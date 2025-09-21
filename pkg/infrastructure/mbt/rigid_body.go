@@ -9,23 +9,15 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/physics"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
 )
 
-// rigidBodyValue は剛体の物理エンジン内部表現を格納する構造体です
-type rigidBodyValue struct {
-	pmxRigidBody     *pmx.RigidBody  // PMXモデルの剛体定義
-	btRigidBody      bt.BtRigidBody  // Bullet物理エンジンの剛体
-	btLocalTransform *bt.BtTransform // 剛体のローカルトランスフォーム
-	mask             int             // 衝突マスク
-	group            int             // 衝突グループ
-}
-
 // initRigidBodies はモデルの剛体を初期化します
 func (mp *MPhysics) initRigidBodies(modelIndex int, rigidBodies *pmx.RigidBodies) {
 	// 剛体を順番にボーンと紐付けていく
-	mp.rigidBodies[modelIndex] = make([]*rigidBodyValue, rigidBodies.Length())
+	mp.rigidBodies[modelIndex] = make([]*physics.RigidBodyValue, rigidBodies.Length())
 	rigidBodies.ForEach(func(index int, rigidBody *pmx.RigidBody) bool {
 		// 剛体の初期位置と回転
 		btRigidBodyTransform := bt.NewBtTransform(NewBulletFromRad(rigidBody.Rotation), NewBulletFromVec(rigidBody.Position))
@@ -43,7 +35,7 @@ func (mp *MPhysics) initRigidBodiesByBoneDeltas(
 	boneDeltas *delta.BoneDeltas, rigidBodyDeltas *delta.RigidBodyDeltas,
 ) {
 	// 剛体を順番にボーンと紐付けていく
-	mp.rigidBodies[modelIndex] = make([]*rigidBodyValue, rigidBodies.Length())
+	mp.rigidBodies[modelIndex] = make([]*physics.RigidBodyValue, rigidBodies.Length())
 	rigidBodies.ForEach(func(index int, rigidBody *pmx.RigidBody) bool {
 		// ボーンから見た剛体の初期位置
 		var bone *pmx.Bone
@@ -111,9 +103,9 @@ func (mp *MPhysics) initRigidBody(
 	// 剛体・剛体グループ・非衝突グループを追加
 	group := 1 << rigidBody.CollisionGroup
 	mp.world.AddRigidBody(btRigidBody, group, rigidBody.CollisionGroupMaskValue)
-	mp.rigidBodies[modelIndex][rigidBody.Index()] = &rigidBodyValue{
-		pmxRigidBody: rigidBody, btRigidBody: btRigidBody, btLocalTransform: &btRigidBodyLocalTransform,
-		mask: rigidBody.CollisionGroupMaskValue, group: group}
+	mp.rigidBodies[modelIndex][rigidBody.Index()] = &physics.RigidBodyValue{
+		PmxRigidBody: rigidBody, BtRigidBody: btRigidBody, BtLocalTransform: &btRigidBodyLocalTransform,
+		Mask: rigidBody.CollisionGroupMaskValue, Group: group}
 
 	// 剛体の物理フラグを更新
 	mp.updateFlag(modelIndex, rigidBody)
@@ -194,18 +186,18 @@ func (mp *MPhysics) configureRigidBody(btRigidBody bt.BtRigidBody, modelIndex in
 // deleteRigidBodies はモデルの全剛体を削除します
 func (mp *MPhysics) deleteRigidBodies(modelIndex int) {
 	for _, r := range mp.rigidBodies[modelIndex] {
-		if r == nil || r.btRigidBody == nil {
+		if r == nil || r.BtRigidBody == nil {
 			continue
 		}
-		mp.world.RemoveRigidBody(r.btRigidBody)
-		bt.DeleteBtRigidBody(r.btRigidBody)
+		mp.world.RemoveRigidBody(r.BtRigidBody)
+		bt.DeleteBtRigidBody(r.BtRigidBody)
 	}
 	mp.rigidBodies[modelIndex] = nil
 }
 
 // updateFlag は剛体の物理フラグを更新します
 func (mp *MPhysics) updateFlag(modelIndex int, rigidBody *pmx.RigidBody) {
-	btRigidBody := mp.rigidBodies[modelIndex][rigidBody.Index()].btRigidBody
+	btRigidBody := mp.rigidBodies[modelIndex][rigidBody.Index()].BtRigidBody
 
 	if rigidBody.PhysicsType == pmx.PHYSICS_TYPE_STATIC {
 		// 剛体の位置更新に物理演算を使わない。もしくは物理演算OFF時
@@ -240,8 +232,8 @@ func (mp *MPhysics) UpdateTransform(
 	mat := mmath.NewGlMat4(boneGlobalMatrix)
 	boneTransform.SetFromOpenGLMatrix(&mat[0])
 
-	btRigidBody := mp.rigidBodies[modelIndex][rigidBody.Index()].btRigidBody
-	btRigidBodyLocalTransform := *mp.rigidBodies[modelIndex][rigidBody.Index()].btLocalTransform
+	btRigidBody := mp.rigidBodies[modelIndex][rigidBody.Index()].BtRigidBody
+	btRigidBodyLocalTransform := *mp.rigidBodies[modelIndex][rigidBody.Index()].BtLocalTransform
 
 	// 剛体のグローバル位置を確定
 	motionState := btRigidBody.GetMotionState().(bt.BtMotionState)
@@ -258,8 +250,8 @@ func (mp *MPhysics) GetRigidBodyBoneMatrix(
 	modelIndex int,
 	rigidBody *pmx.RigidBody,
 ) *mmath.MMat4 {
-	btRigidBody := mp.rigidBodies[modelIndex][rigidBody.Index()].btRigidBody
-	btRigidBodyLocalTransform := *mp.rigidBodies[modelIndex][rigidBody.Index()].btLocalTransform
+	btRigidBody := mp.rigidBodies[modelIndex][rigidBody.Index()].BtRigidBody
+	btRigidBodyLocalTransform := *mp.rigidBodies[modelIndex][rigidBody.Index()].BtLocalTransform
 
 	motionState := btRigidBody.GetMotionState().(bt.BtMotionState)
 
@@ -322,11 +314,11 @@ func (mp *MPhysics) UpdateRigidBodyShapeMass(
 	}
 
 	r := mp.rigidBodies[modelIndex][rigidBody.Index()]
-	if r == nil || r.btRigidBody == nil {
+	if r == nil || r.BtRigidBody == nil {
 		return
 	}
 
-	btRigidBody := r.btRigidBody
+	btRigidBody := r.BtRigidBody
 
 	// 現在の状態を保存
 	motionState := btRigidBody.GetMotionState().(bt.BtMotionState)
@@ -392,7 +384,7 @@ func (mp *MPhysics) UpdateRigidBodyShapeMass(
 
 	// サイズが変更された場合は物理世界に再追加
 	if needShapeUpdate {
-		mp.world.AddRigidBody(btRigidBody, r.group, r.mask)
+		mp.world.AddRigidBody(btRigidBody, r.Group, r.Mask)
 	}
 
 	// 物理フラグを更新
@@ -404,7 +396,7 @@ func (mp *MPhysics) UpdateRigidBodyShapeMass(
 
 // FindRigidBodyByCollisionHit はレイキャストで得た btCollisionObject から
 // (modelIndex, rigidBodyIndex) を逆引きする。
-func (mp *MPhysics) FindRigidBodyByCollisionHit(hitObj bt.BtCollisionObject, hasHit bool) (modelIndex int, rb *pmx.RigidBody, ok bool) {
+func (mp *MPhysics) FindRigidBodyByCollisionHit(hitObj bt.BtCollisionObject, hasHit bool) (modelIndex int, rb *physics.RigidBodyValue, ok bool) {
 	if hitObj == nil || !hasHit {
 		return -1, nil, false
 	}
@@ -425,8 +417,8 @@ func (mp *MPhysics) FindRigidBodyByCollisionHit(hitObj bt.BtCollisionObject, has
 		// 該当モデルが存在する場合、その剛体Indexを使う
 		if len(mp.rigidBodies[modelIndex]) > rigidBodyIndex {
 			v := mp.rigidBodies[modelIndex][rigidBodyIndex]
-			if v != nil && v.btRigidBody != nil {
-				return modelIndex, v.pmxRigidBody, true
+			if v != nil && v.BtRigidBody != nil {
+				return modelIndex, v, true
 			}
 		}
 	}

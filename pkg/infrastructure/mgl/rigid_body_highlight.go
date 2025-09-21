@@ -1,4 +1,4 @@
-package mbt
+package mgl
 
 import (
 	"math"
@@ -13,7 +13,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/rendering"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 )
 
 const (
@@ -24,56 +23,52 @@ const (
 	epsilon         = 1e-6
 )
 
-func (mp *MPhysics) DebugHoverInfo() *physics.DebugRigidBodyHover {
+type RigidBodyHighlighter struct {
+	highlightBuffer         *VertexBufferHandle     // ハイライト用頂点バッファ
+	highlightVertices       []float32               // ハイライト用頂点配列
+	debugHover              *DebugRigidBodyHover    // デバッグ用ホバー情報
+	debugHoverRigid         *physics.RigidBodyValue // デバッグ用ホバー剛体
+	debugHoverStartTime     time.Time               // ハイライト開始時刻（自動クリア用）
+	prevRigidBodyDebugState bool                    // 前回の剛体デバッグ状態
+}
+
+func NewRigidBodyHighlighter() *RigidBodyHighlighter {
+	return &RigidBodyHighlighter{
+		highlightVertices: make([]float32, 0),
+	}
+}
+
+// DebugRigidBodyHover holds information about the rigid body under the debug cursor.
+type DebugRigidBodyHover struct {
+	RigidBody *pmx.RigidBody
+	HitPoint  *mmath.MVec3
+}
+
+func (mp *RigidBodyHighlighter) DebugHoverInfo() *DebugRigidBodyHover {
 	return mp.debugHover
 }
 
-func (mp *MPhysics) UpdateDebugHoverByRigidBody(modelIndex int, rigidBody *pmx.RigidBody, enable bool) {
-	mlog.V("ハイライト開始: enable=%v, rigidBody=%v", enable, rigidBody != nil)
+func (mp *RigidBodyHighlighter) UpdateDebugHoverByRigidBody(modelIndex int, rb *physics.RigidBodyValue, enable bool) {
+	mlog.V("ハイライト開始: enable=%v, rigidBody=%v", enable, rb != nil)
 
-	if !enable || rigidBody == nil {
+	if !enable || rb == nil {
 		mlog.V("ハイライト無効またはrigidBodyがnil - クリア")
 		mp.clearDebugHover()
 		return
 	}
 
-	// モデルから対応する剛体を検索
-	rigidBodies, exists := mp.rigidBodies[modelIndex]
-	mlog.V("剛体検索: modelIndex=%d, 剛体存在=%v", modelIndex, exists)
-	if !exists {
-		mlog.V("モデル%dに剛体が存在しない - クリア", modelIndex)
-		mp.clearDebugHover()
-		return
-	}
-
-	rigidBodyIndex := rigidBody.Index()
-	mlog.V("剛体インデックス確認: rigidBodyIndex=%d, 配列長=%d", rigidBodyIndex, len(rigidBodies))
-	if rigidBodyIndex < 0 || rigidBodyIndex >= len(rigidBodies) {
-		mlog.V("剛体インデックス範囲外 - クリア")
-		mp.clearDebugHover()
-		return
-	}
-
-	targetRigid := rigidBodies[rigidBodyIndex]
-	mlog.V("対象剛体取得: targetRigid=%v", targetRigid != nil)
-	if targetRigid == nil {
-		mlog.V("対象剛体がnil - クリア")
-		mp.clearDebugHover()
-		return
-	}
-
-	mp.debugHover = &physics.DebugRigidBodyHover{
-		RigidBody: rigidBody,
+	mp.debugHover = &DebugRigidBodyHover{
+		RigidBody: rb.PmxRigidBody,
 		HitPoint:  nil, // ヒット点は不明（レイキャストしていないため）
 	}
-	mp.debugHoverRigid = targetRigid
+	mp.debugHoverRigid = rb
 	mp.debugHoverStartTime = time.Now() // タイマー開始
 
 	mlog.V("ハイライト設定完了 - 頂点再構築開始")
-	mp.rebuildHighlightVertices(targetRigid)
+	mp.rebuildHighlightVertices(rb)
 }
 
-func (mp *MPhysics) DrawDebugHighlight(shader rendering.IShader, isDrawRigidBodyFront bool) {
+func (mp *RigidBodyHighlighter) DrawDebugHighlight(shader rendering.IShader, isDrawRigidBodyFront bool) {
 	mlog.V("ハイライト描画開始: 頂点数=%d, rigid=%v", len(mp.highlightVertices), mp.debugHoverRigid != nil)
 	if len(mp.highlightVertices) == 0 || mp.debugHoverRigid == nil {
 		mlog.V("頂点またはデバッグ剛体がない - 描画スキップ")
@@ -84,11 +79,12 @@ func (mp *MPhysics) DrawDebugHighlight(shader rendering.IShader, isDrawRigidBody
 	mlog.V("シェーダープログラム取得: program=%d", program)
 	gl.UseProgram(program)
 
-	mp.liner.configureDepthTest(isDrawRigidBodyFront)
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.ALWAYS)
 
 	if mp.highlightBuffer == nil {
 		mlog.V("ハイライトバッファ初期化: 頂点数=%d", len(mp.highlightVertices))
-		mp.highlightBuffer = mgl.NewBufferFactory().CreateDebugBuffer(gl.Ptr(&mp.highlightVertices[0]), len(mp.highlightVertices))
+		mp.highlightBuffer = NewBufferFactory().CreateDebugBuffer(gl.Ptr(&mp.highlightVertices[0]), len(mp.highlightVertices))
 	}
 
 	mp.highlightBuffer.Bind()
@@ -99,12 +95,15 @@ func (mp *MPhysics) DrawDebugHighlight(shader rendering.IShader, isDrawRigidBody
 	gl.DrawArrays(gl.TRIANGLES, 0, triangleCount)
 
 	mp.highlightBuffer.Unbind()
-	mp.liner.restoreDepthTest(isDrawRigidBodyFront)
+
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.LEQUAL)
+
 	gl.UseProgram(0)
 	mlog.V("ハイライト描画完了")
 }
 
-func (mp *MPhysics) clearDebugHover() {
+func (mp *RigidBodyHighlighter) clearDebugHover() {
 	mp.debugHover = nil
 	mp.debugHoverRigid = nil
 	if mp.highlightVertices != nil {
@@ -113,7 +112,7 @@ func (mp *MPhysics) clearDebugHover() {
 }
 
 // CheckAndClearHighlightOnDebugChange は剛体デバッグ状態変更時にハイライトをクリアします
-func (mp *MPhysics) CheckAndClearHighlightOnDebugChange(currentDebugState bool) {
+func (mp *RigidBodyHighlighter) CheckAndClearHighlightOnDebugChange(currentDebugState bool) {
 	// 状態が変更された場合にハイライトをクリア
 	if mp.prevRigidBodyDebugState != currentDebugState {
 		if !currentDebugState {
@@ -125,7 +124,7 @@ func (mp *MPhysics) CheckAndClearHighlightOnDebugChange(currentDebugState bool) 
 }
 
 // CheckAndClearExpiredHighlight は2秒経過したハイライトを自動的にクリアします
-func (mp *MPhysics) CheckAndClearExpiredHighlight() {
+func (mp *RigidBodyHighlighter) CheckAndClearExpiredHighlight() {
 	if mp.debugHover == nil {
 		// ハイライトが設定されていない場合は何もしない
 		return
@@ -139,16 +138,16 @@ func (mp *MPhysics) CheckAndClearExpiredHighlight() {
 }
 
 // rebuildHighlightVertices はPMXのサイズ情報とBulletの位置・向き情報を組み合わせてハイライト頂点を構築します
-func (mp *MPhysics) rebuildHighlightVertices(rb *rigidBodyValue) {
+func (mp *RigidBodyHighlighter) rebuildHighlightVertices(rb *physics.RigidBodyValue) {
 	mlog.V("ハイライト頂点再構築開始: rb=%v", rb != nil)
 	mp.highlightVertices = mp.highlightVertices[:0]
-	if rb == nil || rb.btRigidBody == nil || mp.debugHover == nil || mp.debugHover.RigidBody == nil {
+	if rb == nil || rb.BtRigidBody == nil || mp.debugHover == nil || mp.debugHover.RigidBody == nil {
 		mlog.V("剛体またはbtRigidBodyまたはPMX剛体情報がnil - 頂点再構築中止")
 		return
 	}
 
 	// Bulletから位置・向きを取得
-	transformIface := rb.btRigidBody.GetWorldTransform()
+	transformIface := rb.BtRigidBody.GetWorldTransform()
 	transform, ok := transformIface.(bt.BtTransform)
 	mlog.V("Transform取得結果: ok=%v", ok)
 	if !ok {
@@ -158,7 +157,7 @@ func (mp *MPhysics) rebuildHighlightVertices(rb *rigidBodyValue) {
 
 	mat := mgl32.Mat4{}
 	transform.GetOpenGLMatrix(&mat[0])
-	worldMat := NewMMat4ByMgl(&mat)
+	worldMat := newMMat4ByMgl(&mat)
 
 	// PMXから形状種別とサイズを取得
 	pmxRigidBody := mp.debugHover.RigidBody
@@ -192,8 +191,19 @@ func (mp *MPhysics) rebuildHighlightVertices(rb *rigidBodyValue) {
 	mlog.V("頂点生成完了: 頂点数=%d", len(mp.highlightVertices))
 }
 
+// NewMMat4ByMgl OpenGL座標系からMMD座標系に変換された行列を返します
+func newMMat4ByMgl(mat *mgl32.Mat4) *mmath.MMat4 {
+	mm := mmath.NewMMat4ByValues(
+		float64(mat[0]), float64(-mat[1]), float64(-mat[2]), float64(mat[3]),
+		float64(-mat[4]), float64(mat[5]), float64(mat[6]), float64(mat[7]),
+		float64(-mat[8]), float64(mat[9]), float64(mat[10]), float64(mat[11]),
+		float64(-mat[12]), float64(mat[13]), float64(mat[14]), float64(mat[15]),
+	)
+	return mm
+}
+
 // appendBoxHighlightWithSize は指定サイズのBox形状を描画します
-func (mp *MPhysics) appendBoxHighlightWithSize(world *mmath.MMat4, hx, hy, hz float64) {
+func (mp *RigidBodyHighlighter) appendBoxHighlightWithSize(world *mmath.MMat4, hx, hy, hz float64) {
 	corners := []*mmath.MVec3{
 		{X: -hx, Y: -hy, Z: -hz},
 		{X: hx, Y: -hy, Z: -hz},
@@ -218,7 +228,7 @@ func (mp *MPhysics) appendBoxHighlightWithSize(world *mmath.MMat4, hx, hy, hz fl
 }
 
 // appendGenericBoxHighlight はデフォルトサイズのBox形状を描画します
-func (mp *MPhysics) appendGenericBoxHighlight(world *mmath.MMat4, size float64) {
+func (mp *RigidBodyHighlighter) appendGenericBoxHighlight(world *mmath.MMat4, size float64) {
 	hx, hy, hz := size, size, size
 
 	corners := []*mmath.MVec3{
@@ -244,7 +254,7 @@ func (mp *MPhysics) appendGenericBoxHighlight(world *mmath.MMat4, size float64) 
 	mp.appendVertices(world, corners, indices)
 }
 
-func (mp *MPhysics) appendSphereHighlight(world *mmath.MMat4, radius float64) {
+func (mp *RigidBodyHighlighter) appendSphereHighlight(world *mmath.MMat4, radius float64) {
 	latSegments := 12
 	lonSegments := 24
 
@@ -281,7 +291,7 @@ func (mp *MPhysics) appendSphereHighlight(world *mmath.MMat4, radius float64) {
 	mp.appendVertices(world, vertices, indices)
 }
 
-func (mp *MPhysics) appendCapsuleHighlight(world *mmath.MMat4, radius, halfHeight float64) {
+func (mp *RigidBodyHighlighter) appendCapsuleHighlight(world *mmath.MMat4, radius, halfHeight float64) {
 	segments := 16
 	capSegments := segments / 2
 
@@ -367,7 +377,7 @@ func (mp *MPhysics) appendCapsuleHighlight(world *mmath.MMat4, radius, halfHeigh
 	mp.appendVertices(world, vertices, indices)
 }
 
-func (mp *MPhysics) appendVertices(world *mmath.MMat4, vertices []*mmath.MVec3, indices []int) {
+func (mp *RigidBodyHighlighter) appendVertices(world *mmath.MMat4, vertices []*mmath.MVec3, indices []int) {
 	color := []float32{float32(highlightColorR), float32(highlightColorG), float32(highlightColorB), float32(highlightColorA)}
 	for _, idx := range indices {
 		if idx < 0 || idx >= len(vertices) {

@@ -16,7 +16,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/domain/physics"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/walk/pkg/walk"
@@ -273,15 +272,15 @@ func (vw *ViewWindow) selectRigidBodyByCursor(xpos, ypos float64) {
 	hitObj := cb.GetCollisionObject()
 
 	// 逆引きして剛体名を取得
-	modelIdx, pmxRB, ok := vw.physics.FindRigidBodyByCollisionHit(hitObj, hasHit)
+	modelIdx, rb, ok := vw.physics.FindRigidBodyByCollisionHit(hitObj, hasHit)
 
 	// ハイライト機能の更新
-	if hasHit && ok && pmxRB != nil {
-		vw.physics.UpdateDebugHoverByRigidBody(modelIdx, pmxRB, true)
+	if hasHit && ok && rb != nil {
+		vw.rigidBodyHighlighter.UpdateDebugHoverByRigidBody(modelIdx, rb, true)
 		mlog.V("pick: ndc=(%.3f,%.3f) from=%v to=%v hasHit=%v frac=%.5f model=%d name=%s",
-			ndcX, ndcY, rayFrom, rayTo, hasHit, frac, modelIdx, pmxRB.Name())
+			ndcX, ndcY, rayFrom, rayTo, hasHit, frac, modelIdx, rb.PmxRigidBody.Name())
 	} else {
-		vw.physics.UpdateDebugHoverByRigidBody(0, nil, false)
+		vw.rigidBodyHighlighter.UpdateDebugHoverByRigidBody(0, nil, false)
 		mlog.V("pick: ndc=(%.3f,%.3f) from=%v to=%v hasHit=%v frac=%.5f (no hit)",
 			ndcX, ndcY, rayFrom, rayTo, hasHit, frac)
 	}
@@ -317,7 +316,7 @@ func (vw *ViewWindow) selectBoneByCursor(xpos, ypos float64) {
 		Y: float64(world.Y()),
 		Z: float64(world.Z()),
 	}
-	boneDistances := make(map[float64][]*physics.DebugBoneHover) // 距離→ボーン配列マップ
+	boneDistances := make(map[float64][]*mgl.DebugBoneHover) // 距離→ボーン配列マップ
 
 	// 第1段階：最も近いボーンの距離を見つける
 	for modelIndex, vmdDeltas := range vw.vmdDeltas {
@@ -335,10 +334,10 @@ func (vw *ViewWindow) selectBoneByCursor(xpos, ypos float64) {
 			// レイと線分の距離を計算
 			distance := mmath.Round(mouseWorldPos.Distance(bonePos), 0.01)
 			if _, ok := boneDistances[distance]; !ok {
-				boneDistances[distance] = make([]*physics.DebugBoneHover, 0)
+				boneDistances[distance] = make([]*mgl.DebugBoneHover, 0)
 			}
 
-			boneDistances[distance] = append(boneDistances[distance], &physics.DebugBoneHover{
+			boneDistances[distance] = append(boneDistances[distance], &mgl.DebugBoneHover{
 				ModelIndex: modelIndex,
 				Bone:       boneDelta.Bone,
 				Distance:   distance,
@@ -360,10 +359,10 @@ func (vw *ViewWindow) selectBoneByCursor(xpos, ypos float64) {
 
 	if len(closestBones) > 0 {
 		mlog.V("ボーン選択成功: %d個のボーン (最短距離=%.3f)", len(closestBones), closestDistance)
-		vw.physics.UpdateDebugHoverByBones(closestBones, true)
+		vw.boneHighlighter.UpdateDebugHoverByBones(closestBones, true)
 	} else {
 		mlog.V("近いボーンが見つかりませんでした")
-		vw.physics.UpdateDebugHoverByBones(nil, false)
+		vw.boneHighlighter.UpdateDebugHoverByBones(nil, false)
 	}
 }
 

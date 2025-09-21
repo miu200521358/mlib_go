@@ -26,6 +26,15 @@ type WindConfig struct {
 	MaxAcceleration  float32      // 風力による最大加速度の上限 [unit/s^2]
 }
 
+// RigidBodyValue は剛体の物理エンジン内部表現を格納する構造体です
+type RigidBodyValue struct {
+	PmxRigidBody     *pmx.RigidBody  // PMXモデルの剛体定義
+	BtRigidBody      bt.BtRigidBody  // Bullet物理エンジンの剛体
+	BtLocalTransform *bt.BtTransform // 剛体のローカルトランスフォーム
+	Mask             int             // 衝突マスク
+	Group            int             // 衝突グループ
+}
+
 // IPhysics 物理エンジンのインターフェース
 type IPhysics interface {
 	// シミュレーション関連
@@ -47,16 +56,6 @@ type IPhysics interface {
 
 	// デバッグ表示
 	DrawDebugLines(shader rendering.IShader, visibleRigidBody, visibleJoint, isDrawRigidBodyFront bool)
-	DrawDebugHighlight(shader rendering.IShader, isDrawRigidBodyFront bool)
-	UpdateDebugHoverByRigidBody(modelIndex int, rigidBody *pmx.RigidBody, enable bool)
-	DebugHoverInfo() *DebugRigidBodyHover
-	CheckAndClearHighlightOnDebugChange(currentDebugState bool)
-	CheckAndClearExpiredHighlight() // 一定秒数経過したハイライトを自動クリア
-
-	// ボーンハイライト関連
-	UpdateDebugHoverByBones(closestBones []*DebugBoneHover, enable bool)
-	DebugBoneHoverInfo() []*DebugBoneHover
-	CheckAndClearBoneExpiredHighlight() // 一定秒数経過したボーンハイライトを自動クリア
 
 	// 風関連
 	EnableWind(enable bool)
@@ -64,18 +63,5 @@ type IPhysics interface {
 	SetWindAdvanced(dragCoeff, liftCoeff, turbulenceFreqHz float32)
 
 	// 剛体関連
-	FindRigidBodyByCollisionHit(hitObj bt.BtCollisionObject, hasHit bool) (modelIndex int, rb *pmx.RigidBody, ok bool)
-}
-
-// DebugRigidBodyHover holds information about the rigid body under the debug cursor.
-type DebugRigidBodyHover struct {
-	RigidBody *pmx.RigidBody
-	HitPoint  *mmath.MVec3
-}
-
-// DebugBoneHover holds information about the bones under the debug cursor.
-type DebugBoneHover struct {
-	ModelIndex int       // モデルインデックス
-	Bone       *pmx.Bone // 検出されたボーン
-	Distance   float64   // カーソルからボーンラインまでの最短距離
+	FindRigidBodyByCollisionHit(hitObj bt.BtCollisionObject, hasHit bool) (modelIndex int, rb *RigidBodyValue, ok bool)
 }

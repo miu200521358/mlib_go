@@ -80,16 +80,16 @@ func (mp *MPhysics) applyWindForces(dt float32) {
 			continue
 		}
 		for _, rb := range bodies {
-			if rb == nil || rb.btRigidBody == nil || rb.pmxRigidBody == nil {
+			if rb == nil || rb.BtRigidBody == nil || rb.PmxRigidBody == nil {
 				continue
 			}
 			// 静的剛体はスキップ
-			if rb.pmxRigidBody.PhysicsType == pmx.PHYSICS_TYPE_STATIC {
+			if rb.PmxRigidBody.PhysicsType == pmx.PHYSICS_TYPE_STATIC {
 				continue
 			}
 
 			// 相対速度 v_rel = v_body - v_wind
-			v := rb.btRigidBody.GetLinearVelocity()
+			v := rb.BtRigidBody.GetLinearVelocity()
 			vx := float64(v.GetX())
 			vy := float64(v.GetY())
 			vz := float64(v.GetZ())
@@ -105,7 +105,7 @@ func (mp *MPhysics) applyWindForces(dt float32) {
 			speed := math.Sqrt(speed2)
 
 			// 断面積の近似（MMD座標系でOK: 絶対値なので X 反転の影響なし）
-			area := mp.approxCrossSectionArea(rb.pmxRigidBody, dir)
+			area := mp.approxCrossSectionArea(rb.PmxRigidBody, dir)
 
 			// 相対速度の単位ベクトル
 			invSpeed := 1.0 / speed
@@ -151,7 +151,7 @@ func (mp *MPhysics) applyWindForces(dt float32) {
 			// 安定化: 最大加速度でクランプ
 			maxA := float64(mp.windCfg.MaxAcceleration)
 			if maxA > 0 {
-				mass := float64(rb.btRigidBody.GetMass())
+				mass := float64(rb.BtRigidBody.GetMass())
 				if mass > 0 {
 					f2 := float64(fTx)*float64(fTx) + float64(fTy)*float64(fTy) + float64(fTz)*float64(fTz)
 					if f2 > 0 {
@@ -168,11 +168,11 @@ func (mp *MPhysics) applyWindForces(dt float32) {
 			}
 
 			fTotal := bt.NewBtVector3(fTx, fTy, fTz)
-			rb.btRigidBody.ApplyCentralForce(fTotal)
+			rb.BtRigidBody.ApplyCentralForce(fTotal)
 			bt.DeleteBtVector3(fTotal)
 
 			// 剛体をアクティブ化
-			rb.btRigidBody.Activate(true)
+			rb.BtRigidBody.Activate(true)
 		}
 	}
 }

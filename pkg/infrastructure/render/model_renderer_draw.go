@@ -9,7 +9,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/domain/physics"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/rendering"
 	"github.com/miu200521358/mlib_go/pkg/domain/state"
@@ -115,7 +114,7 @@ func (mr *ModelRenderer) drawNormal(windowIndex int, shader rendering.IShader, p
 }
 
 // drawBone は、ボーン表示（ラインとポイント）の描画処理を行います。
-func (mr *ModelRenderer) drawBone(windowIndex int, shader rendering.IShader, bones *pmx.Bones, shared *state.SharedState, paddedMatrixes []float32, width, height int, debugBoneHover []*physics.DebugBoneHover) {
+func (mr *ModelRenderer) drawBone(windowIndex int, shader rendering.IShader, bones *pmx.Bones, shared *state.SharedState, paddedMatrixes []float32, width, height int, debugBoneHover []*mgl.DebugBoneHover) {
 	// モデルの前面にボーンを描画するため、深度テストの設定を変更
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.ALWAYS)
@@ -273,7 +272,7 @@ func (mr *ModelRenderer) drawSelectedVertex(
 // --- 内部ヘルパー関数 ---
 
 // fetchBoneLineDeltas は、ボーンライン描画用のデバッグカラー情報を取得します。
-func (mr *ModelRenderer) fetchBoneLineDeltas(bones *pmx.Bones, shared *state.SharedState, debugBoneHover []*physics.DebugBoneHover) ([]int, [][]float32) {
+func (mr *ModelRenderer) fetchBoneLineDeltas(bones *pmx.Bones, shared *state.SharedState, debugBoneHover []*mgl.DebugBoneHover) ([]int, [][]float32) {
 	indexes := make([]int, len(mr.boneLineIndexes))
 	deltas := make([][]float32, len(mr.boneLineIndexes))
 	for i, boneIndex := range mr.boneLineIndexes {
@@ -293,7 +292,7 @@ func (mr *ModelRenderer) fetchBoneLineDeltas(bones *pmx.Bones, shared *state.Sha
 }
 
 // fetchBonePointDeltas は、ボーンポイント描画用のデバッグカラー情報を取得します。
-func (mr *ModelRenderer) fetchBonePointDeltas(bones *pmx.Bones, shared *state.SharedState, debugBoneHover []*physics.DebugBoneHover) ([]int, [][]float32) {
+func (mr *ModelRenderer) fetchBonePointDeltas(bones *pmx.Bones, shared *state.SharedState, debugBoneHover []*mgl.DebugBoneHover) ([]int, [][]float32) {
 	indexes := make([]int, len(mr.bonePointIndexes))
 	deltas := make([][]float32, len(mr.bonePointIndexes))
 	for i, boneIndex := range mr.bonePointIndexes {

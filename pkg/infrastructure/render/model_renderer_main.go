@@ -7,7 +7,6 @@ import (
 	"slices"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
-	"github.com/miu200521358/mlib_go/pkg/domain/physics"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/rendering"
 	"github.com/miu200521358/mlib_go/pkg/domain/state"
@@ -96,7 +95,7 @@ func (mr *ModelRenderer) Delete() {
 
 // Render は、最新の変形情報 vmdDeltas とアプリケーション状態 appState に基づいてモデルを描画します。
 // 描画前にバッファの更新処理を行い、その後各描画パス（メッシュ描画、法線、ボーン、選択頂点など）を呼び出します。
-func (mr *ModelRenderer) Render(shader rendering.IShader, shared *state.SharedState, vmdDeltas *delta.VmdDeltas, debugBoneHover []*physics.DebugBoneHover) {
+func (mr *ModelRenderer) Render(shader rendering.IShader, shared *state.SharedState, vmdDeltas *delta.VmdDeltas, debugBoneHover []*mgl.DebugBoneHover) {
 	mr.bufferHandle.Bind()
 	defer mr.bufferHandle.Unbind()
 

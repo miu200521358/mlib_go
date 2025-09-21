@@ -1,35 +1,24 @@
 package mbt
 
 import (
-	"time"
-
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/physics"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 )
 
 type MPhysics struct {
-	world                   bt.BtDiscreteDynamicsWorld   // ワールド
-	drawer                  bt.BtMDebugDraw              // デバッグビューワー
-	liner                   *mDebugDrawLiner             // ライナー
-	highlightBuffer         *mgl.VertexBufferHandle      // ハイライト用頂点バッファ
-	highlightVertices       []float32                    // ハイライト用頂点配列
-	debugHover              *physics.DebugRigidBodyHover // デバッグ用ホバー情報
-	debugHoverRigid         *rigidBodyValue              // デバッグ用ホバー剛体
-	debugHoverStartTime     time.Time                    // ハイライト開始時刻（自動クリア用）
-	debugBoneHover          []*physics.DebugBoneHover    // ボーンデバッグ用ホバー情報
-	debugBoneHoverStartTime time.Time                    // ボーンハイライト開始時刻（自動クリア用）
-	prevRigidBodyDebugState bool                         // 前回の剛体デバッグ状態
-	config                  physics.PhysicsConfig        // 設定パラメータ
-	DeformSpf               float32                      // デフォームspf
-	PhysicsSpf              float32                      // 物理spf
-	joints                  map[int][]*jointValue        // ジョイント
-	rigidBodies             map[int][]*rigidBodyValue    // 剛体
-	windCfg                 physics.WindConfig           // 風の設定
-	simTimeAcc              float32                      // 経過時間[秒]
+	world       bt.BtDiscreteDynamicsWorld        // ワールド
+	drawer      bt.BtMDebugDraw                   // デバッグビューワー
+	liner       *mDebugDrawLiner                  // ライナー
+	config      physics.PhysicsConfig             // 設定パラメータ
+	DeformSpf   float32                           // デフォームspf
+	PhysicsSpf  float32                           // 物理spf
+	joints      map[int][]*jointValue             // ジョイント
+	rigidBodies map[int][]*physics.RigidBodyValue // 剛体
+	windCfg     physics.WindConfig                // 風の設定
+	simTimeAcc  float32                           // 経過時間[秒]
 }
 
 // NewMPhysics は物理エンジンのインスタンスを生成します
@@ -42,9 +31,8 @@ func NewMPhysics(gravity *mmath.MVec3) physics.IPhysics {
 		config: physics.PhysicsConfig{
 			FixedTimeStep: 1 / 60.0,
 		},
-		highlightVertices: make([]float32, 0),
-		rigidBodies:       make(map[int][]*rigidBodyValue),
-		joints:            make(map[int][]*jointValue),
+		rigidBodies: make(map[int][]*physics.RigidBodyValue),
+		joints:      make(map[int][]*jointValue),
 
 		// 風のデフォルト設定（無効）
 		windCfg: physics.WindConfig{

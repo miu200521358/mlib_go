@@ -25,25 +25,27 @@ import (
 
 type ViewWindow struct {
 	*glfw.Window
-	windowIndex         int                     // ウィンドウインデックス
-	title               string                  // ウィンドウタイトル
-	leftButtonPressed   bool                    // 左ボタン押下フラグ
-	middleButtonPressed bool                    // 中ボタン押下フラグ
-	rightButtonPressed  bool                    // 右ボタン押下フラグ
-	shiftPressed        bool                    // Shiftキー押下フラグ
-	ctrlPressed         bool                    // Ctrlキー押下フラグ
-	updatedPrevCursor   bool                    // 前回のカーソル位置更新フラグ
-	prevCursorPos       *mmath.MVec2            // 前回のカーソル位置
-	cursorX             float64                 // カーソルX位置
-	cursorY             float64                 // カーソルY位置
-	tooltipRenderer     *mgl.TooltipRenderer    // ツールチップ描画オブジェクト
-	list                *ViewerList             // ビューワーリスト
-	shader              rendering.IShader       // シェーダー
-	physics             physics.IPhysics        // 物理エンジン
-	modelRenderers      []*render.ModelRenderer // モデル描画オブジェクト
-	motions             []*vmd.VmdMotion        // モーションデータ
-	vmdDeltas           []*delta.VmdDeltas      // 変形情報
-	overrideOffset      *mmath.MVec3            // オーバーライド補正オフセット
+	windowIndex          int                       // ウィンドウインデックス
+	title                string                    // ウィンドウタイトル
+	leftButtonPressed    bool                      // 左ボタン押下フラグ
+	middleButtonPressed  bool                      // 中ボタン押下フラグ
+	rightButtonPressed   bool                      // 右ボタン押下フラグ
+	shiftPressed         bool                      // Shiftキー押下フラグ
+	ctrlPressed          bool                      // Ctrlキー押下フラグ
+	updatedPrevCursor    bool                      // 前回のカーソル位置更新フラグ
+	prevCursorPos        *mmath.MVec2              // 前回のカーソル位置
+	cursorX              float64                   // カーソルX位置
+	cursorY              float64                   // カーソルY位置
+	tooltipRenderer      *mgl.TooltipRenderer      // ツールチップ描画オブジェクト
+	list                 *ViewerList               // ビューワーリスト
+	shader               rendering.IShader         // シェーダー
+	physics              physics.IPhysics          // 物理エンジン
+	modelRenderers       []*render.ModelRenderer   // モデル描画オブジェクト
+	motions              []*vmd.VmdMotion          // モーションデータ
+	vmdDeltas            []*delta.VmdDeltas        // 変形情報
+	overrideOffset       *mmath.MVec3              // オーバーライド補正オフセット
+	boneHighlighter      *mgl.BoneHighlighter      // ボーンハイライト管理
+	rigidBodyHighlighter *mgl.RigidBodyHighlighter // 剛体ハイライト管理
 }
 
 func newViewWindow(
@@ -90,17 +92,19 @@ func newViewWindow(
 	gravity := list.shared.LoadPhysicsWorldMotion(windowIndex).GravityFrames.Get(0).Gravity
 
 	vw := &ViewWindow{
-		Window:         glWindow,
-		windowIndex:    windowIndex,
-		title:          title,
-		list:           list,
-		shader:         shader,
-		physics:        mbt.NewMPhysics(gravity),
-		prevCursorPos:  mmath.NewMVec2(),
-		overrideOffset: mmath.NewMVec3(),
-		modelRenderers: make([]*render.ModelRenderer, 0),
-		motions:        make([]*vmd.VmdMotion, 0),
-		vmdDeltas:      make([]*delta.VmdDeltas, 0),
+		Window:               glWindow,
+		windowIndex:          windowIndex,
+		title:                title,
+		list:                 list,
+		shader:               shader,
+		physics:              mbt.NewMPhysics(gravity),
+		prevCursorPos:        mmath.NewMVec2(),
+		overrideOffset:       mmath.NewMVec3(),
+		modelRenderers:       make([]*render.ModelRenderer, 0),
+		motions:              make([]*vmd.VmdMotion, 0),
+		vmdDeltas:            make([]*delta.VmdDeltas, 0),
+		boneHighlighter:      mgl.NewBoneHighlighter(),
+		rigidBodyHighlighter: mgl.NewRigidBodyHighlighter(),
 	}
 
 	tooltipRenderer, err := mgl.NewTooltipRenderer()
@@ -204,7 +208,7 @@ func (vw *ViewWindow) render() {
 		}
 
 		// モデルをレンダリング
-		modelRenderer.Render(vw.shader, vw.list.shared, vw.vmdDeltas[i], vw.physics.DebugBoneHoverInfo())
+		modelRenderer.Render(vw.shader, vw.list.shared, vw.vmdDeltas[i], vw.boneHighlighter.DebugBoneHoverInfo())
 	}
 
 	// 物理デバッグ描画
@@ -212,25 +216,25 @@ func (vw *ViewWindow) render() {
 
 	// 剛体デバッグが有効な場合のみハイライト描画
 	if drawRigidBodyFront || drawRigidBodyBack {
-		vw.physics.DrawDebugHighlight(vw.shader, drawRigidBodyFront)
+		vw.rigidBodyHighlighter.DrawDebugHighlight(vw.shader, drawRigidBodyFront)
 	}
 
 	// 剛体デバッグ状態変更の検出とハイライトクリア
-	vw.physics.CheckAndClearHighlightOnDebugChange(drawRigidBodyFront || drawRigidBodyBack)
+	vw.rigidBodyHighlighter.CheckAndClearHighlightOnDebugChange(drawRigidBodyFront || drawRigidBodyBack)
 
 	// 剛体デバッグが有効な場合のみ2秒経過ハイライト自動クリアをチェック
 	if drawRigidBodyFront || drawRigidBodyBack {
-		vw.physics.CheckAndClearExpiredHighlight()
+		vw.rigidBodyHighlighter.CheckAndClearExpiredHighlight()
 	}
 
 	// ボーンデバッグが有効な場合のみ2秒経過ボーンハイライト自動クリアをチェック
 	if vw.list.shared.IsAnyBoneVisible() {
-		vw.physics.CheckAndClearBoneExpiredHighlight()
+		vw.boneHighlighter.CheckAndClearExpiredHighlight()
 	}
 
 	// 剛体デバッグが有効な場合のみツールチップを表示
 	if (drawRigidBodyFront || drawRigidBodyBack) && vw.tooltipRenderer != nil {
-		if hover := vw.physics.DebugHoverInfo(); hover != nil && hover.RigidBody != nil {
+		if hover := vw.rigidBodyHighlighter.DebugHoverInfo(); hover != nil && hover.RigidBody != nil {
 			text := fmt.Sprintf("%s (%d)", hover.RigidBody.Name(), int(hover.RigidBody.CollisionGroup))
 			vw.tooltipRenderer.Render(text, float32(vw.cursorX), float32(vw.cursorY), w, h)
 		}
@@ -238,7 +242,7 @@ func (vw *ViewWindow) render() {
 
 	// ボーンデバッグが有効な場合のみボーンツールチップを表示
 	if vw.list.shared.IsAnyBoneVisible() && vw.tooltipRenderer != nil {
-		if boneHover := vw.physics.DebugBoneHoverInfo(); len(boneHover) > 0 {
+		if boneHover := vw.boneHighlighter.DebugBoneHoverInfo(); len(boneHover) > 0 {
 			// 複数ボーンをカンマ区切りで表示
 			var boneNames []string
 			for _, bone := range boneHover {
