@@ -546,5 +546,21 @@
     {
         "id": "焼き込み再生ループ再開: 焼き込み履歴INDEX[%d]",
         "translation": "Resume Bake Playback Loop: Bake History INDEX [%d]"
+    },
+    {
+        "id": "&ボーン表示の使い方",
+        "translation": "&How to Use Bone Display"
+    },
+    {
+        "id": "ボーン表示の使い方メッセージ",
+        "translation": "・Turning ON bone display will show the model's bones\n・You can select the types of bones to display from the menu\n・Multiple types can be displayed at the same time\n・While bones are displayed, clicking near a bone will show a list of nearby bone names."
+    },
+    {
+        "id": "&剛体表示の使い方",
+        "translation": "&How to Use Rigid Body Display"
+    },
+    {
+        "id": "剛体表示の使い方メッセージ",
+        "translation": "・Turning ON rigid body display will show the model's rigid bodies\n・In front display mode, rigid bodies are shown over the model\n・In embedded display mode, only the parts of the rigid bodies sticking out from the model are shown\n・While rigid bodies are displayed, clicking on a rigid body will show its name and group."
     }
 ]

@@ -301,6 +301,13 @@ func NewControlWindow(
 								OnTriggered: cw.TriggerShowBoneVisible,
 								AssignTo:    &cw.showBoneVisibleAction,
 							},
+							declarative.Action{
+								Text: mi18n.T("&ボーン表示の使い方"),
+								OnTriggered: func() {
+									mlog.ILT(mi18n.T("&ボーン表示の使い方"),
+										mi18n.T("ボーン表示の使い方メッセージ"))
+								},
+							},
 						},
 					},
 					declarative.Menu{
@@ -317,6 +324,13 @@ func NewControlWindow(
 								Checkable:   true,
 								OnTriggered: cw.TriggerShowRigidBodyBack,
 								AssignTo:    &cw.showRigidBodyBackAction,
+							},
+							declarative.Action{
+								Text: mi18n.T("&剛体表示の使い方"),
+								OnTriggered: func() {
+									mlog.ILT(mi18n.T("&剛体表示の使い方"),
+										mi18n.T("剛体表示の使い方メッセージ"))
+								},
 							},
 						},
 					},
