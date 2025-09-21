@@ -19,6 +19,11 @@ import (
 	"github.com/miu200521358/walk/pkg/walk"
 )
 
+const (
+	// 16～32グループ運用なら 0xFFFF や 0xFFFFFFFF など、あなたの運用ビット幅に合わせる。
+	collisionAllFilterMask = int(^uint32(0)) // 全ビット1
+)
+
 // 直角の定数値
 const rightAngle = 89.9
 
@@ -189,10 +194,10 @@ func (vw *ViewWindow) selectRigidBodyByCursor(xpos, ypos float64) {
 		// カメラからワールド座標への方向ベクトル
 		direction := worldPos.Subed(cam.Position).Normalize()
 
-		// Direction分手前から開始（100.0m手前）
-		rayFrom = worldPos.Subed(direction.MulScalar(100.0))
-		// Direction方向に奥行きを持たせる（100.0奥）
-		rayTo = worldPos.Added(direction.MulScalar(100.0))
+		// Direction分手前から開始（10.0m手前）
+		rayFrom = worldPos.Subed(direction.MulScalar(10.0))
+		// Direction方向に奥行きを持たせる（10.0奥）
+		rayTo = worldPos.Added(direction.MulScalar(10.0))
 
 		// デバッグ用NDC計算
 		ndcX = (2.0*float64(xpos))/float64(width) - 1.0
@@ -242,6 +247,9 @@ func (vw *ViewWindow) selectRigidBodyByCursor(xpos, ypos float64) {
 
 	cb := bt.NewBtClosestRayCallback(btRayFrom, btRayTo)
 	defer bt.DeleteBtClosestRayCallback(cb)
+
+	cb.SetCollisionFilterGroup(collisionAllFilterMask) // 全グループからヒット
+	cb.SetCollisionFilterMask(collisionAllFilterMask)  // 全グループにヒット
 
 	vw.physics.GetWorld().RayTest(btRayFrom, btRayTo, cb) // レイキャスト実行
 

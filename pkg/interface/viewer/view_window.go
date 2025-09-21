@@ -11,6 +11,7 @@ import (
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/go-gl/mathgl/mgl32"
+	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/physics"
@@ -457,7 +458,7 @@ func (vw *ViewWindow) computeCursorRay(width, height int) (*mmath.MVec3, *mmath.
 
 // getWorldPosition は指定されたマウス座標からワールド座標位置を取得します
 func (vw *ViewWindow) getWorldPosition(x, y int) (*mmath.MVec3, []*delta.VmdDeltas, *mmath.MMat4) {
-	fmt.Printf("x=%d, y=%d\n", x, y)
+	mlog.V("x=%d, y=%d\n", x, y)
 
 	// ウィンドウサイズを取得
 	w, h := vw.GetSize()
@@ -466,10 +467,10 @@ func (vw *ViewWindow) getWorldPosition(x, y int) (*mmath.MVec3, []*delta.VmdDelt
 	projection := vw.shader.Camera().GetProjectionMatrix(w, h)
 	view := vw.shader.Camera().GetViewMatrix()
 
-	fmt.Printf("Projection: %s\n", projection.String())
-	fmt.Printf("CameraPosition: %s, LookAtCenterPosition: %s\n",
+	mlog.V("Projection: %s\n", projection.String())
+	mlog.V("CameraPosition: %s, LookAtCenterPosition: %s\n",
 		vw.shader.Camera().Position.String(), vw.shader.Camera().LookAtCenter.String())
-	fmt.Printf("View: %s\n", view.String())
+	mlog.V("View: %s\n", view.String())
 
 	// MSAAから深度値を読み取る
 	depth := vw.shader.Msaa().ReadDepthAt(x, y, w, h)
@@ -479,13 +480,13 @@ func (vw *ViewWindow) getWorldPosition(x, y int) (*mmath.MVec3, []*delta.VmdDelt
 		mgl32.Vec3{float32(x), float32(h) - float32(y), depth},
 		view, projection, 0, 0, w, h)
 	if err != nil {
-		fmt.Printf("UnProject error: %v\n", err)
+		mlog.V("UnProject error: %v\n", err)
 		return nil, nil, nil
 	}
 
-	// X座標を反転してmmath.MVec3形式に変換
-	worldPos := &mmath.MVec3{X: float64(-worldCoords.X()), Y: float64(worldCoords.Y()), Z: float64(worldCoords.Z())}
-	fmt.Printf("WorldPosResult: x=%.7f, y=%.7f, z=%.7f (%.7f)\n", worldPos.X, worldPos.Y, worldPos.Z, depth)
+	// mmath.MVec3形式に変換
+	worldPos := &mmath.MVec3{X: float64(worldCoords.X()), Y: float64(worldCoords.Y()), Z: float64(worldCoords.Z())}
+	mlog.V("WorldPosResult: x=%.7f, y=%.7f, z=%.7f (%.7f)\n", worldPos.X, worldPos.Y, worldPos.Z, depth)
 
 	// ビュー行列の逆行列を計算してmmath.MMat4形式に変換
 	viewInv := view.Inv()

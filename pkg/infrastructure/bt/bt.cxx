@@ -583,20 +583,42 @@ static void* Swig_malloc(int c) {
 #include "BulletCollision/CollisionDispatch/btCollisionWorld.h"
 
 
-// Bullet の ClosestRayResultCallback をそのまま Go から new できる薄いラッパ
+// ClosestHit の公開ラッパ
 class BtClosestRayCallback : public btCollisionWorld::ClosestRayResultCallback {
 public:
     BtClosestRayCallback(const btVector3& from, const btVector3& to)
     : btCollisionWorld::ClosestRayResultCallback(from, to) {}
 
-    // Bullet 本家の RayResultCallback::hasHit() をそのまま出す
+    bool HasHit() const { return this->hasHit(); }
+    const btCollisionObject* GetCollisionObject() const { return m_collisionObject; }
+    const btVector3& GetHitPointWorld() const { return m_hitPointWorld; }
+    const btVector3& GetHitNormalWorld() const { return m_hitNormalWorld; }
+    btScalar GetHitFraction() const { return m_closestHitFraction; }
+
+    // ★ ここから追加: フィルタとフラグの setter
+    void SetCollisionFilterGroup(int g) { m_collisionFilterGroup = g; }
+    void SetCollisionFilterMask(int m)  { m_collisionFilterMask  = m; }
+    void SetFlags(unsigned int f)       { m_flags = f; }
+};
+
+// AllHits の公開ラッパ
+class BtAllHitsRayCallback : public btCollisionWorld::AllHitsRayResultCallback {
+public:
+    BtAllHitsRayCallback(const btVector3& from, const btVector3& to)
+    : btCollisionWorld::AllHitsRayResultCallback(from, to) {}
+
     bool HasHit() const { return this->hasHit(); }
 
-    // ヒット情報を読み出すための getter を用意
-    const btCollisionObject* GetCollisionObject() const { return m_collisionObject; }
-    const btVector3&        GetHitPointWorld()   const { return m_hitPointWorld; }
-    const btVector3&        GetHitNormalWorld()  const { return m_hitNormalWorld; }
-    btScalar                GetHitFraction()     const { return m_closestHitFraction; }
+    // 結果配列にアクセスするための簡易 getter
+    int  GetNumHits() const { return m_collisionObjects.size(); }
+    const btCollisionObject* GetCollisionObject(int i) const { return m_collisionObjects[i]; }
+    btScalar GetHitFraction(int i) const { return m_hitFractions[i]; }
+    const btVector3& GetHitPointWorld(int i) const { return m_hitPointWorld[i]; }
+    const btVector3& GetHitNormalWorld(int i) const { return m_hitNormalWorld[i]; }
+
+    void SetCollisionFilterGroup(int g) { m_collisionFilterGroup = g; }
+    void SetCollisionFilterMask(int m)  { m_collisionFilterMask  = m; }
+    void SetFlags(unsigned int f)       { m_flags = f; }
 };
 
 
@@ -42290,10 +42312,193 @@ float _wrap_BtClosestRayCallback_GetHitFraction_bt_e001408c92acdfd7(BtClosestRay
 }
 
 
+void _wrap_BtClosestRayCallback_SetCollisionFilterGroup_bt_e001408c92acdfd7(BtClosestRayCallback *_swig_go_0, intgo _swig_go_1) {
+  BtClosestRayCallback *arg1 = (BtClosestRayCallback *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(BtClosestRayCallback **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  (arg1)->SetCollisionFilterGroup(arg2);
+  
+}
+
+
+void _wrap_BtClosestRayCallback_SetCollisionFilterMask_bt_e001408c92acdfd7(BtClosestRayCallback *_swig_go_0, intgo _swig_go_1) {
+  BtClosestRayCallback *arg1 = (BtClosestRayCallback *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(BtClosestRayCallback **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  (arg1)->SetCollisionFilterMask(arg2);
+  
+}
+
+
+void _wrap_BtClosestRayCallback_SetFlags_bt_e001408c92acdfd7(BtClosestRayCallback *_swig_go_0, intgo _swig_go_1) {
+  BtClosestRayCallback *arg1 = (BtClosestRayCallback *) 0 ;
+  unsigned int arg2 ;
+  
+  arg1 = *(BtClosestRayCallback **)&_swig_go_0; 
+  arg2 = (unsigned int)_swig_go_1; 
+  
+  (arg1)->SetFlags(arg2);
+  
+}
+
+
 void _wrap_delete_BtClosestRayCallback_bt_e001408c92acdfd7(BtClosestRayCallback *_swig_go_0) {
   BtClosestRayCallback *arg1 = (BtClosestRayCallback *) 0 ;
   
   arg1 = *(BtClosestRayCallback **)&_swig_go_0; 
+  
+  delete arg1;
+  
+}
+
+
+BtAllHitsRayCallback *_wrap_new_BtAllHitsRayCallback_bt_e001408c92acdfd7(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+  btVector3 *arg1 = 0 ;
+  btVector3 *arg2 = 0 ;
+  BtAllHitsRayCallback *result = 0 ;
+  BtAllHitsRayCallback *_swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  result = (BtAllHitsRayCallback *)new BtAllHitsRayCallback((btVector3 const &)*arg1,(btVector3 const &)*arg2);
+  *(BtAllHitsRayCallback **)&_swig_go_result = (BtAllHitsRayCallback *)result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_BtAllHitsRayCallback_HasHit_bt_e001408c92acdfd7(BtAllHitsRayCallback *_swig_go_0) {
+  BtAllHitsRayCallback *arg1 = (BtAllHitsRayCallback *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(BtAllHitsRayCallback **)&_swig_go_0; 
+  
+  result = (bool)((BtAllHitsRayCallback const *)arg1)->HasHit();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+intgo _wrap_BtAllHitsRayCallback_GetNumHits_bt_e001408c92acdfd7(BtAllHitsRayCallback *_swig_go_0) {
+  BtAllHitsRayCallback *arg1 = (BtAllHitsRayCallback *) 0 ;
+  int result;
+  intgo _swig_go_result;
+  
+  arg1 = *(BtAllHitsRayCallback **)&_swig_go_0; 
+  
+  result = (int)((BtAllHitsRayCallback const *)arg1)->GetNumHits();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btCollisionObject *_wrap_BtAllHitsRayCallback_GetCollisionObject_bt_e001408c92acdfd7(BtAllHitsRayCallback *_swig_go_0, intgo _swig_go_1) {
+  BtAllHitsRayCallback *arg1 = (BtAllHitsRayCallback *) 0 ;
+  int arg2 ;
+  btCollisionObject *result = 0 ;
+  btCollisionObject *_swig_go_result;
+  
+  arg1 = *(BtAllHitsRayCallback **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  result = (btCollisionObject *)((BtAllHitsRayCallback const *)arg1)->GetCollisionObject(arg2);
+  *(btCollisionObject **)&_swig_go_result = (btCollisionObject *)result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_BtAllHitsRayCallback_GetHitFraction_bt_e001408c92acdfd7(BtAllHitsRayCallback *_swig_go_0, intgo _swig_go_1) {
+  BtAllHitsRayCallback *arg1 = (BtAllHitsRayCallback *) 0 ;
+  int arg2 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(BtAllHitsRayCallback **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  result = (btScalar)((BtAllHitsRayCallback const *)arg1)->GetHitFraction(arg2);
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_BtAllHitsRayCallback_GetHitPointWorld_bt_e001408c92acdfd7(BtAllHitsRayCallback *_swig_go_0, intgo _swig_go_1) {
+  BtAllHitsRayCallback *arg1 = (BtAllHitsRayCallback *) 0 ;
+  int arg2 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(BtAllHitsRayCallback **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  result = (btVector3 *) &((BtAllHitsRayCallback const *)arg1)->GetHitPointWorld(arg2);
+  *(btVector3 **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_BtAllHitsRayCallback_GetHitNormalWorld_bt_e001408c92acdfd7(BtAllHitsRayCallback *_swig_go_0, intgo _swig_go_1) {
+  BtAllHitsRayCallback *arg1 = (BtAllHitsRayCallback *) 0 ;
+  int arg2 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(BtAllHitsRayCallback **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  result = (btVector3 *) &((BtAllHitsRayCallback const *)arg1)->GetHitNormalWorld(arg2);
+  *(btVector3 **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_BtAllHitsRayCallback_SetCollisionFilterGroup_bt_e001408c92acdfd7(BtAllHitsRayCallback *_swig_go_0, intgo _swig_go_1) {
+  BtAllHitsRayCallback *arg1 = (BtAllHitsRayCallback *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(BtAllHitsRayCallback **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  (arg1)->SetCollisionFilterGroup(arg2);
+  
+}
+
+
+void _wrap_BtAllHitsRayCallback_SetCollisionFilterMask_bt_e001408c92acdfd7(BtAllHitsRayCallback *_swig_go_0, intgo _swig_go_1) {
+  BtAllHitsRayCallback *arg1 = (BtAllHitsRayCallback *) 0 ;
+  int arg2 ;
+  
+  arg1 = *(BtAllHitsRayCallback **)&_swig_go_0; 
+  arg2 = (int)_swig_go_1; 
+  
+  (arg1)->SetCollisionFilterMask(arg2);
+  
+}
+
+
+void _wrap_BtAllHitsRayCallback_SetFlags_bt_e001408c92acdfd7(BtAllHitsRayCallback *_swig_go_0, intgo _swig_go_1) {
+  BtAllHitsRayCallback *arg1 = (BtAllHitsRayCallback *) 0 ;
+  unsigned int arg2 ;
+  
+  arg1 = *(BtAllHitsRayCallback **)&_swig_go_0; 
+  arg2 = (unsigned int)_swig_go_1; 
+  
+  (arg1)->SetFlags(arg2);
+  
+}
+
+
+void _wrap_delete_BtAllHitsRayCallback_bt_e001408c92acdfd7(BtAllHitsRayCallback *_swig_go_0) {
+  BtAllHitsRayCallback *arg1 = (BtAllHitsRayCallback *) 0 ;
+  
+  arg1 = *(BtAllHitsRayCallback **)&_swig_go_0; 
   
   delete arg1;
   
