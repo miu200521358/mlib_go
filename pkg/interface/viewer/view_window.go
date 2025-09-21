@@ -4,6 +4,7 @@
 package viewer
 
 import (
+	"fmt"
 	"image"
 	"unsafe"
 
@@ -32,6 +33,9 @@ type ViewWindow struct {
 	ctrlPressed         bool                    // Ctrlキー押下フラグ
 	updatedPrevCursor   bool                    // 前回のカーソル位置更新フラグ
 	prevCursorPos       *mmath.MVec2            // 前回のカーソル位置
+	cursorX             float64                 // カーソルX位置
+	cursorY             float64                 // カーソルY位置
+	tooltipRenderer     *tooltipRenderer        // ツールチップ描画オブジェクト
 	list                *ViewerList             // ビューワーリスト
 	shader              rendering.IShader       // シェーダー
 	physics             physics.IPhysics        // 物理エンジン
@@ -97,6 +101,12 @@ func newViewWindow(
 		motions:        make([]*vmd.VmdMotion, 0),
 		vmdDeltas:      make([]*delta.VmdDeltas, 0),
 	}
+
+	tooltipRenderer, err := newTooltipRenderer()
+	if err != nil {
+		return nil, err
+	}
+	vw.tooltipRenderer = tooltipRenderer
 
 	glWindow.SetCloseCallback(vw.closeCallback)
 	glWindow.SetScrollCallback(vw.scrollCallback)
@@ -180,6 +190,15 @@ func (vw *ViewWindow) render() {
 
 	// シェーダーのカメラ設定更新
 	vw.shader.UpdateCamera()
+	drawRigidBodyFront := vw.list.shared.IsShowRigidBodyFront()
+	drawRigidBodyBack := vw.list.shared.IsShowRigidBodyBack()
+	highlightEnabled := drawRigidBodyFront || drawRigidBodyBack
+	if highlightEnabled {
+		rayFrom, rayTo := vw.computeCursorRay(w, h)
+		vw.physics.UpdateDebugHover(rayFrom, rayTo, true)
+	} else {
+		vw.physics.UpdateDebugHover(nil, nil, false)
+	}
 
 	// 床描画
 	vw.renderFloor()
@@ -194,8 +213,15 @@ func (vw *ViewWindow) render() {
 	}
 
 	// 物理デバッグ描画
-	vw.physics.DrawDebugLines(vw.shader, vw.list.shared.IsShowRigidBodyFront() || vw.list.shared.IsShowRigidBodyBack(),
-		vw.list.shared.IsShowJoint(), vw.list.shared.IsShowRigidBodyFront())
+	vw.physics.DrawDebugLines(vw.shader, highlightEnabled, vw.list.shared.IsShowJoint(), drawRigidBodyFront)
+	vw.physics.DrawDebugHighlight(vw.shader, drawRigidBodyFront)
+
+	if vw.tooltipRenderer != nil {
+		if hover := vw.physics.DebugHoverInfo(); hover != nil && hover.RigidBody != nil {
+			text := fmt.Sprintf("%s(G%d)", hover.RigidBody.Name(), int(hover.RigidBody.CollisionGroup))
+			vw.tooltipRenderer.Render(text, float32(vw.cursorX), float32(vw.cursorY), w, h)
+		}
+	}
 
 	// 描画終了後のFBO解除
 	if len(vw.list.windowList) > 1 && vw.list.shared.IsShowOverride() && vw.windowIndex != 0 {
@@ -410,4 +436,69 @@ func (vw *ViewWindow) updateWind(frame float32) {
 	vw.physics.EnableWind(enabledF.Enabled)
 	vw.physics.SetWind(directionF.Direction, speedF.Speed, randomnessF.Randomness)
 	vw.physics.SetWindAdvanced(dragCoeffF.DragCoeff, liftCoeffF.LiftCoeff, turbulenceFreqHzF.TurbulenceFreqHz)
+}
+
+func (vw *ViewWindow) computeCursorRay(width, height int) (*mmath.MVec3, *mmath.MVec3) {
+	projection := vw.shader.Camera().GetProjectionMatrix(width, height)
+	view := vw.shader.Camera().GetViewMatrix()
+	x := float32(vw.cursorX)
+	y := float32(height) - float32(vw.cursorY)
+	nearPoint, err := mgl32.UnProject(mgl32.Vec3{x, y, 0}, view, projection, 0, 0, width, height)
+	if err != nil {
+		return &mmath.MVec3{}, &mmath.MVec3{}
+	}
+	farPoint, err := mgl32.UnProject(mgl32.Vec3{x, y, 1}, view, projection, 0, 0, width, height)
+	if err != nil {
+		return &mmath.MVec3{}, &mmath.MVec3{}
+	}
+	return &mmath.MVec3{X: float64(nearPoint.X()), Y: float64(nearPoint.Y()), Z: float64(nearPoint.Z())},
+		&mmath.MVec3{X: float64(farPoint.X()), Y: float64(farPoint.Y()), Z: float64(farPoint.Z())}
+}
+
+// getWorldPosition は指定されたマウス座標からワールド座標位置を取得します
+func (vw *ViewWindow) getWorldPosition(x, y int) (*mmath.MVec3, []*delta.VmdDeltas, *mmath.MMat4) {
+	fmt.Printf("x=%d, y=%d\n", x, y)
+
+	// ウィンドウサイズを取得
+	w, h := vw.GetSize()
+
+	// プロジェクション行列とビュー行列を取得
+	projection := vw.shader.Camera().GetProjectionMatrix(w, h)
+	view := vw.shader.Camera().GetViewMatrix()
+
+	fmt.Printf("Projection: %s\n", projection.String())
+	fmt.Printf("CameraPosition: %s, LookAtCenterPosition: %s\n",
+		vw.shader.Camera().Position.String(), vw.shader.Camera().LookAtCenter.String())
+	fmt.Printf("View: %s\n", view.String())
+
+	// MSAAから深度値を読み取る
+	depth := vw.shader.Msaa().ReadDepthAt(x, y, w, h)
+
+	// スクリーン座標からワールド座標に変換
+	worldCoords, err := mgl32.UnProject(
+		mgl32.Vec3{float32(x), float32(h) - float32(y), depth},
+		view, projection, 0, 0, w, h)
+	if err != nil {
+		fmt.Printf("UnProject error: %v\n", err)
+		return nil, nil, nil
+	}
+
+	// X座標を反転してmmath.MVec3形式に変換
+	worldPos := &mmath.MVec3{X: float64(-worldCoords.X()), Y: float64(worldCoords.Y()), Z: float64(worldCoords.Z())}
+	fmt.Printf("WorldPosResult: x=%.7f, y=%.7f, z=%.7f (%.7f)\n", worldPos.X, worldPos.Y, worldPos.Z, depth)
+
+	// ビュー行列の逆行列を計算してmmath.MMat4形式に変換
+	viewInv := view.Inv()
+	viewMat := &mmath.MMat4{
+		float64(viewInv[0]), float64(viewInv[1]), float64(viewInv[2]), float64(viewInv[3]),
+		float64(viewInv[4]), float64(viewInv[5]), float64(viewInv[6]), float64(viewInv[7]),
+		float64(viewInv[8]), float64(viewInv[9]), float64(viewInv[10]), float64(viewInv[11]),
+		float64(viewInv[12]), float64(viewInv[13]), float64(viewInv[14]), float64(viewInv[15]),
+	}
+
+	// 現在のVmdDeltasをコピー
+	vmdDeltas := make([]*delta.VmdDeltas, len(vw.vmdDeltas))
+	copy(vmdDeltas, vw.vmdDeltas)
+
+	return worldPos, vmdDeltas, viewMat
 }

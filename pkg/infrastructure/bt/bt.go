@@ -3230,6 +3230,13 @@ extern uintptr_t _wrap_btCollisionWorld_getDispatchInfo__SWIG_1_bt_e001408c92acd
 extern _Bool _wrap_btCollisionWorld_getForceUpdateAllAabbs_bt_e001408c92acdfd7(uintptr_t arg1);
 extern void _wrap_btCollisionWorld_setForceUpdateAllAabbs_bt_e001408c92acdfd7(uintptr_t arg1, _Bool arg2);
 extern void _wrap_btCollisionWorld_serialize_bt_e001408c92acdfd7(uintptr_t arg1, uintptr_t arg2);
+extern uintptr_t _wrap_new_BtClosestRayCallback_bt_e001408c92acdfd7(uintptr_t arg1, uintptr_t arg2);
+extern _Bool _wrap_BtClosestRayCallback_HasHit_bt_e001408c92acdfd7(uintptr_t arg1);
+extern uintptr_t _wrap_BtClosestRayCallback_GetCollisionObject_bt_e001408c92acdfd7(uintptr_t arg1);
+extern uintptr_t _wrap_BtClosestRayCallback_GetHitPointWorld_bt_e001408c92acdfd7(uintptr_t arg1);
+extern uintptr_t _wrap_BtClosestRayCallback_GetHitNormalWorld_bt_e001408c92acdfd7(uintptr_t arg1);
+extern float _wrap_BtClosestRayCallback_GetHitFraction_bt_e001408c92acdfd7(uintptr_t arg1);
+extern void _wrap_delete_BtClosestRayCallback_bt_e001408c92acdfd7(uintptr_t arg1);
 extern uintptr_t _wrap_new_btUsageBitfield_bt_e001408c92acdfd7(void);
 extern void _wrap_btUsageBitfield_reset_bt_e001408c92acdfd7(uintptr_t arg1);
 extern void _wrap_btUsageBitfield_usedVertexA_set_bt_e001408c92acdfd7(uintptr_t arg1, short arg2);
@@ -6800,7 +6807,6 @@ func (_swig_base SwigcptrBtVector4) GetM_floats() (_swig_ret *float32) {
 }
 
 func (p SwigcptrBtVector4) Operator_Sm__Se_(a ...interface{}) {
-	// argc := len(a)
 	panic("No match for overloaded function call")
 }
 
@@ -13879,7 +13885,6 @@ func (_swig_base SwigcptrGrahamVector3) GetM_floats() (_swig_ret *float32) {
 }
 
 func (p SwigcptrGrahamVector3) Operator_Sm__Se_(a ...interface{}) {
-	// argc := len(a)
 	panic("No match for overloaded function call")
 }
 
@@ -32007,6 +32012,73 @@ type BtCollisionWorld interface {
 	GetForceUpdateAllAabbs() (_swig_ret bool)
 	SetForceUpdateAllAabbs(arg2 bool)
 	Serialize(arg2 BtSerializer)
+}
+
+type SwigcptrBtClosestRayCallback uintptr
+
+func (p SwigcptrBtClosestRayCallback) Swigcptr() uintptr {
+	return (uintptr)(p)
+}
+
+func (p SwigcptrBtClosestRayCallback) SwigIsBtClosestRayCallback() {
+}
+
+func NewBtClosestRayCallback(arg1 BtVector3, arg2 BtVector3) (_swig_ret BtClosestRayCallback) {
+	var swig_r BtClosestRayCallback
+	_swig_i_0 := getSwigcptr(arg1)
+	_swig_i_1 := getSwigcptr(arg2)
+	swig_r = (BtClosestRayCallback)(SwigcptrBtClosestRayCallback(C._wrap_new_BtClosestRayCallback_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtClosestRayCallback) HasHit() (_swig_ret bool) {
+	var swig_r bool
+	_swig_i_0 := arg1
+	swig_r = (bool)(C._wrap_BtClosestRayCallback_HasHit_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtClosestRayCallback) GetCollisionObject() (_swig_ret BtCollisionObject) {
+	var swig_r BtCollisionObject
+	_swig_i_0 := arg1
+	swig_r = (BtCollisionObject)(SwigcptrBtCollisionObject(C._wrap_BtClosestRayCallback_GetCollisionObject_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtClosestRayCallback) GetHitPointWorld() (_swig_ret BtVector3) {
+	var swig_r BtVector3
+	_swig_i_0 := arg1
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_BtClosestRayCallback_GetHitPointWorld_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtClosestRayCallback) GetHitNormalWorld() (_swig_ret BtVector3) {
+	var swig_r BtVector3
+	_swig_i_0 := arg1
+	swig_r = (BtVector3)(SwigcptrBtVector3(C._wrap_BtClosestRayCallback_GetHitNormalWorld_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))))
+	return swig_r
+}
+
+func (arg1 SwigcptrBtClosestRayCallback) GetHitFraction() (_swig_ret float32) {
+	var swig_r float32
+	_swig_i_0 := arg1
+	swig_r = (float32)(C._wrap_BtClosestRayCallback_GetHitFraction_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0)))
+	return swig_r
+}
+
+func DeleteBtClosestRayCallback(arg1 BtClosestRayCallback) {
+	_swig_i_0 := getSwigcptr(arg1)
+	C._wrap_delete_BtClosestRayCallback_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
+}
+
+type BtClosestRayCallback interface {
+	Swigcptr() uintptr
+	SwigIsBtClosestRayCallback()
+	HasHit() (_swig_ret bool)
+	GetCollisionObject() (_swig_ret BtCollisionObject)
+	GetHitPointWorld() (_swig_ret BtVector3)
+	GetHitNormalWorld() (_swig_ret BtVector3)
+	GetHitFraction() (_swig_ret float32)
 }
 
 const VORONOI_SIMPLEX_MAX_VERTS int = 5

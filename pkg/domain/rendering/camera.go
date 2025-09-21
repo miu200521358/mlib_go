@@ -25,7 +25,7 @@ type Camera struct {
 	Position     *mmath.MVec3
 	LookAtCenter *mmath.MVec3
 	Up           *mmath.MVec3
-	FieldOfView  float32
+	FieldOfView  float32 // 視野角（度）
 	AspectRatio  float32
 	NearPlane    float32
 	FarPlane     float32

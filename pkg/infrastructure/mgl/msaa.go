@@ -12,10 +12,12 @@ import (
 
 // msaa は IMsaa インターフェースの実装
 type msaa struct {
-	config      rendering.MSAAConfig
-	fbo         uint32 // マルチサンプル用のフレームバッファオブジェクト
-	colorBuffer uint32 // カラー用マルチサンプルレンダーバッファ
-	depthBuffer uint32 // 深度/ステンシル用マルチサンプルレンダーバッファ
+	config              rendering.MSAAConfig
+	fbo                 uint32 // マルチサンプル用のフレームバッファオブジェクト
+	colorBuffer         uint32 // カラー用マルチサンプルレンダーバッファ
+	depthBuffer         uint32 // 深度/ステンシル用マルチサンプルレンダーバッファ
+	resolveFBO          uint32 // 深度読み取り用解決フレームバッファ
+	resolveDepthTexture uint32 // 解決用深度テクスチャ
 }
 
 // NewMsaa は指定されたサイズで MSAA を初期化し、IMsaa を返す関数です。
@@ -57,6 +59,56 @@ func (m *msaa) init() {
 	}
 
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+
+	// 深度読み取り用解決FBOの生成
+	gl.GenFramebuffers(1, &m.resolveFBO)
+	gl.BindFramebuffer(gl.FRAMEBUFFER, m.resolveFBO)
+
+	// 解決用深度テクスチャの生成と設定（マルチサンプルFBOと同じフォーマットを使用）
+	gl.GenTextures(1, &m.resolveDepthTexture)
+	gl.BindTexture(gl.TEXTURE_2D, m.resolveDepthTexture)
+	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH24_STENCIL8, int32(m.config.Width), int32(m.config.Height), 0, gl.DEPTH_STENCIL, gl.UNSIGNED_INT_24_8, nil)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.TEXTURE_2D, m.resolveDepthTexture, 0)
+
+	// カラーアタッチメントを無効にする（深度読み取り専用）
+	gl.DrawBuffer(gl.NONE)
+	gl.ReadBuffer(gl.NONE)
+
+	// 解決FBOの状態確認
+	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
+		fmt.Println("Resolve framebuffer is not complete")
+	}
+
+	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+}
+
+// ReadDepthAt は指定座標の深度値を読み取ります
+func (m *msaa) ReadDepthAt(x, y, width, height int) float32 {
+	// マルチサンプル深度バッファを解決FBOに転送
+	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, m.fbo)
+	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, m.resolveFBO)
+	gl.BlitFramebuffer(
+		0, 0, int32(m.config.Width), int32(m.config.Height),
+		0, 0, int32(m.config.Width), int32(m.config.Height),
+		gl.DEPTH_BUFFER_BIT, gl.NEAREST,
+	)
+
+	// 解決FBOから深度値を読み取る
+	gl.BindFramebuffer(gl.FRAMEBUFFER, m.resolveFBO)
+	if status := gl.CheckFramebufferStatus(gl.FRAMEBUFFER); status != gl.FRAMEBUFFER_COMPLETE {
+		fmt.Printf("Framebuffer is not complete: %v\n", status)
+	}
+
+	var depth float32
+	// yは下が0なので、上下反転
+	gl.ReadPixels(int32(x), int32(height-y), 1, 1, gl.DEPTH_COMPONENT, gl.FLOAT, gl.Ptr(&depth))
+
+	// フレームバッファをアンバインド
+	m.Unbind()
+
+	return depth
 }
 
 // Bind は MSAA FBO をバインドし、描画先を MSAA に切り替えます。
@@ -97,6 +149,14 @@ func (m *msaa) Delete() {
 		gl.DeleteRenderbuffers(1, &m.depthBuffer)
 		m.depthBuffer = 0
 	}
+	if m.resolveFBO != 0 {
+		gl.DeleteFramebuffers(1, &m.resolveFBO)
+		m.resolveFBO = 0
+	}
+	if m.resolveDepthTexture != 0 {
+		gl.DeleteTextures(1, &m.resolveDepthTexture)
+		m.resolveDepthTexture = 0
+	}
 }
 
 // Resize は MSAA のレンダーバッファサイズを更新します。
@@ -111,6 +171,11 @@ func (m *msaa) Resize(width, height int) {
 	}
 	if m.depthBuffer != 0 {
 		gl.DeleteRenderbuffers(1, &m.depthBuffer)
+	}
+
+	// 解決用リソースを削除
+	if m.resolveDepthTexture != 0 {
+		gl.DeleteTextures(1, &m.resolveDepthTexture)
 	}
 
 	// 再度 FBO にバインド
@@ -130,6 +195,25 @@ func (m *msaa) Resize(width, height int) {
 
 	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
 		fmt.Println("Resized MSAA framebuffer is not complete")
+	}
+
+	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+
+	// 新しい解決用深度テクスチャの作成（マルチサンプルFBOと同じフォーマットを使用）
+	gl.BindFramebuffer(gl.FRAMEBUFFER, m.resolveFBO)
+	gl.GenTextures(1, &m.resolveDepthTexture)
+	gl.BindTexture(gl.TEXTURE_2D, m.resolveDepthTexture)
+	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH24_STENCIL8, int32(width), int32(height), 0, gl.DEPTH_STENCIL, gl.UNSIGNED_INT_24_8, nil)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.TEXTURE_2D, m.resolveDepthTexture, 0)
+
+	// カラーアタッチメントを無効にする（深度読み取り専用）
+	gl.DrawBuffer(gl.NONE)
+	gl.ReadBuffer(gl.NONE)
+
+	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
+		fmt.Println("Resized resolve framebuffer is not complete")
 	}
 
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)

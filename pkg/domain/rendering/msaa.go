@@ -11,8 +11,8 @@ type IMsaa interface {
 	// Resolve はMSAAの結果をデフォルトフレームバッファに解決する
 	Resolve()
 
-	// // ReadDepthAt は指定座標の深度値を読み取る
-	// ReadDepthAt(x, y int) float32
+	// ReadDepthAt は指定座標の深度値を読み取る
+	ReadDepthAt(x, y, width, height int) float32
 
 	// // SetOverrideTargetTexture はオーバーライドターゲットテクスチャを設定する
 	// SetOverrideTargetTexture(textureID uint32)

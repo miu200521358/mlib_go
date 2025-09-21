@@ -583,6 +583,23 @@ static void* Swig_malloc(int c) {
 #include "BulletCollision/CollisionDispatch/btCollisionWorld.h"
 
 
+// Bullet の ClosestRayResultCallback をそのまま Go から new できる薄いラッパ
+class BtClosestRayCallback : public btCollisionWorld::ClosestRayResultCallback {
+public:
+    BtClosestRayCallback(const btVector3& from, const btVector3& to)
+    : btCollisionWorld::ClosestRayResultCallback(from, to) {}
+
+    // Bullet 本家の RayResultCallback::hasHit() をそのまま出す
+    bool HasHit() const { return this->hasHit(); }
+
+    // ヒット情報を読み出すための getter を用意
+    const btCollisionObject* GetCollisionObject() const { return m_collisionObject; }
+    const btVector3&        GetHitPointWorld()   const { return m_hitPointWorld; }
+    const btVector3&        GetHitNormalWorld()  const { return m_hitNormalWorld; }
+    btScalar                GetHitFraction()     const { return m_closestHitFraction; }
+};
+
+
 #include "BulletCollision/NarrowPhaseCollision/btVoronoiSimplexSolver.h"
 
 
@@ -42189,6 +42206,96 @@ void _wrap_btCollisionWorld_serialize_bt_e001408c92acdfd7(btCollisionWorld *_swi
   arg2 = *(btSerializer **)&_swig_go_1; 
   
   (arg1)->serialize(arg2);
+  
+}
+
+
+BtClosestRayCallback *_wrap_new_BtClosestRayCallback_bt_e001408c92acdfd7(btVector3 *_swig_go_0, btVector3 *_swig_go_1) {
+  btVector3 *arg1 = 0 ;
+  btVector3 *arg2 = 0 ;
+  BtClosestRayCallback *result = 0 ;
+  BtClosestRayCallback *_swig_go_result;
+  
+  arg1 = *(btVector3 **)&_swig_go_0; 
+  arg2 = *(btVector3 **)&_swig_go_1; 
+  
+  result = (BtClosestRayCallback *)new BtClosestRayCallback((btVector3 const &)*arg1,(btVector3 const &)*arg2);
+  *(BtClosestRayCallback **)&_swig_go_result = (BtClosestRayCallback *)result; 
+  return _swig_go_result;
+}
+
+
+bool _wrap_BtClosestRayCallback_HasHit_bt_e001408c92acdfd7(BtClosestRayCallback *_swig_go_0) {
+  BtClosestRayCallback *arg1 = (BtClosestRayCallback *) 0 ;
+  bool result;
+  bool _swig_go_result;
+  
+  arg1 = *(BtClosestRayCallback **)&_swig_go_0; 
+  
+  result = (bool)((BtClosestRayCallback const *)arg1)->HasHit();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btCollisionObject *_wrap_BtClosestRayCallback_GetCollisionObject_bt_e001408c92acdfd7(BtClosestRayCallback *_swig_go_0) {
+  BtClosestRayCallback *arg1 = (BtClosestRayCallback *) 0 ;
+  btCollisionObject *result = 0 ;
+  btCollisionObject *_swig_go_result;
+  
+  arg1 = *(BtClosestRayCallback **)&_swig_go_0; 
+  
+  result = (btCollisionObject *)((BtClosestRayCallback const *)arg1)->GetCollisionObject();
+  *(btCollisionObject **)&_swig_go_result = (btCollisionObject *)result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_BtClosestRayCallback_GetHitPointWorld_bt_e001408c92acdfd7(BtClosestRayCallback *_swig_go_0) {
+  BtClosestRayCallback *arg1 = (BtClosestRayCallback *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(BtClosestRayCallback **)&_swig_go_0; 
+  
+  result = (btVector3 *) &((BtClosestRayCallback const *)arg1)->GetHitPointWorld();
+  *(btVector3 **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+btVector3 *_wrap_BtClosestRayCallback_GetHitNormalWorld_bt_e001408c92acdfd7(BtClosestRayCallback *_swig_go_0) {
+  BtClosestRayCallback *arg1 = (BtClosestRayCallback *) 0 ;
+  btVector3 *result = 0 ;
+  btVector3 *_swig_go_result;
+  
+  arg1 = *(BtClosestRayCallback **)&_swig_go_0; 
+  
+  result = (btVector3 *) &((BtClosestRayCallback const *)arg1)->GetHitNormalWorld();
+  *(btVector3 **)&_swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+float _wrap_BtClosestRayCallback_GetHitFraction_bt_e001408c92acdfd7(BtClosestRayCallback *_swig_go_0) {
+  BtClosestRayCallback *arg1 = (BtClosestRayCallback *) 0 ;
+  btScalar result;
+  float _swig_go_result;
+  
+  arg1 = *(BtClosestRayCallback **)&_swig_go_0; 
+  
+  result = (btScalar)((BtClosestRayCallback const *)arg1)->GetHitFraction();
+  _swig_go_result = result; 
+  return _swig_go_result;
+}
+
+
+void _wrap_delete_BtClosestRayCallback_bt_e001408c92acdfd7(BtClosestRayCallback *_swig_go_0) {
+  BtClosestRayCallback *arg1 = (BtClosestRayCallback *) 0 ;
+  
+  arg1 = *(BtClosestRayCallback **)&_swig_go_0; 
+  
+  delete arg1;
   
 }
 

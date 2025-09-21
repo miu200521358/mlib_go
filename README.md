@@ -77,7 +77,7 @@ https://rinatz.github.io/swigdoc/abstract.html
 2. 変換コード作成
 
 ```
-(mtool) C:\MMD\mlib_go\pkg\bt>swig -c++ -go -cgo -I"C:\MMD\mlib_go\pkg\bt\bullet\src" -I"C:\development\TDM-GCC-64\lib\gcc\x86_64-w64-mingw32\10.3.0\include\c++\x86_64-w64-mingw32" -I"C:\development\TDM-GCC-64\x86_64-w64-mingw32\include" -I"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include" -cpperraswarn -o "C:\MMD\mlib_go\pkg\bt\bt.cxx" "C:\MMD\mlib_go\pkg\bt\bullet.i"
+(mtool) C:\MMD\mlib_go\pkg\infrastructure\bt>swig -c++ -go -cgo -I"C:\MMD\mlib_go\pkg\infrastructure\bt\bullet\src" -I"C:\development\TDM-GCC-64\lib\gcc\x86_64-w64-mingw32\10.3.0\include\c++\x86_64-w64-mingw32" -I"C:\development\TDM-GCC-64\x86_64-w64-mingw32\include" -I"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include" -cpperraswarn -o "C:\MMD\mlib_go\pkg\infrastructure\bt\bt.cxx" "C:\MMD\mlib_go\pkg\infrastructure\bt\bullet.i"
 ```
 
 ## バージョン反映
@@ -86,56 +86,6 @@ https://rinatz.github.io/swigdoc/abstract.html
 go list -m -mod=mod -versions github.com/miu200521358/dds
 go list -m -mod=mod -versions github.com/miu200521358/win
 go list -m -mod=mod -versions github.com/miu200521358/walk
-```
-
----------
-
-
-## fyne (没)
-
-```
-go get fyne.io/fyne/v2@latest
-go install fyne.io/fyne/v2/cmd/fyne@latest
-```
-
-```
-C:\MMD\mlib_go>fyne bundle resources\MPLUS1-Regular.ttf > pkg\front\core\bundle.go
-go get fyne.io/fyne/v2/internal/svg@v2.4.3
-go get fyne.io/fyne/v2/storage/repository@v2.4.3
-```
-
-```
-go get fyne.io/fyne/v2/internal/driver/glfw@v2.4.3
-go get fyne.io/fyne/v2/app@v2.4.3
-go get fyne.io/fyne/v2/widget@v2.4.3
-go get fyne.io/fyne/v2/internal/painter@v2.4.3
-```
-
-```
-fyne bundle icon.png > icon.go
-```
-
-```
-go get fyne.io/fyne/v2
-go get github.com/ungerik/go3d
-go get github.com/fyne-io/glfw-js
-go get fyne.io/fyne/v2/layout
-```
-
-### walk
-
-```
-go get github.com/akavel/rsrc
-cd %GOPATH%\pkg\mod\github.com\akavel\rsrc@v0.10.2
-go build
-```
-
-```
-rsrc -manifest main.manifest -o rsrc.syso
-```
-
-```
-go get -u golang.org/x/image
 ```
 
 

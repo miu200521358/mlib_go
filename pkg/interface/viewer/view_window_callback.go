@@ -5,6 +5,7 @@ package viewer
 
 import (
 	"fmt"
+	"math"
 	"strings"
 	"unsafe"
 
@@ -12,6 +13,8 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/walk/pkg/walk"
 )
@@ -61,7 +64,8 @@ func (vw *ViewWindow) keyCallback(
 	w *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey,
 ) {
 	// 修飾キーの処理
-	if action == glfw.Press {
+	switch action {
+	case glfw.Press:
 		switch key {
 		case glfw.KeyLeftShift, glfw.KeyRightShift:
 			vw.shiftPressed = true
@@ -70,7 +74,7 @@ func (vw *ViewWindow) keyCallback(
 			vw.ctrlPressed = true
 			return
 		}
-	} else if action == glfw.Release {
+	case glfw.Release:
 		switch key {
 		case glfw.KeyLeftShift, glfw.KeyRightShift:
 			vw.shiftPressed = false
@@ -91,7 +95,8 @@ func (vw *ViewWindow) keyCallback(
 func (vw *ViewWindow) mouseCallback(
 	w *glfw.Window, button glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey,
 ) {
-	if action == glfw.Press {
+	switch action {
+	case glfw.Press:
 		switch button {
 		case glfw.MouseButtonLeft:
 			vw.leftButtonPressed = true
@@ -100,7 +105,7 @@ func (vw *ViewWindow) mouseCallback(
 		case glfw.MouseButtonRight:
 			vw.rightButtonPressed = true
 		}
-	} else if action == glfw.Release {
+	case glfw.Release:
 		switch button {
 		case glfw.MouseButtonLeft:
 			vw.leftButtonPressed = false
@@ -114,6 +119,19 @@ func (vw *ViewWindow) mouseCallback(
 
 // cursorPosCallback はカーソル位置のイベントを処理する
 func (vw *ViewWindow) cursorPosCallback(w *glfw.Window, xpos, ypos float64) {
+	vw.cursorX = xpos
+	vw.cursorY = ypos
+
+	// if vw.leftButtonPressed {
+	// 	// 左クリックした場合、デバッグモードによって処理を分岐
+
+	// 	// 左クリックはカーソル位置を取得
+	// 	// if vw.ctrlPressed {
+	// 	// 	vw.leftCursorRemoveWindowPositions[mgl32.Vec2{float32(xpos), float32(ypos)}] = 0.0
+	// 	// } else {
+	// 	// 	vw.leftCursorWindowPositions[mgl32.Vec2{float32(xpos), float32(ypos)}] = 0.0
+	// 	// }
+	// }
 
 	if !vw.updatedPrevCursor {
 		vw.prevCursorPos.X = xpos
@@ -125,20 +143,122 @@ func (vw *ViewWindow) cursorPosCallback(w *glfw.Window, xpos, ypos float64) {
 	if vw.rightButtonPressed {
 		// 右クリックはカメラの角度を更新
 		vw.updateCameraAngleByCursor(xpos, ypos)
+		return
 	} else if vw.middleButtonPressed {
 		// 中クリックはカメラ位置と中心を移動
 		vw.updateCameraPositionByCursor(xpos, ypos)
-	} else if vw.leftButtonPressed {
-		// 左クリックはカーソル位置を取得
-		// if vw.ctrlPressed {
-		// 	vw.leftCursorRemoveWindowPositions[mgl32.Vec2{float32(xpos), float32(ypos)}] = 0.0
-		// } else {
-		// 	vw.leftCursorWindowPositions[mgl32.Vec2{float32(xpos), float32(ypos)}] = 0.0
-		// }
+		return
 	}
 
 	vw.prevCursorPos.X = xpos
 	vw.prevCursorPos.Y = ypos
+
+	if vw.list.shared.IsShowRigidBodyFront() || vw.list.shared.IsShowRigidBodyBack() {
+		// 剛体デバッグ中の場合、剛体選択を行う
+		vw.selectRigidBodyByCursor(xpos, ypos)
+	}
+
+	// mlog.I("Cursor Position: (%.2f, %.2f)", xpos, ypos)
+}
+
+// selectRigidBodyByCursor はカーソル位置に基づいて剛体を選択する
+// クリック位置 → レイ → ヒット剛体名をログ
+func (vw *ViewWindow) selectRigidBodyByCursor(xpos, ypos float64) {
+	if vw.physics == nil {
+		return
+	}
+
+	// 実ビューポートとカメラ取得
+	width, height := vw.GetSize()
+	if width == 0 || height == 0 {
+		return
+	}
+	cam := vw.shader.Camera()
+	if cam == nil {
+		return
+	}
+
+	var rayFrom, rayTo *mmath.MVec3
+	var ndcX, ndcY float64
+
+	// getWorldPositionを使用して実際のワールド座標を取得
+	worldPos, _, _ := vw.getWorldPosition(int(xpos), int(ypos))
+
+	if worldPos != nil {
+		// 成功：実際の深度値を使用した精密なレイテスト
+		// カメラからワールド座標への方向ベクトル
+		direction := worldPos.Subed(cam.Position).Normalize()
+
+		// Direction分手前から開始（100.0m手前）
+		rayFrom = worldPos.Subed(direction.MulScalar(100.0))
+		// Direction方向に奥行きを持たせる（100.0奥）
+		rayTo = worldPos.Added(direction.MulScalar(100.0))
+
+		// デバッグ用NDC計算
+		ndcX = (2.0*float64(xpos))/float64(width) - 1.0
+		ndcY = 1.0 - (2.0*float64(ypos))/float64(height)
+
+		mlog.D("Using precise ray based on depth: worldPos=%v direction=%v", worldPos, direction)
+	} else {
+		// フォールバック：従来の実装を使用
+		mlog.D("Fallback to traditional ray casting (no depth available)")
+
+		// NDC
+		ndcX = (2.0*float64(xpos))/float64(width) - 1.0
+		ndcY = 1.0 - (2.0*float64(ypos))/float64(height)
+
+		// 投影パラメータ
+		aspect := float64(cam.AspectRatio)
+		fovRad := mmath.DegToRad(float64(cam.FieldOfView))
+		tanFov := math.Tan(fovRad * 0.5)
+
+		// 視空間方向
+		dirCam := (&mmath.MVec3{
+			X: ndcX * aspect * tanFov,
+			Y: ndcY * tanFov,
+			Z: -1.0,
+		}).Normalized()
+
+		// カメラ基底 → 世界方向
+		forward := cam.LookAtCenter.Subed(cam.Position).Normalize()
+		right := forward.Cross(cam.Up).Normalize()
+		up := right.Cross(forward).Normalize()
+		dirWorld := (&mmath.MVec3{
+			X: dirCam.X*right.X + dirCam.Y*up.X + dirCam.Z*forward.X,
+			Y: dirCam.X*right.Y + dirCam.Y*up.Y + dirCam.Z*forward.Y,
+			Z: dirCam.X*right.Z + dirCam.Y*up.Z + dirCam.Z*forward.Z,
+		}).Normalized()
+
+		// ニア面の少し先から撃つ（内側/数値不安定回避）
+		rayFrom = cam.Position.Added(dirWorld.MulScalar(float64(cam.NearPlane)))
+		rayTo = cam.Position.Added(dirWorld.MulScalar(float64(cam.FarPlane)))
+	}
+
+	// レイテスト実行
+	btRayFrom := bt.NewBtVector3(float32(rayFrom.X), float32(rayFrom.Y), float32(rayFrom.Z))
+	defer bt.DeleteBtVector3(btRayFrom)
+	btRayTo := bt.NewBtVector3(float32(rayTo.X), float32(rayTo.Y), float32(rayTo.Z))
+	defer bt.DeleteBtVector3(btRayTo)
+
+	cb := bt.NewBtClosestRayCallback(btRayFrom, btRayTo)
+	defer bt.DeleteBtClosestRayCallback(cb)
+
+	vw.physics.GetWorld().RayTest(btRayFrom, btRayTo, cb) // レイキャスト実行
+
+	hasHit := cb.HasHit()
+	frac := cb.GetHitFraction()
+	hitObj := cb.GetCollisionObject()
+
+	// 逆引きして剛体名を取る
+	modelIdx, pmxRB, ok := vw.physics.FindRigidBodyByCollisionHit(hitObj, hasHit)
+
+	if hasHit && ok && pmxRB != nil {
+		mlog.I("pick: ndc=(%.3f,%.3f) from=%v to=%v hasHit=%v frac=%.5f model=%d name=%s",
+			ndcX, ndcY, rayFrom, rayTo, hasHit, frac, modelIdx, pmxRB.Name())
+	} else {
+		mlog.I("pick: ndc=(%.3f,%.3f) from=%v to=%v hasHit=%v frac=%.5f (hitObj=%v) (reverseLookup ok=%v)",
+			ndcX, ndcY, rayFrom, rayTo, hasHit, frac, hitObj, ok)
+	}
 }
 
 // updateCameraAngleByCursor はカメラの角度をカーソル位置に基づいて更新する

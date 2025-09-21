@@ -67,7 +67,7 @@ func (mp *MPhysics) applyWindForces(dt float32) {
 	dir := mp.windCfg.Direction.Copy().Normalized()
 	windSpeed := float64(mp.windCfg.Speed) * gust
 	windVecMmd := dir.MuledScalar(windSpeed)
-	windVecBt := newBulletFromVec(windVecMmd)
+	windVecBt := NewBulletFromVec(windVecMmd)
 
 	// Bullet座標の風の各成分
 	windX := float64(windVecBt.GetX())
@@ -215,29 +215,6 @@ func (mp *MPhysics) approxCrossSectionArea(r *pmx.RigidBody, dir *mmath.MVec3) f
 		rads := float64(r.Size.X)
 		return float32(math.Pi * rads * rads)
 	}
-}
-
-func createWorld(gravity *mmath.MVec3) bt.BtDiscreteDynamicsWorld {
-	broadphase := bt.NewBtDbvtBroadphase()
-	collisionConfiguration := bt.NewBtDefaultCollisionConfiguration()
-	dispatcher := bt.NewBtCollisionDispatcher(collisionConfiguration)
-	solver := bt.NewBtSequentialImpulseConstraintSolver()
-	// solver.GetM_analyticsData().SetM_numIterationsUsed(200)
-	world := bt.NewBtDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration)
-	world.SetGravity(bt.NewBtVector3(float32(gravity.X), float32(gravity.Y*10), float32(gravity.Z)))
-	// world.GetSolverInfo().(bt.BtContactSolverInfo).SetM_numIterations(100)
-	// world.GetSolverInfo().(bt.BtContactSolverInfo).SetM_splitImpulse(1)
-
-	groundShape := bt.NewBtStaticPlaneShape(bt.NewBtVector3(float32(0), float32(1), float32(0)), float32(0))
-	groundTransform := bt.NewBtTransform()
-	groundTransform.SetIdentity()
-	groundTransform.SetOrigin(bt.NewBtVector3(float32(0), float32(0), float32(0)))
-	groundMotionState := bt.NewBtDefaultMotionState(groundTransform)
-	groundRigidBody := bt.NewBtRigidBody(float32(0), groundMotionState, groundShape)
-
-	world.AddRigidBody(groundRigidBody, 1<<15, 0xFFFF)
-
-	return world
 }
 
 // UpdatePhysicsSelectively は変更が必要な剛体・ジョイントのみを選択的に更新します

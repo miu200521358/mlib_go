@@ -23,7 +23,7 @@ func (mp *MPhysics) initJoints(modelIndex int, rigidBodies *pmx.RigidBodies, j *
 	j.ForEach(func(index int, joint *pmx.Joint) bool {
 		if rigidBodies.Contains(joint.RigidBodyIndexA) && rigidBodies.Contains(joint.RigidBodyIndexB) {
 			// ジョイントの位置と向き
-			jointTransform := bt.NewBtTransform(newBulletFromRad(joint.Rotation), newBulletFromVec(joint.Position))
+			jointTransform := bt.NewBtTransform(NewBulletFromRad(joint.Rotation), NewBulletFromVec(joint.Position))
 
 			mp.initJoint(modelIndex, joint, jointTransform, nil)
 		}
@@ -102,8 +102,8 @@ func (mp *MPhysics) calculateJointTransform(
 	// ジョイントのローカル位置と回転を計算
 	jointLocalPos := joint.Position.Subed(bone.Position)
 	btJointLocalTransform := bt.NewBtTransform(
-		newBulletFromRad(joint.Rotation),
-		newBulletFromVec(jointLocalPos),
+		NewBulletFromRad(joint.Rotation),
+		NewBulletFromVec(jointLocalPos),
 	)
 
 	// ボーングローバル変換とジョイントローカル変換を乗算

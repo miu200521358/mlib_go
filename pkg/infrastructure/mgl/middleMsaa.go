@@ -14,6 +14,8 @@ type middleMsaa struct {
 	msaaFBO, msaaColorBuffer, msaaDepthBuffer uint32
 	// 中間FBO（シングルサンプル）のFBOとレンダーバッファ
 	intermediateFBO, intermediateColorBuffer uint32
+	// 深度読み取り用のテクスチャ
+	intermediateDepthTexture uint32
 }
 
 // NewMiddleMsaa は指定されたサイズで middleMsaa を初期化し、IMsaa を返します。
@@ -62,10 +64,45 @@ func (m *middleMsaa) init() {
 	gl.RenderbufferStorage(gl.RENDERBUFFER, gl.RGBA8, int32(m.config.Width), int32(m.config.Height))
 	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, m.intermediateColorBuffer)
 
+	// 深度読み取り用テクスチャの生成と設定
+	gl.GenTextures(1, &m.intermediateDepthTexture)
+	gl.BindTexture(gl.TEXTURE_2D, m.intermediateDepthTexture)
+	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT32F, int32(m.config.Width), int32(m.config.Height), 0, gl.DEPTH_COMPONENT, gl.FLOAT, nil)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, m.intermediateDepthTexture, 0)
+
 	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
 		fmt.Println("middleMsaa: intermediate FBO is not complete")
 	}
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+}
+
+// ReadDepthAt は指定座標の深度値を読み取ります
+func (m *middleMsaa) ReadDepthAt(x, y, width, height int) float32 {
+	// マルチサンプル深度バッファを中間FBOに転送
+	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, m.msaaFBO)
+	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, m.intermediateFBO)
+	gl.BlitFramebuffer(
+		0, 0, int32(m.config.Width), int32(m.config.Height),
+		0, 0, int32(m.config.Width), int32(m.config.Height),
+		gl.DEPTH_BUFFER_BIT, gl.NEAREST,
+	)
+
+	// 中間FBOから深度値を読み取る
+	gl.BindFramebuffer(gl.FRAMEBUFFER, m.intermediateFBO)
+	if status := gl.CheckFramebufferStatus(gl.FRAMEBUFFER); status != gl.FRAMEBUFFER_COMPLETE {
+		fmt.Printf("Framebuffer is not complete: %v\n", status)
+	}
+
+	var depth float32
+	// yは下が0なので、上下反転
+	gl.ReadPixels(int32(x), int32(height-y), 1, 1, gl.DEPTH_COMPONENT, gl.FLOAT, gl.Ptr(&depth))
+
+	// フレームバッファをアンバインド
+	m.Unbind()
+
+	return depth
 }
 
 func (m *middleMsaa) Bind() {
@@ -118,6 +155,10 @@ func (m *middleMsaa) Delete() {
 		gl.DeleteRenderbuffers(1, &m.intermediateColorBuffer)
 		m.intermediateColorBuffer = 0
 	}
+	if m.intermediateDepthTexture != 0 {
+		gl.DeleteTextures(1, &m.intermediateDepthTexture)
+		m.intermediateDepthTexture = 0
+	}
 }
 
 func (m *middleMsaa) Resize(width, height int) {
@@ -147,10 +188,22 @@ func (m *middleMsaa) Resize(width, height int) {
 	if m.intermediateColorBuffer != 0 {
 		gl.DeleteRenderbuffers(1, &m.intermediateColorBuffer)
 	}
+	if m.intermediateDepthTexture != 0 {
+		gl.DeleteTextures(1, &m.intermediateDepthTexture)
+	}
 	gl.BindFramebuffer(gl.FRAMEBUFFER, m.intermediateFBO)
 	gl.GenRenderbuffers(1, &m.intermediateColorBuffer)
 	gl.BindRenderbuffer(gl.RENDERBUFFER, m.intermediateColorBuffer)
 	gl.RenderbufferStorage(gl.RENDERBUFFER, gl.RGBA8, int32(width), int32(height))
 	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, m.intermediateColorBuffer)
+
+	// 新しい深度テクスチャの作成
+	gl.GenTextures(1, &m.intermediateDepthTexture)
+	gl.BindTexture(gl.TEXTURE_2D, m.intermediateDepthTexture)
+	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT32F, int32(width), int32(height), 0, gl.DEPTH_COMPONENT, gl.FLOAT, nil)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, m.intermediateDepthTexture, 0)
+
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/rendering"
+	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
 )
 
 // PhysicsConfig 物理エンジンの設定パラメータ
@@ -30,6 +31,7 @@ type IPhysics interface {
 	// シミュレーション関連
 	StepSimulation(timeStep float32, maxSubSteps int, fixedTimeStep float32) // 物理シミュレーションを1ステップ進める
 	ResetWorld(gravity *mmath.MVec3)
+	GetWorld() bt.BtDiscreteDynamicsWorld
 
 	// モデル管理
 	AddModel(modelIndex int, model *pmx.PmxModel)
@@ -45,9 +47,21 @@ type IPhysics interface {
 
 	// デバッグ表示
 	DrawDebugLines(shader rendering.IShader, visibleRigidBody, visibleJoint, isDrawRigidBodyFront bool)
+	DrawDebugHighlight(shader rendering.IShader, isDrawRigidBodyFront bool)
+	UpdateDebugHover(rayFrom, rayTo *mmath.MVec3, enable bool)
+	DebugHoverInfo() *DebugRigidBodyHover
 
 	// 風関連
 	EnableWind(enable bool)
 	SetWind(direction *mmath.MVec3, speed float32, randomness float32)
 	SetWindAdvanced(dragCoeff, liftCoeff, turbulenceFreqHz float32)
+
+	// 剛体関連
+	FindRigidBodyByCollisionHit(hitObj bt.BtCollisionObject, hasHit bool) (modelIndex int, rb *pmx.RigidBody, ok bool)
+}
+
+// DebugRigidBodyHover holds information about the rigid body under the debug cursor.
+type DebugRigidBodyHover struct {
+	RigidBody *pmx.RigidBody
+	HitPoint  *mmath.MVec3
 }

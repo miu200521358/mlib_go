@@ -28,7 +28,7 @@ func (mp *MPhysics) initRigidBodies(modelIndex int, rigidBodies *pmx.RigidBodies
 	mp.rigidBodies[modelIndex] = make([]*rigidBodyValue, rigidBodies.Length())
 	rigidBodies.ForEach(func(index int, rigidBody *pmx.RigidBody) bool {
 		// 剛体の初期位置と回転
-		btRigidBodyTransform := bt.NewBtTransform(newBulletFromRad(rigidBody.Rotation), newBulletFromVec(rigidBody.Position))
+		btRigidBodyTransform := bt.NewBtTransform(NewBulletFromRad(rigidBody.Rotation), NewBulletFromVec(rigidBody.Position))
 
 		// 物理設定の初期化
 		mp.initRigidBody(modelIndex, rigidBody, btRigidBodyTransform, nil)
@@ -64,8 +64,8 @@ func (mp *MPhysics) initRigidBodiesByBoneDeltas(
 		boneTransform.SetFromOpenGLMatrix(&mat[0])
 
 		rigidBodyLocalPos := rigidBody.Position.Subed(bone.Position)
-		btRigidBodyLocalTransform := bt.NewBtTransform(newBulletFromRad(rigidBody.Rotation),
-			newBulletFromVec(rigidBodyLocalPos))
+		btRigidBodyLocalTransform := bt.NewBtTransform(NewBulletFromRad(rigidBody.Rotation),
+			NewBulletFromVec(rigidBodyLocalPos))
 		defer bt.DeleteBtTransform(btRigidBodyLocalTransform)
 
 		btRigidBodyTransform.Mult(boneTransform, btRigidBodyLocalTransform)
@@ -99,14 +99,14 @@ func (mp *MPhysics) initRigidBody(
 	// 剛体のローカルトランスフォーム計算
 	rigidBodyLocalPos := rigidBody.Position.Subed(bonePos)
 	btRigidBodyLocalTransform := bt.NewBtTransform(
-		newBulletFromRad(rigidBody.Rotation), newBulletFromVec(rigidBodyLocalPos))
+		NewBulletFromRad(rigidBody.Rotation), NewBulletFromVec(rigidBodyLocalPos))
 
 	// 剛体のグローバル位置と回転
 	motionState := bt.NewBtDefaultMotionState(btRigidBodyTransform)
 
 	// 剛体の生成と物理パラメータの設定
 	btRigidBody := bt.NewBtRigidBody(mass, motionState, btCollisionShape, localInertia)
-	mp.configureRigidBody(btRigidBody, rigidBody)
+	mp.configureRigidBody(btRigidBody, modelIndex, rigidBody)
 
 	// 剛体・剛体グループ・非衝突グループを追加
 	group := 1 << rigidBody.CollisionGroup
@@ -182,12 +182,13 @@ func (mp *MPhysics) getBonePosition(rigidBody *pmx.RigidBody) *mmath.MVec3 {
 }
 
 // configureRigidBody は剛体の物理パラメータを設定します
-func (mp *MPhysics) configureRigidBody(btRigidBody bt.BtRigidBody, rigidBody *pmx.RigidBody) {
+func (mp *MPhysics) configureRigidBody(btRigidBody bt.BtRigidBody, modelIndex int, rigidBody *pmx.RigidBody) {
 	btRigidBody.SetDamping(float32(rigidBody.RigidBodyParam.LinearDamping),
 		float32(rigidBody.RigidBodyParam.AngularDamping))
 	btRigidBody.SetRestitution(float32(rigidBody.RigidBodyParam.Restitution))
 	btRigidBody.SetFriction(float32(rigidBody.RigidBodyParam.Friction))
-	btRigidBody.SetUserIndex(rigidBody.Index())
+	btRigidBody.SetUserIndex(modelIndex)
+	btRigidBody.SetUserIndex2(rigidBody.Index())
 }
 
 // deleteRigidBodies はモデルの全剛体を削除します
@@ -279,7 +280,7 @@ func (mp *MPhysics) GetRigidBodyBoneMatrix(
 	boneGlobalMatrixGL := mgl32.Mat4{}
 	boneGlobalTransform.GetOpenGLMatrix(&boneGlobalMatrixGL[0])
 
-	return newMMat4ByMgl(&boneGlobalMatrixGL)
+	return NewMMat4ByMgl(&boneGlobalMatrixGL)
 }
 
 // UpdateRigidBodiesSelectively は変更が必要な剛体のみを選択的に更新します
@@ -399,4 +400,36 @@ func (mp *MPhysics) UpdateRigidBodyShapeMass(
 
 	// 剛体をアクティブにしてワールドの再計算を促す
 	btRigidBody.Activate(true)
+}
+
+// FindRigidBodyByCollisionHit はレイキャストで得た btCollisionObject から
+// (modelIndex, rigidBodyIndex) を逆引きする。
+func (mp *MPhysics) FindRigidBodyByCollisionHit(hitObj bt.BtCollisionObject, hasHit bool) (modelIndex int, rb *pmx.RigidBody, ok bool) {
+	if hitObj == nil || !hasHit {
+		return -1, nil, false
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			// SWIG ラッパが 0 ポインタを内包していた場合などを握り潰す
+			modelIndex = -1
+			rb = nil
+			ok = false
+		}
+	}()
+
+	// モデルIndexと剛体Indexを取得
+	modelIndex = hitObj.GetUserIndex()
+	rigidBodyIndex := hitObj.GetUserIndex2()
+
+	if _, ok := mp.rigidBodies[modelIndex]; ok {
+		// 該当モデルが存在する場合、その剛体Indexを使う
+		if len(mp.rigidBodies[modelIndex]) > rigidBodyIndex {
+			v := mp.rigidBodies[modelIndex][rigidBodyIndex]
+			if v != nil && v.btRigidBody != nil {
+				return modelIndex, v.pmxRigidBody, true
+			}
+		}
+	}
+
+	return -1, nil, false
 }
