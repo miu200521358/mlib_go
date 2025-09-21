@@ -2,6 +2,7 @@ package mbt
 
 import (
 	"math"
+	"time"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
@@ -28,35 +29,35 @@ func (mp *MPhysics) DebugHoverInfo() *physics.DebugRigidBodyHover {
 }
 
 func (mp *MPhysics) UpdateDebugHoverByRigidBody(modelIndex int, rigidBody *pmx.RigidBody, enable bool) {
-	mlog.I("ハイライト開始: enable=%v, rigidBody=%v", enable, rigidBody != nil)
+	mlog.V("ハイライト開始: enable=%v, rigidBody=%v", enable, rigidBody != nil)
 
 	if !enable || rigidBody == nil {
-		mlog.I("ハイライト無効またはrigidBodyがnil - クリア")
+		mlog.V("ハイライト無効またはrigidBodyがnil - クリア")
 		mp.clearDebugHover()
 		return
 	}
 
 	// モデルから対応する剛体を検索
 	rigidBodies, exists := mp.rigidBodies[modelIndex]
-	mlog.I("剛体検索: modelIndex=%d, 剛体存在=%v", modelIndex, exists)
+	mlog.V("剛体検索: modelIndex=%d, 剛体存在=%v", modelIndex, exists)
 	if !exists {
-		mlog.I("モデル%dに剛体が存在しない - クリア", modelIndex)
+		mlog.V("モデル%dに剛体が存在しない - クリア", modelIndex)
 		mp.clearDebugHover()
 		return
 	}
 
 	rigidBodyIndex := rigidBody.Index()
-	mlog.I("剛体インデックス確認: rigidBodyIndex=%d, 配列長=%d", rigidBodyIndex, len(rigidBodies))
+	mlog.V("剛体インデックス確認: rigidBodyIndex=%d, 配列長=%d", rigidBodyIndex, len(rigidBodies))
 	if rigidBodyIndex < 0 || rigidBodyIndex >= len(rigidBodies) {
-		mlog.I("剛体インデックス範囲外 - クリア")
+		mlog.V("剛体インデックス範囲外 - クリア")
 		mp.clearDebugHover()
 		return
 	}
 
 	targetRigid := rigidBodies[rigidBodyIndex]
-	mlog.I("対象剛体取得: targetRigid=%v", targetRigid != nil)
+	mlog.V("対象剛体取得: targetRigid=%v", targetRigid != nil)
 	if targetRigid == nil {
-		mlog.I("対象剛体がnil - クリア")
+		mlog.V("対象剛体がnil - クリア")
 		mp.clearDebugHover()
 		return
 	}
@@ -67,26 +68,27 @@ func (mp *MPhysics) UpdateDebugHoverByRigidBody(modelIndex int, rigidBody *pmx.R
 	}
 	mp.debugHoverRigid = targetRigid
 	mp.debugHoverDistance = 0
+	mp.debugHoverStartTime = time.Now() // タイマー開始
 
-	mlog.I("ハイライト設定完了 - 頂点再構築開始")
+	mlog.V("ハイライト設定完了 - 頂点再構築開始")
 	mp.rebuildHighlightVertices(targetRigid)
 }
 
 func (mp *MPhysics) DrawDebugHighlight(shader rendering.IShader, isDrawRigidBodyFront bool) {
-	mlog.I("ハイライト描画開始: 頂点数=%d, rigid=%v", len(mp.highlightVertices), mp.debugHoverRigid != nil)
+	mlog.V("ハイライト描画開始: 頂点数=%d, rigid=%v", len(mp.highlightVertices), mp.debugHoverRigid != nil)
 	if len(mp.highlightVertices) == 0 || mp.debugHoverRigid == nil {
-		mlog.I("頂点またはデバッグ剛体がない - 描画スキップ")
+		mlog.V("頂点またはデバッグ剛体がない - 描画スキップ")
 		return
 	}
 
 	program := shader.Program(rendering.ProgramTypePhysics)
-	mlog.I("シェーダープログラム取得: program=%d", program)
+	mlog.V("シェーダープログラム取得: program=%d", program)
 	gl.UseProgram(program)
 
 	mp.liner.configureDepthTest(isDrawRigidBodyFront)
 
 	if mp.highlightBuffer == nil {
-		mlog.I("ハイライトバッファ初期化: 頂点数=%d", len(mp.highlightVertices))
+		mlog.V("ハイライトバッファ初期化: 頂点数=%d", len(mp.highlightVertices))
 		mp.highlightBuffer = mgl.NewBufferFactory().CreateDebugBuffer(gl.Ptr(&mp.highlightVertices[0]), len(mp.highlightVertices))
 	}
 
@@ -94,13 +96,13 @@ func (mp *MPhysics) DrawDebugHighlight(shader rendering.IShader, isDrawRigidBody
 	mp.highlightBuffer.UpdateDebugBuffer(mp.highlightVertices)
 
 	triangleCount := int32(len(mp.highlightVertices) / 7)
-	mlog.I("描画実行: DrawArrays 三角形数=%d", triangleCount)
+	mlog.V("描画実行: DrawArrays 三角形数=%d", triangleCount)
 	gl.DrawArrays(gl.TRIANGLES, 0, triangleCount)
 
 	mp.highlightBuffer.Unbind()
 	mp.liner.restoreDepthTest(isDrawRigidBodyFront)
 	gl.UseProgram(0)
-	mlog.I("ハイライト描画完了")
+	mlog.V("ハイライト描画完了")
 }
 
 func (mp *MPhysics) clearDebugHover() {
@@ -124,21 +126,35 @@ func (mp *MPhysics) CheckAndClearHighlightOnDebugChange(currentDebugState bool) 
 	}
 }
 
+// CheckAndClearExpiredHighlight は2秒経過したハイライトを自動的にクリアします
+func (mp *MPhysics) CheckAndClearExpiredHighlight() {
+	if mp.debugHover == nil {
+		// ハイライトが設定されていない場合は何もしない
+		return
+	}
+
+	// 2秒経過をチェック
+	if time.Since(mp.debugHoverStartTime) >= 2*time.Second {
+		mlog.V("ハイライト自動クリア: 2秒経過しました")
+		mp.clearDebugHover()
+	}
+}
+
 // rebuildHighlightVertices はPMXのサイズ情報とBulletの位置・向き情報を組み合わせてハイライト頂点を構築します
 func (mp *MPhysics) rebuildHighlightVertices(rb *rigidBodyValue) {
-	mlog.I("ハイライト頂点再構築開始: rb=%v", rb != nil)
+	mlog.V("ハイライト頂点再構築開始: rb=%v", rb != nil)
 	mp.highlightVertices = mp.highlightVertices[:0]
 	if rb == nil || rb.btRigidBody == nil || mp.debugHover == nil || mp.debugHover.RigidBody == nil {
-		mlog.I("剛体またはbtRigidBodyまたはPMX剛体情報がnil - 頂点再構築中止")
+		mlog.V("剛体またはbtRigidBodyまたはPMX剛体情報がnil - 頂点再構築中止")
 		return
 	}
 
 	// Bulletから位置・向きを取得
 	transformIface := rb.btRigidBody.GetWorldTransform()
 	transform, ok := transformIface.(bt.BtTransform)
-	mlog.I("Transform取得結果: ok=%v", ok)
+	mlog.V("Transform取得結果: ok=%v", ok)
 	if !ok {
-		mlog.I("Transform取得失敗 - 頂点再構築中止")
+		mlog.V("Transform取得失敗 - 頂点再構築中止")
 		return
 	}
 
@@ -150,32 +166,32 @@ func (mp *MPhysics) rebuildHighlightVertices(rb *rigidBodyValue) {
 	pmxRigidBody := mp.debugHover.RigidBody
 	shapeType := pmxRigidBody.ShapeType
 	shapeSize := pmxRigidBody.Size
-	mlog.I("PMX形状情報: ShapeType=%d, Size=[%.3f, %.3f, %.3f]",
+	mlog.V("PMX形状情報: ShapeType=%d, Size=[%.3f, %.3f, %.3f]",
 		shapeType, shapeSize.X, shapeSize.Y, shapeSize.Z)
 
 	switch shapeType {
 	case 0: // SHAPE_SPHERE
-		mlog.I("Shape種別: Sphere (PMX ShapeType=0)")
+		mlog.V("Shape種別: Sphere (PMX ShapeType=0)")
 		radius := math.Abs(float64(shapeSize.X))
 		mp.appendSphereHighlight(worldMat, radius)
 	case 1: // SHAPE_BOX
-		mlog.I("Shape種別: Box (PMX ShapeType=1)")
+		mlog.V("Shape種別: Box (PMX ShapeType=1)")
 		hx := math.Abs(float64(shapeSize.X))
 		hy := math.Abs(float64(shapeSize.Y))
 		hz := math.Abs(float64(shapeSize.Z))
 		mp.appendBoxHighlightWithSize(worldMat, hx, hy, hz)
 	case 2: // SHAPE_CAPSULE
-		mlog.I("Shape種別: Capsule (PMX ShapeType=2)")
+		mlog.V("Shape種別: Capsule (PMX ShapeType=2)")
 		radius := math.Abs(float64(shapeSize.X))
 		halfHeight := math.Abs(float64(shapeSize.Y)) / 2.0 // PMXの高さを半分にする
 		mp.appendCapsuleHighlight(worldMat, radius, halfHeight)
 	default:
-		mlog.I("Shape種別: 未対応 - PMX ShapeType=%d", shapeType)
+		mlog.V("Shape種別: 未対応 - PMX ShapeType=%d", shapeType)
 		// 未対応の形状の場合はデフォルトのBox形状で描画
 		mp.appendGenericBoxHighlight(worldMat, 0.5)
 	}
 
-	mlog.I("頂点生成完了: 頂点数=%d", len(mp.highlightVertices))
+	mlog.V("頂点生成完了: 頂点数=%d", len(mp.highlightVertices))
 }
 
 // appendBoxHighlightWithSize は指定サイズのBox形状を描画します

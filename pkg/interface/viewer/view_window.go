@@ -218,6 +218,11 @@ func (vw *ViewWindow) render() {
 	// 剛体デバッグ状態変更の検出とハイライトクリア
 	vw.physics.CheckAndClearHighlightOnDebugChange(drawRigidBodyFront || drawRigidBodyBack)
 
+	// 剛体デバッグが有効な場合のみ2秒経過ハイライト自動クリアをチェック
+	if drawRigidBodyFront || drawRigidBodyBack {
+		vw.physics.CheckAndClearExpiredHighlight()
+	}
+
 	// 剛体デバッグが有効な場合のみツールチップを表示
 	if (drawRigidBodyFront || drawRigidBodyBack) && vw.tooltipRenderer != nil {
 		if hover := vw.physics.DebugHoverInfo(); hover != nil && hover.RigidBody != nil {

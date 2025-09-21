@@ -51,6 +51,7 @@ type IPhysics interface {
 	UpdateDebugHoverByRigidBody(modelIndex int, rigidBody *pmx.RigidBody, enable bool)
 	DebugHoverInfo() *DebugRigidBodyHover
 	CheckAndClearHighlightOnDebugChange(currentDebugState bool)
+	CheckAndClearExpiredHighlight() // 一定秒数経過したハイライトを自動クリア
 
 	// 風関連
 	EnableWind(enable bool)

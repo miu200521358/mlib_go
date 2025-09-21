@@ -1,6 +1,8 @@
 package mbt
 
 import (
+	"time"
+
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/physics"
@@ -18,6 +20,7 @@ type MPhysics struct {
 	debugHover              *physics.DebugRigidBodyHover // デバッグ用ホバー情報
 	debugHoverRigid         *rigidBodyValue              // デバッグ用ホバー剛体
 	debugHoverDistance      float64                      // デバッグ用ホバー距離
+	debugHoverStartTime     time.Time                    // ハイライト開始時刻（自動クリア用）
 	prevRigidBodyDebugState bool                         // 前回の剛体デバッグ状態
 	config                  physics.PhysicsConfig        // 設定パラメータ
 	DeformSpf               float32                      // デフォームspf
