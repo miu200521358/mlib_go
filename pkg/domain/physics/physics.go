@@ -48,7 +48,7 @@ type IPhysics interface {
 	// デバッグ表示
 	DrawDebugLines(shader rendering.IShader, visibleRigidBody, visibleJoint, isDrawRigidBodyFront bool)
 	DrawDebugHighlight(shader rendering.IShader, isDrawRigidBodyFront bool)
-	UpdateDebugHover(rayFrom, rayTo *mmath.MVec3, enable bool)
+	UpdateDebugHoverByRigidBody(modelIndex int, rigidBody *pmx.RigidBody, enable bool)
 	DebugHoverInfo() *DebugRigidBodyHover
 
 	// 風関連

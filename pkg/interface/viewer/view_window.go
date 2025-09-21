@@ -36,7 +36,7 @@ type ViewWindow struct {
 	prevCursorPos       *mmath.MVec2            // 前回のカーソル位置
 	cursorX             float64                 // カーソルX位置
 	cursorY             float64                 // カーソルY位置
-	tooltipRenderer     *tooltipRenderer        // ツールチップ描画オブジェクト
+	tooltipRenderer     *mgl.TooltipRenderer    // ツールチップ描画オブジェクト
 	list                *ViewerList             // ビューワーリスト
 	shader              rendering.IShader       // シェーダー
 	physics             physics.IPhysics        // 物理エンジン
@@ -103,7 +103,7 @@ func newViewWindow(
 		vmdDeltas:      make([]*delta.VmdDeltas, 0),
 	}
 
-	tooltipRenderer, err := newTooltipRenderer()
+	tooltipRenderer, err := mgl.NewTooltipRenderer()
 	if err != nil {
 		return nil, err
 	}
@@ -194,12 +194,6 @@ func (vw *ViewWindow) render() {
 	drawRigidBodyFront := vw.list.shared.IsShowRigidBodyFront()
 	drawRigidBodyBack := vw.list.shared.IsShowRigidBodyBack()
 	highlightEnabled := drawRigidBodyFront || drawRigidBodyBack
-	if highlightEnabled {
-		rayFrom, rayTo := vw.computeCursorRay(w, h)
-		vw.physics.UpdateDebugHover(rayFrom, rayTo, true)
-	} else {
-		vw.physics.UpdateDebugHover(nil, nil, false)
-	}
 
 	// 床描画
 	vw.renderFloor()
@@ -437,23 +431,6 @@ func (vw *ViewWindow) updateWind(frame float32) {
 	vw.physics.EnableWind(enabledF.Enabled)
 	vw.physics.SetWind(directionF.Direction, speedF.Speed, randomnessF.Randomness)
 	vw.physics.SetWindAdvanced(dragCoeffF.DragCoeff, liftCoeffF.LiftCoeff, turbulenceFreqHzF.TurbulenceFreqHz)
-}
-
-func (vw *ViewWindow) computeCursorRay(width, height int) (*mmath.MVec3, *mmath.MVec3) {
-	projection := vw.shader.Camera().GetProjectionMatrix(width, height)
-	view := vw.shader.Camera().GetViewMatrix()
-	x := float32(vw.cursorX)
-	y := float32(height) - float32(vw.cursorY)
-	nearPoint, err := mgl32.UnProject(mgl32.Vec3{x, y, 0}, view, projection, 0, 0, width, height)
-	if err != nil {
-		return &mmath.MVec3{}, &mmath.MVec3{}
-	}
-	farPoint, err := mgl32.UnProject(mgl32.Vec3{x, y, 1}, view, projection, 0, 0, width, height)
-	if err != nil {
-		return &mmath.MVec3{}, &mmath.MVec3{}
-	}
-	return &mmath.MVec3{X: float64(nearPoint.X()), Y: float64(nearPoint.Y()), Z: float64(nearPoint.Z())},
-		&mmath.MVec3{X: float64(farPoint.X()), Y: float64(farPoint.Y()), Z: float64(farPoint.Z())}
 }
 
 // getWorldPosition は指定されたマウス座標からワールド座標位置を取得します

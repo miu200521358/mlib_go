@@ -114,6 +114,10 @@ func (vw *ViewWindow) mouseCallback(
 		switch button {
 		case glfw.MouseButtonLeft:
 			vw.leftButtonPressed = false
+			// 剛体デバッグ表示中なら剛体選択とハイライト
+			if vw.list.shared.IsShowRigidBodyFront() || vw.list.shared.IsShowRigidBodyBack() {
+				vw.selectRigidBodyByCursor(vw.cursorX, vw.cursorY)
+			}
 		case glfw.MouseButtonMiddle:
 			vw.middleButtonPressed = false
 		case glfw.MouseButtonRight:
@@ -126,17 +130,6 @@ func (vw *ViewWindow) mouseCallback(
 func (vw *ViewWindow) cursorPosCallback(w *glfw.Window, xpos, ypos float64) {
 	vw.cursorX = xpos
 	vw.cursorY = ypos
-
-	// if vw.leftButtonPressed {
-	// 	// 左クリックした場合、デバッグモードによって処理を分岐
-
-	// 	// 左クリックはカーソル位置を取得
-	// 	// if vw.ctrlPressed {
-	// 	// 	vw.leftCursorRemoveWindowPositions[mgl32.Vec2{float32(xpos), float32(ypos)}] = 0.0
-	// 	// } else {
-	// 	// 	vw.leftCursorWindowPositions[mgl32.Vec2{float32(xpos), float32(ypos)}] = 0.0
-	// 	// }
-	// }
 
 	if !vw.updatedPrevCursor {
 		vw.prevCursorPos.X = xpos
@@ -157,13 +150,6 @@ func (vw *ViewWindow) cursorPosCallback(w *glfw.Window, xpos, ypos float64) {
 
 	vw.prevCursorPos.X = xpos
 	vw.prevCursorPos.Y = ypos
-
-	if vw.list.shared.IsShowRigidBodyFront() || vw.list.shared.IsShowRigidBodyBack() {
-		// 剛体デバッグ中の場合、剛体選択を行う
-		vw.selectRigidBodyByCursor(xpos, ypos)
-	}
-
-	// mlog.I("Cursor Position: (%.2f, %.2f)", xpos, ypos)
 }
 
 // selectRigidBodyByCursor はカーソル位置に基づいて剛体を選択する
@@ -260,10 +246,15 @@ func (vw *ViewWindow) selectRigidBodyByCursor(xpos, ypos float64) {
 	// 逆引きして剛体名を取る
 	modelIdx, pmxRB, ok := vw.physics.FindRigidBodyByCollisionHit(hitObj, hasHit)
 
+	// ハイライト機能を統合（効率化：既にレイキャスト済みなので直接剛体を指定）
 	if hasHit && ok && pmxRB != nil {
+		// 剛体がヒットした場合、レイキャストを再実行せずに直接ハイライト表示を更新
+		vw.physics.UpdateDebugHoverByRigidBody(modelIdx, pmxRB, true)
 		mlog.I("pick: ndc=(%.3f,%.3f) from=%v to=%v hasHit=%v frac=%.5f model=%d name=%s",
 			ndcX, ndcY, rayFrom, rayTo, hasHit, frac, modelIdx, pmxRB.Name())
 	} else {
+		// 剛体がヒットしなかった場合、ハイライトをクリア
+		vw.physics.UpdateDebugHoverByRigidBody(0, nil, false)
 		mlog.I("pick: ndc=(%.3f,%.3f) from=%v to=%v hasHit=%v frac=%.5f (hitObj=%v) (reverseLookup ok=%v)",
 			ndcX, ndcY, rayFrom, rayTo, hasHit, frac, hitObj, ok)
 	}

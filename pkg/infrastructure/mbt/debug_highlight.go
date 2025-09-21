@@ -8,6 +8,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/physics"
+	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
 	"github.com/miu200521358/mlib_go/pkg/domain/rendering"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
@@ -21,57 +22,42 @@ const (
 	epsilon         = 1e-6
 )
 
-func (mp *MPhysics) UpdateDebugHover(rayFrom, rayTo *mmath.MVec3, enable bool) {
-	if !enable || rayFrom == nil || rayTo == nil {
+func (mp *MPhysics) DebugHoverInfo() *physics.DebugRigidBodyHover {
+	return mp.debugHover
+}
+
+func (mp *MPhysics) UpdateDebugHoverByRigidBody(modelIndex int, rigidBody *pmx.RigidBody, enable bool) {
+	if !enable || rigidBody == nil {
 		mp.clearDebugHover()
 		return
 	}
 
-	btRayFrom := NewBulletFromVec(rayFrom)
-	btRayTo := NewBulletFromVec(rayTo)
-	defer bt.DeleteBtVector3(btRayFrom)
-	defer bt.DeleteBtVector3(btRayTo)
-
-	bestDistance := math.MaxFloat64
-	var bestRigid *rigidBodyValue
-	var bestHit *mmath.MVec3
-
-	for _, bodies := range mp.rigidBodies {
-		for _, rb := range bodies {
-			if rb == nil || rb.btRigidBody == nil {
-				continue
-			}
-
-			hitPoint, ok := mp.intersectRigidBody(rayFrom, rayTo, rb, btRayFrom, btRayTo)
-			if !ok || hitPoint == nil {
-				continue
-			}
-
-			distance := rayFrom.Distance(hitPoint)
-			if distance < bestDistance {
-				bestDistance = distance
-				bestRigid = rb
-				bestHit = hitPoint
-			}
-		}
+	// モデルから対応する剛体を検索
+	rigidBodies, exists := mp.rigidBodies[modelIndex]
+	if !exists {
+		mp.clearDebugHover()
+		return
 	}
 
-	if bestRigid == nil {
+	rigidBodyIndex := rigidBody.Index()
+	if rigidBodyIndex < 0 || rigidBodyIndex >= len(rigidBodies) {
+		mp.clearDebugHover()
+		return
+	}
+
+	targetRigid := rigidBodies[rigidBodyIndex]
+	if targetRigid == nil {
 		mp.clearDebugHover()
 		return
 	}
 
 	mp.debugHover = &physics.DebugRigidBodyHover{
-		RigidBody: bestRigid.pmxRigidBody,
-		HitPoint:  bestHit,
+		RigidBody: rigidBody,
+		HitPoint:  nil, // ヒット点は不明（レイキャストしていないため）
 	}
-	mp.debugHoverRigid = bestRigid
-	mp.debugHoverDistance = bestDistance
-	mp.rebuildHighlightVertices(bestRigid)
-}
-
-func (mp *MPhysics) DebugHoverInfo() *physics.DebugRigidBodyHover {
-	return mp.debugHover
+	mp.debugHoverRigid = targetRigid
+	mp.debugHoverDistance = 0
+	mp.rebuildHighlightVertices(targetRigid)
 }
 
 func (mp *MPhysics) DrawDebugHighlight(shader rendering.IShader, isDrawRigidBodyFront bool) {
@@ -105,60 +91,6 @@ func (mp *MPhysics) clearDebugHover() {
 	if mp.highlightVertices != nil {
 		mp.highlightVertices = mp.highlightVertices[:0]
 	}
-}
-
-func (mp *MPhysics) intersectRigidBody(rayFrom, rayTo *mmath.MVec3, rb *rigidBodyValue, btRayFrom, btRayTo bt.BtVector3) (*mmath.MVec3, bool) {
-	worldTransformIface := rb.btRigidBody.GetWorldTransform()
-	transform, ok := worldTransformIface.(bt.BtTransform)
-	if !ok {
-		return nil, false
-	}
-
-	localFromBt := transform.InvXform(btRayFrom)
-	defer bt.DeleteBtVector3(localFromBt)
-	localToBt := transform.InvXform(btRayTo)
-	defer bt.DeleteBtVector3(localToBt)
-
-	localFrom := vec3FromBt(localFromBt)
-	localTo := vec3FromBt(localToBt)
-	dir := localTo.sub(localFrom)
-
-	collisionShapeIface := rb.btRigidBody.GetCollisionShape()
-	shape, ok := collisionShapeIface.(bt.BtCollisionShape)
-	if !ok {
-		return nil, false
-	}
-
-	var t float64
-	var hit bool
-
-	switch s := shape.(type) {
-	case bt.BtBoxShape:
-		halfExtentsBt := s.GetHalfExtentsWithMargin()
-		hx := math.Abs(float64(halfExtentsBt.GetX()))
-		hy := math.Abs(float64(halfExtentsBt.GetY()))
-		hz := math.Abs(float64(halfExtentsBt.GetZ()))
-		bt.DeleteBtVector3(halfExtentsBt)
-		min := vec3{-hx, -hy, -hz}
-		max := vec3{hx, hy, hz}
-		t, hit = rayAabbIntersection(localFrom, dir, min, max)
-	case bt.BtSphereShape:
-		radius := float64(s.GetRadius())
-		t, hit = raySphereIntersection(localFrom, dir, radius)
-	case bt.BtCapsuleShape:
-		radius := float64(s.GetRadius())
-		halfHeight := float64(s.GetHalfHeight())
-		t, hit = rayCapsuleIntersection(localFrom, dir, halfHeight, radius)
-	default:
-		return nil, false
-	}
-
-	if !hit || t < 0 || t > 1 {
-		return nil, false
-	}
-
-	hitPoint := rayFrom.Added(rayTo.Subed(rayFrom).MuledScalar(t))
-	return hitPoint, true
 }
 
 func (mp *MPhysics) rebuildHighlightVertices(rb *rigidBodyValue) {
