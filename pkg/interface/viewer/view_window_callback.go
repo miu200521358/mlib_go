@@ -141,11 +141,9 @@ func (vw *ViewWindow) cursorPosCallback(w *glfw.Window, xpos, ypos float64) {
 	if vw.rightButtonPressed {
 		// 右クリックはカメラの角度を更新
 		vw.updateCameraAngleByCursor(xpos, ypos)
-		return
 	} else if vw.middleButtonPressed {
 		// 中クリックはカメラ位置と中心を移動
 		vw.updateCameraPositionByCursor(xpos, ypos)
-		return
 	}
 
 	vw.prevCursorPos.X = xpos
