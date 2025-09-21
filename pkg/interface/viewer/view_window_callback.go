@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
@@ -151,7 +152,7 @@ func (vw *ViewWindow) cursorPosCallback(w *glfw.Window, xpos, ypos float64) {
 }
 
 // selectRigidBodyByCursor はカーソル位置に基づいて剛体を選択する
-// クリック位置 → レイ → ヒット剛体名をログ
+// カメラの現在位置・角度を考慮した正確なレイキャストを実行
 func (vw *ViewWindow) selectRigidBodyByCursor(xpos, ypos float64) {
 	if vw.physics == nil {
 		return
@@ -167,58 +168,66 @@ func (vw *ViewWindow) selectRigidBodyByCursor(xpos, ypos float64) {
 		return
 	}
 
+	// 現在のカメラ状態を使用してマトリックスを取得
+	projection := cam.GetProjectionMatrix(width, height)
+	view := cam.GetViewMatrix()
+
+	// NDC座標を計算
+	ndcX := (2.0*float64(xpos))/float64(width) - 1.0
+	ndcY := 1.0 - (2.0*float64(ypos))/float64(height)
+
+	// NDCからワールド座標への変換（near平面とfar平面）
+	nearWorld, err1 := mgl32.UnProject(
+		mgl32.Vec3{float32(xpos), float32(height) - float32(ypos), 0.0},
+		view, projection, 0, 0, width, height)
+
+	farWorld, err2 := mgl32.UnProject(
+		mgl32.Vec3{float32(xpos), float32(height) - float32(ypos), 1.0},
+		view, projection, 0, 0, width, height)
+
 	var rayFrom, rayTo *mmath.MVec3
-	var ndcX, ndcY float64
 
-	// getWorldPositionを使用して実際のワールド座標を取得
-	worldPos, _, _ := vw.getWorldPosition(int(xpos), int(ypos))
-
-	if worldPos != nil {
-		// 成功：実際の深度値を使用した精密なレイテスト
-		// カメラからワールド座標への方向ベクトル
-		direction := worldPos.Subed(cam.Position).Normalize()
-
-		// Direction分手前から開始（10.0m手前）
-		rayFrom = worldPos.Subed(direction.MulScalar(10.0))
-		// Direction方向に奥行きを持たせる（10.0奥）
-		rayTo = worldPos.Added(direction.MulScalar(10.0))
-
-		// デバッグ用NDC計算
-		ndcX = (2.0*float64(xpos))/float64(width) - 1.0
-		ndcY = 1.0 - (2.0*float64(ypos))/float64(height)
-
-		mlog.D("Using precise ray based on depth: worldPos=%v direction=%v", worldPos, direction)
+	if err1 == nil && err2 == nil {
+		// UnProjectが成功した場合：正確なレイを構築
+		rayFrom = &mmath.MVec3{
+			X: float64(nearWorld.X()),
+			Y: float64(nearWorld.Y()),
+			Z: float64(nearWorld.Z()),
+		}
+		rayTo = &mmath.MVec3{
+			X: float64(farWorld.X()),
+			Y: float64(farWorld.Y()),
+			Z: float64(farWorld.Z()),
+		}
+		mlog.D("Camera-aware ray: from=%v to=%v (NDC: %.3f, %.3f)", rayFrom, rayTo, ndcX, ndcY)
 	} else {
-		// フォールバック：従来の実装を使用
-		mlog.D("Fallback to traditional ray casting (no depth available)")
-
-		// NDC
-		ndcX = (2.0*float64(xpos))/float64(width) - 1.0
-		ndcY = 1.0 - (2.0*float64(ypos))/float64(height)
+		// フォールバック：カメラからの直線レイ
+		mlog.D("UnProject failed, using fallback ray casting")
 
 		// 投影パラメータ
 		aspect := float64(cam.AspectRatio)
 		fovRad := mmath.DegToRad(float64(cam.FieldOfView))
 		tanFov := math.Tan(fovRad * 0.5)
 
-		// 視空間方向
+		// 視空間方向ベクトル
 		dirCam := (&mmath.MVec3{
 			X: ndcX * aspect * tanFov,
 			Y: ndcY * tanFov,
 			Z: -1.0,
 		}).Normalized()
 
-		// カメラ基底 → 世界方向
+		// カメラの現在の方向基底を使用
 		forward := cam.LookAtCenter.Subed(cam.Position).Normalize()
 		right := forward.Cross(cam.Up).Normalize()
 		up := right.Cross(forward).Normalize()
+
+		// ワールド座標での方向ベクトル
 		dirWorld := (&mmath.MVec3{
 			X: dirCam.X*right.X + dirCam.Y*up.X + dirCam.Z*forward.X,
 			Y: dirCam.X*right.Y + dirCam.Y*up.Y + dirCam.Z*forward.Y,
 			Z: dirCam.X*right.Z + dirCam.Y*up.Z + dirCam.Z*forward.Z,
 		}).Normalized()
 
-		// ニア面の少し先から撃つ（内側/数値不安定回避）
 		rayFrom = cam.Position.Added(dirWorld.MulScalar(float64(cam.NearPlane)))
 		rayTo = cam.Position.Added(dirWorld.MulScalar(float64(cam.FarPlane)))
 	}
@@ -232,29 +241,27 @@ func (vw *ViewWindow) selectRigidBodyByCursor(xpos, ypos float64) {
 	cb := bt.NewBtClosestRayCallback(btRayFrom, btRayTo)
 	defer bt.DeleteBtClosestRayCallback(cb)
 
-	cb.SetCollisionFilterGroup(collisionAllFilterMask) // 全グループからヒット
-	cb.SetCollisionFilterMask(collisionAllFilterMask)  // 全グループにヒット
+	cb.SetCollisionFilterGroup(collisionAllFilterMask)
+	cb.SetCollisionFilterMask(collisionAllFilterMask)
 
-	vw.physics.GetWorld().RayTest(btRayFrom, btRayTo, cb) // レイキャスト実行
+	vw.physics.GetWorld().RayTest(btRayFrom, btRayTo, cb)
 
 	hasHit := cb.HasHit()
 	frac := cb.GetHitFraction()
 	hitObj := cb.GetCollisionObject()
 
-	// 逆引きして剛体名を取る
+	// 逆引きして剛体名を取得
 	modelIdx, pmxRB, ok := vw.physics.FindRigidBodyByCollisionHit(hitObj, hasHit)
 
-	// ハイライト機能を統合（効率化：既にレイキャスト済みなので直接剛体を指定）
+	// ハイライト機能の更新
 	if hasHit && ok && pmxRB != nil {
-		// 剛体がヒットした場合、レイキャストを再実行せずに直接ハイライト表示を更新
 		vw.physics.UpdateDebugHoverByRigidBody(modelIdx, pmxRB, true)
 		mlog.I("pick: ndc=(%.3f,%.3f) from=%v to=%v hasHit=%v frac=%.5f model=%d name=%s",
 			ndcX, ndcY, rayFrom, rayTo, hasHit, frac, modelIdx, pmxRB.Name())
 	} else {
-		// 剛体がヒットしなかった場合、ハイライトをクリア
 		vw.physics.UpdateDebugHoverByRigidBody(0, nil, false)
-		mlog.I("pick: ndc=(%.3f,%.3f) from=%v to=%v hasHit=%v frac=%.5f (hitObj=%v) (reverseLookup ok=%v)",
-			ndcX, ndcY, rayFrom, rayTo, hasHit, frac, hitObj, ok)
+		mlog.I("pick: ndc=(%.3f,%.3f) from=%v to=%v hasHit=%v frac=%.5f (no hit)",
+			ndcX, ndcY, rayFrom, rayTo, hasHit, frac)
 	}
 }
 
