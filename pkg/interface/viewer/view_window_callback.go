@@ -14,7 +14,9 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
+	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/physics"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/bt"
 	"github.com/miu200521358/mlib_go/pkg/infrastructure/mgl"
 	"github.com/miu200521358/walk/pkg/walk"
@@ -115,9 +117,12 @@ func (vw *ViewWindow) mouseCallback(
 		switch button {
 		case glfw.MouseButtonLeft:
 			vw.leftButtonPressed = false
-			// 剛体デバッグ表示中なら剛体選択とハイライト
 			if vw.list.shared.IsShowRigidBodyFront() || vw.list.shared.IsShowRigidBodyBack() {
+				// 剛体デバッグ表示中なら剛体選択とハイライト
 				vw.selectRigidBodyByCursor(vw.cursorX, vw.cursorY)
+			} else if vw.list.shared.IsAnyBoneVisible() {
+				// ボーン表示中ならボーン選択とハイライト
+				vw.selectBoneByCursor(vw.cursorX, vw.cursorY)
 			}
 		case glfw.MouseButtonMiddle:
 			vw.middleButtonPressed = false
@@ -151,21 +156,16 @@ func (vw *ViewWindow) cursorPosCallback(w *glfw.Window, xpos, ypos float64) {
 	vw.prevCursorPos.Y = ypos
 }
 
-// selectRigidBodyByCursor はカーソル位置に基づいて剛体を選択する
-// カメラの現在位置・角度を考慮した正確なレイキャストを実行
-func (vw *ViewWindow) selectRigidBodyByCursor(xpos, ypos float64) {
-	if vw.physics == nil {
-		return
-	}
-
-	// 実ビューポートとカメラ取得
+// calculateRayFromTo はマウス座標からレイのFROMとTO座標を計算する共通関数
+func (vw *ViewWindow) calculateRayFromTo(xpos, ypos float64) (*mmath.MVec3, *mmath.MVec3, error) {
+	// ビューポートとカメラの検証
 	width, height := vw.GetSize()
 	if width == 0 || height == 0 {
-		return
+		return nil, nil, fmt.Errorf("invalid viewport size: %dx%d", width, height)
 	}
 	cam := vw.shader.Camera()
 	if cam == nil {
-		return
+		return nil, nil, fmt.Errorf("camera is nil")
 	}
 
 	// 現在のカメラ状態を使用してマトリックスを取得
@@ -200,37 +200,59 @@ func (vw *ViewWindow) selectRigidBodyByCursor(xpos, ypos float64) {
 			Z: float64(farWorld.Z()),
 		}
 		mlog.D("Camera-aware ray: from=%v to=%v (NDC: %.3f, %.3f)", rayFrom, rayTo, ndcX, ndcY)
-	} else {
-		// フォールバック：カメラからの直線レイ
-		mlog.D("UnProject failed, using fallback ray casting")
-
-		// 投影パラメータ
-		aspect := float64(cam.AspectRatio)
-		fovRad := mmath.DegToRad(float64(cam.FieldOfView))
-		tanFov := math.Tan(fovRad * 0.5)
-
-		// 視空間方向ベクトル
-		dirCam := (&mmath.MVec3{
-			X: ndcX * aspect * tanFov,
-			Y: ndcY * tanFov,
-			Z: -1.0,
-		}).Normalized()
-
-		// カメラの現在の方向基底を使用
-		forward := cam.LookAtCenter.Subed(cam.Position).Normalize()
-		right := forward.Cross(cam.Up).Normalize()
-		up := right.Cross(forward).Normalize()
-
-		// ワールド座標での方向ベクトル
-		dirWorld := (&mmath.MVec3{
-			X: dirCam.X*right.X + dirCam.Y*up.X + dirCam.Z*forward.X,
-			Y: dirCam.X*right.Y + dirCam.Y*up.Y + dirCam.Z*forward.Y,
-			Z: dirCam.X*right.Z + dirCam.Y*up.Z + dirCam.Z*forward.Z,
-		}).Normalized()
-
-		rayFrom = cam.Position.Added(dirWorld.MulScalar(float64(cam.NearPlane)))
-		rayTo = cam.Position.Added(dirWorld.MulScalar(float64(cam.FarPlane)))
+		return rayFrom, rayTo, nil
 	}
+
+	// フォールバック：カメラからの直線レイ
+	mlog.D("UnProject failed, using fallback ray casting")
+
+	// 投影パラメータ
+	aspect := float64(cam.AspectRatio)
+	fovRad := mmath.DegToRad(float64(cam.FieldOfView))
+	tanFov := math.Tan(fovRad * 0.5)
+
+	// 視空間方向ベクトル
+	dirCam := (&mmath.MVec3{
+		X: ndcX * aspect * tanFov,
+		Y: ndcY * tanFov,
+		Z: -1.0,
+	}).Normalized()
+
+	// カメラの現在の方向基底を使用
+	forward := cam.LookAtCenter.Subed(cam.Position).Normalize()
+	right := forward.Cross(cam.Up).Normalize()
+	up := right.Cross(forward).Normalize()
+
+	// ワールド座標での方向ベクトル
+	dirWorld := (&mmath.MVec3{
+		X: dirCam.X*right.X + dirCam.Y*up.X + dirCam.Z*forward.X,
+		Y: dirCam.X*right.Y + dirCam.Y*up.Y + dirCam.Z*forward.Y,
+		Z: dirCam.X*right.Z + dirCam.Y*up.Z + dirCam.Z*forward.Z,
+	}).Normalized()
+
+	rayFrom = cam.Position.Added(dirWorld.MulScalar(float64(cam.NearPlane)))
+	rayTo = cam.Position.Added(dirWorld.MulScalar(float64(cam.FarPlane)))
+	return rayFrom, rayTo, nil
+}
+
+// selectRigidBodyByCursor はカーソル位置に基づいて剛体を選択する
+// カメラの現在位置・角度を考慮した正確なレイキャストを実行
+func (vw *ViewWindow) selectRigidBodyByCursor(xpos, ypos float64) {
+	if vw.physics == nil {
+		return
+	}
+
+	// 共通レイ計算関数を使用
+	rayFrom, rayTo, err := vw.calculateRayFromTo(xpos, ypos)
+	if err != nil {
+		mlog.W("レイ計算に失敗しました: %v", err)
+		return
+	}
+
+	// NDC座標を計算（ログ用）
+	width, height := vw.GetSize()
+	ndcX := (2.0*float64(xpos))/float64(width) - 1.0
+	ndcY := 1.0 - (2.0*float64(ypos))/float64(height)
 
 	// レイテスト実行
 	btRayFrom := bt.NewBtVector3(float32(rayFrom.X), float32(rayFrom.Y), float32(rayFrom.Z))
@@ -262,6 +284,86 @@ func (vw *ViewWindow) selectRigidBodyByCursor(xpos, ypos float64) {
 		vw.physics.UpdateDebugHoverByRigidBody(0, nil, false)
 		mlog.I("pick: ndc=(%.3f,%.3f) from=%v to=%v hasHit=%v frac=%.5f (no hit)",
 			ndcX, ndcY, rayFrom, rayTo, hasHit, frac)
+	}
+}
+
+// selectBoneByCursor は指定されたマウス座標から最も近いボーンを選択します
+func (vw *ViewWindow) selectBoneByCursor(xpos, ypos float64) {
+	mlog.I("ボーン選択処理開始: x=%.1f, y=%.1f", xpos, ypos)
+
+	if len(vw.vmdDeltas) == 0 || vw.vmdDeltas[0] == nil {
+		mlog.I("VmdDeltasが存在しない - ボーン選択中止")
+		return
+	}
+
+	width, height := vw.GetSize()
+	depth := vw.shader.Msaa().ReadDepthAt(int(xpos), int(ypos), width, height)
+
+	// 現在のカメラ状態を使用してマトリックスを取得
+	projection := vw.shader.Camera().GetProjectionMatrix(width, height)
+	view := vw.shader.Camera().GetViewMatrix()
+
+	// NDCからワールド座標への変換
+	world, err := mgl32.UnProject(
+		mgl32.Vec3{float32(xpos), float32(height) - float32(ypos), depth},
+		view, projection, 0, 0, width, height)
+	if err != nil {
+		mlog.W("UnProject失敗: %v", err)
+		return
+	}
+
+	mouseWorldPos := &mmath.MVec3{
+		X: -float64(world.X()), // X軸反転
+		Y: float64(world.Y()),
+		Z: float64(world.Z()),
+	}
+	boneDistances := make(map[float64][]*physics.DebugBoneHover) // 距離→ボーン配列マップ
+
+	// 第1段階：最も近いボーンの距離を見つける
+	for modelIndex, vmdDeltas := range vw.vmdDeltas {
+		if vmdDeltas == nil || vmdDeltas.Bones == nil {
+			continue
+		}
+
+		vmdDeltas.Bones.ForEach(func(index int, boneDelta *delta.BoneDelta) bool {
+			if boneDelta == nil || boneDelta.Bone == nil {
+				return true // 続行
+			}
+
+			bonePos := boneDelta.FilledGlobalPosition()
+
+			// レイと線分の距離を計算
+			distance := mmath.Round(mouseWorldPos.Distance(bonePos), 0.01)
+			if _, ok := boneDistances[distance]; !ok {
+				boneDistances[distance] = make([]*physics.DebugBoneHover, 0)
+			}
+
+			boneDistances[distance] = append(boneDistances[distance], &physics.DebugBoneHover{
+				ModelIndex: modelIndex,
+				Bone:       boneDelta.Bone,
+				Distance:   distance,
+			})
+
+			return true
+		})
+	}
+
+	// 最も近いボーンを特定（複数ボーンが同一位置にある場合は全件取得）
+	var closestDistance float64 = math.MaxFloat64
+	for dist := range boneDistances {
+		if dist < closestDistance {
+			closestDistance = dist
+		}
+	}
+
+	closestBones := boneDistances[closestDistance] // 最も近い距離のボーン群
+
+	if len(closestBones) > 0 {
+		mlog.I("ボーン選択成功: %d個のボーン (最短距離=%.3f)", len(closestBones), closestDistance)
+		vw.physics.UpdateDebugHoverByBones(closestBones, true)
+	} else {
+		mlog.I("近いボーンが見つかりませんでした")
+		vw.physics.UpdateDebugHoverByBones(nil, false)
 	}
 }
 

@@ -53,6 +53,11 @@ type IPhysics interface {
 	CheckAndClearHighlightOnDebugChange(currentDebugState bool)
 	CheckAndClearExpiredHighlight() // 一定秒数経過したハイライトを自動クリア
 
+	// ボーンハイライト関連
+	UpdateDebugHoverByBones(closestBones []*DebugBoneHover, enable bool)
+	DebugBoneHoverInfo() []*DebugBoneHover
+	CheckAndClearBoneExpiredHighlight() // 一定秒数経過したボーンハイライトを自動クリア
+
 	// 風関連
 	EnableWind(enable bool)
 	SetWind(direction *mmath.MVec3, speed float32, randomness float32)
@@ -66,4 +71,11 @@ type IPhysics interface {
 type DebugRigidBodyHover struct {
 	RigidBody *pmx.RigidBody
 	HitPoint  *mmath.MVec3
+}
+
+// DebugBoneHover holds information about the bones under the debug cursor.
+type DebugBoneHover struct {
+	ModelIndex int       // モデルインデックス
+	Bone       *pmx.Bone // 検出されたボーン
+	Distance   float64   // カーソルからボーンラインまでの最短距離
 }

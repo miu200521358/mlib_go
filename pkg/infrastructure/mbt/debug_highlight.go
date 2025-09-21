@@ -67,7 +67,6 @@ func (mp *MPhysics) UpdateDebugHoverByRigidBody(modelIndex int, rigidBody *pmx.R
 		HitPoint:  nil, // ヒット点は不明（レイキャストしていないため）
 	}
 	mp.debugHoverRigid = targetRigid
-	mp.debugHoverDistance = 0
 	mp.debugHoverStartTime = time.Now() // タイマー開始
 
 	mlog.V("ハイライト設定完了 - 頂点再構築開始")
@@ -108,7 +107,6 @@ func (mp *MPhysics) DrawDebugHighlight(shader rendering.IShader, isDrawRigidBody
 func (mp *MPhysics) clearDebugHover() {
 	mp.debugHover = nil
 	mp.debugHoverRigid = nil
-	mp.debugHoverDistance = 0
 	if mp.highlightVertices != nil {
 		mp.highlightVertices = mp.highlightVertices[:0]
 	}

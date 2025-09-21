@@ -422,6 +422,10 @@ func (ss *SharedState) SetShowSelectedVertex(show bool) {
 	ss.UpdateFlags(map[uint32]bool{FlagShowSelectedVertex: show})
 }
 
+func (ss *SharedState) IsAnyBoneVisible() bool {
+	return ss.IsShowBoneAll() || ss.IsShowBoneIk() || ss.IsShowBoneEffector() || ss.IsShowBoneFixed() || ss.IsShowBoneRotate() || ss.IsShowBoneTranslate() || ss.IsShowBoneVisible()
+}
+
 func (ss *SharedState) IsShowBoneAll() bool {
 	return ss.isBitSet(FlagShowBoneAll)
 }

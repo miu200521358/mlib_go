@@ -6,12 +6,12 @@ package viewer
 import (
 	"fmt"
 	"image"
+	"strings"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.4-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/physics"
@@ -223,11 +223,33 @@ func (vw *ViewWindow) render() {
 		vw.physics.CheckAndClearExpiredHighlight()
 	}
 
+	// ボーンデバッグが有効な場合のみ2秒経過ボーンハイライト自動クリアをチェック
+	if vw.list.shared.IsAnyBoneVisible() {
+		vw.physics.CheckAndClearBoneExpiredHighlight()
+	}
+
 	// 剛体デバッグが有効な場合のみツールチップを表示
 	if (drawRigidBodyFront || drawRigidBodyBack) && vw.tooltipRenderer != nil {
 		if hover := vw.physics.DebugHoverInfo(); hover != nil && hover.RigidBody != nil {
-			text := fmt.Sprintf("%s(G%d)", hover.RigidBody.Name(), int(hover.RigidBody.CollisionGroup))
+			text := fmt.Sprintf("%s (%d)", hover.RigidBody.Name(), int(hover.RigidBody.CollisionGroup))
 			vw.tooltipRenderer.Render(text, float32(vw.cursorX), float32(vw.cursorY), w, h)
+		}
+	}
+
+	// ボーンデバッグが有効な場合のみボーンツールチップを表示
+	if vw.list.shared.IsAnyBoneVisible() && vw.tooltipRenderer != nil {
+		if boneHover := vw.physics.DebugBoneHoverInfo(); len(boneHover) > 0 {
+			// 複数ボーンをカンマ区切りで表示
+			var boneNames []string
+			for _, bone := range boneHover {
+				if bone != nil {
+					boneNames = append(boneNames, bone.Bone.Name())
+				}
+			}
+			if len(boneNames) > 0 {
+				text := strings.Join(boneNames, ", ") // a, b, c
+				vw.tooltipRenderer.Render(text, float32(vw.cursorX), float32(vw.cursorY), w, h)
+			}
 		}
 	}
 
@@ -444,52 +466,4 @@ func (vw *ViewWindow) updateWind(frame float32) {
 	vw.physics.EnableWind(enabledF.Enabled)
 	vw.physics.SetWind(directionF.Direction, speedF.Speed, randomnessF.Randomness)
 	vw.physics.SetWindAdvanced(dragCoeffF.DragCoeff, liftCoeffF.LiftCoeff, turbulenceFreqHzF.TurbulenceFreqHz)
-}
-
-// getWorldPosition は指定されたマウス座標からワールド座標位置を取得します
-func (vw *ViewWindow) getWorldPosition(x, y int) (*mmath.MVec3, []*delta.VmdDeltas, *mmath.MMat4) {
-	mlog.V("x=%d, y=%d\n", x, y)
-
-	// ウィンドウサイズを取得
-	w, h := vw.GetSize()
-
-	// プロジェクション行列とビュー行列を取得
-	projection := vw.shader.Camera().GetProjectionMatrix(w, h)
-	view := vw.shader.Camera().GetViewMatrix()
-
-	mlog.V("Projection: %s\n", projection.String())
-	mlog.V("CameraPosition: %s, LookAtCenterPosition: %s\n",
-		vw.shader.Camera().Position.String(), vw.shader.Camera().LookAtCenter.String())
-	mlog.V("View: %s\n", view.String())
-
-	// MSAAから深度値を読み取る
-	depth := vw.shader.Msaa().ReadDepthAt(x, y, w, h)
-
-	// スクリーン座標からワールド座標に変換
-	worldCoords, err := mgl32.UnProject(
-		mgl32.Vec3{float32(x), float32(h) - float32(y), depth},
-		view, projection, 0, 0, w, h)
-	if err != nil {
-		mlog.V("UnProject error: %v\n", err)
-		return nil, nil, nil
-	}
-
-	// mmath.MVec3形式に変換
-	worldPos := &mmath.MVec3{X: float64(worldCoords.X()), Y: float64(worldCoords.Y()), Z: float64(worldCoords.Z())}
-	mlog.V("WorldPosResult: x=%.7f, y=%.7f, z=%.7f (%.7f)\n", worldPos.X, worldPos.Y, worldPos.Z, depth)
-
-	// ビュー行列の逆行列を計算してmmath.MMat4形式に変換
-	viewInv := view.Inv()
-	viewMat := &mmath.MMat4{
-		float64(viewInv[0]), float64(viewInv[1]), float64(viewInv[2]), float64(viewInv[3]),
-		float64(viewInv[4]), float64(viewInv[5]), float64(viewInv[6]), float64(viewInv[7]),
-		float64(viewInv[8]), float64(viewInv[9]), float64(viewInv[10]), float64(viewInv[11]),
-		float64(viewInv[12]), float64(viewInv[13]), float64(viewInv[14]), float64(viewInv[15]),
-	}
-
-	// 現在のVmdDeltasをコピー
-	vmdDeltas := make([]*delta.VmdDeltas, len(vw.vmdDeltas))
-	copy(vmdDeltas, vw.vmdDeltas)
-
-	return worldPos, vmdDeltas, viewMat
 }

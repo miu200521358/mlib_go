@@ -19,8 +19,9 @@ type MPhysics struct {
 	highlightVertices       []float32                    // ハイライト用頂点配列
 	debugHover              *physics.DebugRigidBodyHover // デバッグ用ホバー情報
 	debugHoverRigid         *rigidBodyValue              // デバッグ用ホバー剛体
-	debugHoverDistance      float64                      // デバッグ用ホバー距離
 	debugHoverStartTime     time.Time                    // ハイライト開始時刻（自動クリア用）
+	debugBoneHover          []*physics.DebugBoneHover    // ボーンデバッグ用ホバー情報
+	debugBoneHoverStartTime time.Time                    // ボーンハイライト開始時刻（自動クリア用）
 	prevRigidBodyDebugState bool                         // 前回の剛体デバッグ状態
 	config                  physics.PhysicsConfig        // 設定パラメータ
 	DeformSpf               float32                      // デフォームspf
