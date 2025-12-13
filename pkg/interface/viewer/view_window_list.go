@@ -10,7 +10,6 @@ import (
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/miu200521358/mlib_go/pkg/config/mconfig"
-	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
 	"github.com/miu200521358/mlib_go/pkg/config/mlog"
 	"github.com/miu200521358/mlib_go/pkg/config/mproc"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
@@ -277,28 +276,26 @@ func (vl *ViewerList) processFrame(
 	if vl.shared.Playing() && !vl.shared.IsClosed() {
 		frame := vl.shared.Frame()
 
-		primaryPhysicsType := physicsWorldMotions[0].PhysicsResetFrames.Get(frame).PhysicsResetType
-		if primaryPhysicsType == vmd.PHYSICS_RESET_TYPE_START_FIT_FRAME {
-			// 現在のフレームで物理フィットリセットがある場合、固定で進める
-			frame += 1
-		} else {
-			// 通常のフレーム進行
-			frame += (elapsed * deformDefaultFps)
-		}
+		// 通常のフレーム進行
+		frame += (elapsed * deformDefaultFps)
 
 		if frame > vl.shared.MaxFrame() {
 			// フレームが最大フレームを超えた場合、かつ変形情報保存中はINDEXを増やす
-			for windowIndex, vw := range vl.windowList {
-				if vl.shared.IsSaveDelta(windowIndex) && vl.shared.MaxFrame() > 1.0 {
-					// 変形情報のインデックスを増やす
-					deltaIndex := vw.list.shared.SaveDeltaIndex(vw.windowIndex) + 1
-					vl.shared.SetSaveDeltaIndex(vw.windowIndex, deltaIndex)
-					mlog.IL(mi18n.T("焼き込み再生ループ再開: 焼き込み履歴INDEX[%d]"), deltaIndex+1)
+			for windowIndex := range vl.windowList {
+				if vl.shared.IsSaveDelta(windowIndex) {
+					// 再生停止
+					vl.shared.SetPlaying(false)
+					vl.shared.SetSaveDelta(windowIndex, false)
 
-					// 物理リセット設定
-					vl.shared.SetPhysicsReset(max(
-						vmd.PHYSICS_RESET_TYPE_START_FIT_FRAME,
-						physicsWorldMotions[windowIndex].PhysicsResetFrames.Get(0).PhysicsResetType))
+					// // 変形情報のインデックスを増やす
+					// deltaIndex := vw.list.shared.SaveDeltaIndex(vw.windowIndex) + 1
+					// vl.shared.SetSaveDeltaIndex(vw.windowIndex, deltaIndex)
+					// mlog.IL(mi18n.T("焼き込み再生ループ再開: 焼き込み履歴INDEX[%d]"), deltaIndex+1)
+
+					// // 物理リセット設定
+					// vl.shared.SetPhysicsReset(max(
+					// 	vmd.PHYSICS_RESET_TYPE_START_FIT_FRAME,
+					// 	physicsWorldMotions[windowIndex].PhysicsResetFrames.Get(0).PhysicsResetType))
 				} else {
 					// 物理リセットON
 					vl.shared.SetPhysicsReset(max(
@@ -675,7 +672,8 @@ func (vl *ViewerList) deform(
 			frame,
 		)
 
-		if vw.list.shared.IsSaveDelta(vw.windowIndex) {
+		if physicsResetType == vmd.PHYSICS_RESET_TYPE_NONE &&
+			vw.list.shared.IsSaveDelta(vw.windowIndex) {
 			// モデルのデフォーム更新
 			vw.saveDeltaMotions(frame)
 		}

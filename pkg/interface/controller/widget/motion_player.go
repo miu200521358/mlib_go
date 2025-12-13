@@ -159,15 +159,18 @@ func (mp *MotionPlayer) SetPlaying(playing bool) {
 
 			var prevFrame float32
 			for range ticker.C {
-				// 再生が停止されたらループを抜ける
-				if !mp.window.Playing() {
-					break
-				}
 				currentFrame := mp.window.Frame()
 				// 前回のフレームと異なる場合に更新する
 				if currentFrame != prevFrame {
 					mp.ChangeValue(currentFrame)
 					prevFrame = currentFrame
+				}
+				// 再生が停止されたらループを抜ける
+				if !mp.window.Playing() {
+					if mp.playButton.Text() != mp.stoppedText {
+						mp.SetPlaying(false)
+					}
+					break
 				}
 			}
 		}()

@@ -102,7 +102,7 @@ func IterParallelByList[T any](allData []T, blockSize int, logBlockSize int,
 
 					if logFunc != nil && logBlockSize > 0 {
 						mu.Lock()
-						if iterIndex%logBlockSize == 0 {
+						if iterIndex%logBlockSize == 0 && iterIndex > 0 {
 							logFunc(iterIndex, len(allData))
 						}
 						iterIndex++

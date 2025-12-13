@@ -134,6 +134,9 @@ func (jointFrames *JointFrames) MinFrame() float32 {
 			minFno = fno
 		}
 	}
+	if minFno == float32(math.MaxFloat32) {
+		return 0
+	}
 	return minFno
 }
 

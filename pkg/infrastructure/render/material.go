@@ -28,11 +28,17 @@ func newMaterialGL(m *pmx.Material, prevVerticesCount int, tm *TextureManager) *
 		toonTexGl = tm.ToonTexture(m.ToonTextureIndex)
 	}
 
+	// スフィアは無効かテクスチャが無い場合は作らない
+	var sphereTexGl *textureGl
+	if m.SphereMode != pmx.SPHERE_MODE_INVALID && m.SphereTextureIndex != -1 {
+		sphereTexGl = tm.Texture(m.SphereTextureIndex)
+	}
+
 	return &materialGL{
 		Material:          m,
 		prevVerticesCount: prevVerticesCount,
 		texture:           tm.Texture(m.TextureIndex),
-		sphereTexture:     tm.Texture(m.SphereTextureIndex),
+		sphereTexture:     sphereTexGl,
 		toonTexture:       toonTexGl,
 	}
 }
