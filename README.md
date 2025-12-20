@@ -96,3 +96,13 @@ go list -m -mod=mod -versions github.com/miu200521358/walk
 3. `(mtool) C:\MMD\mlib_go\crumb>go run profile.go`
 4. `go tool pprof profile.go cpu.pprof`
 5. `go tool pprof -http=:8080 cpu.pprof`
+
+### Agent Skills
+
+```
+conda create -n mlib python=3.14 -y
+conda activate mlib
+pip install skillport
+skillport init
+```
+
