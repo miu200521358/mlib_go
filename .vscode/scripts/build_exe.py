@@ -20,6 +20,8 @@ app_version = config_dict.get('Version')
 print(f"app_name: {app_name}")
 print(f"app_version: {app_version}")
 
+all_rebuild = "" if os.environ.get('ENV') == 'dev' else "-a"
+env_name = "dev" if os.environ.get('ENV') == 'dev' else "prod"
 
 # Build command
 # -o 出力フォルダ
@@ -27,17 +29,12 @@ print(f"app_version: {app_version}")
 # -v ビルドログを出力
 # -a 全ての依存関係を再ビルド
 # -buildmode=exe 実行可能ファイルを生成
-# -ldflags "-s -w" バイナリサイズを小さくする (リファクタリング時には削除する)
+# -ldflags "-s -w" バイナリサイズを小さくする
 # -H=windowsgui コンソールを表示しない
 # -linkmode external -extldflags '-static -Wl,cmd/app/app.res' リソースを埋め込む
-if os.environ.get('ENV') == 'dev':
-    build_command = f"go build -o {workspace_folder}/build/{app_name}_{app_version}.exe " \
-                    f"-v -buildmode=exe -ldflags \"-s -w -H=windowsgui -X main.env=dev " \
-                    f"-linkmode external -extldflags '-static -Wl,{workspace_folder}/cmd/app/app.res'\" "
-else:
-    build_command = f"go build -o {workspace_folder}/build/{app_name}_{app_version}.exe -trimpath " \
-                    f"-v -a -buildmode=exe -ldflags \"-s -w -H=windowsgui -X main.env=prod " \
-                    f"-linkmode external -extldflags '-static -Wl,{workspace_folder}/cmd/app/app.res'\" "
+build_command = f"go build -o {workspace_folder}/build/{app_name}_{app_version}.exe -trimpath " \
+                f"-v {all_rebuild} -buildmode=exe -ldflags \"-s -w -H=windowsgui -X main.env={env_name} " \
+                f"-linkmode external -extldflags '-static -Wl,{workspace_folder}/cmd/app/app.res'\" "
 
 print(f"build_command: {build_command}")
 
