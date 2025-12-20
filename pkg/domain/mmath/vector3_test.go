@@ -31,6 +31,16 @@ func TestVec3_LengthSquared(t *testing.T) {
 			v:        NewVec3ByValues(-1, -2, -2),
 			expected: 9,
 		},
+		{
+			name:     "既存テスト1",
+			v:        NewVec3ByValues(1, 2, 3),
+			expected: 14.0,
+		},
+		{
+			name:     "既存テスト2",
+			v:        NewVec3ByValues(2.3, 0.2, 9),
+			expected: 86.33000000000001,
+		},
 	}
 
 	for _, tt := range tests {
@@ -315,6 +325,13 @@ func TestVec3_Lerp(t *testing.T) {
 			t:        0.5,
 			expected: NewVec3ByValues(5, 5, 5),
 		},
+		{
+			name:     "既存テスト",
+			v1:       NewVec3ByValues(1, 2, 3),
+			v2:       NewVec3ByValues(4, 5, 6),
+			t:        0.5,
+			expected: NewVec3ByValues(2.5, 3.5, 4.5),
+		},
 	}
 
 	for _, tt := range tests {
@@ -324,5 +341,294 @@ func TestVec3_Lerp(t *testing.T) {
 				t.Errorf("Lerp() = %v, want %v", result, tt.expected)
 			}
 		})
+	}
+}
+
+func TestVec3_NearEquals(t *testing.T) {
+	tests := []struct {
+		name     string
+		v1       *Vec3
+		v2       *Vec3
+		epsilon  float64
+		expected bool
+	}{
+		{
+			name:     "ほぼ等しい",
+			v1:       NewVec3ByValues(1, 2, 3),
+			v2:       NewVec3ByValues(1.000001, 2.000001, 3.000001),
+			epsilon:  0.00001,
+			expected: true,
+		},
+		{
+			name:     "等しくない",
+			v1:       NewVec3ByValues(1, 2, 3),
+			v2:       NewVec3ByValues(1.0001, 2.0001, 3.0001),
+			epsilon:  0.00001,
+			expected: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.v1.NearEquals(tt.v2, tt.epsilon)
+			if result != tt.expected {
+				t.Errorf("NearEquals() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestVec3_LessThan(t *testing.T) {
+	tests := []struct {
+		name     string
+		v1       *Vec3
+		v2       *Vec3
+		expected bool
+	}{
+		{
+			name:     "小さい",
+			v1:       NewVec3ByValues(1, 2, 3),
+			v2:       NewVec3ByValues(4, 5, 6),
+			expected: true,
+		},
+		{
+			name:     "大きい",
+			v1:       NewVec3ByValues(3, 4, 5),
+			v2:       NewVec3ByValues(1, 2, 3),
+			expected: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.v1.LessThan(tt.v2)
+			if result != tt.expected {
+				t.Errorf("LessThan() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestVec3_GreaterThan(t *testing.T) {
+	tests := []struct {
+		name     string
+		v1       *Vec3
+		v2       *Vec3
+		expected bool
+	}{
+		{
+			name:     "大きい",
+			v1:       NewVec3ByValues(3, 4, 5),
+			v2:       NewVec3ByValues(1, 2, 3),
+			expected: true,
+		},
+		{
+			name:     "小さい",
+			v1:       NewVec3ByValues(1, 2, 3),
+			v2:       NewVec3ByValues(3, 4, 5),
+			expected: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.v1.GreaterThan(tt.v2)
+			if result != tt.expected {
+				t.Errorf("GreaterThan() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestVec3_Negated(t *testing.T) {
+	tests := []struct {
+		name     string
+		v        *Vec3
+		expected *Vec3
+	}{
+		{
+			name:     "正の値",
+			v:        NewVec3ByValues(1, 2, 3),
+			expected: NewVec3ByValues(-1, -2, -3),
+		},
+		{
+			name:     "負の値",
+			v:        NewVec3ByValues(-3, -4, -5),
+			expected: NewVec3ByValues(3, 4, 5),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.v.Negated()
+			if !result.NearEquals(tt.expected, 1e-10) {
+				t.Errorf("Negated() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestVec3_Length(t *testing.T) {
+	tests := []struct {
+		name     string
+		v        *Vec3
+		expected float64
+	}{
+		{
+			name:     "既存テスト1",
+			v:        NewVec3ByValues(1, 2, 3),
+			expected: 3.7416573867739413,
+		},
+		{
+			name:     "既存テスト2",
+			v:        NewVec3ByValues(2.3, 0.2, 9),
+			expected: 9.291393867445294,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.v.Length()
+			if !NearEquals(result, tt.expected, 1e-10) {
+				t.Errorf("Length() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestVec3_Normalized(t *testing.T) {
+	tests := []struct {
+		name     string
+		v        *Vec3
+		expected *Vec3
+	}{
+		{
+			name:     "既存テスト1",
+			v:        NewVec3ByValues(1, 2, 3),
+			expected: NewVec3ByValues(0.2672612419124244, 0.5345224838248488, 0.8017837257372732),
+		},
+		{
+			name:     "既存テスト2",
+			v:        NewVec3ByValues(2.3, 0.2, 9),
+			expected: NewVec3ByValues(0.24754089997827142, 0.021525295650284472, 0.9686383042628013),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.v.Normalized()
+			if !result.NearEquals(tt.expected, 1e-8) {
+				t.Errorf("Normalized() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestVec3_Distance(t *testing.T) {
+	tests := []struct {
+		name     string
+		v1       *Vec3
+		v2       *Vec3
+		expected float64
+	}{
+		{
+			name:     "既存テスト1",
+			v1:       NewVec3ByValues(1, 2, 3),
+			v2:       NewVec3ByValues(2.3, 0.2, 9),
+			expected: 6.397655820689325,
+		},
+		{
+			name:     "既存テスト2",
+			v1:       NewVec3ByValues(-1, -0.3, 3),
+			v2:       NewVec3ByValues(-2.3, 0.2, 9.33333333),
+			expected: 6.484682804030502,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.v1.Distance(tt.v2)
+			if !NearEquals(result, tt.expected, 1e-10) {
+				t.Errorf("Distance() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestVec3_One(t *testing.T) {
+	tests := []struct {
+		name     string
+		v        *Vec3
+		expected *Vec3
+	}{
+		{
+			name:     "非ゼロ",
+			v:        NewVec3ByValues(1, 2, 3.2),
+			expected: NewVec3ByValues(1, 2, 3.2),
+		},
+		{
+			name:     "X=0",
+			v:        NewVec3ByValues(0, 2, 3.2),
+			expected: NewVec3ByValues(1, 2, 3.2),
+		},
+		{
+			name:     "Y=0",
+			v:        NewVec3ByValues(1, 0, 3.2),
+			expected: NewVec3ByValues(1, 1, 3.2),
+		},
+		{
+			name:     "Y=0,Z=0",
+			v:        NewVec3ByValues(2, 0, 0),
+			expected: NewVec3ByValues(2, 1, 1),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.v.One()
+			if !result.NearEquals(tt.expected, 1e-8) {
+				t.Errorf("One() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestVec3_Degree(t *testing.T) {
+	tests := []struct {
+		name     string
+		v1       *Vec3
+		v2       *Vec3
+		expected float64
+	}{
+		{
+			name:     "90度",
+			v1:       NewVec3ByValues(1, 0, 0),
+			v2:       NewVec3ByValues(0, 1, 0),
+			expected: 90.0,
+		},
+		{
+			name:     "既存テスト",
+			v1:       NewVec3ByValues(1, 0, 0),
+			v2:       NewVec3ByValues(1, 1, 1),
+			expected: 54.735610317245346,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.v1.Degree(tt.v2)
+			if !NearEquals(result, tt.expected, 0.00001) {
+				t.Errorf("Degree() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestVec3_Hash(t *testing.T) {
+	v := NewVec3ByValues(1, 2, 3)
+	expected := uint64(17648364615301650315)
+	result := v.Hash()
+	if result != expected {
+		t.Errorf("Hash() = %v, want %v", result, expected)
 	}
 }

@@ -265,6 +265,12 @@ func TestVec2_Angle(t *testing.T) {
 			v2:       &Vec2{X: -1, Y: 0},
 			expected: math.Pi,
 		},
+		{
+			name:     "45度",
+			v1:       &Vec2{X: 1, Y: 0},
+			v2:       &Vec2{X: 1, Y: 1},
+			expected: math.Pi / 4,
+		},
 	}
 
 	for _, tt := range tests {
@@ -274,5 +280,210 @@ func TestVec2_Angle(t *testing.T) {
 				t.Errorf("Angle() = %v, want %v", result, tt.expected)
 			}
 		})
+	}
+}
+
+func TestVec2_NearEquals(t *testing.T) {
+	tests := []struct {
+		name     string
+		v1       *Vec2
+		v2       *Vec2
+		epsilon  float64
+		expected bool
+	}{
+		{
+			name:     "ほぼ等しい",
+			v1:       &Vec2{X: 1, Y: 2},
+			v2:       &Vec2{X: 1.000001, Y: 2.000001},
+			epsilon:  0.00001,
+			expected: true,
+		},
+		{
+			name:     "等しくない",
+			v1:       &Vec2{X: 1, Y: 2},
+			v2:       &Vec2{X: 1.0001, Y: 2.0001},
+			epsilon:  0.00001,
+			expected: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.v1.NearEquals(tt.v2, tt.epsilon)
+			if result != tt.expected {
+				t.Errorf("NearEquals() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestVec2_LessThan(t *testing.T) {
+	tests := []struct {
+		name     string
+		v1       *Vec2
+		v2       *Vec2
+		expected bool
+	}{
+		{
+			name:     "小さい",
+			v1:       &Vec2{X: 1, Y: 2},
+			v2:       &Vec2{X: 3, Y: 4},
+			expected: true,
+		},
+		{
+			name:     "大きい",
+			v1:       &Vec2{X: 3, Y: 4},
+			v2:       &Vec2{X: 1, Y: 2},
+			expected: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.v1.LessThan(tt.v2)
+			if result != tt.expected {
+				t.Errorf("LessThan() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestVec2_GreaterThan(t *testing.T) {
+	tests := []struct {
+		name     string
+		v1       *Vec2
+		v2       *Vec2
+		expected bool
+	}{
+		{
+			name:     "大きい",
+			v1:       &Vec2{X: 3, Y: 4},
+			v2:       &Vec2{X: 1, Y: 2},
+			expected: true,
+		},
+		{
+			name:     "小さい",
+			v1:       &Vec2{X: 1, Y: 2},
+			v2:       &Vec2{X: 3, Y: 4},
+			expected: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.v1.GreaterThan(tt.v2)
+			if result != tt.expected {
+				t.Errorf("GreaterThan() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestVec2_Negated(t *testing.T) {
+	tests := []struct {
+		name     string
+		v        *Vec2
+		expected *Vec2
+	}{
+		{
+			name:     "正の値",
+			v:        &Vec2{X: 1, Y: 2},
+			expected: &Vec2{X: -1, Y: -2},
+		},
+		{
+			name:     "負の値",
+			v:        &Vec2{X: -3, Y: -4},
+			expected: &Vec2{X: 3, Y: 4},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.v.Negated()
+			if !result.NearEquals(tt.expected, 1e-10) {
+				t.Errorf("Negated() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestVec2_Lerp(t *testing.T) {
+	tests := []struct {
+		name     string
+		v1       *Vec2
+		v2       *Vec2
+		t        float64
+		expected *Vec2
+	}{
+		{
+			name:     "t=0.5",
+			v1:       &Vec2{X: 1, Y: 2},
+			v2:       &Vec2{X: 3, Y: 4},
+			t:        0.5,
+			expected: &Vec2{X: 2, Y: 3},
+		},
+		{
+			name:     "t=0",
+			v1:       &Vec2{X: 1, Y: 2},
+			v2:       &Vec2{X: 3, Y: 4},
+			t:        0,
+			expected: &Vec2{X: 1, Y: 2},
+		},
+		{
+			name:     "t=1",
+			v1:       &Vec2{X: 1, Y: 2},
+			v2:       &Vec2{X: 3, Y: 4},
+			t:        1,
+			expected: &Vec2{X: 3, Y: 4},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.v1.Lerp(tt.v2, tt.t)
+			if !result.NearEquals(tt.expected, 1e-8) {
+				t.Errorf("Lerp() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestVec2_Degree(t *testing.T) {
+	tests := []struct {
+		name     string
+		v1       *Vec2
+		v2       *Vec2
+		expected float64
+	}{
+		{
+			name:     "90度",
+			v1:       &Vec2{X: 1, Y: 0},
+			v2:       &Vec2{X: 0, Y: 1},
+			expected: 90.0,
+		},
+		{
+			name:     "45度",
+			v1:       &Vec2{X: 1, Y: 0},
+			v2:       &Vec2{X: 1, Y: 1},
+			expected: 45.0,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.v1.Degree(tt.v2)
+			if !NearEquals(result, tt.expected, 0.00001) {
+				t.Errorf("Degree() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestVec2_Hash(t *testing.T) {
+	v := &Vec2{X: 1, Y: 2}
+	expected := uint64(4921663092573786862)
+	result := v.Hash()
+	if result != expected {
+		t.Errorf("Hash() = %v, want %v", result, expected)
 	}
 }

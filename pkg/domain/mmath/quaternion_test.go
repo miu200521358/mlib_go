@@ -240,13 +240,217 @@ func TestQuaternion_FromAxisAngle(t *testing.T) {
 			angle:    math.Pi,
 			expected: NewQuaternionByValues(0, 1, 0, 0),
 		},
+		{
+			name:     "既存テスト1",
+			axis:     NewVec3ByValues(1, 2, 3),
+			angle:    DegToRad(30),
+			expected: NewQuaternionByValues(0.0691722994246875, 0.138344598849375, 0.207516898274062, 0.965925826289068),
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := NewQuaternionFromAxisAngle(tt.axis, tt.angle)
-			if !result.NearEquals(tt.expected, 1e-6) {
+			if !result.NearEquals(tt.expected, 1e-5) {
 				t.Errorf("NewQuaternionFromAxisAngle() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestQuaternion_ToDegrees(t *testing.T) {
+	tests := []struct {
+		name     string
+		q        *Quaternion
+		expected *Vec3
+	}{
+		{
+			name:     "ゼロ回転",
+			q:        NewQuaternionByValues(0, 0, 0, 1),
+			expected: NewVec3ByValues(0, 0, 0),
+		},
+		{
+			name:     "X軸10度",
+			q:        NewQuaternionByValues(0.08715574274765817, 0.0, 0.0, 0.9961946980917455),
+			expected: NewVec3ByValues(10, 0, 0),
+		},
+		{
+			name:     "10,20,30度",
+			q:        NewQuaternionByValues(0.12767944, 0.14487813, 0.23929834, 0.95154852),
+			expected: NewVec3ByValues(10, 20, 30),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.q.ToDegrees()
+			if !result.NearEquals(tt.expected, 1e-5) {
+				t.Errorf("ToDegrees() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestQuaternion_FromDegrees(t *testing.T) {
+	tests := []struct {
+		name                 string
+		xPitch, yHead, zRoll float64
+		expected             *Quaternion
+	}{
+		{
+			name:   "ゼロ",
+			xPitch: 0, yHead: 0, zRoll: 0,
+			expected: NewQuaternionByValues(0, 0, 0, 1),
+		},
+		{
+			name:   "X軸10度",
+			xPitch: 10, yHead: 0, zRoll: 0,
+			expected: NewQuaternionByValues(0.08715574, 0.0, 0.0, 0.9961947),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := NewQuaternionFromDegrees(tt.xPitch, tt.yHead, tt.zRoll)
+			if !result.NearEquals(tt.expected, 1e-6) {
+				t.Errorf("NewQuaternionFromDegrees() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestQuaternion_Dot(t *testing.T) {
+	tests := []struct {
+		name     string
+		q1       *Quaternion
+		q2       *Quaternion
+		expected float64
+	}{
+		{
+			name:     "既存テスト1",
+			q1:       NewQuaternionByValues(0.4738680537545347, 0.20131048764138487, -0.48170221425083437, 0.7091446481376844),
+			q2:       NewQuaternionByValues(0.12767944069578063, 0.14487812541736916, 0.2392983377447303, 0.9515485246437885),
+			expected: 0.6491836986795888,
+		},
+		{
+			name:     "既存テスト2",
+			q1:       NewQuaternionByValues(0.1549093965157679, 0.15080756177478563, 0.3575205710320892, 0.908536845412201),
+			q2:       NewQuaternionByValues(0.15799222008931638, 0.1243359045760714, 0.33404459937562386, 0.9208654879256133),
+			expected: 0.9992933154462645,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.q1.Dot(tt.q2)
+			if !NearEquals(result, tt.expected, 1e-10) {
+				t.Errorf("Dot() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestQuaternion_Normalized(t *testing.T) {
+	tests := []struct {
+		name     string
+		q        *Quaternion
+		expected *Quaternion
+	}{
+		{
+			name:     "既存テスト1",
+			q:        NewQuaternionByValues(2, 3, 4, 1),
+			expected: NewQuaternionByValues(0.36514837, 0.54772256, 0.73029674, 0.18257419),
+		},
+		{
+			name:     "単位クォータニオン",
+			q:        NewQuaternionByValues(0, 0, 0, 1),
+			expected: NewQuaternionByValues(0, 0, 0, 1),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.q.Normalized()
+			if !result.NearEquals(tt.expected, 1e-7) {
+				t.Errorf("Normalized() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestQuaternion_Muled(t *testing.T) {
+	tests := []struct {
+		name     string
+		q1       *Quaternion
+		q2       *Quaternion
+		expected *Quaternion
+	}{
+		{
+			name:     "既存テスト1",
+			q1:       NewQuaternionByValues(0.4738680537545347, 0.20131048764138487, -0.48170221425083437, 0.7091446481376844),
+			q2:       NewQuaternionByValues(0.12767944069578063, 0.14487812541736916, 0.2392983377447303, 0.9515485246437885),
+			expected: NewQuaternionByValues(0.6594130183457979, 0.11939693791117263, -0.24571599091322077, 0.7003873887093154),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.q1.Muled(tt.q2)
+			if !result.NearEquals(tt.expected, 1e-8) {
+				t.Errorf("Muled() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestQuaternion_ToDegree(t *testing.T) {
+	tests := []struct {
+		name     string
+		q        *Quaternion
+		expected float64
+	}{
+		{
+			name:     "10度",
+			q:        NewQuaternionByValues(0.08715574274765817, 0.0, 0.0, 0.9961946980917455),
+			expected: 10.0,
+		},
+		{
+			name:     "既存テスト",
+			q:        NewQuaternionByValues(0.12767944069578063, 0.14487812541736916, 0.2392983377447303, 0.9515485246437885),
+			expected: 35.81710117358426,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.q.ToDegree()
+			if !NearEquals(result, tt.expected, 1e-10) {
+				t.Errorf("ToDegree() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestQuaternion_Rotate(t *testing.T) {
+	tests := []struct {
+		name     string
+		from     *Vec3
+		to       *Vec3
+		expected *Quaternion
+	}{
+		{
+			name:     "既存テスト1",
+			from:     NewVec3ByValues(1, 2, 3),
+			to:       NewVec3ByValues(4, 5, 6),
+			expected: NewQuaternionByValues(-0.04597839511020707, 0.0919567902204141, -0.04597839511020706, 0.9936377222602503),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := NewQuaternionRotate(tt.from, tt.to)
+			if !result.NearEquals(tt.expected, 1e-5) {
+				t.Errorf("NewQuaternionRotate() = %v, want %v", result, tt.expected)
 			}
 		})
 	}

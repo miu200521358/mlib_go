@@ -262,3 +262,110 @@ func TestMat4_GL(t *testing.T) {
 		t.Errorf("GL() diagonal should be 1")
 	}
 }
+
+func TestMat4_Inverse(t *testing.T) {
+	tests := []struct {
+		name     string
+		m        *Mat4
+		expected *Mat4
+	}{
+		{
+			name: "回転行列1",
+			m: &Mat4{
+				-0.28213944, 0.48809647, 0.82592928, 0.0,
+				0.69636424, 0.69636424, -0.17364818, 0.0,
+				-0.65990468, 0.52615461, -0.53636474, 0.0,
+				0.0, 0.0, 0.0, 1.0,
+			},
+			expected: &Mat4{
+				-0.28213944, 0.69636424, -0.65990468, 0.0,
+				0.48809647, 0.69636424, 0.52615461, 0.0,
+				0.82592928, -0.17364818, -0.53636474, 0.0,
+				0.0, 0.0, 0.0, 1.0,
+			},
+		},
+		{
+			name: "回転行列2",
+			m: &Mat4{
+				0.45487413, 0.87398231, -0.17101007, 0.0,
+				-0.49240388, 0.08682409, -0.8660254, 0.0,
+				-0.74204309, 0.47813857, 0.46984631, 0.0,
+				0.0, 0.0, 0.0, 1.0,
+			},
+			expected: &Mat4{
+				0.45487413, -0.49240388, -0.74204309, 0.0,
+				0.87398231, 0.08682409, 0.47813857, 0.0,
+				-0.17101007, -0.8660254, 0.46984631, 0.0,
+				0.0, 0.0, 0.0, 1.0,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.m.Inverted()
+			if !result.NearEquals(tt.expected, 1e-5) {
+				t.Errorf("Inverted() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestMat4_MulVec3_Extended(t *testing.T) {
+	tests := []struct {
+		name     string
+		m        *Mat4
+		v        *Vec3
+		expected *Vec3
+	}{
+		{
+			name: "既存テスト",
+			m: &Mat4{
+				-0.28213944, 0.69636424, -0.65990468, 0,
+				0.48809647, 0.69636424, 0.52615461, 0,
+				0.82592928, -0.17364818, -0.53636474, 0,
+				0., 0., 0., 1.,
+			},
+			v:        NewVec3ByValues(10, 20, 30),
+			expected: NewVec3ByValues(31.7184134, 15.6814818, -12.166896800000002),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.m.MulVec3(tt.v)
+			if !result.NearEquals(tt.expected, 1e-5) {
+				t.Errorf("MulVec3() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestMat4_Mul_Extended(t *testing.T) {
+	a := &Mat4{
+		1, 2, 3, 4,
+		5, 6, 7, 8,
+		9, 10, 11, 12,
+		13, 14, 15, 16,
+	}
+
+	mat := &Mat4{
+		17, 18, 19, 20,
+		21, 22, 23, 24,
+		25, 26, 27, 28,
+		29, 30, 31, 32,
+	}
+
+	expected := &Mat4{
+		250, 260, 270, 280,
+		618, 644, 670, 696,
+		986, 1028, 1070, 1112,
+		1354, 1412, 1470, 1528,
+	}
+
+	mat.Mul(a)
+
+	if !mat.NearEquals(expected, 1e-10) {
+		t.Errorf("Mul() = %v, want %v", mat, expected)
+	}
+}
