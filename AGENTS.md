@@ -345,6 +345,246 @@ go build -o build/mlib.exe cmd/main.go
 
 ---
 
+## コーディングルール
+
+### Goコーディングスタイル
+
+#### 命名規則
+| 対象 | 規則 | 例 |
+|------|------|-----|
+| 変数 | キャメルケース | `boneIndex`, `modelPath` |
+| エクスポート関数/型 | パスカルケース | `NewBone()`, `PmxModel` |
+| インターフェース | `I` プレフィックス | `IBaseFrame`, `IModelRepository` |
+| メソッドレシーバー | 1〜2文字 | `b *Bone`, `v *Vec3` |
+| 定数（const） | パスカルケース | `MaxBones`, `DefaultFPS` |
+| 擬似定数（var） | 全大文字スネークケース | `IDENTITY_MATRIX`, `ZERO_VECTOR` |
+
+#### 定数の使い分け
+```go
+// const で宣言できるもの（プリミティブ型）: パスカルケース
+const MaxBones = 512
+const DefaultFPS = 30
+
+// var だが変更しない値（構造体等）: 全大文字スネークケースで「不変」を明示
+var IDENTITY_MATRIX = NewMat4()
+var ZERO_VECTOR = NewVec3(0, 0, 0)
+```
+
+#### コメント
+- エクスポートされる関数・型には必ずドキュメントコメントを記述
+- 複雑なロジックには説明コメントを追加
+- TODOコメントには担当者と日付を記載: `// TODO(name): 説明 (2024-01-01)`
+
+---
+
+## エラー処理
+
+### 基本方針
+- **panic は絶対に使用しない**
+- エラーは必ず `error` として返り値で上位に伝播させる
+- 最終的にアプリケーションの `main.go` でキャッチし、UIダイアログで表示
+
+### エラーの流れ
+
+```
+[domain/usecase層]                    [adapter層]                    [main.go]
+     │                                     │                             │
+     │  return err                         │  return err                 │
+     ├──────────────────────────────────────┼─────────────────────────────┤
+     │                                     │                             │
+     │  NewReadError()                     │  errors.As() で判定         │
+     │  NewTerminateError()                │                             │
+     └─────────────────────────────────────────────────────────────────────┘
+                                                                          │
+                                                         merr.ShowErrorDialog()
+                                                         merr.ShowFatalErrorDialog()
+```
+
+### カスタムエラー型
+
+適度な粒度でカスタムエラー型を定義（細かすぎない）:
+
+| エラー型 | 用途 | ダイアログ |
+|----------|------|-----------|
+| `ReadError` | PMX/VMD等のファイル読み取りエラー | ShowErrorDialog |
+| `WriteError` | ファイル書き込みエラー | ShowErrorDialog |
+| `ValidationError` | データ検証エラー | ShowErrorDialog |
+| `NotFoundError` | 要素が見つからない | ShowErrorDialog |
+| `TerminateError` | 致命的エラー（アプリ終了） | ShowFatalErrorDialog |
+
+### 実装ルール
+
+**エラーを生成する側:**
+```go
+// ✅ OK: カスタムエラーを返す
+func (bones *Bones) GetByName(name string) (*Bone, error) {
+    if bone, ok := bones.nameMap[name]; ok {
+        return bone, nil
+    }
+    return nil, merr.NewNotFoundError("bone", name)
+}
+```
+
+**エラーを伝播する側:**
+```go
+// ✅ OK: エラーをラップして返す
+func LoadModel(path string) (*PmxModel, error) {
+    data, err := os.ReadFile(path)
+    if err != nil {
+        return nil, fmt.Errorf("failed to read file %s: %w", path, err)
+    }
+    // ...
+}
+```
+
+**コンストラクタ・初期化関数:**
+```go
+// ✅ OK: すべての初期化関数はerrorを返す
+func NewControlWindow(config *Config) (*ControlWindow, error) {
+    if err := validate(config); err != nil {
+        return nil, fmt.Errorf("config validation failed: %w", err)
+    }
+    // ...
+}
+```
+
+**エラーを最終処理する側（main.go）:**
+```go
+func main() {
+    if err := run(); err != nil {
+        if merr.IsTerminateError(err) {
+            merr.ShowFatalErrorDialog(appConfig, err)
+        } else {
+            merr.ShowErrorDialog(appConfig, err)
+        }
+    }
+}
+```
+
+### 禁止事項
+- ❌ `panic()` の使用
+- ❌ エラーを握りつぶす（`_ = someFunc()` でエラーを無視）
+- ❌ エラーメッセージに機密情報を含める
+
+---
+
+## テスト
+
+### 基本ルール
+- **各処理には必ずテストを書く**
+- テストファイルは `*_test.go` として同一パッケージに配置
+- テーブル駆動テスト（Table-Driven Tests）を使用
+
+### テーブル駆動テストの形式
+
+```go
+func TestBone_GetByName(t *testing.T) {
+    tests := []struct {
+        name      string
+        boneName  string
+        wantErr   bool
+        errType   error
+    }{
+        {
+            name:     "存在するボーン",
+            boneName: "センター",
+            wantErr:  false,
+        },
+        {
+            name:     "存在しないボーン",
+            boneName: "unknown",
+            wantErr:  true,
+            errType:  &merr.NotFoundError{},
+        },
+    }
+
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            // テスト実行
+            result, err := bones.GetByName(tt.boneName)
+            
+            if tt.wantErr {
+                if err == nil {
+                    t.Errorf("expected error but got nil")
+                }
+                if tt.errType != nil && !errors.As(err, &tt.errType) {
+                    t.Errorf("expected error type %T but got %T", tt.errType, err)
+                }
+            } else {
+                if err != nil {
+                    t.Errorf("unexpected error: %v", err)
+                }
+            }
+        })
+    }
+}
+```
+
+### 描画系テストの指針
+
+描画系（OpenGL等）は自動テストが困難なため、以下の戦略を採用:
+
+| レイヤ | テスト方法 |
+|--------|-----------|
+| **ドメイン層** | ユニットテスト（完全自動化） |
+| **ユースケース層** | モック注入でユニットテスト |
+| **レンダラーロジック** | 計算部分のみユニットテスト |
+| **実際の描画** | 目視確認 + スクリーンショット比較（手動/半自動） |
+
+**テスト可能な部分:**
+```go
+// ✅ テスト可能: シェーダーのユニフォーム計算
+func CalculateMVPMatrix(model, view, projection *mmath.Mat4) *mmath.Mat4
+
+// ✅ テスト可能: バッファデータの生成
+func BuildVertexBuffer(vertices *Vertices) []float32
+
+// ⚠️ 目視確認: 実際のレンダリング結果
+func Render(scene *Scene)
+```
+
+**描画テスト用ユーティリティ:**
+- `test_resources/` に期待される出力画像を配置
+- 必要に応じてスクリーンショット比較ツールを活用
+- CI では描画テストをスキップ（`//go:build !ci` タグ）
+
+---
+
+## 設計原則
+
+### SOLID原則
+- **S (単一責任)**: 1つのパッケージ/型は1つの責任のみ
+- **O (オープン・クローズド)**: 拡張に開き、修正に閉じる
+- **L (リスコフの置換)**: インターフェースを満たす実装は置換可能に
+- **I (インターフェース分離)**: 大きなインターフェースより小さな専用インターフェース
+- **D (依存性逆転)**: 具象ではなく抽象（インターフェース）に依存
+
+### クリーンアーキテクチャのルール
+- 依存は内側から外側への一方向のみ
+- 外側の層はインターフェースを実装
+- DIコンテナは使用せず、main.goで依存性を組み立て
+
+### 禁止事項
+- ❌ domain層から外側の層への依存
+- ❌ 循環参照（import cycle）
+- ❌ グローバル変数の使用
+- ❌ init()での副作用のある処理
+- ❌ インターフェースを返す関数（具象型を返すべき）
+
+---
+
+## SWIG/Bullet
+
+### 基本方針
+- `infra/physics/mbt/` の SWIG 生成コードは既存をそのまま流用
+- SWIG の再生成が必要な場合は手動で実行（リポジトリ管理者が実施）
+
+### 変更時の注意
+- `bullet.i` を変更した場合のみ SWIG 再実行が必要
+- 再生成後は `bt.go`, `bt.cxx`, `bt.h` が更新される
+
+---
+
 ## リファクタリング完了後
 
 リファクタリングが完了したら、このAGENTS.mdを通常の開発ガイドに更新する:

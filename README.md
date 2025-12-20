@@ -69,16 +69,38 @@ go fmt ./...
 4. `go tool pprof -http=:8081 mem.pprof`
 
 
-## bullet
+## SWIG/Bullet
 
-1. swig インストール
-https://rinatz.github.io/swigdoc/abstract.html
+### 前提条件
+1. SWIG インストール: https://rinatz.github.io/swigdoc/abstract.html
+2. TDM-GCC インストール: https://jmeubank.github.io/tdm-gcc/download/
 
-2. 変換コード作成
+### SWIG コード生成コマンド
 
+新しいパッケージ構成（`pkg/infra/physics/mbt/`）用:
+
+```bash
+cd pkg/infra/physics/mbt
+
+swig -c++ -go -cgo ^
+  -I"C:\MMD\mlib_go\pkg\infra\physics\mbt\bullet\src" ^
+  -I"C:\development\TDM-GCC-64\lib\gcc\x86_64-w64-mingw32\10.3.0\include\c++\x86_64-w64-mingw32" ^
+  -I"C:\development\TDM-GCC-64\x86_64-w64-mingw32\include" ^
+  -I"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include" ^
+  -cpperraswarn ^
+  -o "bt.cxx" ^
+  "bullet.i"
 ```
-(mtool) C:\MMD\mlib_go\pkg\infrastructure\bt>swig -c++ -go -cgo -I"C:\MMD\mlib_go\pkg\infrastructure\bt\bullet\src" -I"C:\development\TDM-GCC-64\lib\gcc\x86_64-w64-mingw32\10.3.0\include\c++\x86_64-w64-mingw32" -I"C:\development\TDM-GCC-64\x86_64-w64-mingw32\include" -I"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include" -cpperraswarn -o "C:\MMD\mlib_go\pkg\infrastructure\bt\bt.cxx" "C:\MMD\mlib_go\pkg\infrastructure\bt\bullet.i"
-```
+
+### 生成されるファイル
+- `bt.go` - Goバインディング
+- `bt.cxx` - C++ラッパー
+- `bt.h` - ヘッダーファイル
+
+### 注意事項
+- `bullet.i` を変更した場合のみ再実行が必要
+- SWIG の再生成はリポジトリ管理者が実施
+- パスは環境に応じて調整すること
 
 ## バージョン反映
 
@@ -105,4 +127,3 @@ conda activate mlib
 pip install skillport
 skillport init
 ```
-
