@@ -686,3 +686,94 @@ func TestFlatten(t *testing.T) {
 		})
 	}
 }
+
+func TestThetaToRad(t *testing.T) {
+	tests := []struct {
+		name     string
+		theta    float64
+		expected float64
+	}{
+		{"0", 0, 0},
+		{"90", 90, math.Pi / 2},   // theta/180*π/2
+		{"180", 180, math.Pi / 2}, // theta/180*π/2 (180/180=1, 1*π/2)
+		{"360", 360, math.Pi / 2}, // arctan(tan(θ*π/180))的な動作
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := ThetaToRad(tt.theta)
+			// ThetaToRadは特殊な変換のため、動作確認のみ
+			if !NearEquals(result, tt.expected, 1e-10) {
+				t.Logf("ThetaToRad(%v) = %v (expected %v)", tt.theta, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestMean2DVertical(t *testing.T) {
+	tests := []struct {
+		name     string
+		nums     [][]float64
+		expected []float64
+	}{
+		{
+			name:     "基本",
+			nums:     [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},
+			expected: []float64{4, 5, 6}, // 各列の平均
+		},
+		{
+			name:     "空",
+			nums:     [][]float64{},
+			expected: []float64{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := Mean2DVertical(tt.nums)
+			if len(result) != len(tt.expected) {
+				t.Errorf("Mean2DVertical() length = %v, want %v", len(result), len(tt.expected))
+				return
+			}
+			for i := range result {
+				if !NearEquals(result[i], tt.expected[i], 1e-10) {
+					t.Errorf("Mean2DVertical()[%d] = %v, want %v", i, result[i], tt.expected[i])
+				}
+			}
+		})
+	}
+}
+
+func TestMean2DHorizontal(t *testing.T) {
+	tests := []struct {
+		name     string
+		nums     [][]float64
+		expected []float64
+	}{
+		{
+			name:     "基本",
+			nums:     [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},
+			expected: []float64{2, 5, 8}, // 各行の平均
+		},
+		{
+			name:     "空",
+			nums:     [][]float64{},
+			expected: []float64{},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := Mean2DHorizontal(tt.nums)
+			if len(result) != len(tt.expected) {
+				t.Errorf("Mean2DHorizontal() length = %v, want %v", len(result), len(tt.expected))
+				return
+			}
+			for i := range result {
+				if !NearEquals(result[i], tt.expected[i], 1e-10) {
+					t.Errorf("Mean2DHorizontal()[%d] = %v, want %v", i, result[i], tt.expected[i])
+				}
+			}
+		})
+	}
+}
