@@ -302,20 +302,42 @@ func TestUnique(t *testing.T) {
 }
 
 func TestBoolToInt(t *testing.T) {
-	if BoolToInt(true) != 1 {
-		t.Errorf("BoolToInt(true) = %v, want 1", BoolToInt(true))
+	tests := []struct {
+		name     string
+		b        bool
+		expected int
+	}{
+		{"true", true, 1},
+		{"false", false, 0},
 	}
-	if BoolToInt(false) != 0 {
-		t.Errorf("BoolToInt(false) = %v, want 0", BoolToInt(false))
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := BoolToInt(tt.b)
+			if result != tt.expected {
+				t.Errorf("BoolToInt(%v) = %v, want %v", tt.b, result, tt.expected)
+			}
+		})
 	}
 }
 
 func TestBoolToFlag(t *testing.T) {
-	if BoolToFlag(true) != 1.0 {
-		t.Errorf("BoolToFlag(true) = %v, want 1.0", BoolToFlag(true))
+	tests := []struct {
+		name     string
+		b        bool
+		expected float64
+	}{
+		{"true", true, 1.0},
+		{"false", false, -1.0},
 	}
-	if BoolToFlag(false) != -1.0 {
-		t.Errorf("BoolToFlag(false) = %v, want -1.0", BoolToFlag(false))
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := BoolToFlag(tt.b)
+			if result != tt.expected {
+				t.Errorf("BoolToFlag(%v) = %v, want %v", tt.b, result, tt.expected)
+			}
+		})
 	}
 }
 
@@ -341,6 +363,325 @@ func TestIsPowerOfTwo(t *testing.T) {
 			result := IsPowerOfTwo(tt.n)
 			if result != tt.expected {
 				t.Errorf("IsPowerOfTwo(%v) = %v, want %v", tt.n, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestMedian(t *testing.T) {
+	tests := []struct {
+		name     string
+		values   []float64
+		expected float64
+	}{
+		{"空配列", []float64{}, 0},
+		{"単一要素", []float64{5}, 5},
+		{"奇数個", []float64{3, 1, 2}, 2},
+		{"偶数個", []float64{4, 1, 3, 2}, 2.5}, // ソート後[1,2,3,4]、中央は(2+3)/2=2.5
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := Median(tt.values)
+			if result != tt.expected {
+				t.Errorf("Median(%v) = %v, want %v", tt.values, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestStd(t *testing.T) {
+	tests := []struct {
+		name     string
+		values   []float64
+		expected float64
+	}{
+		{"空配列", []float64{}, 0},
+		{"同じ値", []float64{5, 5, 5}, 0},
+		{"標準偏差計算", []float64{2, 4, 4, 4, 5, 5, 7, 9}, 2},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := Std(tt.values)
+			if !NearEquals(result, tt.expected, 1e-6) {
+				t.Errorf("Std(%v) = %v, want %v", tt.values, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestRatio(t *testing.T) {
+	tests := []struct {
+		name     string
+		total    float64
+		values   []float64
+		expected []float64
+	}{
+		{"基本", 100, []float64{25, 50, 25}, []float64{0.25, 0.5, 0.25}},
+		{"非ゼロ合計", 10, []float64{1, 2, 3}, []float64{0.1, 0.2, 0.3}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := Ratio(tt.total, tt.values)
+			if len(result) != len(tt.expected) {
+				t.Errorf("Ratio() length = %v, want %v", len(result), len(tt.expected))
+				return
+			}
+			for i := range result {
+				if !NearEquals(result[i], tt.expected[i], 1e-10) {
+					t.Errorf("Ratio()[%d] = %v, want %v", i, result[i], tt.expected[i])
+				}
+			}
+		})
+	}
+}
+
+func TestRound(t *testing.T) {
+	tests := []struct {
+		name      string
+		v         float64
+		threshold float64
+		expected  float64
+	}{
+		{"基本丸め", 1.5, 1, 2},
+		{"切り捨て", 1.4, 1, 1},
+		{"負の丸め", -1.5, 1, -2},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := Round(tt.v, tt.threshold)
+			if result != tt.expected {
+				t.Errorf("Round(%v, %v) = %v, want %v", tt.v, tt.threshold, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestEffective(t *testing.T) {
+	tests := []struct {
+		name     string
+		v        float64
+		expected float64
+	}{
+		{"基本", 1.23456789, 1.2346}, // 小数4桁
+		{"ゼロ", 0, 0},
+		{"負", -1.23456789, -1.2346},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := Effective(tt.v)
+			if !NearEquals(result, tt.expected, 1e-4) {
+				t.Errorf("Effective(%v) = %v, want %v", tt.v, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestSort(t *testing.T) {
+	tests := []struct {
+		name     string
+		values   []float64
+		expected []float64
+	}{
+		{"基本ソート", []float64{5, 2, 8, 1, 9}, []float64{1, 2, 5, 8, 9}},
+		{"逆順", []float64{5, 4, 3, 2, 1}, []float64{1, 2, 3, 4, 5}},
+		{"既にソート済み", []float64{1, 2, 3}, []float64{1, 2, 3}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			values := DeepCopy(tt.values)
+			Sort(values)
+			for i := range values {
+				if values[i] != tt.expected[i] {
+					t.Errorf("Sort(%v) = %v, want %v", tt.values, values, tt.expected)
+					break
+				}
+			}
+		})
+	}
+}
+
+func TestContains(t *testing.T) {
+	tests := []struct {
+		name     string
+		s        []int
+		v        int
+		expected bool
+	}{
+		{"含む", []int{1, 2, 3}, 2, true},
+		{"含まない", []int{1, 2, 3}, 5, false},
+		{"空配列", []int{}, 1, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := Contains(tt.s, tt.v)
+			if result != tt.expected {
+				t.Errorf("Contains(%v, %v) = %v, want %v", tt.s, tt.v, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestDeepCopy(t *testing.T) {
+	tests := []struct {
+		name     string
+		original []float64
+	}{
+		{"基本", []float64{1, 2, 3}},
+		{"空配列", []float64{}},
+		{"単一要素", []float64{5}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			copied := DeepCopy(tt.original)
+			// 同じ値であることを確認
+			if len(copied) != len(tt.original) {
+				t.Errorf("DeepCopy() length = %v, want %v", len(copied), len(tt.original))
+				return
+			}
+			for i := range tt.original {
+				if tt.original[i] != copied[i] {
+					t.Errorf("DeepCopy() values differ at index %d", i)
+				}
+			}
+			// コピーを変更しても元に影響しないことを確認
+			if len(copied) > 0 {
+				copied[0] = 999
+				if tt.original[0] == 999 {
+					t.Errorf("DeepCopy() did not create a deep copy")
+				}
+			}
+		})
+	}
+}
+
+func TestIntRanges(t *testing.T) {
+	tests := []struct {
+		name     string
+		max      int
+		expected []int
+	}{
+		{"5まで", 5, []int{0, 1, 2, 3, 4, 5}}, // 0からmaxまで含む
+		{"1まで", 1, []int{0, 1}},
+		{"0", 0, []int{0}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := IntRanges(tt.max)
+			if len(result) != len(tt.expected) {
+				t.Errorf("IntRanges(%v) length = %v, want %v", tt.max, len(result), len(tt.expected))
+				return
+			}
+			for i := range result {
+				if result[i] != tt.expected[i] {
+					t.Errorf("IntRanges(%v)[%d] = %v, want %v", tt.max, i, result[i], tt.expected[i])
+				}
+			}
+		})
+	}
+}
+
+func TestIntRangesByStep(t *testing.T) {
+	tests := []struct {
+		name     string
+		min      int
+		max      int
+		step     int
+		expected []int
+	}{
+		{"基本", 0, 10, 2, []int{0, 2, 4, 6, 8, 10}}, // maxも含む
+		{"1から", 1, 5, 1, []int{1, 2, 3, 4, 5}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := IntRangesByStep(tt.min, tt.max, tt.step)
+			if len(result) != len(tt.expected) {
+				t.Errorf("IntRangesByStep() length = %v, want %v", len(result), len(tt.expected))
+				return
+			}
+			for i := range result {
+				if result[i] != tt.expected[i] {
+					t.Errorf("IntRangesByStep()[%d] = %v, want %v", i, result[i], tt.expected[i])
+				}
+			}
+		})
+	}
+}
+
+func TestIsAllSameValues(t *testing.T) {
+	tests := []struct {
+		name     string
+		values   []float64
+		expected bool
+	}{
+		{"全て同じ", []float64{5, 5, 5}, true},
+		{"異なる", []float64{5, 5, 6}, false},
+		{"空", []float64{}, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := IsAllSameValues(tt.values)
+			if result != tt.expected {
+				t.Errorf("IsAllSameValues(%v) = %v, want %v", tt.values, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestIsAlmostAllSameValues(t *testing.T) {
+	tests := []struct {
+		name      string
+		values    []float64
+		threshold float64
+		expected  bool
+	}{
+		{"全て同じ", []float64{5, 5, 5}, 0.1, true},
+		{"ほぼ同じ", []float64{5, 5.05, 4.95}, 0.1, true},
+		{"異なる", []float64{5, 5, 6}, 0.1, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := IsAlmostAllSameValues(tt.values, tt.threshold)
+			if result != tt.expected {
+				t.Errorf("IsAlmostAllSameValues(%v, %v) = %v, want %v", tt.values, tt.threshold, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestFlatten(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    [][]int
+		expected []int
+	}{
+		{"基本", [][]int{{1, 2}, {3, 4, 5}, {6}}, []int{1, 2, 3, 4, 5, 6}},
+		{"空配列", [][]int{}, []int{}},
+		{"単一配列", [][]int{{1, 2, 3}}, []int{1, 2, 3}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := Flatten(tt.input)
+			if len(result) != len(tt.expected) {
+				t.Errorf("Flatten() length = %v, want %v", len(result), len(tt.expected))
+				return
+			}
+			for i := range result {
+				if result[i] != tt.expected[i] {
+					t.Errorf("Flatten()[%d] = %v, want %v", i, result[i], tt.expected[i])
+				}
 			}
 		})
 	}

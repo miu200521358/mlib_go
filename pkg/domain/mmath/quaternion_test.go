@@ -444,6 +444,12 @@ func TestQuaternion_Rotate(t *testing.T) {
 			to:       NewVec3ByValues(4, 5, 6),
 			expected: NewQuaternionByValues(-0.04597839511020707, 0.0919567902204141, -0.04597839511020706, 0.9936377222602503),
 		},
+		{
+			name:     "既存テスト2",
+			from:     NewVec3ByValues(-10, 20, -15),
+			to:       NewVec3ByValues(40, -5, 6),
+			expected: NewQuaternionByValues(0.042643949239185255, -0.511727390870223, -0.7107324873197542, 0.48080755245182594),
+		},
 	}
 
 	for _, tt := range tests {
@@ -451,6 +457,153 @@ func TestQuaternion_Rotate(t *testing.T) {
 			result := NewQuaternionRotate(tt.from, tt.to)
 			if !result.NearEquals(tt.expected, 1e-5) {
 				t.Errorf("NewQuaternionRotate() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+// 既存mlib_goからの移行テスト
+
+func TestQuaternion_ToMat4(t *testing.T) {
+	tests := []struct {
+		name     string
+		q        *Quaternion
+		expected *Mat4
+	}{
+		{
+			name: "単位クォータニオン",
+			q:    NewQuaternion(),
+			expected: &Mat4{
+				1, 0, 0, 0,
+				0, 1, 0, 0,
+				0, 0, 1, 0,
+				0, 0, 0, 1,
+			},
+		},
+		{
+			name: "90度回転",
+			q:    NewQuaternionByValues(0.5, 0.5, 0.5, 0.5),
+			expected: &Mat4{
+				0.0, 1.0, 0.0, 0.0,
+				0.0, 0.0, 1.0, 0.0,
+				1.0, 0.0, 0.0, 0.0,
+				0.0, 0.0, 0.0, 1.0,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.q.ToMat4()
+			if !result.NearEquals(tt.expected, 1e-10) {
+				t.Errorf("ToMat4() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestQuaternion_Length(t *testing.T) {
+	q := NewQuaternionByValues(1, 2, 3, 4)
+	// 正規化されていないクォータニオンの長さ
+	expected := 5.477225575051661 // sqrt(1+4+9+16) = sqrt(30)
+
+	result := q.Length()
+	if !NearEquals(result, expected, 1e-10) {
+		t.Errorf("Length() = %v, want %v", result, expected)
+	}
+
+	// 正規化後のクォータニオンの長さは1
+	qNorm := q.Normalized()
+	if !NearEquals(qNorm.Length(), 1.0, 1e-10) {
+		t.Errorf("Normalized().Length() = %v, want 1.0", qNorm.Length())
+	}
+}
+
+func TestQuaternion_Lerp(t *testing.T) {
+	tests := []struct {
+		name     string
+		q1       *Quaternion
+		q2       *Quaternion
+		t        float64
+		expected *Quaternion
+	}{
+		{
+			name:     "t=0",
+			q1:       NewQuaternion(),
+			q2:       NewQuaternionFromDegrees(90, 0, 0),
+			t:        0,
+			expected: NewQuaternion(),
+		},
+		{
+			name:     "t=1",
+			q1:       NewQuaternion(),
+			q2:       NewQuaternionFromDegrees(90, 0, 0),
+			t:        1,
+			expected: NewQuaternionFromDegrees(90, 0, 0),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.q1.Lerp(tt.q2, tt.t)
+			if !result.NearEquals(tt.expected, 1e-5) {
+				t.Errorf("Lerp() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestQuaternion_Inverted(t *testing.T) {
+	q := NewQuaternionFromDegrees(30, 45, 60)
+	inv := q.Inverted()
+
+	// q * inv = 単位クォータニオン
+	result := q.Muled(inv)
+	expected := NewQuaternion()
+
+	if !result.NearEquals(expected, 1e-6) {
+		t.Errorf("q * q.Inverted() = %v, want identity", result)
+	}
+}
+
+func TestQuaternion_Copy(t *testing.T) {
+	q := NewQuaternionByValues(1, 2, 3, 4)
+	copied := q.Copy()
+
+	if !q.NearEquals(copied, 1e-10) {
+		t.Errorf("Copy() returned different values")
+	}
+
+	// コピーを変更しても元のクォータニオンに影響しないことを確認
+	copied.SetX(999)
+	if q.X() == 999 {
+		t.Errorf("Copy() did not create a deep copy")
+	}
+}
+
+func TestQuaternion_IsIdent(t *testing.T) {
+	tests := []struct {
+		name     string
+		q        *Quaternion
+		expected bool
+	}{
+		{
+			name:     "単位クォータニオン",
+			q:        NewQuaternion(),
+			expected: true,
+		},
+		{
+			name:     "非単位",
+			q:        NewQuaternionFromDegrees(10, 0, 0),
+			expected: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.q.IsIdent()
+			if result != tt.expected {
+				t.Errorf("IsIdent() = %v, want %v", result, tt.expected)
 			}
 		})
 	}
