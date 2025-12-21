@@ -61,6 +61,8 @@
 pkg/
 │
 ├── domain/                      # ドメイン層（外部依存なし）
+│   ├── mcore/                   # 基幹struct（IndexModel, IndexNameModel, コレクション）
+│   ├── merr/                    # カスタムエラー型
 │   ├── mmath/                   # 数学ライブラリ
 │   ├── mmodel/                  # PMXモデルエンティティ
 │   ├── mmotion/                 # VMDモーションエンティティ
@@ -104,8 +106,6 @@ pkg/
 - `curve.go` - Curve（ベジェ補間曲線）
 - `scalar.go` - スカラー演算ユーティリティ、汎用関数
 - `number.go` - Number, SignedNumber, Float（ジェネリクス型制約）
-- `bounding.go` - BoundingBox, BoundingSphere, BoundingCapsule（※未実装）
-- `llrb.go` - LLRB木（インデックス管理）（※未実装）
 
 **依存**: なし（標準ライブラリのみ）
 
@@ -114,20 +114,21 @@ pkg/
 ### domain/mmodel（PMXモデル）
 
 **ファイル構成:**
-- `pmx_model.go` - PmxModel（モデル全体）
-- `bone.go` - Bone, Bones, IkLink, Ik
-- `vertex.go` - Vertex, Vertices, Deform (Bdef1, Bdef2, Bdef4, Sdef)
-- `face.go` - Face, Faces
-- `material.go` - Material, Materials
-- `morph.go` - Morph, Morphs, VertexMorphOffset, BoneMorphOffset, etc.
-- `rigid_body.go` - RigidBody, RigidBodies
-- `joint.go` - Joint, Joints
-- `texture.go` - Texture, Textures
-- `display_slot.go` - DisplaySlot, DisplaySlots
+- `deform.go` - IDeform, Deform, Bdef1, Bdef2, Bdef4, Sdef
+- `vertex.go` - Vertex
+- `face.go` - Face
+- `texture.go` - Texture
+- `material.go` - Material
+- `ik.go` - Ik, IkLink
 - `bone_config.go` - BoneConfig, StandardBoneName
-- `collection.go` - IndexModels[T], IndexNameModels[T]
+- `bone.go` - Bone
+- `morph.go` - Morph, Morphs, VertexMorphOffset, BoneMorphOffset, etc.
+- `display_slot.go` - DisplaySlot
+- `rigid_body.go` - RigidBody
+- `joint.go` - Joint
+- `pmx_model.go` - PmxModel（モデル全体）
 
-**依存**: `mmath` のみ
+**依存**: `mmath`, `mcore` のみ
 
 ---
 
@@ -164,96 +165,30 @@ pkg/
 
 ---
 
-### usecase/port/minput（入力ポート）
-
-**ファイル構成:**
-- `model_usecase.go` - IModelUsecase interface
-- `motion_usecase.go` - IMotionUsecase interface
-- `deform_usecase.go` - IDeformUsecase interface
-
-**例:**
-```go
-type IDeformUsecase interface {
-    DeformModel(model *mmodel.PmxModel, motion *mmotion.VmdMotion, frame float32) *mdelta.VmdDeltas
-    DeformBone(model *mmodel.PmxModel, motion *mmotion.VmdMotion, boneIndex int, frame float32) *mdelta.BoneDelta
-}
-```
-
----
-
-### usecase/port/moutput（出力ポート）
-
-**ファイル構成:**
-- `model_repository.go` - IModelRepository interface
-- `motion_repository.go` - IMotionRepository interface
-- `image_repository.go` - IImageRepository interface
-- `physics_engine.go` - IPhysicsEngine interface
-- `renderer.go` - IRenderer interface
-
-**例:**
-```go
-type IModelRepository interface {
-    Load(path string) (*mmodel.PmxModel, error)
-    Save(path string, model *mmodel.PmxModel) error
-}
-
-type IPhysicsEngine interface {
-    AddModel(modelIndex int, model *mmodel.PmxModel) error
-    DeleteModel(modelIndex int) error
-    StepSimulation(timeStep float32, maxSubSteps int, fixedTimeStep float32) error
-    GetBoneMatrix(modelIndex int, boneIndex int) *mmath.Mat4
-}
-```
-
----
-
-### usecase/minteractor（ユースケース実装）
-
-**ファイル構成:**
-- `model_interactor.go` - ModelInteractor（IModelUsecase実装）
-- `motion_interactor.go` - MotionInteractor（IMotionUsecase実装）
-- `deform_interactor.go` - DeformInteractor（IDeformUsecase実装）
-- `bone_deform.go` - ボーン変形ロジック
-- `ik_deform.go` - IK計算ロジック
-- `morph_deform.go` - モーフ変形ロジック
-- `physics_deform.go` - 物理変形ロジック
-
-**依存**: `domain/*`, `usecase/port/*`（インターフェースのみ）
-
----
-
-### adapter/mgateway（リポジトリ実装）
-
-**ファイル構成:**
-- `pmx_reader.go` - PmxReader（IModelRepository実装）
-- `pmx_writer.go` - PmxWriter
-- `vmd_reader.go` - VmdReader（IMotionRepository実装）
-- `vmd_writer.go` - VmdWriter
-- `vpd_reader.go` - VpdReader
-- `image_loader.go` - ImageLoader（IImageRepository実装）
-
-**依存**: `domain/*`, `usecase/port/moutput`, `infra/file/mfile`
-
----
-
-### infra/physics/mbullet（物理エンジン実装）
-
-**ファイル構成:**
-- `physics_engine.go` - BulletEngine（IPhysicsEngine実装）
-- `rigid_body.go` - 剛体管理
-- `joint.go` - ジョイント管理
-- `wind.go` - 風シミュレーション
-- `debug_view.go` - デバッグ描画
-
-**依存**: `domain/*`, `usecase/port/moutput`, `infra/physics/mbt`
+※ usecase/, adapter/, infra/ の詳細は実装時に追記
 
 ---
 
 ## 移行チェックリスト
 
 ### Phase 1: Domain層の移行
+- [x] `mcore` - 基幹struct（IndexModel, IndexNameModel, コレクション）
+- [x] `merr` - カスタムエラー型
 - [x] `mmath` - 数学ライブラリ（依存なし、最初に移行）
 - [ ] `mmodel` - PMXモデルエンティティ
+  - [x] deform.go - IDeform, Deform, Bdef1, Bdef2, Bdef4, Sdef
+  - [x] vertex.go - Vertex
+  - [x] face.go - Face
+  - [x] texture.go - Texture
+  - [ ] material.go - Material（次）
+  - [ ] ik.go - Ik, IkLink
+  - [ ] bone_config.go - BoneConfig, StandardBoneName
+  - [ ] bone.go - Bone
+  - [ ] morph.go - Morph, MorphOffset各種
+  - [ ] display_slot.go - DisplaySlot
+  - [ ] rigid_body.go - RigidBody
+  - [ ] joint.go - Joint
+  - [ ] pmx_model.go - PmxModel
 - [ ] `mmotion` - VMDモーションエンティティ  
 - [ ] `mdelta` - 変形差分
 
@@ -352,15 +287,36 @@ go build -o build/mlib.exe cmd/main.go
 
 ### Goコーディングスタイル
 
-#### 命名規則
+#### 型・関数の命名規則
 | 対象 | 規則 | 例 |
 |------|------|-----|
-| 変数 | キャメルケース | `boneIndex`, `modelPath` |
 | エクスポート関数/型 | パスカルケース | `NewBone()`, `PmxModel` |
 | インターフェース | `I` プレフィックス | `IBaseFrame`, `IModelRepository` |
 | メソッドレシーバー | 1〜2文字 | `b *Bone`, `v *Vec3` |
 | 定数（const） | パスカルケース | `MaxBones`, `DefaultFPS` |
 | 擬似定数（var） | 全大文字スネークケース | `IDENTITY_MATRIX`, `ZERO_VECTOR` |
+| 列挙型const | 型名_値名 | `DEFORM_BDEF1`, `MORPH_TYPE_VERTEX` |
+
+#### 変数の命名規則（Go推奨スタイル）
+| スコープ | 規則 | 例 |
+|----------|------|-----|
+| ローカル変数 | 短く（1-3文字） | `i`, `idx`, `v`, `err` |
+| ループ変数 | 1文字 | `i`, `j`, `k` |
+| 引数（短スコープ） | 短縮形 | `idx0`, `w0`, `src`, `dst` |
+| 引数（長スコープ） | 意味が分かる程度 | `threshold`, `ratio` |
+| コピー先変数 | `cp` | `cp := &Vertex{}` |
+| 出力用変数 | `out` | `out := make([]int, 0)` |
+
+**短縮パターン:**
+- `index` → `idx`
+- `weight` → `w`
+- `source` → `src`
+- `destination` → `dst`
+- `copied` → `cp`
+- `result` → `out`
+- `values` → `vals`
+- `indexes` → `idxs`
+- `weights` → `wgts`
 
 #### 定数の使い分け
 ```go
@@ -395,6 +351,28 @@ func (v *Vec3) Added(other *Vec3) *Vec3 {
     return NewVec3ByValues(v.X+other.X, v.Y+other.Y, v.Z+other.Z)
 }
 ```
+
+#### Copy() メソッド
+
+- **`github.com/tiendc/go-deepcopy`** を使用してディープコピー
+- 戻り値は `(*T, error)` 形式
+- テストで別オブジェクトであることを確認
+
+```go
+// ✅ Copy()の実装例
+func (v *Vertex) Copy() (*Vertex, error) {
+    cp := &Vertex{}
+    if err := deepcopy.Copy(cp, v); err != nil {
+        return nil, err
+    }
+    return cp, nil
+}
+```
+
+**テストでの確認事項:**
+- ポインタが異なること
+- 値変更が影響しないこと（独立性）
+- スライス内要素も独立していること
 
 #### コメント
 - エクスポートされる関数・型には必ずドキュメントコメントを記述
