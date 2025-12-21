@@ -36,7 +36,7 @@ func NewVertex() *Vertex {
 
 // IsValid はVertexが有効かどうかを返します。
 func (v *Vertex) IsValid() bool {
-	return v != nil && v.IndexModel.IsValid() && v.Position != nil
+	return v != nil && v.IndexModel.IsValid() && v.Position != nil && v.Deform != nil
 }
 
 // Copy は深いコピーを作成します。

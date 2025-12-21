@@ -39,8 +39,8 @@ type IDeform interface {
 	Index(boneIndex int) int
 	// IndexWeight はボーンのウェイトを返します。
 	IndexWeight(boneIndex int) float64
-	// Add はウェイトを分割して追加します。
-	Add(boneIndex, separateIndex int, ratio float64)
+	// SplitWeight はウェイトを分割して追加します。
+	SplitWeight(fromIdx, toIdx int, ratio float64)
 }
 
 // Deform はデフォームの基底構造体です。
@@ -181,12 +181,12 @@ func (d *Deform) Normalize(align bool) {
 	}
 }
 
-// Add はウェイトを分割して追加します。
-// srcIdxのウェイトをratioで分割してdstIdxに追加します。
-func (d *Deform) Add(dstIdx, srcIdx int, ratio float64) {
+// SplitWeight はウェイトを分割して追加します。
+// fromIdxのウェイトをratioで分割してtoIdxに追加します。
+func (d *Deform) SplitWeight(fromIdx, toIdx int, ratio float64) {
 	for i, idx := range d.indexes {
-		if idx == srcIdx {
-			d.indexes = append(d.indexes, dstIdx)
+		if idx == fromIdx {
+			d.indexes = append(d.indexes, toIdx)
 			d.weights = append(d.weights, d.weights[i]*ratio)
 			d.weights[i] *= 1 - ratio
 			break
