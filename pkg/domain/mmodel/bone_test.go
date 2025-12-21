@@ -17,8 +17,8 @@ func TestNewBone(t *testing.T) {
 	if b.ParentIndex != -1 {
 		t.Errorf("ParentIndex = %v, want -1", b.ParentIndex)
 	}
-	if b.Flag != BONE_FLAG_NONE {
-		t.Errorf("Flag = %v, want BONE_FLAG_NONE", b.Flag)
+	if b.Flag != BoneFlagNone {
+		t.Errorf("Flag = %v, want BoneFlagNone", b.Flag)
 	}
 	if b.Position == nil {
 		t.Errorf("Position should not be nil")
@@ -78,7 +78,7 @@ func TestBone_Copy(t *testing.T) {
 		b.Position = mmath.NewVec3ByValues(1, 2, 3)
 		b.ParentIndex = 4
 		b.Layer = 1
-		b.Flag = BONE_FLAG_CAN_ROTATE | BONE_FLAG_IS_VISIBLE
+		b.Flag = BoneFlagCanRotate | BoneFlagIsVisible
 
 		cp, err := b.Copy()
 		if err != nil {

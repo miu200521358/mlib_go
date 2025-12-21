@@ -4,7 +4,7 @@ import "testing"
 
 func TestBoneFlag(t *testing.T) {
 	t.Run("フラグ設定と取得", func(t *testing.T) {
-		f := BONE_FLAG_NONE
+		f := BoneFlagNone
 
 		f = f.SetCanRotate(true)
 		if !f.CanRotate() {
@@ -31,7 +31,7 @@ func TestBoneFlag(t *testing.T) {
 	})
 
 	t.Run("IKフラグ", func(t *testing.T) {
-		f := BONE_FLAG_NONE
+		f := BoneFlagNone
 
 		f = f.SetIsIK(true)
 		if !f.IsIK() {
@@ -40,7 +40,7 @@ func TestBoneFlag(t *testing.T) {
 	})
 
 	t.Run("付与フラグ", func(t *testing.T) {
-		f := BONE_FLAG_NONE
+		f := BoneFlagNone
 
 		f = f.SetExternalRotation(true)
 		if !f.IsExternalRotation() {
@@ -54,7 +54,7 @@ func TestBoneFlag(t *testing.T) {
 	})
 
 	t.Run("軸フラグ", func(t *testing.T) {
-		f := BONE_FLAG_NONE
+		f := BoneFlagNone
 
 		f = f.SetHasFixedAxis(true)
 		if !f.HasFixedAxis() {
@@ -68,7 +68,7 @@ func TestBoneFlag(t *testing.T) {
 	})
 
 	t.Run("物理後変形フラグ", func(t *testing.T) {
-		f := BONE_FLAG_NONE
+		f := BoneFlagNone
 
 		f = f.SetAfterPhysicsDeform(true)
 		if !f.IsAfterPhysicsDeform() {
@@ -77,7 +77,7 @@ func TestBoneFlag(t *testing.T) {
 	})
 
 	t.Run("複合フラグ", func(t *testing.T) {
-		f := BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE | BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE
+		f := BoneFlagCanRotate | BoneFlagCanTranslate | BoneFlagIsVisible | BoneFlagCanManipulate
 		if !f.CanRotate() {
 			t.Errorf("CanRotate() = false, want true")
 		}

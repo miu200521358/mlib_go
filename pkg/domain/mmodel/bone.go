@@ -73,7 +73,7 @@ func NewBone() *Bone {
 		Position:         mmath.NewVec3(),
 		ParentIndex:      -1,
 		Layer:            -1,
-		Flag:             BONE_FLAG_NONE,
+		Flag:             BoneFlagNone,
 		TailPosition:     mmath.NewVec3(),
 		TailIndex:        -1,
 		EffectIndex:      -1,
