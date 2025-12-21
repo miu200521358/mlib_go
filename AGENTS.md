@@ -93,16 +93,19 @@ pkg/
 
 ## パッケージ詳細
 
-### domain/mmath（数学ライブラリ）
+### domain/mmath（数学ライブラリ）✅ 実装完了
 
 **ファイル構成:**
-- `vector.go` - Vec2, Vec3, Vec4
-- `matrix.go` - Mat4
-- `quaternion.go` - Quaternion
-- `curve.go` - Curve（ベジェ補間）
-- `bounding.go` - BoundingBox, BoundingSphere, BoundingCapsule
-- `scalar.go` - スカラー演算ユーティリティ
-- `llrb.go` - LLRB木（インデックス管理）
+- `vector2.go` - Vec2（2次元ベクトル）
+- `vector3.go` - Vec3（3次元ベクトル）
+- `vector4.go` - Vec4（4次元ベクトル）
+- `matrix.go` - Mat4（4x4行列）
+- `quaternion.go` - Quaternion（クォータニオン）
+- `curve.go` - Curve（ベジェ補間曲線）
+- `scalar.go` - スカラー演算ユーティリティ、汎用関数
+- `number.go` - Number, SignedNumber, Float（ジェネリクス型制約）
+- `bounding.go` - BoundingBox, BoundingSphere, BoundingCapsule（※未実装）
+- `llrb.go` - LLRB木（インデックス管理）（※未実装）
 
 **依存**: なし（標準ライブラリのみ）
 
@@ -249,7 +252,7 @@ type IPhysicsEngine interface {
 ## 移行チェックリスト
 
 ### Phase 1: Domain層の移行
-- [ ] `mmath` - 数学ライブラリ（依存なし、最初に移行）
+- [x] `mmath` - 数学ライブラリ（依存なし、最初に移行）
 - [ ] `mmodel` - PMXモデルエンティティ
 - [ ] `mmotion` - VMDモーションエンティティ  
 - [ ] `mdelta` - 変形差分
@@ -368,6 +371,29 @@ const DefaultFPS = 30
 // var だが変更しない値（構造体等）: 全大文字スネークケースで「不変」を明示
 var IDENTITY_MATRIX = NewMat4()
 var ZERO_VECTOR = NewVec3(0, 0, 0)
+```
+
+#### メソッド命名規則（破壊的/非破壊）
+
+| タイプ | 命名 | 例 | 説明 |
+|--------|------|-----|------|
+| 破壊的 | 動詞（現在形） | `Add`, `Sub`, `Mul`, `Normalize` | レシーバを変更し、自身を返す |
+| 非破壊 | 動詞＋ed | `Added`, `Subed`, `Muled`, `Normalized` | 新しいオブジェクトを返す |
+| 非破壊 | 形容詞 | `Copy`, `Clamped`, `Inverted` | 新しいオブジェクトを返す |
+
+```go
+// ✅ 破壊的メソッド: レシーバを変更し、チェーン呼び出し可能
+func (v *Vec3) Add(other *Vec3) *Vec3 {
+    v.X += other.X
+    v.Y += other.Y
+    v.Z += other.Z
+    return v  // 自身を返す
+}
+
+// ✅ 非破壊メソッド: 新しいオブジェクトを返す
+func (v *Vec3) Added(other *Vec3) *Vec3 {
+    return NewVec3ByValues(v.X+other.X, v.Y+other.Y, v.Z+other.Z)
+}
 ```
 
 #### コメント
@@ -547,6 +573,59 @@ func Render(scene *Scene)
 - `test_resources/` に期待される出力画像を配置
 - 必要に応じてスクリーンショット比較ツールを活用
 - CI では描画テストをスキップ（`//go:build !ci` タグ）
+
+### 破壊的/非破壊メソッドのテスト
+
+**破壊的メソッド（元オブジェクトを変更）:**
+- 元のオブジェクトが変更されていることを確認
+- 戻り値がレシーバ自身であることを確認（チェーン呼び出し対応）
+
+```go
+func TestVec3_Add(t *testing.T) {
+    tests := []struct {
+        name     string
+        v1X, v1Y, v1Z float64
+        v2       *Vec3
+        expected *Vec3
+    }{ ... }
+
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            v := NewVec3ByValues(tt.v1X, tt.v1Y, tt.v1Z)
+            result := v.Add(tt.v2)
+            // 元のオブジェクトが変更されていることを確認
+            if v.X != tt.expected.X || v.Y != tt.expected.Y { ... }
+            // 戻り値がレシーバ自身であることを確認
+            if result != v { ... }
+        })
+    }
+}
+```
+
+**非破壊メソッド（新しいオブジェクトを返す）:**
+- 元のオブジェクトが変更されていないことを確認
+
+```go
+func TestVec3_Subed(t *testing.T) {
+    tests := []struct {
+        name     string
+        v1X, v1Y, v1Z float64
+        v2       *Vec3
+        expected *Vec3
+    }{ ... }
+
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            v1 := NewVec3ByValues(tt.v1X, tt.v1Y, tt.v1Z)
+            result := v1.Subed(tt.v2)
+            // 結果の確認
+            if !result.NearEquals(tt.expected, 1e-10) { ... }
+            // 元のベクトルが変更されていないことを確認
+            if v1.X != tt.v1X || v1.Y != tt.v1Y || v1.Z != tt.v1Z { ... }
+        })
+    }
+}
+```
 
 ---
 
