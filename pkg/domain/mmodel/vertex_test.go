@@ -20,27 +20,27 @@ func TestNewVertex(t *testing.T) {
 }
 
 func TestVertex_IsValid(t *testing.T) {
-	t.Run("新規作成は無効", func(t *testing.T) {
+	t.Run("新規作成は無効（インデックス=-1）", func(t *testing.T) {
 		v := NewVertex()
 		if v.IsValid() {
 			t.Errorf("IsValid() = true, want false")
 		}
 	})
 
-	t.Run("インデックス設定のみは無効（Deformなし）", func(t *testing.T) {
+	t.Run("インデックス設定後は有効（Deformはデフォルトで設定）", func(t *testing.T) {
 		v := NewVertex()
 		v.SetIndex(0)
-		if v.IsValid() {
-			t.Errorf("IsValid() = true, want false (Deform is nil)")
+		if !v.IsValid() {
+			t.Errorf("IsValid() = false, want true")
 		}
 	})
 
-	t.Run("インデックスとDeform設定後は有効", func(t *testing.T) {
+	t.Run("Deformがnilの場合は無効", func(t *testing.T) {
 		v := NewVertex()
 		v.SetIndex(0)
-		v.Deform = NewBdef1(0)
-		if !v.IsValid() {
-			t.Errorf("IsValid() = false, want true")
+		v.Deform = nil
+		if v.IsValid() {
+			t.Errorf("IsValid() = true, want false (Deform is nil)")
 		}
 	})
 }

@@ -41,6 +41,8 @@ type IDeform interface {
 	IndexWeight(boneIndex int) float64
 	// SplitWeight はウェイトを分割して追加します。
 	SplitWeight(fromIdx, toIdx int, ratio float64)
+	// Copy は深いコピーを作成します。
+	Copy() (IDeform, error)
 }
 
 // Deform はデフォームの基底構造体です。
@@ -257,6 +259,11 @@ func (b *Bdef1) Packed() [8]float32 {
 	return [8]float32{float32(b.indexes[0]), 0, 0, 0, 1.0, 0, 0, 0}
 }
 
+// Copy は深いコピーを作成します。
+func (b *Bdef1) Copy() (IDeform, error) {
+	return NewBdef1(b.indexes[0]), nil
+}
+
 // --------------------------------------------
 // Bdef2
 // --------------------------------------------
@@ -285,6 +292,11 @@ func (b *Bdef2) Packed() [8]float32 {
 	}
 }
 
+// Copy は深いコピーを作成します。
+func (b *Bdef2) Copy() (IDeform, error) {
+	return NewBdef2(b.indexes[0], b.indexes[1], b.weights[0]), nil
+}
+
 // --------------------------------------------
 // Bdef4
 // --------------------------------------------
@@ -311,6 +323,14 @@ func (b *Bdef4) Packed() [8]float32 {
 		float32(b.indexes[0]), float32(b.indexes[1]), float32(b.indexes[2]), float32(b.indexes[3]),
 		float32(b.weights[0]), float32(b.weights[1]), float32(b.weights[2]), float32(b.weights[3]),
 	}
+}
+
+// Copy は深いコピーを作成します。
+func (b *Bdef4) Copy() (IDeform, error) {
+	return NewBdef4(
+		b.indexes[0], b.indexes[1], b.indexes[2], b.indexes[3],
+		b.weights[0], b.weights[1], b.weights[2], b.weights[3],
+	), nil
 }
 
 // --------------------------------------------
@@ -346,4 +366,14 @@ func (s *Sdef) Packed() [8]float32 {
 		float32(s.indexes[0]), float32(s.indexes[1]), 0, 0,
 		float32(s.weights[0]), float32(1 - s.weights[0]), 0, 0,
 	}
+}
+
+// Copy は深いコピーを作成します。
+func (s *Sdef) Copy() (IDeform, error) {
+	return NewSdef(
+		s.indexes[0], s.indexes[1], s.weights[0],
+		mmath.NewVec3ByValues(s.C.X, s.C.Y, s.C.Z),
+		mmath.NewVec3ByValues(s.R0.X, s.R0.Y, s.R0.Z),
+		mmath.NewVec3ByValues(s.R1.X, s.R1.Y, s.R1.Z),
+	), nil
 }

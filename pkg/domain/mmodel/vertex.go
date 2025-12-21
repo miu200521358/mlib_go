@@ -28,7 +28,7 @@ func NewVertex() *Vertex {
 		Uv:              mmath.NewVec2(),
 		ExtendedUvs:     make([]*mmath.Vec4, 0),
 		DeformType:      DEFORM_BDEF1,
-		Deform:          nil,
+		Deform:          NewBdef1(0),
 		EdgeFactor:      0.0,
 		MaterialIndexes: make([]int, 0),
 	}
