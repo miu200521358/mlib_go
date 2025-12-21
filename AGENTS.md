@@ -111,7 +111,7 @@ pkg/
 
 ---
 
-### domain/mmodel（PMXモデル）
+### domain/mmodel（PMXモデル）✅ 実装完了
 
 **ファイル構成:**
 - `deform.go` - IDeform, Deform, Bdef1, Bdef2, Bdef4, Sdef
@@ -120,15 +120,20 @@ pkg/
 - `texture.go` - Texture
 - `material.go` - Material
 - `ik.go` - Ik, IkLink
-- `bone_config.go` - BoneConfig, StandardBoneName
+- `bone_flag.go` - BoneFlag（ビットフラグ）
+- `bone_standard.go` - StandardBoneName, BoneDirection
 - `bone.go` - Bone
-- `morph.go` - Morph, Morphs, VertexMorphOffset, BoneMorphOffset, etc.
-- `display_slot.go` - DisplaySlot
-- `rigid_body.go` - RigidBody
-- `joint.go` - Joint
-- `pmx_model.go` - PmxModel（モデル全体）
+- `morph.go` - Morph, IMorphOffset, VertexMorphOffset, BoneMorphOffset, etc.
+- `display_slot.go` - DisplaySlot, Reference
+- `rigid_body.go` - RigidBody, RigidBodyParam, CollisionGroup
+- `joint.go` - Joint, JointParam
+- `pmx_model.go` - PmxModel（モデル全体）, コレクション型エイリアス
 
 **依存**: `mmath`, `mcore` のみ
+
+**後回し（UseCase層へ移動予定）:**
+- `bone_config.go` - BoneConfig, GetStandardBoneConfigs()
+- `bone_human.go` - CreateXxx(), InsertShortageOverrideBones()
 
 ---
 
@@ -175,20 +180,21 @@ pkg/
 - [x] `mcore` - 基幹struct（IndexModel, IndexNameModel, コレクション）
 - [x] `merr` - カスタムエラー型
 - [x] `mmath` - 数学ライブラリ（依存なし、最初に移行）
-- [ ] `mmodel` - PMXモデルエンティティ
+- [x] `mmodel` - PMXモデルエンティティ
   - [x] deform.go - IDeform, Deform, Bdef1, Bdef2, Bdef4, Sdef
   - [x] vertex.go - Vertex
   - [x] face.go - Face
   - [x] texture.go - Texture
-  - [ ] material.go - Material（次）
-  - [ ] ik.go - Ik, IkLink
-  - [ ] bone_config.go - BoneConfig, StandardBoneName
-  - [ ] bone.go - Bone
-  - [ ] morph.go - Morph, MorphOffset各種
-  - [ ] display_slot.go - DisplaySlot
-  - [ ] rigid_body.go - RigidBody
-  - [ ] joint.go - Joint
-  - [ ] pmx_model.go - PmxModel
+  - [x] material.go - Material
+  - [x] ik.go - Ik, IkLink
+  - [x] bone_flag.go - BoneFlag
+  - [x] bone_standard.go - StandardBoneName, BoneDirection
+  - [x] bone.go - Bone
+  - [x] morph.go - Morph, MorphOffset各種
+  - [x] display_slot.go - DisplaySlot
+  - [x] rigid_body.go - RigidBody
+  - [x] joint.go - Joint
+  - [x] pmx_model.go - PmxModel
 - [ ] `mmotion` - VMDモーションエンティティ  
 - [ ] `mdelta` - 変形差分
 
