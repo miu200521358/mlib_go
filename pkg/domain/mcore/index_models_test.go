@@ -240,3 +240,76 @@ func TestIndexModels_Clear(t *testing.T) {
 		t.Errorf("Clear() failed")
 	}
 }
+
+func TestNewIndexModelsWithCapacity(t *testing.T) {
+	t.Run("正常", func(t *testing.T) {
+		im, err := NewIndexModelsWithCapacity[*mockIndexModel](3, 10)
+		if err != nil {
+			t.Errorf("NewIndexModelsWithCapacity() error = %v", err)
+		}
+		if im.Length() != 3 {
+			t.Errorf("Length() = %v, want 3", im.Length())
+		}
+	})
+
+	t.Run("エラー: 負の長さ", func(t *testing.T) {
+		_, err := NewIndexModelsWithCapacity[*mockIndexModel](-1, 10)
+		if err == nil {
+			t.Errorf("NewIndexModelsWithCapacity() error = nil, want error")
+		}
+	})
+
+	t.Run("エラー: capacity < length", func(t *testing.T) {
+		_, err := NewIndexModelsWithCapacity[*mockIndexModel](10, 5)
+		if err == nil {
+			t.Errorf("NewIndexModelsWithCapacity() error = nil, want error")
+		}
+	})
+}
+
+func TestIndexModels_Remove(t *testing.T) {
+	t.Run("正常", func(t *testing.T) {
+		im, _ := NewIndexModels[*mockIndexModel](3)
+		_ = im.Update(newMockIndexModel(0, true))
+		_ = im.Update(newMockIndexModel(1, true))
+		_ = im.Update(newMockIndexModel(2, true))
+
+		err := im.Remove(1)
+		if err != nil {
+			t.Errorf("Remove() error = %v", err)
+		}
+		if im.Length() != 2 {
+			t.Errorf("Length() = %v, want 2", im.Length())
+		}
+	})
+
+	t.Run("エラー: 範囲外", func(t *testing.T) {
+		im, _ := NewIndexModels[*mockIndexModel](3)
+		err := im.Remove(10)
+		if err == nil {
+			t.Errorf("Remove() error = nil, want error")
+		}
+	})
+}
+
+func TestIndexModels_Values(t *testing.T) {
+	im, _ := NewIndexModels[*mockIndexModel](3)
+	_ = im.Update(newMockIndexModel(0, true))
+
+	values := im.Values()
+	if len(values) != 3 {
+		t.Errorf("Values() length = %v, want 3", len(values))
+	}
+}
+
+func TestIndexModels_IsNotEmpty(t *testing.T) {
+	im, _ := NewIndexModels[*mockIndexModel](3)
+	if !im.IsNotEmpty() {
+		t.Errorf("IsNotEmpty() = false, want true")
+	}
+
+	im.Clear()
+	if im.IsNotEmpty() {
+		t.Errorf("IsNotEmpty() = true, want false")
+	}
+}

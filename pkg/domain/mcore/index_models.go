@@ -24,6 +24,16 @@ type IIndexModels[T IIndexModel] interface {
 	ForEach(callback func(index int, value T) bool)
 	// Values は全要素のスライスを返します。
 	Values() []T
+	// First は最初の要素を返します。
+	First() (T, error)
+	// Last は最後の要素を返します。
+	Last() (T, error)
+	// Clear は全要素をクリアします。
+	Clear()
+	// IsEmpty はコレクションが空かどうかを返します。
+	IsEmpty() bool
+	// IsNotEmpty はコレクションが空でないかどうかを返します。
+	IsNotEmpty() bool
 }
 
 // IndexModels はインデックスベースのコレクション実装です。
