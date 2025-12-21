@@ -47,23 +47,43 @@ func TestFace_IsValid(t *testing.T) {
 }
 
 func TestFace_Copy(t *testing.T) {
-	f := NewFaceByIndexes(10, 20, 30)
-	f.SetIndex(5)
+	t.Run("基本コピー", func(t *testing.T) {
+		f := NewFaceByIndexes(10, 20, 30)
+		f.SetIndex(5)
 
-	copied, err := f.Copy()
-	if err != nil {
-		t.Errorf("Copy() error = %v", err)
-	}
-	if copied.Index() != 5 {
-		t.Errorf("Copy() Index = %v, want 5", copied.Index())
-	}
-	if copied.VertexIndexes != f.VertexIndexes {
-		t.Errorf("Copy() VertexIndexes mismatch")
-	}
+		cp, err := f.Copy()
+		if err != nil {
+			t.Fatalf("Copy() error = %v", err)
+		}
+		if cp.Index() != 5 {
+			t.Errorf("Copy() Index = %v, want 5", cp.Index())
+		}
+		if cp.VertexIndexes != f.VertexIndexes {
+			t.Errorf("Copy() VertexIndexes mismatch")
+		}
+	})
 
-	// 独立性確認
-	f.VertexIndexes[0] = 999
-	if copied.VertexIndexes[0] == 999 {
-		t.Errorf("Copy() is not independent")
-	}
+	t.Run("別オブジェクト確認_VertexIndexes", func(t *testing.T) {
+		f := NewFaceByIndexes(10, 20, 30)
+		f.SetIndex(5)
+
+		cp, _ := f.Copy()
+
+		// 配列の変更が影響しないことを確認
+		f.VertexIndexes[0] = 999
+		if cp.VertexIndexes[0] == 999 {
+			t.Errorf("VertexIndexes should be independent")
+		}
+	})
+
+	t.Run("別オブジェクト確認_ポインタ比較", func(t *testing.T) {
+		f := NewFaceByIndexes(10, 20, 30)
+
+		cp, _ := f.Copy()
+
+		// コピー元とコピー先が異なるオブジェクトであることを確認
+		if f == cp {
+			t.Errorf("Face pointer should be different")
+		}
+	})
 }

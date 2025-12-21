@@ -2,6 +2,7 @@ package mmodel
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mcore"
+	"github.com/tiendc/go-deepcopy"
 )
 
 // Face は三角形面を表します。
@@ -42,8 +43,9 @@ func (f *Face) IsValid() bool {
 
 // Copy は深いコピーを作成します。
 func (f *Face) Copy() (*Face, error) {
-	return &Face{
-		IndexModel:    *mcore.NewIndexModel(f.Index()),
-		VertexIndexes: f.VertexIndexes, // 配列はコピー
-	}, nil
+	cp := &Face{}
+	if err := deepcopy.Copy(cp, f); err != nil {
+		return nil, err
+	}
+	return cp, nil
 }

@@ -3,6 +3,7 @@ package mmodel
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mcore"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/tiendc/go-deepcopy"
 )
 
 // Vertex は頂点を表します。
@@ -40,23 +41,9 @@ func (v *Vertex) IsValid() bool {
 
 // Copy は深いコピーを作成します。
 func (v *Vertex) Copy() (*Vertex, error) {
-	cp := &Vertex{
-		IndexModel:      *mcore.NewIndexModel(v.Index()),
-		Position:        v.Position.Copy(),
-		Normal:          v.Normal.Copy(),
-		Uv:              v.Uv.Copy(),
-		ExtendedUvs:     make([]*mmath.Vec4, len(v.ExtendedUvs)),
-		DeformType:      v.DeformType,
-		Deform:          v.Deform, // Deformは参照コピー（必要に応じて深いコピーに変更）
-		EdgeFactor:      v.EdgeFactor,
-		MaterialIndexes: make([]int, len(v.MaterialIndexes)),
+	cp := &Vertex{}
+	if err := deepcopy.Copy(cp, v); err != nil {
+		return nil, err
 	}
-
-	for i, uv := range v.ExtendedUvs {
-		cp.ExtendedUvs[i] = uv.Copy()
-	}
-
-	copy(cp.MaterialIndexes, v.MaterialIndexes)
-
 	return cp, nil
 }

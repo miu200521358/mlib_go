@@ -2,6 +2,7 @@ package mmodel
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mcore"
+	"github.com/tiendc/go-deepcopy"
 )
 
 // Texture はテクスチャを表します。
@@ -33,8 +34,9 @@ func (t *Texture) IsValid() bool {
 
 // Copy は深いコピーを作成します。
 func (t *Texture) Copy() (*Texture, error) {
-	return &Texture{
-		IndexModel: *mcore.NewIndexModel(t.Index()),
-		Path:       t.Path,
-	}, nil
+	cp := &Texture{}
+	if err := deepcopy.Copy(cp, t); err != nil {
+		return nil, err
+	}
+	return cp, nil
 }
