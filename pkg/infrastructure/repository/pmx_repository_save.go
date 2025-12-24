@@ -679,7 +679,7 @@ func (rep *PmxRepository) saveMorphs(
 				if err != nil {
 					return err
 				}
-				err = rep.writeNumber(fout, binaryType_float, off.Uv.Z, 0.0, false)
+				err = rep.writeNumber(fout, binaryType_float, off.Uv.W, 0.0, false)
 				if err != nil {
 					return err
 				}
