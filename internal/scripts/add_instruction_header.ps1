@@ -78,11 +78,6 @@ foreach ($relPath in $addedGoPaths) {
     }
 
     $content = Get-Content -Raw -Path $fullPath
-    if ($content -match [regex]::Escape($instruction)) {
-        Write-Host "Skip (already has instruction): $relPath"
-        continue
-    }
-
     $eol = if ($content -match "`r`n") { "`r`n" } else { "`n" }
     $hasTrailingNewline = $content.EndsWith($eol)
     $lines = $content -split "`r?`n", -1
@@ -106,6 +101,15 @@ foreach ($relPath in $addedGoPaths) {
             continue
         }
         break
+    }
+
+    $checkIndex = $insertIndex
+    while ($checkIndex -lt $lines.Length -and $lines[$checkIndex] -match '^\s*$') {
+        $checkIndex++
+    }
+    if ($checkIndex -lt $lines.Length -and $lines[$checkIndex] -eq $instruction) {
+        Write-Host "Skip (already has instruction at top): $relPath"
+        continue
     }
 
     $before = if ($insertIndex -gt 0) { @($lines[0..($insertIndex - 1)]) } else { @() }
