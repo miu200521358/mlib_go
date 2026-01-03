@@ -25,6 +25,16 @@ func main() {
 
 	// modelPath := "D:/MMD/MikuMikuDance_v926x64/UserFile/Model/刀剣乱舞/172_桑名江/桑名江 ウメ式 ver1.00/ウメ式桑名江(武装解除)ver1.00_ローカル軸.pmx"
 
+	println("親指の爪が向いている軸方向を教えて下さい。\n爪が上を向いていたら Y 、前を向いていたら Z を入力して Enter キーを押してください。")
+
+	thumbUpAxisInput, _ := reader.ReadString('\n')
+	thumbUpAxisInput = strings.TrimSpace(thumbUpAxisInput)
+	thumbUpAxisInput = strings.ToUpper(thumbUpAxisInput)
+	thumbUpAxisIsY := true
+	if thumbUpAxisInput == "Z" {
+		thumbUpAxisIsY = false
+	}
+
 	data, err := repository.NewPmxRepository(false).Load(modelPath)
 	if err != nil {
 		fmt.Println("モデル読み込みエラー:", err)
@@ -101,10 +111,13 @@ func main() {
 				fromBone.BoneFlag |= pmx.BONE_FLAG_HAS_LOCAL_AXIS
 
 				fromBone.LocalAxisX = boneAxis.Normalized()
-				localAxisY := fromBone.LocalAxis.Cross(horizontalDir).Normalized()
-				fromBone.LocalAxisZ = localAxisY.Cross(fromBone.LocalAxisX).Normalized()
+				fromBone.LocalAxisZ = horizontalDir.Cross(fromBone.LocalAxis).Normalized()
+
+				if strings.Contains(fromBone.Name(), "親指") && !thumbUpAxisIsY {
+					// 親指でZ軸上向き指定の場合、YとZを入れ替え
+					fromBone.LocalAxisZ = fromBone.LocalAxisZ.Cross(fromBone.LocalAxisX).Normalized()
+				}
 				fmt.Printf("ローカル軸X: (%.3f, %.3f, %.3f)\n", fromBone.LocalAxisX.X, fromBone.LocalAxisX.Y, fromBone.LocalAxisX.Z)
-				fmt.Printf("ローカル軸Y: (%.3f, %.3f, %.3f)\n", localAxisY.X, localAxisY.Y, localAxisY.Z)
 				fmt.Printf("ローカル軸Z: (%.3f, %.3f, %.3f)\n", fromBone.LocalAxisZ.X, fromBone.LocalAxisZ.Y, fromBone.LocalAxisZ.Z)
 			} else {
 				fmt.Printf("★が見つかりませんでした\n")
@@ -198,123 +211,65 @@ func insertBones(bones *pmx.Bones, vertices *pmx.Vertices) error {
 			}
 		}
 
-		{
-			// 親指0
-			if bone, err := bones.GetThumb(direction, 0); err != nil && merr.IsNameNotFoundError(err) && bone == nil {
-				if thumb0, err := bones.CreateThumb0(direction); err == nil && thumb0 != nil {
-					if err := bones.Insert(thumb0); err != nil {
-						return err
-					}
-					if thumb1, err := bones.GetThumb(direction, 1); err == nil && thumb1 != nil {
-						thumb1.ParentIndex = thumb0.Index()
-					}
-					bones.Setup()
-				} else if merr.IsParentNotFoundError(err) {
-					// 何もしない
-				} else {
-					return err
-				}
-			} else if err != nil {
-				return err
-			}
-		}
+		// {
+		// 	// 親指0
+		// 	if bone, err := bones.GetThumb(direction, 0); err != nil && merr.IsNameNotFoundError(err) && bone == nil {
+		// 		if thumb0, err := bones.CreateThumb0(direction); err == nil && thumb0 != nil {
+		// 			if err := bones.Insert(thumb0); err != nil {
+		// 				return err
+		// 			}
+		// 			if thumb1, err := bones.GetThumb(direction, 1); err == nil && thumb1 != nil {
+		// 				thumb1.ParentIndex = thumb0.Index()
+		// 			}
+		// 			bones.Setup()
+		// 		} else if merr.IsParentNotFoundError(err) {
+		// 			// 何もしない
+		// 		} else {
+		// 			return err
+		// 		}
+		// 	} else if err != nil {
+		// 		return err
+		// 	}
+		// }
 	}
 	return nil
 }
 
-// findStarVerticesByPCA はPCAを使って★の位置（指の左右端点）を求めます
+// findStarVerticesByPCA は外積を使って★の位置（指の左右端点）を求めます
+// 水平方向 = ボーン軸 × グローバルZ（0,0,-1）
 func findStarVerticesByPCA(vertices []*pmx.Vertex, boneAxis *mmath.MVec3, boneCenter *mmath.MVec3) (*pmx.Vertex, *pmx.Vertex, *mmath.MVec3) {
 	if len(vertices) < 2 {
 		return nil, nil, nil
 	}
 
-	// Step 1: 各頂点をボーン軸に垂直な平面に投影
-	// 投影: p' = p - (p・axis)*axis
-	var projectedPoints []struct {
-		vertex    *pmx.Vertex
-		projected *mmath.MVec3 // ボーン中心からの相対位置（ボーン軸成分を除去）
+	// Step 1: 水平方向を外積で計算
+	// 水平方向 = ボーン軸 × グローバルZ (0, 0, -1)
+	globalZ := &mmath.MVec3{X: 0, Y: 0, Z: -1}
+	horizontalDir := boneAxis.Cross(globalZ).Normalized()
+
+	// 外積が0に近い場合（ボーン軸がZ軸とほぼ平行の場合）はY軸を使う
+	if horizontalDir.Length() < 1e-6 {
+		globalY := &mmath.MVec3{X: 0, Y: 1, Z: 0}
+		horizontalDir = boneAxis.Cross(globalY).Normalized()
 	}
+
+	// Step 2: 各頂点を水平方向に投影して、最大/最小を見つける
+	var minDot, maxDot float64 = math.MaxFloat64, -math.MaxFloat64
+	var leftStar, rightStar *pmx.Vertex
 
 	for _, v := range vertices {
 		// ボーン中心からの相対位置
 		relPos := v.Position.Subed(boneCenter)
-		// ボーン軸成分を除去（垂直平面に投影）
-		axisComponent := boneAxis.MuledScalar(relPos.Dot(boneAxis))
-		projected := relPos.Subed(axisComponent)
-
-		projectedPoints = append(projectedPoints, struct {
-			vertex    *pmx.Vertex
-			projected *mmath.MVec3
-		}{vertex: v, projected: projected})
-	}
-
-	// Step 2: 投影された点群の重心を計算
-	var centroidX, centroidY, centroidZ float64
-	for _, pp := range projectedPoints {
-		centroidX += pp.projected.X
-		centroidY += pp.projected.Y
-		centroidZ += pp.projected.Z
-	}
-	n := float64(len(projectedPoints))
-	centroid := &mmath.MVec3{X: centroidX / n, Y: centroidY / n, Z: centroidZ / n}
-
-	// Step 3: 共分散行列を計算（3x3だがボーン軸方向は0になるので実質2D）
-	var cxx, cxy, cxz, cyy, cyz, czz float64
-	for _, pp := range projectedPoints {
-		dx := pp.projected.X - centroid.X
-		dy := pp.projected.Y - centroid.Y
-		dz := pp.projected.Z - centroid.Z
-		cxx += dx * dx
-		cxy += dx * dy
-		cxz += dx * dz
-		cyy += dy * dy
-		cyz += dy * dz
-		czz += dz * dz
-	}
-	cxx /= n
-	cxy /= n
-	cxz /= n
-	cyy /= n
-	cyz /= n
-	czz /= n
-
-	// Step 4: 3x3共分散行列の最大固有値の固有ベクトルを求める（Power Iteration法）
-	// 初期ベクトル
-	eigenvector := &mmath.MVec3{X: 1, Y: 0, Z: 0}
-
-	for iter := 0; iter < 100; iter++ {
-		// 行列×ベクトル
-		newX := cxx*eigenvector.X + cxy*eigenvector.Y + cxz*eigenvector.Z
-		newY := cxy*eigenvector.X + cyy*eigenvector.Y + cyz*eigenvector.Z
-		newZ := cxz*eigenvector.X + cyz*eigenvector.Y + czz*eigenvector.Z
-
-		newVec := &mmath.MVec3{X: newX, Y: newY, Z: newZ}
-		length := newVec.Length()
-		if length < 1e-10 {
-			break
-		}
-		eigenvector = newVec.DivedScalar(length)
-	}
-
-	// 水平方向 = 最大分散方向
-	horizontalDir := eigenvector.Normalized()
-
-	// Step 5: この方向で最も離れた2点を見つける
-	var minDot, maxDot float64 = math.MaxFloat64, -math.MaxFloat64
-	var leftStar, rightStar *pmx.Vertex
-
-	for _, pp := range projectedPoints {
-		// 重心からの相対位置を水平方向に投影
-		relFromCentroid := pp.projected.Subed(centroid)
-		dot := relFromCentroid.Dot(horizontalDir)
+		// 水平方向への投影
+		dot := relPos.Dot(horizontalDir)
 
 		if dot < minDot {
 			minDot = dot
-			leftStar = pp.vertex
+			leftStar = v
 		}
 		if dot > maxDot {
 			maxDot = dot
-			rightStar = pp.vertex
+			rightStar = v
 		}
 	}
 
