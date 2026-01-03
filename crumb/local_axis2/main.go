@@ -111,7 +111,13 @@ func main() {
 				fromBone.BoneFlag |= pmx.BONE_FLAG_HAS_LOCAL_AXIS
 
 				fromBone.LocalAxisX = boneAxis.Normalized()
-				fromBone.LocalAxisZ = horizontalDir.Cross(fromBone.LocalAxis).Normalized()
+
+				// 左右の向きに応じてZ軸を設定
+				if direction == pmx.BONE_DIRECTION_LEFT {
+					fromBone.LocalAxisZ = horizontalDir.Cross(fromBone.LocalAxis).Normalized()
+				} else {
+					fromBone.LocalAxisZ = fromBone.LocalAxis.Cross(horizontalDir).Normalized()
+				}
 
 				if strings.Contains(fromBone.Name(), "親指") && !thumbUpAxisIsY {
 					// 親指でZ軸上向き指定の場合、YとZを入れ替え
