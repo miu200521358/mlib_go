@@ -50,7 +50,7 @@ func TestAppConfigUnmarshalAppName(t *testing.T) {
 	if cfg.ViewerWindowSize.Width != 3 || cfg.ViewerWindowSize.Height != 4 {
 		t.Errorf("ViewerWindowSize: got=%v", cfg.ViewerWindowSize)
 	}
-	if cfg.Env() != APP_ENV_STG || cfg.IsStg() != true {
+	if cfg.Env() != APP_ENV_STG || !cfg.IsStg() {
 		t.Errorf("Env STG: got=%v", cfg.Env())
 	}
 	if !cfg.IsCloseConfirmEnabled() {
@@ -69,14 +69,14 @@ func TestAppConfigUnmarshalInvalid(t *testing.T) {
 // TestAppConfigEnvVariants はEnv判定を確認する。
 func TestAppConfigEnvVariants(t *testing.T) {
 	var nilCfg *AppConfig
-	if nilCfg.Env() != APP_ENV_DEV || nilCfg.IsDev() != true {
+	if nilCfg.Env() != APP_ENV_DEV || !nilCfg.IsDev() {
 		t.Errorf("nil Env default: got=%v", nilCfg.Env())
 	}
 	if nilCfg.IsCloseConfirmEnabled() {
 		t.Errorf("nil CloseConfirm should be false")
 	}
 	cfg := &AppConfig{}
-	if cfg.Env() != APP_ENV_DEV || cfg.IsDev() != true {
+	if cfg.Env() != APP_ENV_DEV || !cfg.IsDev() {
 		t.Errorf("empty Env default: got=%v", cfg.Env())
 	}
 	cfg.EnvValue = APP_ENV_PROD

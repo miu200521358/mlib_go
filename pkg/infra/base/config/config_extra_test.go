@@ -204,7 +204,7 @@ func TestUserConfigSaveStringSlice(t *testing.T) {
 func TestUserConfigBoolIntDefaults(t *testing.T) {
 	withTempRoot(t)
 	store := &UserConfigStore{}
-	if store.Bool("missing", true) != true {
+	if !store.Bool("missing", true) {
 		t.Errorf("Bool default failed")
 	}
 	if store.Int("missing", 5) != 5 {
