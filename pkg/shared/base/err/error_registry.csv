@@ -23,6 +23,10 @@ ID,Kind,Layer,Module,ErrorName,Summary,Remedy,SourcePaths
 94506,Internal,adapter,45,GraphicsContextInitFailed,OpenGLコンテキスト初期化に失敗,,mlib_go/cmd/main.go; mlib_go/pkg/interface/viewer/view_window.go
 92101,Internal,domain,21,MathCopyFailed,数学型のコピーに失敗,,-
 92102,Internal,domain,21,MathLengthMismatch,配列長が一致しない,,-
+92103,Internal,domain,21,MathCalculateXFailed,CalculateXに失敗,,-
+92104,Internal,domain,21,MathQuaternionLogFailed,Quaternion.Logに失敗,,-
+92105,Internal,domain,21,MathIntersectLinePlaneFailed,平面との交点計算に失敗,,-
+92106,Internal,domain,21,MathCurveFitFailed,曲線フィットに失敗,,-
 92201,Internal,domain,22,ModelCopyFailed,モデルコピーに失敗,,-
 92301,Internal,domain,23,MotionCopyFailed,モーションコピーに失敗,,-
 95209,Internal,infra,52,BaseError,エラー基底型,,mlib_go/pkg/infra/base/err/err.go
