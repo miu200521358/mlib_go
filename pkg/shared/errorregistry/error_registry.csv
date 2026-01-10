@@ -1,0 +1,43 @@
+ID,Kind,Layer,Module,ErrorName,Summary,Remedy,SourcePaths
+20001,NotFound,domain,00,NameNotFoundError,名前解決に失敗,,mlib_go/pkg/domain/core/index_name_model.go; mlib_go/pkg/domain/pmx/bones.go; vmd_sizing_t4/pkg/usecase/sizing.go
+22201,NotFound,domain,22,ParentNotFoundError,親要素が見つからない,,mlib_go/pkg/domain/pmx/bone_human.go
+92202,Internal,domain,22,IndexOutOfRangeError,インデックスが範囲外,,-
+92203,Internal,domain,22,NameConflictError,名称が既存要素と衝突,,-
+92204,Internal,domain,22,NameMismatchError,名称が一致しない,,-
+90001,Internal,domain,00,InvariantViolationError,不変条件違反/NaNなどプログラム的異常,,-
+13001,Validate,usecase,39,PrerequisiteMissingError,前提不足で処理開始できない,前提を満たしてから再実行する,-
+14101,Validate,adapter,41,IoFileNotFound,入力ファイルが存在しない,パスを確認して再指定する,mlib_go/pkg/infrastructure/repository/pmx_repository_load.go; mlib_go/pkg/infrastructure/repository/vmd_repository_load.go; mlib_go/pkg/infrastructure/repository/vpd_repository.go; mlib_go/pkg/infrastructure/repository/csv_repository.go; mlib_go/pkg/infrastructure/repository/x_repository.go
+14102,Validate,adapter,41,IoExtInvalid,拡張子が不正,拡張子を対応形式に修正する,mlib_go/pkg/infrastructure/repository/pmx_repository_load.go; mlib_go/pkg/infrastructure/repository/vmd_repository_load.go; mlib_go/pkg/infrastructure/repository/vpd_repository.go; mlib_go/pkg/infrastructure/repository/csv_repository.go; mlib_go/pkg/infrastructure/repository/x_repository.go
+14103,Validate,adapter,41,IoFormatNotSupported,形式/バージョンが非対応,対応形式/バージョンに変換する,mlib_go/pkg/infrastructure/repository/pmx_repository_load.go; mlib_go/pkg/infrastructure/repository/x_repository.go
+14104,Validate,adapter,41,IoEncodingUnknown,未知のエンコード方式,対応エンコードで保存する,mlib_go/pkg/infrastructure/repository/pmx_repository_load.go
+14105,Validate,adapter,41,IoParseFailed,ファイル内容の解析に失敗,ファイル形式/破損を確認する,mlib_go/pkg/infrastructure/repository/pmx_repository_load.go; mlib_go/pkg/infrastructure/repository/vmd_repository_load.go; mlib_go/pkg/infrastructure/repository/vpd_repository.go; mlib_go/pkg/infrastructure/repository/csv_repository.go; mlib_go/pkg/infrastructure/repository/x_repository.go; mlib_go/pkg/infrastructure/repository/x_repository_binary.go; mlib_go/pkg/infrastructure/repository/x_repository_decompress.go
+14106,Validate,adapter,41,IoEncodeFailed,出力データのエンコードに失敗,出力内容/文字コードを確認する,-
+14107,Validate,adapter,41,IoNameEncodeFailed,名前のエンコードに失敗,名称/文字コードを確認する,mlib_go/pkg/infrastructure/repository/vmd_repository_save.go
+14108,Validate,adapter,41,IoSaveFailed,ファイル保存に失敗,出力先/権限/ディスク容量を確認する,mlib_go/pkg/infrastructure/repository/vmd_repository_save.go; mlib_go/pkg/infrastructure/repository/csv_repository.go; mlib_go/pkg/infrastructure/repository/pmx_repository_save.go
+85401,External,infra,54,TerminateError,ユーザー中止で終了処理へ移行,,mlib_go/pkg/config/merr/merr.go; mlib_go/pkg/interface/app/safe.go; bone_baker/pkg/application/usecase/output_usecase.go; vmd_sizing_t4/pkg/usecase/sizing.go; vmd_sizing_t4/pkg/usecase/sizing_leg.go
+94501,Internal,adapter,45,ShaderSourceLoadFailed,シェーダソース読込に失敗,ファイルパス/配布物を確認する,mlib_go/pkg/infrastructure/mgl/shader_loader.go
+94502,Internal,adapter,45,ShaderCompileFailed,シェーダのコンパイルに失敗,シェーダの文法/対応GLSLを確認する,mlib_go/pkg/infrastructure/mgl/shader_loader.go
+94503,Internal,adapter,45,ShaderLinkFailed,シェーダのリンクに失敗,シェーダの入出力整合性を確認する,mlib_go/pkg/infrastructure/mgl/shader_loader.go
+94504,Internal,adapter,45,FramebufferIncomplete,Framebufferが不完全,MSAA/FBO設定を確認する,mlib_go/pkg/infrastructure/mgl/override_renderer.go
+94505,Internal,adapter,45,OpenGLError,OpenGLエラーが発生,ドライバ/GL状態/描画順序を確認する,mlib_go/pkg/infrastructure/mgl/error.go
+94506,Internal,adapter,45,GraphicsContextInitFailed,OpenGLコンテキスト初期化に失敗,,mlib_go/cmd/main.go; mlib_go/pkg/interface/viewer/view_window.go
+92101,Internal,domain,21,MathCopyFailed,数学型のコピーに失敗,,-
+92102,Internal,domain,21,MathLengthMismatch,配列長が一致しない,,-
+92201,Internal,domain,22,ModelCopyFailed,モデルコピーに失敗,,-
+92301,Internal,domain,23,MotionCopyFailed,モーションコピーに失敗,,-
+95209,Internal,infra,52,BaseError,エラー基底型,,mlib_go/pkg/config/merr/merr.go
+95201,Internal,infra,52,AppConfigLoadFailed,app_config.json読込に失敗,,-
+95202,Internal,infra,52,UserConfigSaveFailed,user_config.json保存に失敗,,-
+95203,Internal,infra,52,AppRootDirResolveFailed,アプリルート取得に失敗,,-
+95207,Internal,infra,52,VerboseSinkWriteFailed,VERBOSE書き込みに失敗,,-
+95208,Internal,infra,52,VerboseSinkCloseFailed,VERBOSE出力のクローズに失敗,,-
+15301,Validate,infra,53,FileNotFoundError,ファイルが存在しない,パスを確認して再指定する,-
+15302,Validate,infra,53,FileReadFailed,ファイル読込に失敗,ファイル/権限/エンコードを確認する,-
+15303,Validate,infra,53,ImageDecodeFailed,画像デコードに失敗,画像形式/破損を確認する,-
+15304,Validate,infra,53,IntParseFailed,数値パースに失敗,入力文字列を確認する,-
+15305,Validate,infra,53,LogStreamOpenFailed,ログストリームの作成に失敗,出力先/権限/ディスク容量を確認する,-
+15306,Validate,infra,53,ConsoleSnapshotSaveFailed,ログスナップショット保存に失敗,出力先/権限/ディスク容量を確認する,-
+95301,Internal,infra,53,IterProcessFailed,並列処理中のエラー,,-
+95501,Internal,infra,55,ControllerWindowInitFailed,Controllerウィンドウ初期化に失敗,,-
+95502,Internal,infra,55,ConsoleViewInitFailed,ConsoleView初期化に失敗,,-
+95503,Internal,infra,55,ProgressBarInitFailed,ProgressBar初期化に失敗,,-

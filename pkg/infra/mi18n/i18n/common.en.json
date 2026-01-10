@@ -1,0 +1,566 @@
+[
+    {
+        "id": "&ビューワー",
+        "translation": "&Viewer"
+    },
+    {
+        "id": "&フレームドロップON",
+        "translation": "&Frame Drop ON"
+    },
+    {
+        "id": "&物理ON/OFF",
+        "translation": "&Physics ON/OFF"
+    },
+    {
+        "id": "&物理リセット",
+        "translation": "&Physics Reset"
+    },
+    {
+        "id": "&法線表示",
+        "translation": "&Normal Display"
+    },
+    {
+        "id": "&ボーン表示",
+        "translation": "&Bone Display"
+    },
+    {
+        "id": "&全ボーン",
+        "translation": "&All Bones"
+    },
+    {
+        "id": "&IKボーン",
+        "translation": "&IK Bones"
+    },
+    {
+        "id": "&付与親ボーン",
+        "translation": "&Assigned Parent Bones"
+    },
+    {
+        "id": "&軸制限ボーン",
+        "translation": "&Axis Restricted Bones"
+    },
+    {
+        "id": "&回転ボーン",
+        "translation": "&Rotation Bones"
+    },
+    {
+        "id": "&移動ボーン",
+        "translation": "&Move Bones"
+    },
+    {
+        "id": "&表示ボーン",
+        "translation": "&Display Bones"
+    },
+    {
+        "id": "&剛体表示",
+        "translation": "&Rigid Body Display"
+    },
+    {
+        "id": "&ジョイント表示",
+        "translation": "&Joint Display"
+    },
+    {
+        "id": "背景色生成エラー",
+        "translation": "Background Color Generation Error"
+    },
+    {
+        "id": "&言語",
+        "translation": "&Language"
+    },
+    {
+        "id": "未設定",
+        "translation": "Not Set"
+    },
+    {
+        "id": "開く",
+        "translation": "Open"
+    },
+    {
+        "id": "履歴",
+        "translation": "History"
+    },
+    {
+        "id": "ファイルが存在しません",
+        "translation": "File Does Not Exist"
+    },
+    {
+        "id": "読み込み失敗",
+        "translation": "Load Failed"
+    },
+    {
+        "id": "履歴ダイアログ生成エラー",
+        "translation": "History Dialog Generation Error"
+    },
+    {
+        "id": "履歴ダイアログタイトル",
+        "translation": "History of {{.Title}}"
+    },
+    {
+        "id": "履歴リスト生成エラー",
+        "translation": "History List Generation Error"
+    },
+    {
+        "id": "ボタンBox生成エラー",
+        "translation": "Button Box Generation Error"
+    },
+    {
+        "id": "OKボタン生成エラー",
+        "translation": "OK Button Generation Error"
+    },
+    {
+        "id": "Cancelボタン生成エラー",
+        "translation": "Cancel Button Generation Error"
+    },
+    {
+        "id": "ファイル選択ダイアログタイトル",
+        "translation": "Please Select {{.Title}}"
+    },
+    {
+        "id": "ファイル選択ダイアログ選択エラー",
+        "translation": "File Selection Dialog Error"
+    },
+    {
+        "id": "タブウィジェット生成エラー",
+        "translation": "Tab Widget Generation Error"
+    },
+    {
+        "id": "タブページ生成エラー",
+        "translation": "Tab Page Generation Error"
+    },
+    {
+        "id": "再生",
+        "translation": "Play"
+    },
+    {
+        "id": "一時停止",
+        "translation": "Pause"
+    },
+    {
+        "id": "メインウィンドウ生成エラー",
+        "translation": "Main Window Generation Error"
+    },
+    {
+        "id": "ビューワーウィンドウ生成エラー",
+        "translation": "Viewer Window Generation Error"
+    },
+    {
+        "id": "コンソール生成エラー",
+        "translation": "Console Generation Error"
+    },
+    {
+        "id": "ファイル",
+        "translation": "File"
+    },
+    {
+        "id": "Pmxファイル",
+        "translation": "PMX File"
+    },
+    {
+        "id": "Pmxファイルピッカー生成エラー",
+        "translation": "PMX File Picker Generation Error"
+    },
+    {
+        "id": "Vmdファイル",
+        "translation": "VMD File"
+    },
+    {
+        "id": "Vmdファイルピッカー生成エラー",
+        "translation": "VMD File Picker Generation Error"
+    },
+    {
+        "id": "セパレータ生成エラー",
+        "translation": "Separator Generation Error"
+    },
+    {
+        "id": "モーションプレイヤー生成エラー",
+        "translation": "Motion Player Generation Error"
+    },
+    {
+        "id": "Pmxファイル読み込みエラー",
+        "translation": "PMX File Loading Error"
+    },
+    {
+        "id": "Vmdファイル読み込みエラー",
+        "translation": "VMD File Loading Error"
+    },
+    {
+        "id": "ビューワー",
+        "translation": "Viewer"
+    },
+    {
+        "id": "&コントローラーウィンドウ",
+        "translation": "&Controller Window"
+    },
+    {
+        "id": "&デバッグログ表示",
+        "translation": "&Display Debug Messages"
+    },
+    {
+        "id": "&冗長ログ表示",
+        "translation": "&Display Verbose Messages"
+    },
+    {
+        "id": "予期せぬエラーが発生しました",
+        "translation": "An unexpected error has occurred"
+    },
+    {
+        "id": "有効なPmxファイルが入力されていません",
+        "translation": "A valid Pmx file has not been entered"
+    },
+    {
+        "id": "&使い方",
+        "translation": "&How to use"
+    },
+    {
+        "id": "&ビューワーの使い方",
+        "translation": "&How to use the viewer"
+    },
+    {
+        "id": "ビューワーの使い方メッセージ",
+        "translation": "・Use the mouse wheel up and down to zoom in and out\n・Click and move the mouse wheel to change the camera position\n・Click and move the right mouse button to change the camera direction\n・Hold Shift while operating the mouse to increase the movement amount\n・Hold Ctrl while operating the mouse to decrease the movement amount\n・Enter '1' on the keypad to view from the bottom\n・Enter '2' on the keypad to view from the front\n・Enter '4' on the keypad to view from the left\n・Enter '5' on the keypad to view from the top\n・Enter '6' on the keypad to view from the right\n・Enter '8' on the keypad to view from the back"
+    },
+    {
+        "id": "&再生フォームの使い方",
+        "translation": "&How to use the playback form"
+    },
+    {
+        "id": "再生フォームの使い方",
+        "translation": "How to use the playback form"
+    },
+    {
+        "id": "再生ウィジェットの使い方メッセージ",
+        "translation": "・The 'Play' button becomes clickable when a PMX model is set\n・Setting a VMD motion is optional\n・Clicking the 'Play' button starts the rendering. The button label changes to 'Pause'\n・Clicking the 'Pause' button pauses the rendering. The button label changes to 'Play'\n・While paused, you can change the keyframe position with the keyframe number field or slider\n・The keyframe number field and slider can adjust the number up and down with the middle mouse wheel"
+    },
+    {
+        "id": "コントローラーウィンドウの使い方",
+        "translation": "How to use the Controller Window"
+    },
+    {
+        "id": "コントローラーウィンドウの使い方メッセージ",
+        "translation": "・Click on the name of each form part to display how to use that part in the message area."
+    },
+    {
+        "id": "予期せぬエラーヘッダー",
+        "translation": "An unexpected error has occurred. The app will now close.\nIf the issue persists, please contact us through the community.\n    App Name: {{.AppName}}, App Version: {{.AppVersion}}"
+    },
+    {
+        "id": "コミュニティ報告",
+        "translation": "Copy the error and report it in the community"
+    },
+    {
+        "id": "アプリを終了",
+        "translation": "Close the app"
+    },
+    {
+        "id": "エラーダイアログ起動失敗",
+        "translation": "Failed to launch error dialog"
+    },
+    {
+        "id": "クリップボードコピー失敗",
+        "translation": "Failed to copy to clipboard"
+    },
+    {
+        "id": "&ハイスペックモード",
+        "translation": "&High Spec Mode"
+    },
+    {
+        "id": "モデル名エンコードエラー",
+        "translation": "Since the model name ({{.Name}}) contains characters that are unreadable in Japanese or English (environment-dependent characters, foreign language characters, etc.), a temporary model name will be set."
+    },
+    {
+        "id": "ボーン名エンコードエラー",
+        "translation": "Since the bone name ({{.Name}}) contains characters that are unreadable in Japanese or English (environment-dependent characters, foreign language characters, etc.), it will be skipped."
+    },
+    {
+        "id": "ファイルクローズエラー",
+        "translation": "Failed to output the file to the file path ({{.Path}})."
+    },
+    {
+        "id": "ボーンフレーム書き込みエラー",
+        "translation": "Failed to write the bone data."
+    },
+    {
+        "id": "モーフフレーム書き込みエラー",
+        "translation": "Failed to write the morph data."
+    },
+    {
+        "id": "&IK冗長ログ表示",
+        "translation": "&IK verbose log display"
+    },
+    {
+        "id": "固定ビュー表示",
+        "translation": "Fixed view display"
+    },
+    {
+        "id": "固定ビュー非表示",
+        "translation": "Hide fixed view"
+    },
+    {
+        "id": "固定ビューウィジェット生成エラー",
+        "translation": "Fixed view widget generation error"
+    },
+    {
+        "id": "正面",
+        "translation": "Front"
+    },
+    {
+        "id": "左面",
+        "translation": "Left"
+    },
+    {
+        "id": "右面",
+        "translation": "Right"
+    },
+    {
+        "id": "背面",
+        "translation": "Back"
+    },
+    {
+        "id": "&ワイヤーフレーム表示",
+        "translation": "&Wireframe Display"
+    },
+    {
+        "id": "&前面表示",
+        "translation": "&Front Display"
+    },
+    {
+        "id": "&埋め込み表示",
+        "translation": "&Embedded Display"
+    },
+    {
+        "id": "&情報表示",
+        "translation": "&Display Information"
+    },
+    {
+        "id": "&fps制限",
+        "translation": "&FPS Limit"
+    },
+    {
+        "id": "&30fps制限",
+        "translation": "&30 FPS Limit"
+    },
+    {
+        "id": "&60fps制限",
+        "translation": "&60 FPS Limit"
+    },
+    {
+        "id": "&fps無制限",
+        "translation": "&Unlimited FPS"
+    },
+    {
+        "id": "&頂点ライン選択",
+        "translation": "&Vertex Line Selection"
+    },
+    {
+        "id": "&頂点ライン選択使い方",
+        "translation": "&How to Use Vertex Line Selection"
+    },
+    {
+        "id": "頂点ライン選択使い方メッセージ",
+        "translation": "With the vertex line selection turned ON, you can select vertices by moving the cursor over them while holding down the left mouse button. Selected vertices are displayed in orange. The cursor's path is displayed in red. You can deselect vertices by tracing over them again with the left mouse button while holding down the Ctrl key."
+    },
+    {
+        "id": "ミップマップ生成エラー",
+        "translation": "Mipmaps will not be generated because the texture size is not a power of two. Texture name: {{.Name}}"
+    },
+    {
+        "id": "アイコン生成エラー",
+        "translation": "Icon generation error"
+    },
+    {
+        "id": "終了確認",
+        "translation": "Exit Confirmation"
+    },
+    {
+        "id": "終了確認メッセージ",
+        "translation": "Are you sure you want to exit the app?"
+    },
+    {
+        "id": "言語変更",
+        "translation": "Language Change"
+    },
+    {
+        "id": "言語変更メッセージ",
+        "translation": "The language change on the screen will take effect after restarting.\nDo you want to exit the app?"
+    },
+    {
+        "id": "&サブビューワーオーバーレイ",
+        "translation": "&Subviewer Overlay"
+    },
+    {
+        "id": "&サブビューワーオーバーレイの使い方",
+        "translation": "&How to use the sub-viewer overlay"
+    },
+    {
+        "id": "サブビューワーオーバーレイの使い方メッセージ",
+        "translation": "When checked, the sub-window rendering will be overlaid on the main window.\nWhile checked, operating the main window will also synchronize the movement of the sub-window.\nThe size of the character model in the sub-window will be approximately matched to the character model in the main window.\nYou can switch whether to use the upper body or lower body as the alignment reference."
+    },
+    {
+        "id": "&カメラ同期",
+        "translation": "&Camera Sync"
+    },
+    {
+        "id": "再生キーフレ説明",
+        "translation": "・The frame number field displays the currently rendered frame number.\n・You can increase or decrease the frame number by using the mouse wheel in the field or pressing the button to the right of the field."
+    },
+    {
+        "id": "再生スライダー説明",
+        "translation": "・The playback slider shows the corresponding position of the currently rendered frame number.\n・You can increase or decrease the frame number by using the mouse wheel over the slider."
+    },
+    {
+        "id": "再生ボタン説明",
+        "translation": "・Clicking the playback button allows you to play the motion.\n・Other buttons or operations cannot be used during playback."
+    },
+    {
+        "id": "ファイル存在エラー",
+        "translation": "The file does not exist\nInput file path: {{.Path}}"
+    },
+    {
+        "id": "拡張子エラー",
+        "translation": "The input file path has an unsupported file extension\nInput file path: {{.Path}}, Allowed extensions: {{.Ext}}"
+    },
+    {
+        "id": "&ビューワー冗長ログ表示",
+        "translation": "&Viewer Verbose Log Display"
+    },
+    {
+        "id": "保存開始",
+        "translation": "Start saving {{.Type}}\nOutput file path: {{.Path}}"
+    },
+    {
+        "id": "保存終了",
+        "translation": "Finished saving {{.Type}}"
+    },
+    {
+        "id": "読み込み開始",
+        "translation": "Start loading {{.Type}}\nInput file path: {{.Path}}"
+    },
+    {
+        "id": "読み込み終了",
+        "translation": "Finished loading {{.Type}}"
+    },
+    {
+        "id": "読み込み途中完了",
+        "translation": "-- 【{{.Type}}】Loading complete"
+    },
+    {
+        "id": "読み込み途中",
+        "translation": "---- 【{{.Type}}】Loading [{{.Index}}/{{.Total}}]"
+    },
+    {
+        "id": "保存途中完了",
+        "translation": "-- 【{{.Type}}】Saving complete"
+    },
+    {
+        "id": "保存途中",
+        "translation": "---- 【{{.Type}}】Saving [{{.Index}}/{{.Total}}]"
+    },
+    {
+        "id": "頂点",
+        "translation": "Vertex"
+    },
+    {
+        "id": "面",
+        "translation": "Face"
+    },
+    {
+        "id": "材質",
+        "translation": "Material"
+    },
+    {
+        "id": "ボーン",
+        "translation": "Bone"
+    },
+    {
+        "id": "モーフ",
+        "translation": "Morph"
+    },
+    {
+        "id": "表示枠",
+        "translation": "Display frame"
+    },
+    {
+        "id": "剛体",
+        "translation": "Rigid body"
+    },
+    {
+        "id": "ジョイント",
+        "translation": "Joint"
+    },
+    {
+        "id": "&画面移動連結",
+        "translation": "&Screen movement link"
+    },
+    {
+        "id": "日本語名称",
+        "translation": "Japanese Name"
+    },
+    {
+        "id": "英語名称",
+        "translation": "English Name"
+    },
+    {
+        "id": "有効テクスチャ",
+        "translation": "Enable Texture"
+    },
+    {
+        "id": "テクスチャ",
+        "translation": "Texture"
+    },
+    {
+        "id": "有効Toon",
+        "translation": "Enable Toon"
+    },
+    {
+        "id": "有効スフィア",
+        "translation": "Enable Sphere"
+    },
+    {
+        "id": "スフィア",
+        "translation": "Sphere"
+    },
+    {
+        "id": "システム用ボーン追加失敗",
+        "translation": "Failed to add system bone"
+    },
+    {
+        "id": "&上半身合わせ",
+        "translation": "&Upper Body Alignment"
+    },
+    {
+        "id": "&下半身合わせ",
+        "translation": "&Lower Body Alignment"
+    },
+    {
+        "id": "&カメラ合わせなし",
+        "translation": "&No Camera Alignment"
+    },
+    {
+        "id": "&ツールについて",
+        "translation": "&About the Tool"
+    },
+    {
+        "id": "中間MSAA差し替え",
+        "translation": "Since the default FBO sample count is not 4, MSAA is replaced with a type using an intermediate FBO"
+    },
+    {
+        "id": "焼き込み再生ループ再開: 焼き込み履歴INDEX[%d]",
+        "translation": "Resume Bake Playback Loop: Bake History INDEX [%d]"
+    },
+    {
+        "id": "&ボーン表示の使い方",
+        "translation": "&How to Use Bone Display"
+    },
+    {
+        "id": "ボーン表示の使い方メッセージ",
+        "translation": "・Turning ON bone display will show the model's bones\n・You can select the types of bones to display from the menu\n・Multiple types can be displayed at the same time\n・While bones are displayed, clicking near a bone will show a list of nearby bone names."
+    },
+    {
+        "id": "&剛体表示の使い方",
+        "translation": "&How to Use Rigid Body Display"
+    },
+    {
+        "id": "剛体表示の使い方メッセージ",
+        "translation": "・Turning ON rigid body display will show the model's rigid bodies\n・In front display mode, rigid bodies are shown over the model\n・In embedded display mode, only the parts of the rigid bodies sticking out from the model are shown\n・While rigid bodies are displayed, clicking on a rigid body will show its name and group."
+    }
+]
