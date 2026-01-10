@@ -1,5 +1,5 @@
 // 指示: miu200521358
-package mi18n
+package i18n
 
 import (
 	"embed"
@@ -8,14 +8,14 @@ import (
 	"sync"
 
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
-	basei18n "github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
 )
 
 //go:embed i18n/common.*.json
 var commonI18nFiles embed.FS
 
 // LangCode は言語コード。
-type LangCode = basei18n.LangCode
+type LangCode = i18n.LangCode
 
 const (
 	// LANG_JA は日本語。
@@ -45,7 +45,7 @@ var defaultI18n *I18n
 var defaultMu sync.Mutex
 
 // InitI18n はi18nを初期化する。
-func InitI18n(appFiles embed.FS, userConfig config.IUserConfig) basei18n.II18n {
+func InitI18n(appFiles embed.FS, userConfig config.IUserConfig) i18n.II18n {
 	instance := initI18nFS(appFiles, userConfig)
 	defaultMu.Lock()
 	defaultI18n = instance
@@ -75,11 +75,11 @@ func initI18nFS(appFiles fs.FS, userConfig config.IUserConfig) *I18n {
 }
 
 // SetLang は言語を保存する。
-func SetLang(lang LangCode) basei18n.LangChangeAction {
+func SetLang(lang LangCode) i18n.LangChangeAction {
 	defaultMu.Lock()
 	defer defaultMu.Unlock()
 	if defaultI18n == nil {
-		return basei18n.LANG_CHANGE_RESTART_REQUIRED
+		return i18n.LANG_CHANGE_RESTART_REQUIRED
 	}
 	return defaultI18n.SetLang(lang)
 }
@@ -89,7 +89,7 @@ func CurrentLang() LangCode {
 	defaultMu.Lock()
 	defer defaultMu.Unlock()
 	if defaultI18n == nil {
-		return basei18n.DefaultLang
+		return i18n.DefaultLang
 	}
 	return defaultI18n.Lang()
 }
@@ -117,24 +117,24 @@ func TWithLang(lang LangCode, key string) string {
 // Lang は現在言語を返す。
 func (i *I18n) Lang() LangCode {
 	if i == nil {
-		return basei18n.DefaultLang
+		return i18n.DefaultLang
 	}
 	return i.lang
 }
 
 // SetLang は言語を保存し、再起動が必要か返す。
-func (i *I18n) SetLang(lang LangCode) basei18n.LangChangeAction {
+func (i *I18n) SetLang(lang LangCode) i18n.LangChangeAction {
 	if i == nil {
-		return basei18n.LANG_CHANGE_RESTART_REQUIRED
+		return i18n.LANG_CHANGE_RESTART_REQUIRED
 	}
 	lang = normalizeLang(lang)
 	if lang == i.lang {
-		return basei18n.LANG_CHANGE_NONE
+		return i18n.LANG_CHANGE_NONE
 	}
 	if i.userConfig != nil {
 		_ = i.userConfig.SetStringSlice(config.UserConfigKeyLang, []string{string(lang)}, 1)
 	}
-	return basei18n.LANG_CHANGE_RESTART_REQUIRED
+	return i18n.LANG_CHANGE_RESTART_REQUIRED
 }
 
 // IsReady は初期化済みか判定する。
@@ -159,7 +159,7 @@ func (i *I18n) TWithLang(lang LangCode, key string) string {
 		return "●●" + key + "●●"
 	}
 	if lang == "" {
-		lang = basei18n.DefaultLang
+		lang = i18n.DefaultLang
 	}
 	return lookupMessage(i.messages, lang, key)
 }
@@ -167,17 +167,17 @@ func (i *I18n) TWithLang(lang LangCode, key string) string {
 // detectLang はユーザー設定から言語を取得する。
 func detectLang(userConfig config.IUserConfig) LangCode {
 	if userConfig == nil {
-		return basei18n.DefaultLang
+		return i18n.DefaultLang
 	}
 	values := userConfig.GetStringSlice(config.UserConfigKeyLang)
 	if len(values) == 0 {
-		return basei18n.DefaultLang
+		return i18n.DefaultLang
 	}
 	switch LangCode(values[0]) {
 	case LANG_JA, LANG_EN, LANG_ZH, LANG_KO:
 		return LangCode(values[0])
 	default:
-		return basei18n.DefaultLang
+		return i18n.DefaultLang
 	}
 }
 
@@ -187,7 +187,7 @@ func normalizeLang(lang LangCode) LangCode {
 	case LANG_JA, LANG_EN, LANG_ZH, LANG_KO:
 		return lang
 	default:
-		return basei18n.DefaultLang
+		return i18n.DefaultLang
 	}
 }
 
@@ -227,7 +227,7 @@ func mergeMessages(common, app map[string]string) map[string]string {
 func lookupMessage(messages map[LangCode]map[string]string, lang LangCode, key string) string {
 	langMap, ok := messages[lang]
 	if !ok {
-		langMap = messages[basei18n.DefaultLang]
+		langMap = messages[i18n.DefaultLang]
 	}
 	value, ok := langMap[key]
 	if !ok {

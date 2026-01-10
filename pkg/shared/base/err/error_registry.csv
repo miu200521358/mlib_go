@@ -14,7 +14,7 @@ ID,Kind,Layer,Module,ErrorName,Summary,Remedy,SourcePaths
 14106,Validate,adapter,41,IoEncodeFailed,出力データのエンコードに失敗,出力内容/文字コードを確認する,-
 14107,Validate,adapter,41,IoNameEncodeFailed,名前のエンコードに失敗,名称/文字コードを確認する,mlib_go/pkg/infrastructure/repository/vmd_repository_save.go
 14108,Validate,adapter,41,IoSaveFailed,ファイル保存に失敗,出力先/権限/ディスク容量を確認する,mlib_go/pkg/infrastructure/repository/vmd_repository_save.go; mlib_go/pkg/infrastructure/repository/csv_repository.go; mlib_go/pkg/infrastructure/repository/pmx_repository_save.go
-85401,External,infra,54,TerminateError,ユーザー中止で終了処理へ移行,,mlib_go/pkg/config/merr/merr.go; mlib_go/pkg/interface/app/safe.go; bone_baker/pkg/application/usecase/output_usecase.go; vmd_sizing_t4/pkg/usecase/sizing.go; vmd_sizing_t4/pkg/usecase/sizing_leg.go
+85401,External,infra,54,TerminateError,ユーザー中止で終了処理へ移行,,mlib_go/pkg/infra/base/err/err.go; mlib_go/pkg/interface/app/safe.go; bone_baker/pkg/application/usecase/output_usecase.go; vmd_sizing_t4/pkg/usecase/sizing.go; vmd_sizing_t4/pkg/usecase/sizing_leg.go
 94501,Internal,adapter,45,ShaderSourceLoadFailed,シェーダソース読込に失敗,ファイルパス/配布物を確認する,mlib_go/pkg/infrastructure/mgl/shader_loader.go
 94502,Internal,adapter,45,ShaderCompileFailed,シェーダのコンパイルに失敗,シェーダの文法/対応GLSLを確認する,mlib_go/pkg/infrastructure/mgl/shader_loader.go
 94503,Internal,adapter,45,ShaderLinkFailed,シェーダのリンクに失敗,シェーダの入出力整合性を確認する,mlib_go/pkg/infrastructure/mgl/shader_loader.go
@@ -25,7 +25,7 @@ ID,Kind,Layer,Module,ErrorName,Summary,Remedy,SourcePaths
 92102,Internal,domain,21,MathLengthMismatch,配列長が一致しない,,-
 92201,Internal,domain,22,ModelCopyFailed,モデルコピーに失敗,,-
 92301,Internal,domain,23,MotionCopyFailed,モーションコピーに失敗,,-
-95209,Internal,infra,52,BaseError,エラー基底型,,mlib_go/pkg/config/merr/merr.go
+95209,Internal,infra,52,BaseError,エラー基底型,,mlib_go/pkg/infra/base/err/err.go
 95201,Internal,infra,52,AppConfigLoadFailed,app_config.json読込に失敗,,-
 95202,Internal,infra,52,UserConfigSaveFailed,user_config.json保存に失敗,,-
 95203,Internal,infra,52,AppRootDirResolveFailed,アプリルート取得に失敗,,-

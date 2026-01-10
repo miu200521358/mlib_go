@@ -1,5 +1,5 @@
 // 指示: miu200521358
-package errorregistry
+package err
 
 import "testing"
 

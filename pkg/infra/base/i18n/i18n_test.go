@@ -1,12 +1,12 @@
 // 指示: miu200521358
-package mi18n
+package i18n
 
 import (
 	"testing"
 	"testing/fstest"
 
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
-	basei18n "github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
 )
 
 type stubUserConfig struct {
@@ -90,10 +90,10 @@ func TestSetLangAction(t *testing.T) {
 	cfg := &stubUserConfig{lang: []string{"ja"}}
 	i := initI18nFS(fsys, cfg)
 
-	if action := i.SetLang(LANG_JA); action != basei18n.LANG_CHANGE_NONE {
+	if action := i.SetLang(LANG_JA); action != i18n.LANG_CHANGE_NONE {
 		t.Errorf("SetLang same: got=%v", action)
 	}
-	if action := i.SetLang(LANG_EN); action != basei18n.LANG_CHANGE_RESTART_REQUIRED {
+	if action := i.SetLang(LANG_EN); action != i18n.LANG_CHANGE_RESTART_REQUIRED {
 		t.Errorf("SetLang change: got=%v", action)
 	}
 	if len(cfg.setLang) == 0 || cfg.setLang[0] != "en" {
