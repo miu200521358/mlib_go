@@ -11,8 +11,8 @@ import (
 )
 
 type stubUserConfig struct {
-	lang     []string
-	setLang  []string
+	lang    []string
+	setLang []string
 }
 
 // Get は未使用のため空実装。
@@ -58,10 +58,10 @@ func (s *stubUserConfig) AppRootDir() (string, error) { return "", nil }
 // TestI18nTranslations は翻訳取得を確認する。
 func TestI18nTranslations(t *testing.T) {
 	fsys := fstest.MapFS{
-		"i18n/app.ja.json": &fstest.MapFile{Data: []byte(`[{"id":"hello","translation":"こんにちは"}]`)},
-		"i18n/app.en.json": &fstest.MapFile{Data: []byte(`[{"id":"hello","translation":"hello"}]`)},
-		"i18n/app.zh.json": &fstest.MapFile{Data: []byte(`[]`)},
-		"i18n/app.ko.json": &fstest.MapFile{Data: []byte(`[]`)},
+		"cmd/i18n/app.ja.json": &fstest.MapFile{Data: []byte(`[{"id":"hello","translation":"こんにちは"}]`)},
+		"cmd/i18n/app.en.json": &fstest.MapFile{Data: []byte(`[{"id":"hello","translation":"hello"}]`)},
+		"cmd/i18n/app.zh.json": &fstest.MapFile{Data: []byte(`[]`)},
+		"cmd/i18n/app.ko.json": &fstest.MapFile{Data: []byte(`[]`)},
 	}
 	cfg := &stubUserConfig{lang: []string{"ja"}}
 	i := initI18nFS(fsys, cfg)
@@ -83,10 +83,10 @@ func TestI18nTranslations(t *testing.T) {
 // TestSetLangAction は言語変更の戻り値を確認する。
 func TestSetLangAction(t *testing.T) {
 	fsys := fstest.MapFS{
-		"i18n/app.ja.json": &fstest.MapFile{Data: []byte(`[]`)},
-		"i18n/app.en.json": &fstest.MapFile{Data: []byte(`[]`)},
-		"i18n/app.zh.json": &fstest.MapFile{Data: []byte(`[]`)},
-		"i18n/app.ko.json": &fstest.MapFile{Data: []byte(`[]`)},
+		"cmd/i18n/app.ja.json": &fstest.MapFile{Data: []byte(`[]`)},
+		"cmd/i18n/app.en.json": &fstest.MapFile{Data: []byte(`[]`)},
+		"cmd/i18n/app.zh.json": &fstest.MapFile{Data: []byte(`[]`)},
+		"cmd/i18n/app.ko.json": &fstest.MapFile{Data: []byte(`[]`)},
 	}
 	cfg := &stubUserConfig{lang: []string{"ja"}}
 	i := initI18nFS(fsys, cfg)
@@ -173,10 +173,10 @@ func TestInitI18nGlobals(t *testing.T) {
 	cfg := &stubUserConfig{lang: []string{"en"}}
 
 	prev := defaultI18n
-	i := InitI18n(emptyFS, cfg)
+	InitI18n(emptyFS, cfg)
 	t.Cleanup(func() { defaultI18n = prev })
 
-	if i == nil || CurrentLang() != LANG_EN {
+	if CurrentLang() != LANG_EN {
 		t.Errorf("InitI18n CurrentLang: got=%v", CurrentLang())
 	}
 	if SetLang(LANG_EN) != i18n.LANG_CHANGE_NONE {
@@ -207,8 +207,8 @@ func TestI18nReadyFlag(t *testing.T) {
 // TestLoadMessagesAndLookup は読み込みと参照の分岐を確認する。
 func TestLoadMessagesAndLookup(t *testing.T) {
 	fsys := fstest.MapFS{
-		"ok.json":   &fstest.MapFile{Data: []byte(`[{"id":"a","translation":"A"},{"id":"","translation":"skip"}]`)},
-		"bad.json":  &fstest.MapFile{Data: []byte(`{invalid`)},
+		"ok.json":  &fstest.MapFile{Data: []byte(`[{"id":"a","translation":"A"},{"id":"","translation":"skip"}]`)},
+		"bad.json": &fstest.MapFile{Data: []byte(`{invalid`)},
 	}
 	if got := loadMessages(fsys, "missing.json"); len(got) != 0 {
 		t.Errorf("loadMessages missing: got=%v", got)

@@ -30,18 +30,6 @@ var (
 	}
 )
 
-// IUserConfigStore はinfra向けのユーザー設定I/F。
-type IUserConfigStore interface {
-	SaveValue(key, value string, limit int) error
-	Values(key string) []string
-	Bool(key string, defaultValue bool) bool
-	SaveBool(key string, value bool) error
-	Int(key string, defaultValue int) int
-	SaveInt(key string, value int) error
-	LoadAll(key string) ([]string, map[string]interface{})
-	AppRootDir() (string, error)
-}
-
 // ConfigStore は設定ストアの実装。
 type ConfigStore struct {
 	appConfig  *config.AppConfig
@@ -73,7 +61,7 @@ var userConfigOnce sync.Once
 var userConfigSingleton *UserConfigStore
 
 // NewUserConfigStore はユーザー設定ストアを返す（シングルトン）。
-func NewUserConfigStore() IUserConfigStore {
+func NewUserConfigStore() config.IUserConfig {
 	userConfigOnce.Do(func() {
 		userConfigSingleton = &UserConfigStore{}
 	})
@@ -85,7 +73,7 @@ type UserConfigStore struct{}
 
 // Get はキーの値を返す。
 func (u *UserConfigStore) Get(key string) (any, bool) {
-	_, configMap := u.LoadAll(key)
+	_, configMap := u.loadAll(key)
 	val, ok := configMap[key]
 	return val, ok
 }
@@ -94,7 +82,7 @@ func (u *UserConfigStore) Get(key string) (any, bool) {
 func (u *UserConfigStore) Set(key string, value any) error {
 	switch v := value.(type) {
 	case string:
-		return u.SaveValue(key, v, 1)
+		return u.saveValue(key, v, 1)
 	case []string:
 		limit := len(v)
 		if limit == 0 {
@@ -102,9 +90,9 @@ func (u *UserConfigStore) Set(key string, value any) error {
 		}
 		return u.SetStringSlice(key, v, limit)
 	case bool:
-		return u.SaveBool(key, v)
+		return u.SetBool(key, v)
 	case int:
-		return u.SaveInt(key, v)
+		return u.SetInt(key, v)
 	default:
 		return fmt.Errorf("unsupported config value type: %T", value)
 	}
@@ -112,7 +100,7 @@ func (u *UserConfigStore) Set(key string, value any) error {
 
 // GetStringSlice はキーのスライスを返す。
 func (u *UserConfigStore) GetStringSlice(key string) []string {
-	values, _ := u.LoadAll(key)
+	values, _ := u.loadAll(key)
 	return values
 }
 
@@ -123,27 +111,27 @@ func (u *UserConfigStore) SetStringSlice(key string, values []string, limit int)
 
 // GetBool はbool設定を返す。
 func (u *UserConfigStore) GetBool(key string, defaultValue bool) bool {
-	return u.Bool(key, defaultValue)
+	return u.boolValue(key, defaultValue)
 }
 
 // SetBool はbool設定を保存する。
 func (u *UserConfigStore) SetBool(key string, value bool) error {
-	return u.SaveBool(key, value)
+	return u.saveBool(key, value)
 }
 
 // GetInt はint設定を返す。
 func (u *UserConfigStore) GetInt(key string, defaultValue int) int {
-	return u.Int(key, defaultValue)
+	return u.intValue(key, defaultValue)
 }
 
 // SetInt はint設定を保存する。
 func (u *UserConfigStore) SetInt(key string, value int) error {
-	return u.SaveInt(key, value)
+	return u.saveInt(key, value)
 }
 
 // GetAll はキーの値と全設定を返す。
 func (u *UserConfigStore) GetAll(key string) ([]string, map[string]any) {
-	values, configMap := u.LoadAll(key)
+	values, configMap := u.loadAll(key)
 	out := make(map[string]any, len(configMap))
 	for k, v := range configMap {
 		out[k] = v
@@ -156,40 +144,34 @@ func (u *UserConfigStore) AppRootDir() (string, error) {
 	return AppRootDir()
 }
 
-// SaveValue は値を保存する。
-func (u *UserConfigStore) SaveValue(key, value string, limit int) error {
+// saveValue は値を保存する。
+func (u *UserConfigStore) saveValue(key, value string, limit int) error {
 	if value == "" {
 		return nil
 	}
 	return u.saveStringSlice(key, []string{value}, limit)
 }
 
-// Values は値一覧を返す。
-func (u *UserConfigStore) Values(key string) []string {
-	values, _ := u.LoadAll(key)
-	return values
-}
-
-// Bool はbool値を返す。
-func (u *UserConfigStore) Bool(key string, defaultValue bool) bool {
-	values, _ := u.LoadAll(key)
+// boolValue はbool値を返す。
+func (u *UserConfigStore) boolValue(key string, defaultValue bool) bool {
+	values, _ := u.loadAll(key)
 	if len(values) == 0 {
 		return defaultValue
 	}
 	return values[0] == "ON"
 }
 
-// SaveBool はbool値を保存する。
-func (u *UserConfigStore) SaveBool(key string, value bool) error {
+// saveBool はbool値を保存する。
+func (u *UserConfigStore) saveBool(key string, value bool) error {
 	if value {
-		return u.SaveValue(key, "ON", 1)
+		return u.saveValue(key, "ON", 1)
 	}
-	return u.SaveValue(key, "OFF", 1)
+	return u.saveValue(key, "OFF", 1)
 }
 
-// Int はint値を返す。
-func (u *UserConfigStore) Int(key string, defaultValue int) int {
-	values, _ := u.LoadAll(key)
+// intValue はint値を返す。
+func (u *UserConfigStore) intValue(key string, defaultValue int) int {
+	values, _ := u.loadAll(key)
 	if len(values) == 0 {
 		return defaultValue
 	}
@@ -200,13 +182,13 @@ func (u *UserConfigStore) Int(key string, defaultValue int) int {
 	return parsed
 }
 
-// SaveInt はint値を保存する。
-func (u *UserConfigStore) SaveInt(key string, value int) error {
-	return u.SaveValue(key, strconv.Itoa(value), 1)
+// saveInt はint値を保存する。
+func (u *UserConfigStore) saveInt(key string, value int) error {
+	return u.saveValue(key, strconv.Itoa(value), 1)
 }
 
-// LoadAll は設定を読み込み、指定キーの値と全体を返す。
-func (u *UserConfigStore) LoadAll(key string) ([]string, map[string]interface{}) {
+// loadAll は設定を読み込み、指定キーの値と全体を返す。
+func (u *UserConfigStore) loadAll(key string) ([]string, map[string]any) {
 	configMap, _ := loadUserConfigFn()
 	values, ok := configMap[key]
 	if !ok {
@@ -214,7 +196,7 @@ func (u *UserConfigStore) LoadAll(key string) ([]string, map[string]interface{})
 	}
 
 	switch list := values.(type) {
-	case []interface{}:
+	case []any:
 		out := make([]string, 0, len(list))
 		for _, v := range list {
 			str, ok := v.(string)
@@ -236,7 +218,7 @@ func (u *UserConfigStore) saveStringSlice(key string, values []string, limit int
 	if len(values) == 0 {
 		return nil
 	}
-	current, configMap := u.LoadAll(key)
+	current, configMap := u.loadAll(key)
 	seen := make(map[string]struct{}, len(values)+len(current))
 	merged := make([]string, 0, len(values)+len(current))
 
@@ -280,10 +262,10 @@ func (u *UserConfigStore) saveStringSlice(key string, values []string, limit int
 }
 
 // loadUserConfig はユーザー設定を読み込む。
-func loadUserConfig() (map[string]interface{}, error) {
+func loadUserConfig() (map[string]any, error) {
 	root, err := AppRootDir()
 	if err != nil {
-		return map[string]interface{}{}, err
+		return map[string]any{}, err
 	}
 	path := filepath.Join(root, config.UserConfigFileName)
 	data, err := readFile(path)
@@ -291,13 +273,13 @@ func loadUserConfig() (map[string]interface{}, error) {
 		path = filepath.Join(root, config.UserConfigLegacyFileName)
 		data, err = readFile(path)
 		if err != nil {
-			return map[string]interface{}{}, nil
+			return map[string]any{}, nil
 		}
 	}
 
-	configMap := make(map[string]interface{})
+	configMap := make(map[string]any)
 	if err := json.Unmarshal(data, &configMap); err != nil {
-		return map[string]interface{}{}, nil
+		return map[string]any{}, nil
 	}
 	return configMap, nil
 }

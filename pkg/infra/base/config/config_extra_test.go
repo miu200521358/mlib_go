@@ -20,7 +20,7 @@ func withTempRoot(t *testing.T) string {
 	return dir
 }
 
-func withLoadUserConfig(t *testing.T, fn func() (map[string]interface{}, error)) {
+func withLoadUserConfig(t *testing.T, fn func() (map[string]any, error)) {
 	t.Helper()
 	prev := loadUserConfigFn
 	loadUserConfigFn = fn
@@ -130,7 +130,7 @@ func TestUserConfigSetGet(t *testing.T) {
 	}
 }
 
-// TestUserConfigLoadAllVariants はLoadAllの分岐を確認する。
+// TestUserConfigLoadAllVariants はGetAllの分岐を確認する。
 func TestUserConfigLoadAllVariants(t *testing.T) {
 	withTempRoot(t)
 	store := &UserConfigStore{}
@@ -140,36 +140,36 @@ func TestUserConfigLoadAllVariants(t *testing.T) {
 	if err := os.WriteFile(path, []byte(`{"history":["a","b"]}`), 0644); err != nil {
 		t.Fatalf("seed config failed: %v", err)
 	}
-	values, _ := store.LoadAll("history")
+	values, _ := store.GetAll("history")
 	if !reflect.DeepEqual(values, []string{"a", "b"}) {
-		t.Errorf("LoadAll list: got=%v", values)
+		t.Errorf("GetAll list: got=%v", values)
 	}
-	if values, _ := store.LoadAll("missing"); len(values) != 0 {
-		t.Errorf("LoadAll missing: got=%v", values)
+	if values, _ := store.GetAll("missing"); len(values) != 0 {
+		t.Errorf("GetAll missing: got=%v", values)
 	}
 
 	if err := os.WriteFile(path, []byte(`{"history":[1]}`), 0644); err != nil {
 		t.Fatalf("seed config failed: %v", err)
 	}
-	values, _ = store.LoadAll("history")
+	values, _ = store.GetAll("history")
 	if len(values) != 0 {
-		t.Errorf("LoadAll non-string: got=%v", values)
+		t.Errorf("GetAll non-string: got=%v", values)
 	}
 
 	if err := os.WriteFile(path, []byte(`{"history":"x"}`), 0644); err != nil {
 		t.Fatalf("seed config failed: %v", err)
 	}
-	values, _ = store.LoadAll("history")
+	values, _ = store.GetAll("history")
 	if len(values) != 0 {
-		t.Errorf("LoadAll default: got=%v", values)
+		t.Errorf("GetAll default: got=%v", values)
 	}
 
-	withLoadUserConfig(t, func() (map[string]interface{}, error) {
-		return map[string]interface{}{"history": []string{"x", "y"}}, nil
+	withLoadUserConfig(t, func() (map[string]any, error) {
+		return map[string]any{"history": []string{"x", "y"}}, nil
 	})
-	values, _ = store.LoadAll("history")
+	values, _ = store.GetAll("history")
 	if !reflect.DeepEqual(values, []string{"x", "y"}) {
-		t.Errorf("LoadAll []string: got=%v", values)
+		t.Errorf("GetAll []string: got=%v", values)
 	}
 }
 
@@ -178,8 +178,8 @@ func TestUserConfigSaveStringSlice(t *testing.T) {
 	withTempRoot(t)
 	store := &UserConfigStore{}
 
-	if err := store.SaveValue("path", "", 1); err != nil {
-		t.Fatalf("SaveValue empty failed: %v", err)
+	if err := store.Set("path", ""); err != nil {
+		t.Fatalf("Set empty string failed: %v", err)
 	}
 	if err := store.SetStringSlice("path", []string{}, 1); err != nil {
 		t.Fatalf("SetStringSlice empty failed: %v", err)
@@ -194,9 +194,9 @@ func TestUserConfigSaveStringSlice(t *testing.T) {
 	if err := store.SetStringSlice("path", []string{"a", "", "b", "a"}, 2); err != nil {
 		t.Fatalf("SetStringSlice failed: %v", err)
 	}
-	values := store.Values("path")
+	values := store.GetStringSlice("path")
 	if !reflect.DeepEqual(values, []string{"a", "b"}) {
-		t.Errorf("Values: got=%v", values)
+		t.Errorf("GetStringSlice: got=%v", values)
 	}
 }
 
@@ -204,10 +204,10 @@ func TestUserConfigSaveStringSlice(t *testing.T) {
 func TestUserConfigBoolIntDefaults(t *testing.T) {
 	withTempRoot(t)
 	store := &UserConfigStore{}
-	if !store.Bool("missing", true) {
+	if !store.GetBool("missing", true) {
 		t.Errorf("Bool default failed")
 	}
-	if store.Int("missing", 5) != 5 {
+	if store.GetInt("missing", 5) != 5 {
 		t.Errorf("Int default failed")
 	}
 
@@ -216,7 +216,7 @@ func TestUserConfigBoolIntDefaults(t *testing.T) {
 	if err := os.WriteFile(path, []byte(`{"num":["bad"]}`), 0644); err != nil {
 		t.Fatalf("seed config failed: %v", err)
 	}
-	if store.Int("num", 7) != 7 {
+	if store.GetInt("num", 7) != 7 {
 		t.Errorf("Int parse default failed")
 	}
 }
@@ -226,15 +226,15 @@ func TestSaveStringSliceErrors(t *testing.T) {
 	withTempRoot(t)
 	store := &UserConfigStore{}
 
-	withLoadUserConfig(t, func() (map[string]interface{}, error) {
-		return map[string]interface{}{"bad": make(chan int)}, nil
+	withLoadUserConfig(t, func() (map[string]any, error) {
+		return map[string]any{"bad": make(chan int)}, nil
 	})
 	if err := store.SetStringSlice("list", []string{"a"}, 1); err == nil {
 		t.Errorf("SetStringSlice marshal error expected")
 	}
 
-	withLoadUserConfig(t, func() (map[string]interface{}, error) {
-		return map[string]interface{}{}, nil
+	withLoadUserConfig(t, func() (map[string]any, error) {
+		return map[string]any{}, nil
 	})
 	withWriteFile(t, func(string, []byte, os.FileMode) error {
 		return errors.New("write error")
@@ -275,9 +275,9 @@ func TestLoadUserConfigInvalidJSON(t *testing.T) {
 		t.Fatalf("seed config failed: %v", err)
 	}
 	store := &UserConfigStore{}
-	values := store.Values("missing")
+	values := store.GetStringSlice("missing")
 	if values == nil {
-		t.Errorf("Values should not be nil")
+		t.Errorf("GetStringSlice should not be nil")
 	}
 }
 

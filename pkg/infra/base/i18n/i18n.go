@@ -45,12 +45,11 @@ var defaultI18n *I18n
 var defaultMu sync.Mutex
 
 // InitI18n はi18nを初期化する。
-func InitI18n(appFiles embed.FS, userConfig config.IUserConfig) i18n.II18n {
+func InitI18n(appFiles embed.FS, userConfig config.IUserConfig) {
 	instance := initI18nFS(appFiles, userConfig)
 	defaultMu.Lock()
 	defaultI18n = instance
 	defaultMu.Unlock()
-	return instance
 }
 
 // initI18nFS はFSからi18nを初期化する。
@@ -61,7 +60,7 @@ func initI18nFS(appFiles fs.FS, userConfig config.IUserConfig) *I18n {
 	messages := make(map[LangCode]map[string]string, len(langs))
 	for _, lc := range langs {
 		common := loadMessages(commonI18nFiles, "i18n/common."+string(lc)+".json")
-		app := loadMessages(appFiles, "i18n/app."+string(lc)+".json")
+		app := loadMessages(appFiles, "cmd/i18n/app."+string(lc)+".json")
 		merged := mergeMessages(common, app)
 		messages[lc] = merged
 	}
