@@ -607,10 +607,9 @@ func (ss *SharedState) SetModel(viewerIndex, modelIndex int, model IStateModel) 
 	}
 	slot.Store(stateModelSlot{Model: model})
 	idxSlot := ss.ensureIndexSlot(viewerIndex, modelIndex)
-	if idxSlot == nil {
-		return
+	if idxSlot != nil {
+		idxSlot.Store(stateIndexSlot{Indexes: []int{}})
 	}
-	idxSlot.Store(stateIndexSlot{Indexes: []int{}})
 }
 
 // Model はモデルを取得する。

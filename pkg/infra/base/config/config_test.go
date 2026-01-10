@@ -3,6 +3,7 @@ package config
 
 import (
 	"bytes"
+	"embed"
 	"image"
 	"image/color"
 	"image/png"
@@ -47,6 +48,43 @@ func TestLoadAppConfigError(t *testing.T) {
 	}
 	if _, err := loadAppConfigFS(fsys); err == nil {
 		t.Errorf("loadAppConfigFS expected error")
+	}
+}
+
+// TestLoadAppConfigMissingFile は設定ファイル欠落を確認する。
+func TestLoadAppConfigMissingFile(t *testing.T) {
+	fsys := fstest.MapFS{}
+	if _, err := loadAppConfigFS(fsys); err == nil {
+		t.Errorf("loadAppConfigFS expected read error")
+	}
+}
+
+// TestLoadAppConfigIconMissing はアイコン欠落を確認する。
+func TestLoadAppConfigIconMissing(t *testing.T) {
+	fsys := fstest.MapFS{
+		"app/app_config.json": &fstest.MapFile{Data: []byte(`{"Name":"TestApp","IconImagePath":"app/missing.png"}`)},
+	}
+	if _, err := loadAppConfigFS(fsys); err == nil {
+		t.Errorf("loadAppConfigFS expected icon read error")
+	}
+}
+
+// TestLoadAppConfigIconDecode はデコード失敗を確認する。
+func TestLoadAppConfigIconDecode(t *testing.T) {
+	fsys := fstest.MapFS{
+		"app/app_config.json": &fstest.MapFile{Data: []byte(`{"Name":"TestApp","IconImagePath":"app/app.png"}`)},
+		"app/app.png":         &fstest.MapFile{Data: []byte("not-png")},
+	}
+	if _, err := loadAppConfigFS(fsys); err == nil {
+		t.Errorf("loadAppConfigFS expected decode error")
+	}
+}
+
+// TestLoadAppConfig は関数経由の読み込みを確認する。
+func TestLoadAppConfig(t *testing.T) {
+	var emptyFS embed.FS
+	if _, err := LoadAppConfig(emptyFS); err == nil {
+		t.Errorf("LoadAppConfig expected error")
 	}
 }
 

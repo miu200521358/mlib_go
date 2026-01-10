@@ -59,3 +59,16 @@ func TestClampFrame(t *testing.T) {
 		t.Errorf("IsFrameInRange out of range")
 	}
 }
+
+// TestTimeZeroCases はゼロ除算回避を確認する。
+func TestTimeZeroCases(t *testing.T) {
+	if FramesToSeconds(10, 0) != 0 {
+		t.Errorf("FramesToSeconds fps=0 should be 0")
+	}
+	if FpsToSpf(0) != 0 {
+		t.Errorf("FpsToSpf fps=0 should be 0")
+	}
+	if SpfToFps(0) != 0 {
+		t.Errorf("SpfToFps spf=0 should be 0")
+	}
+}

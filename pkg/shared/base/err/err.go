@@ -10,6 +10,7 @@ import (
 
 //go:embed error_registry.csv
 var registryFiles embed.FS
+var openRegistryFile = registryFiles.Open
 
 // ErrorKind はエラー種別を表す。
 type ErrorKind string
@@ -44,7 +45,7 @@ const ErrorRegistryPath = "error_registry.csv"
 
 // LoadDefaultRegistry は埋め込みCSVから読み込む。
 func LoadDefaultRegistry() ([]ErrorRecord, error) {
-	file, err := registryFiles.Open(ErrorRegistryPath)
+	file, err := openRegistryFile(ErrorRegistryPath)
 	if err != nil {
 		return nil, err
 	}
@@ -56,6 +57,7 @@ func LoadDefaultRegistry() ([]ErrorRecord, error) {
 func LoadRegistry(r io.Reader) ([]ErrorRecord, error) {
 	reader := csv.NewReader(r)
 	reader.TrimLeadingSpace = true
+	reader.FieldsPerRecord = -1
 
 	records, err := reader.ReadAll()
 	if err != nil {

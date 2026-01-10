@@ -36,3 +36,54 @@ func TestAppConfigUnmarshal(t *testing.T) {
 		t.Errorf("Env default: got=%v", cfg.Env())
 	}
 }
+
+// TestAppConfigUnmarshalAppName はAppName優先とViewerWindowSize優先を確認する。
+func TestAppConfigUnmarshalAppName(t *testing.T) {
+	payload := `{"AppName":"MainApp","Name":"Legacy","Env":"stg","ViewerWindowSize":{"Width":3,"Height":4},"ViewWindowSize":{"Width":7,"Height":8},"CloseConfirm":true}`
+	var cfg AppConfig
+	if err := json.Unmarshal([]byte(payload), &cfg); err != nil {
+		t.Fatalf("Unmarshal failed: %v", err)
+	}
+	if cfg.AppName != "MainApp" {
+		t.Errorf("AppName: got=%v", cfg.AppName)
+	}
+	if cfg.ViewerWindowSize.Width != 3 || cfg.ViewerWindowSize.Height != 4 {
+		t.Errorf("ViewerWindowSize: got=%v", cfg.ViewerWindowSize)
+	}
+	if cfg.Env() != APP_ENV_STG || cfg.IsStg() != true {
+		t.Errorf("Env STG: got=%v", cfg.Env())
+	}
+	if !cfg.IsCloseConfirmEnabled() {
+		t.Errorf("CloseConfirm: expected true")
+	}
+}
+
+// TestAppConfigUnmarshalInvalid はJSONエラーを確認する。
+func TestAppConfigUnmarshalInvalid(t *testing.T) {
+	var cfg AppConfig
+	if err := cfg.UnmarshalJSON([]byte("{invalid")); err == nil {
+		t.Errorf("UnmarshalJSON expected error")
+	}
+}
+
+// TestAppConfigEnvVariants はEnv判定を確認する。
+func TestAppConfigEnvVariants(t *testing.T) {
+	var nilCfg *AppConfig
+	if nilCfg.Env() != APP_ENV_DEV || nilCfg.IsDev() != true {
+		t.Errorf("nil Env default: got=%v", nilCfg.Env())
+	}
+	if nilCfg.IsCloseConfirmEnabled() {
+		t.Errorf("nil CloseConfirm should be false")
+	}
+	cfg := &AppConfig{}
+	if cfg.Env() != APP_ENV_DEV || cfg.IsDev() != true {
+		t.Errorf("empty Env default: got=%v", cfg.Env())
+	}
+	cfg.EnvValue = APP_ENV_PROD
+	if cfg.Env() != APP_ENV_PROD || !cfg.IsProd() || cfg.IsStg() {
+		t.Errorf("Env PROD: got=%v", cfg.Env())
+	}
+	if cfg.IsCloseConfirmEnabled() {
+		t.Errorf("CloseConfirm default: expected false")
+	}
+}

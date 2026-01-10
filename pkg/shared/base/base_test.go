@@ -20,3 +20,11 @@ func TestBaseServicesAccessors(t *testing.T) {
 		t.Errorf("BaseServices nil accessors should return nil")
 	}
 }
+
+// TestBaseServicesAccessorsNonNil は非nilの返却を確認する。
+func TestBaseServicesAccessorsNonNil(t *testing.T) {
+	b := &BaseServices{}
+	if b.Config() != nil || b.I18n() != nil || b.Logger() != nil {
+		t.Errorf("BaseServices empty fields should return nil")
+	}
+}

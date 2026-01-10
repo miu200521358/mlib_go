@@ -16,6 +16,20 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
 )
 
+var (
+	osExecutable     = os.Executable
+	readFile         = os.ReadFile
+	writeFile        = os.WriteFile
+	loadUserConfigFn = loadUserConfig
+	appRootDirFn     = func() (string, error) {
+		exePath, err := osExecutable()
+		if err != nil {
+			return "", err
+		}
+		return filepath.Dir(exePath), nil
+	}
+)
+
 // IUserConfigStore はinfra向けのユーザー設定I/F。
 type IUserConfigStore interface {
 	SaveValue(key, value string, limit int) error
@@ -193,7 +207,7 @@ func (u *UserConfigStore) SaveInt(key string, value int) error {
 
 // LoadAll は設定を読み込み、指定キーの値と全体を返す。
 func (u *UserConfigStore) LoadAll(key string) ([]string, map[string]interface{}) {
-	configMap, _ := loadUserConfig()
+	configMap, _ := loadUserConfigFn()
 	values, ok := configMap[key]
 	if !ok {
 		return []string{}, configMap
@@ -259,7 +273,7 @@ func (u *UserConfigStore) saveStringSlice(key string, values []string, limit int
 		return err
 	}
 	path := filepath.Join(root, config.UserConfigFileName)
-	if err := os.WriteFile(path, data, 0644); err != nil {
+	if err := writeFile(path, data, 0644); err != nil {
 		return err
 	}
 	return nil
@@ -272,10 +286,10 @@ func loadUserConfig() (map[string]interface{}, error) {
 		return map[string]interface{}{}, err
 	}
 	path := filepath.Join(root, config.UserConfigFileName)
-	data, err := os.ReadFile(path)
+	data, err := readFile(path)
 	if err != nil {
 		path = filepath.Join(root, config.UserConfigLegacyFileName)
-		data, err = os.ReadFile(path)
+		data, err = readFile(path)
 		if err != nil {
 			return map[string]interface{}{}, nil
 		}
@@ -290,11 +304,7 @@ func loadUserConfig() (map[string]interface{}, error) {
 
 // AppRootDir はアプリルートディレクトリを返す。
 func AppRootDir() (string, error) {
-	exePath, err := os.Executable()
-	if err != nil {
-		return "", err
-	}
-	return filepath.Dir(exePath), nil
+	return appRootDirFn()
 }
 
 // MustAppRootDir はアプリルートをpanic付きで返す。
