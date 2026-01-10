@@ -6,6 +6,7 @@ import (
 	"hash/fnv"
 	"math/rand"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -33,10 +34,10 @@ type HashableBase struct {
 	partsFunc   func() string
 }
 
-// init は乱数シードを初期化する。
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
+var (
+	randMu  sync.Mutex
+	randGen = rand.New(rand.NewSource(time.Now().UnixNano()))
+)
 
 // NewHashableBase はHashableBaseを生成する。
 func NewHashableBase(name, path string) *HashableBase {
@@ -111,5 +112,8 @@ func (hb *HashableBase) UpdateHash() {
 
 // UpdateRandomHash は再読込用にランダム値を設定する。
 func (hb *HashableBase) UpdateRandomHash() {
-	hb.hash = strconv.FormatInt(rand.Int63(), 10)
+	randMu.Lock()
+	value := randGen.Int63()
+	randMu.Unlock()
+	hb.hash = strconv.FormatInt(value, 10)
 }
