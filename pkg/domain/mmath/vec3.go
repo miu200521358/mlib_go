@@ -218,7 +218,7 @@ func (v Vec3) Absed() Vec3 {
 
 func (v Vec3) Hash() uint64 {
 	h := fnv.New64a()
-	_, _ = h.Write([]byte(fmt.Sprintf("%.10f,%.10f,%.10f", v.X, v.Y, v.Z)))
+	_, _ = fmt.Fprintf(h, "%.10f,%.10f,%.10f", v.X, v.Y, v.Z)
 	return h.Sum64()
 }
 

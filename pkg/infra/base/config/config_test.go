@@ -4,6 +4,7 @@ package config
 import (
 	"bytes"
 	"embed"
+	"errors"
 	"image"
 	"image/color"
 	"image/png"
@@ -15,6 +16,13 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
 )
+
+func removeFile(t *testing.T, path string) {
+	t.Helper()
+	if err := os.Remove(path); err != nil && !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("remove file failed: %v", err)
+	}
+}
 
 // TestLoadAppConfigSuccess は設定読み込みの成功を確認する。
 func TestLoadAppConfigSuccess(t *testing.T) {
@@ -96,8 +104,8 @@ func TestUserConfigSetStringSlice(t *testing.T) {
 		t.Fatalf("AppRootDir failed: %v", err)
 	}
 	userPath := filepath.Join(root, config.UserConfigFileName)
-	_ = os.Remove(userPath)
-	defer os.Remove(userPath)
+	removeFile(t, userPath)
+	t.Cleanup(func() { removeFile(t, userPath) })
 
 	if err := os.WriteFile(userPath, []byte(`{"history":["path1","path2"]}`), 0644); err != nil {
 		t.Fatalf("seed user config failed: %v", err)
@@ -122,10 +130,10 @@ func TestUserConfigFallback(t *testing.T) {
 	}
 	userPath := filepath.Join(root, config.UserConfigFileName)
 	legacyPath := filepath.Join(root, config.UserConfigLegacyFileName)
-	_ = os.Remove(userPath)
-	_ = os.Remove(legacyPath)
-	defer os.Remove(userPath)
-	defer os.Remove(legacyPath)
+	removeFile(t, userPath)
+	removeFile(t, legacyPath)
+	t.Cleanup(func() { removeFile(t, userPath) })
+	t.Cleanup(func() { removeFile(t, legacyPath) })
 
 	if err := os.WriteFile(legacyPath, []byte(`{"lang":["ja"]}`), 0644); err != nil {
 		t.Fatalf("seed legacy config failed: %v", err)

@@ -16,14 +16,14 @@ type Vec4 struct {
 }
 
 var (
-	ZERO_VEC4     = Vec4{}
-	UNIT_XW_VEC4  = Vec4{X: 1, W: 1}
-	UNIT_YW_VEC4  = Vec4{Y: 1, W: 1}
-	UNIT_ZW_VEC4  = Vec4{Z: 1, W: 1}
-	UNIT_W_VEC4   = Vec4{W: 1}
-	ONE_VEC4      = Vec4{X: 1, Y: 1, Z: 1, W: 1}
-	VEC4_MIN_VAL  = Vec4{X: -math.MaxFloat64, Y: -math.MaxFloat64, Z: -math.MaxFloat64, W: 1}
-	VEC4_MAX_VAL  = Vec4{X: math.MaxFloat64, Y: math.MaxFloat64, Z: math.MaxFloat64, W: 1}
+	ZERO_VEC4    = Vec4{}
+	UNIT_XW_VEC4 = Vec4{X: 1, W: 1}
+	UNIT_YW_VEC4 = Vec4{Y: 1, W: 1}
+	UNIT_ZW_VEC4 = Vec4{Z: 1, W: 1}
+	UNIT_W_VEC4  = Vec4{W: 1}
+	ONE_VEC4     = Vec4{X: 1, Y: 1, Z: 1, W: 1}
+	VEC4_MIN_VAL = Vec4{X: -math.MaxFloat64, Y: -math.MaxFloat64, Z: -math.MaxFloat64, W: 1}
+	VEC4_MAX_VAL = Vec4{X: math.MaxFloat64, Y: math.MaxFloat64, Z: math.MaxFloat64, W: 1}
 )
 
 func NewVec4() Vec4 {
@@ -196,7 +196,7 @@ func (v Vec4) Absed() Vec4 {
 
 func (v Vec4) Hash() uint64 {
 	h := fnv.New64a()
-	_, _ = h.Write([]byte(fmt.Sprintf("%.10f,%.10f,%.10f,%.10f", v.X, v.Y, v.Z, v.W)))
+	_, _ = fmt.Fprintf(h, "%.10f,%.10f,%.10f,%.10f", v.X, v.Y, v.Z, v.W)
 	return h.Sum64()
 }
 

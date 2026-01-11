@@ -103,7 +103,7 @@ func Evaluate(curve *Curve, start, now, end float32) (x, y, t float64) {
 	t = newton(x1, x2, x, x, 1e-15, 1e-20)
 	s := 1.0 - t
 
-y = (3.0 * (math.Pow(s, 2.0)) * t * y1) + (3.0 * s * (math.Pow(t, 2.0)) * y2) + math.Pow(t, 3.0)
+	y = (3.0 * (math.Pow(s, 2.0)) * t * y1) + (3.0 * s * (math.Pow(t, 2.0)) * y2) + math.Pow(t, 3.0)
 
 	return x, y, t
 }
@@ -116,7 +116,7 @@ func bezierCoeffs(p1, p2 float64) (a, b, c float64) {
 }
 
 func bezierValue(a, b, c, t float64) float64 {
-	return ((a*t + b) * t + c) * t
+	return ((a*t+b)*t + c) * t
 }
 
 func bezierDerivative(a, b, c, t float64) float64 {
@@ -296,7 +296,8 @@ func calculateError(xCoords, yCoords []float64, P1, P2 Vec2) float64 {
 		t := newton(P1.X, P2.X, x, x, 1e-15, 1e-20)
 		s := 1.0 - t
 		y := (3.0 * (math.Pow(s, 2.0)) * t * P1.Y) + (3.0 * s * (math.Pow(t, 2.0)) * P2.Y) + math.Pow(t, 3.0)
-		totalError += math.Pow(yCoords[i]-y, 2)
+		dy := yCoords[i] - y
+		totalError += dy * dy
 	}
 	return totalError
 }

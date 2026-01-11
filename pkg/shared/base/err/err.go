@@ -49,8 +49,11 @@ func LoadDefaultRegistry() ([]ErrorRecord, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
-	return LoadRegistry(file)
+	recs, err := LoadRegistry(file)
+	if closeErr := file.Close(); err == nil && closeErr != nil {
+		err = closeErr
+	}
+	return recs, err
 }
 
 // LoadRegistry はCSVからエラー管理表を読み込む。

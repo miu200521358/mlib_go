@@ -158,7 +158,7 @@ func (v Vec2) Absed() Vec2 {
 
 func (v Vec2) Hash() uint64 {
 	h := fnv.New64a()
-	_, _ = h.Write([]byte(fmt.Sprintf("%.10f,%.10f", v.X, v.Y)))
+	_, _ = fmt.Fprintf(h, "%.10f,%.10f", v.X, v.Y)
 	return h.Sum64()
 }
 
