@@ -1,3 +1,4 @@
+// 指示: miu200521358
 package mmath
 
 import (
@@ -34,7 +35,7 @@ func TestScalarBasics(t *testing.T) {
 		t.Errorf("Median even")
 	}
 	if math.Abs(Std([]float64{1, 2})-0.5) < 1e-9 {
-		// ok
+		// 問題なし
 	} else {
 		t.Errorf("Std")
 	}
