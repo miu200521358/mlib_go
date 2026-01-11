@@ -58,10 +58,10 @@ func (s *stubUserConfig) AppRootDir() (string, error) { return "", nil }
 // TestI18nTranslations は翻訳取得を確認する。
 func TestI18nTranslations(t *testing.T) {
 	fsys := fstest.MapFS{
-		"cmd/i18n/app.ja.json": &fstest.MapFile{Data: []byte(`[{"id":"hello","translation":"こんにちは"}]`)},
-		"cmd/i18n/app.en.json": &fstest.MapFile{Data: []byte(`[{"id":"hello","translation":"hello"}]`)},
-		"cmd/i18n/app.zh.json": &fstest.MapFile{Data: []byte(`[]`)},
-		"cmd/i18n/app.ko.json": &fstest.MapFile{Data: []byte(`[]`)},
+		"i18n/app.ja.json": &fstest.MapFile{Data: []byte(`[{"id":"hello","translation":"こんにちは"}]`)},
+		"i18n/app.en.json": &fstest.MapFile{Data: []byte(`[{"id":"hello","translation":"hello"}]`)},
+		"i18n/app.zh.json": &fstest.MapFile{Data: []byte(`[]`)},
+		"i18n/app.ko.json": &fstest.MapFile{Data: []byte(`[]`)},
 	}
 	cfg := &stubUserConfig{lang: []string{"ja"}}
 	i := initI18nFS(fsys, cfg)
@@ -83,10 +83,10 @@ func TestI18nTranslations(t *testing.T) {
 // TestSetLangAction は言語変更の戻り値を確認する。
 func TestSetLangAction(t *testing.T) {
 	fsys := fstest.MapFS{
-		"cmd/i18n/app.ja.json": &fstest.MapFile{Data: []byte(`[]`)},
-		"cmd/i18n/app.en.json": &fstest.MapFile{Data: []byte(`[]`)},
-		"cmd/i18n/app.zh.json": &fstest.MapFile{Data: []byte(`[]`)},
-		"cmd/i18n/app.ko.json": &fstest.MapFile{Data: []byte(`[]`)},
+		"i18n/app.ja.json": &fstest.MapFile{Data: []byte(`[]`)},
+		"i18n/app.en.json": &fstest.MapFile{Data: []byte(`[]`)},
+		"i18n/app.zh.json": &fstest.MapFile{Data: []byte(`[]`)},
+		"i18n/app.ko.json": &fstest.MapFile{Data: []byte(`[]`)},
 	}
 	cfg := &stubUserConfig{lang: []string{"ja"}}
 	i := initI18nFS(fsys, cfg)

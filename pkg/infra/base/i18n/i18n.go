@@ -60,7 +60,7 @@ func initI18nFS(appFiles fs.FS, userConfig config.IUserConfig) *I18n {
 	messages := make(map[LangCode]map[string]string, len(langs))
 	for _, lc := range langs {
 		common := loadMessages(commonI18nFiles, "i18n/common."+string(lc)+".json")
-		app := loadMessages(appFiles, "cmd/i18n/app."+string(lc)+".json")
+		app := loadMessages(appFiles, "i18n/app."+string(lc)+".json")
 		merged := mergeMessages(common, app)
 		messages[lc] = merged
 	}
