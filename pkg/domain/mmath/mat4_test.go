@@ -33,7 +33,7 @@ func TestMat4Basics(t *testing.T) {
 	if m.String() == "" {
 		t.Errorf("String")
 	}
-	if cp, err := m.Copy(); err != nil || *cp != m {
+	if cp, err := m.Copy(); err != nil || cp != m {
 		t.Errorf("Copy")
 	}
 	if !m.NearEquals(m2, 1e-10) {

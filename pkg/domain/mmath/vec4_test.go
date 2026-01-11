@@ -101,7 +101,7 @@ func TestVec4Ops(t *testing.T) {
 	if clamp01 != (Vec4{0, 1, 0, 0}) {
 		t.Errorf("Clamp01")
 	}
-	if cp, err := (Vec4{1, 2, 3, 4}).Copy(); err != nil || *cp != (Vec4{1, 2, 3, 4}) {
+	if cp, err := (Vec4{1, 2, 3, 4}).Copy(); err != nil || cp != (Vec4{1, 2, 3, 4}) {
 		t.Errorf("Copy")
 	}
 	if len((Vec4{1, 2, 3, 4}).Vector()) != 4 {

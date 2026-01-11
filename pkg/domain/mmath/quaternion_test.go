@@ -228,7 +228,7 @@ func TestQuaternionAdvanced(t *testing.T) {
 	if xq == quaternionZero || yq == quaternionZero || zq == quaternionZero {
 		t.Errorf("SeparateByAxis")
 	}
-	if cp, err := q.Copy(); err != nil || *cp == quaternionZero {
+	if cp, err := q.Copy(); err != nil || cp == quaternionZero {
 		t.Errorf("Copy")
 	}
 	if len(q.Vector()) != 4 {

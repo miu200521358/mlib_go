@@ -147,7 +147,7 @@ func TestVec3Ops(t *testing.T) {
 	if clamp01 != (Vec3{r3Vec(0, 1, 0)}) {
 		t.Errorf("Clamp01")
 	}
-	if cp, err := (Vec3{r3Vec(1, 2, 3)}).Copy(); err != nil || *cp != (Vec3{r3Vec(1, 2, 3)}) {
+	if cp, err := (Vec3{r3Vec(1, 2, 3)}).Copy(); err != nil || cp != (Vec3{r3Vec(1, 2, 3)}) {
 		t.Errorf("Copy")
 	}
 	if len((Vec3{r3Vec(1, 2, 3)}).Vector()) != 3 {

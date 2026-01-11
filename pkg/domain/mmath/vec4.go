@@ -297,7 +297,7 @@ func (v Vec4) Clamped01() Vec4 {
 	return result
 }
 
-func (v Vec4) Copy() (*Vec4, error) {
+func (v Vec4) Copy() (Vec4, error) {
 	return deepCopy(v)
 }
 

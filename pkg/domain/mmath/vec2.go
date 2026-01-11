@@ -267,7 +267,7 @@ func (v *Vec2) RotateAroundPoint(point Vec2, angle float64) *Vec2 {
 	return v.Sub(point).Rotate(angle).Add(point)
 }
 
-func (v Vec2) Copy() (*Vec2, error) {
+func (v Vec2) Copy() (Vec2, error) {
 	return deepCopy(v)
 }
 

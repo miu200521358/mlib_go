@@ -105,7 +105,7 @@ func (q Quaternion) ToRadians() Vec3 {
 		yHead = math.Atan2(2*q.Imag*q.Kmag+2*q.Jmag*q.Real, 2*q.Real*q.Real+2*q.Kmag*q.Kmag-1)
 		zRoll = math.Atan2(2*q.Imag*q.Jmag+2*q.Kmag*q.Real, 2*q.Real*q.Real+2*q.Jmag*q.Jmag-1)
 	} else {
-		yHead = math.Atan2(-(2*q.Imag*q.Kmag-2*q.Jmag*q.Real), 2*q.Real*q.Real+2*q.Imag*q.Imag-1)
+		yHead = math.Atan2(-(2*q.Imag*q.Kmag - 2*q.Jmag*q.Real), 2*q.Real*q.Real+2*q.Imag*q.Imag-1)
 		zRoll = 0
 	}
 	return Vec3{r3.Vec{X: xPitch, Y: yHead, Z: zRoll}}
@@ -528,7 +528,7 @@ func (q Quaternion) SeparateByAxis(globalAxis Vec3) (Quaternion, Quaternion, Qua
 	return xQQ, yQQ, zQQ
 }
 
-func (q Quaternion) Copy() (*Quaternion, error) {
+func (q Quaternion) Copy() (Quaternion, error) {
 	return deepCopy(q)
 }
 

@@ -141,7 +141,7 @@ func TestVec2Ops(t *testing.T) {
 		t.Errorf("RotateAroundPoint")
 	}
 	copySrc := Vec2{1, 2}
-	if cp, err := copySrc.Copy(); err != nil || *cp != (Vec2{1, 2}) {
+	if cp, err := copySrc.Copy(); err != nil || cp != (Vec2{1, 2}) {
 		t.Errorf("Copy")
 	}
 	if len(copySrc.Vector()) != 2 {

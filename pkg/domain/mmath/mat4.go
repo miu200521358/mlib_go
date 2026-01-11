@@ -86,7 +86,7 @@ func (m Mat4) String() string {
 	)
 }
 
-func (m Mat4) Copy() (*Mat4, error) {
+func (m Mat4) Copy() (Mat4, error) {
 	return deepCopy(m)
 }
 
