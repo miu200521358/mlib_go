@@ -1,3 +1,4 @@
+// 指示: miu200521358
 package collection
 
 import (
@@ -164,6 +165,7 @@ func (c *IndexedCollection[T]) Contains(index int) bool {
 	return c.values[index].IsValid()
 }
 
+// identityMappings は length 分の恒等マッピングを生成して返す。
 func identityMappings(length int) ([]int, []int) {
 	oldToNew := make([]int, length)
 	newToOld := make([]int, length)

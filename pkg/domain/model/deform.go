@@ -1,3 +1,4 @@
+// 指示: miu200521358
 package model
 
 import "github.com/miu200521358/mlib_go/pkg/domain/mmath"
@@ -29,14 +30,17 @@ type deformBase struct {
 	weights    []float64
 }
 
+// DeformType はデフォーム種別を返す。
 func (d *deformBase) DeformType() DeformType {
 	return d.deformType
 }
 
+// Indexes はボーンインデックスの一覧を返す。
 func (d *deformBase) Indexes() []int {
 	return d.indexes
 }
 
+// Weights はボーンウェイトの一覧を返す。
 func (d *deformBase) Weights() []float64 {
 	return d.weights
 }

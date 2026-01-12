@@ -39,22 +39,27 @@ const (
 	configValueTypeNotSupportedErrorID = "95204"
 )
 
+// newInternalError は内部エラーとして共通委譲エラーを生成する。
 func newInternalError(id string, message string, cause error) error {
 	return baseerr.NewCommonError(id, baseerr.ErrorKindInternal, message, cause)
 }
 
+// newAppConfigLoadFailed はアプリ設定の読込失敗エラーを生成する。
 func newAppConfigLoadFailed(message string, cause error) error {
 	return newInternalError(appConfigLoadFailedErrorID, message, cause)
 }
 
+// newUserConfigSaveFailed はユーザー設定の保存失敗エラーを生成する。
 func newUserConfigSaveFailed(message string, cause error) error {
 	return newInternalError(userConfigSaveFailedErrorID, message, cause)
 }
 
+// newAppRootDirResolveFailed はアプリルート取得失敗エラーを生成する。
 func newAppRootDirResolveFailed(cause error) error {
 	return newInternalError(appRootDirResolveFailedErrorID, "アプリルート取得に失敗しました", cause)
 }
 
+// newConfigValueTypeNotSupported は設定値の型未対応エラーを生成する。
 func newConfigValueTypeNotSupported(message string) error {
 	return newInternalError(configValueTypeNotSupportedErrorID, message, nil)
 }

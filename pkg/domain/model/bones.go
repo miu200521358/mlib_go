@@ -1,3 +1,4 @@
+// 指示: miu200521358
 package model
 
 import (
@@ -233,6 +234,7 @@ func (c *BoneCollection) Contains(index int) bool {
 	return c.values[pos].IsValid()
 }
 
+// rebuildIndexToPos は values の順序から indexToPos を再構築する。
 func (c *BoneCollection) rebuildIndexToPos() {
 	c.indexToPos = make(map[int]int, len(c.values))
 	for pos, bone := range c.values {
@@ -243,6 +245,7 @@ func (c *BoneCollection) rebuildIndexToPos() {
 	}
 }
 
+// rebuildNameIndex は現在の indexToPos を基に NameIndex を再構築する。
 func (c *BoneCollection) rebuildNameIndex() {
 	ordered := make([]*Bone, len(c.values))
 	for idx := 0; idx < len(c.values); idx++ {
@@ -255,6 +258,7 @@ func (c *BoneCollection) rebuildNameIndex() {
 	c.nameIndex.Rebuild(ordered)
 }
 
+// identityMappings は length 分の恒等マッピングを生成して返す。
 func identityMappings(length int) ([]int, []int) {
 	oldToNew := make([]int, length)
 	newToOld := make([]int, length)
