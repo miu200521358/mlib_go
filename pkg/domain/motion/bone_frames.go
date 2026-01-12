@@ -174,15 +174,15 @@ func NewBoneNameFrames(name string) *BoneNameFrames {
 	}
 }
 
-// Reduce は変曲点抽出と曲線当てはめで削減する。
-func (b *BoneNameFrames) Reduce() *BoneNameFrames {
+// Reduce は変曲点抽出と曲線当てはめで削減し、失敗時はerrorを返す。
+func (b *BoneNameFrames) Reduce() (*BoneNameFrames, error) {
 	if b == nil || b.Len() == 0 {
-		return b
+		return b, nil
 	}
 	maxFrame := b.MaxFrame()
 	maxIFrame := int(maxFrame) + 1
 	if maxIFrame <= 1 {
-		return b
+		return b, nil
 	}
 
 	frames := make([]Frame, 0, maxIFrame)
@@ -227,7 +227,7 @@ func (b *BoneNameFrames) Reduce() *BoneNameFrames {
 	inflectionFrames = mmath.Unique(inflectionFrames)
 	mmath.Sort(inflectionFrames)
 	if len(inflectionFrames) <= 2 {
-		return b
+		return b, nil
 	}
 
 	reduced := NewBoneNameFrames(b.Name)
@@ -246,9 +246,13 @@ func (b *BoneNameFrames) Reduce() *BoneNameFrames {
 	midFrame := inflectionFrames[1]
 	endFrame := inflectionFrames[2]
 	actualEnd := Frame(0)
+	var err error
 	var i int
 	for actualEnd < maxFrame {
-		actualEnd = b.reduceRange(startFrame, midFrame, endFrame, xs, ys, zs, quats, reduced)
+		actualEnd, err = b.reduceRange(startFrame, midFrame, endFrame, xs, ys, zs, quats, reduced)
+		if err != nil {
+			return nil, err
+		}
 
 		exactI := slices.Index(inflectionFrames, actualEnd)
 		if exactI == -1 {
@@ -277,15 +281,21 @@ func (b *BoneNameFrames) Reduce() *BoneNameFrames {
 		startFrame := actualEnd
 		endFrame := inflectionFrames[len(inflectionFrames)-1]
 		midFrame := Frame(int(startFrame+endFrame) / 2)
-		actualEnd = b.reduceRange(startFrame, midFrame, endFrame, xs, ys, zs, quats, reduced)
+		actualEnd, err = b.reduceRange(startFrame, midFrame, endFrame, xs, ys, zs, quats, reduced)
+		if err != nil {
+			return nil, err
+		}
 		for actualEnd < endFrame {
 			startFrame = actualEnd
 			midFrame = Frame(int(actualEnd+endFrame) / 2)
-			actualEnd = b.reduceRange(startFrame, midFrame, endFrame, xs, ys, zs, quats, reduced)
+			actualEnd, err = b.reduceRange(startFrame, midFrame, endFrame, xs, ys, zs, quats, reduced)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
-	return reduced
+	return reduced, nil
 }
 
 // ContainsActive は有効なキーフレが存在するか判定する。
@@ -520,7 +530,7 @@ func linearT(prev, now, next Frame) float64 {
 }
 
 // reduceRange は区間ごとの曲線当てはめを行う。
-func (b *BoneNameFrames) reduceRange(startFrame, midFrame, endFrame Frame, xs, ys, zs []float64, quats []mmath.Quaternion, reduced *BoneNameFrames) Frame {
+func (b *BoneNameFrames) reduceRange(startFrame, midFrame, endFrame Frame, xs, ys, zs []float64, quats []mmath.Quaternion, reduced *BoneNameFrames) (Frame, error) {
 	startI := int(startFrame)
 	endI := int(endFrame)
 
@@ -533,11 +543,23 @@ func (b *BoneNameFrames) reduceRange(startFrame, midFrame, endFrame Frame, xs, y
 	}
 
 	xCurve, xErr := mmath.NewCurveFromValues(rangeXs, 1e-2)
+	if xErr != nil {
+		return 0, xErr
+	}
 	yCurve, yErr := mmath.NewCurveFromValues(rangeYs, 1e-2)
+	if yErr != nil {
+		return 0, yErr
+	}
 	zCurve, zErr := mmath.NewCurveFromValues(rangeZs, 1e-2)
+	if zErr != nil {
+		return 0, zErr
+	}
 	rCurve, rErr := mmath.NewCurveFromValues(rangeRs, 1e-4)
+	if rErr != nil {
+		return 0, rErr
+	}
 
-	if xErr == nil && yErr == nil && zErr == nil && rErr == nil && xCurve != nil && yCurve != nil && zCurve != nil && rCurve != nil {
+	if xCurve != nil && yCurve != nil && zCurve != nil && rCurve != nil {
 		success := true
 		for i := startI + 1; i < endI; i++ {
 			if !checkCurve(
@@ -564,7 +586,7 @@ func (b *BoneNameFrames) reduceRange(startFrame, midFrame, endFrame Frame, xs, y
 				Rotate:     rCurve,
 			}
 			reduced.Append(reduceBf)
-			return endFrame
+			return endFrame, nil
 		}
 	}
 
@@ -578,7 +600,7 @@ func (b *BoneNameFrames) reduceRange(startFrame, midFrame, endFrame Frame, xs, y
 			reduceBf.Curves = bf.Curves.Copy()
 		}
 		reduced.Append(reduceBf)
-		return midFrame
+		return midFrame, nil
 	}
 
 	return b.reduceRange(startFrame, Frame(int(midFrame+startFrame)/2), midFrame, xs, ys, zs, quats, reduced)

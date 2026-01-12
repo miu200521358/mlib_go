@@ -76,7 +76,10 @@ func TestBoneNameFramesReduceNoInflection(t *testing.T) {
 	frames := NewBoneNameFrames("b")
 	frames.Append(NewBoneFrame(0))
 	frames.Append(NewBoneFrame(1))
-	reduced := frames.Reduce()
+	reduced, err := frames.Reduce()
+	if err != nil {
+		t.Fatalf("Reduce error: %v", err)
+	}
 	if reduced != frames {
 		t.Fatalf("Reduce should return original when no inflection")
 	}
@@ -98,7 +101,10 @@ func TestBoneNameFramesReduceRange(t *testing.T) {
 	quats := []mmath.Quaternion{mmath.NewQuaternion(), mmath.NewQuaternion(), mmath.NewQuaternion()}
 
 	reduced := NewBoneNameFrames("b")
-	end := frames.reduceRange(0, 1, 2, xs, ys, zs, quats, reduced)
+	end, err := frames.reduceRange(0, 1, 2, xs, ys, zs, quats, reduced)
+	if err != nil {
+		t.Fatalf("reduceRange error: %v", err)
+	}
 	if end != 2 {
 		t.Fatalf("reduceRange end: got=%v", end)
 	}
