@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
+	baseerr "github.com/miu200521358/mlib_go/pkg/shared/base/err"
 )
 
 func withTempRoot(t *testing.T) string {
@@ -39,6 +40,13 @@ func withExecutable(t *testing.T, fn func() (string, error)) {
 	prev := osExecutable
 	osExecutable = fn
 	t.Cleanup(func() { osExecutable = prev })
+}
+
+func withReadFile(t *testing.T, fn func(string) ([]byte, error)) {
+	t.Helper()
+	prev := readFile
+	readFile = fn
+	t.Cleanup(func() { readFile = prev })
 }
 
 // TestConfigStoreAccessors はConfigStoreのgetterを確認する。
@@ -127,6 +135,8 @@ func TestUserConfigSetGet(t *testing.T) {
 
 	if err := store.Set("bad", 1.23); err == nil {
 		t.Errorf("Set unsupported type should error")
+	} else if ce, ok := err.(*baseerr.CommonError); !ok || ce.ErrorID() != configValueTypeNotSupportedErrorID {
+		t.Errorf("Set unsupported type ErrorID: err=%v", err)
 	}
 }
 
@@ -231,6 +241,8 @@ func TestSaveStringSliceErrors(t *testing.T) {
 	})
 	if err := store.SetStringSlice("list", []string{"a"}, 1); err == nil {
 		t.Errorf("SetStringSlice marshal error expected")
+	} else if ce, ok := err.(*baseerr.CommonError); !ok || ce.ErrorID() != userConfigSaveFailedErrorID {
+		t.Errorf("SetStringSlice marshal ErrorID: err=%v", err)
 	}
 
 	withLoadUserConfig(t, func() (map[string]any, error) {
@@ -241,6 +253,8 @@ func TestSaveStringSliceErrors(t *testing.T) {
 	})
 	if err := store.SetStringSlice("list", []string{"a"}, 1); err == nil {
 		t.Errorf("SetStringSlice write error expected")
+	} else if ce, ok := err.(*baseerr.CommonError); !ok || ce.ErrorID() != userConfigSaveFailedErrorID {
+		t.Errorf("SetStringSlice write ErrorID: err=%v", err)
 	}
 
 	prev := appRootDirFn
@@ -250,6 +264,8 @@ func TestSaveStringSliceErrors(t *testing.T) {
 	t.Cleanup(func() { appRootDirFn = prev })
 	if err := store.SetStringSlice("list", []string{"a"}, 1); err == nil {
 		t.Errorf("SetStringSlice AppRootDir error expected")
+	} else if ce, ok := err.(*baseerr.CommonError); !ok || ce.ErrorID() != userConfigSaveFailedErrorID {
+		t.Errorf("SetStringSlice AppRootDir ErrorID: err=%v", err)
 	}
 }
 
@@ -281,6 +297,34 @@ func TestLoadUserConfigInvalidJSON(t *testing.T) {
 	}
 }
 
+// TestLoadUserConfigInvalidJSONError はパース失敗時のエラーIDを確認する。
+func TestLoadUserConfigInvalidJSONError(t *testing.T) {
+	withTempRoot(t)
+	root := MustAppRootDir()
+	path := filepath.Join(root, config.UserConfigFileName)
+	if err := os.WriteFile(path, []byte("{invalid"), 0644); err != nil {
+		t.Fatalf("seed config failed: %v", err)
+	}
+	if _, err := loadUserConfig(); err == nil {
+		t.Fatalf("loadUserConfig expected error")
+	} else if ce, ok := err.(*baseerr.CommonError); !ok || ce.ErrorID() != baseerr.JsonPackageErrorID {
+		t.Fatalf("loadUserConfig ErrorID: err=%v", err)
+	}
+}
+
+// TestLoadUserConfigReadError は読込失敗時のエラーIDを確認する。
+func TestLoadUserConfigReadError(t *testing.T) {
+	withTempRoot(t)
+	withReadFile(t, func(string) ([]byte, error) {
+		return nil, errors.New("read error")
+	})
+	if _, err := loadUserConfig(); err == nil {
+		t.Fatalf("loadUserConfig expected error")
+	} else if ce, ok := err.(*baseerr.CommonError); !ok || ce.ErrorID() != baseerr.OsPackageErrorID {
+		t.Fatalf("loadUserConfig ErrorID: err=%v", err)
+	}
+}
+
 // TestLoadUserConfigAppRootDirError はAppRootDir失敗を確認する。
 func TestLoadUserConfigAppRootDirError(t *testing.T) {
 	prev := appRootDirFn
@@ -291,5 +335,7 @@ func TestLoadUserConfigAppRootDirError(t *testing.T) {
 
 	if _, err := loadUserConfig(); err == nil {
 		t.Errorf("loadUserConfig expected error")
+	} else if ce, ok := err.(*baseerr.CommonError); !ok || ce.ErrorID() != appRootDirResolveFailedErrorID {
+		t.Errorf("loadUserConfig ErrorID: err=%v", err)
 	}
 }

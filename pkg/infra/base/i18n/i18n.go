@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
+	baseerr "github.com/miu200521358/mlib_go/pkg/shared/base/err"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
 )
 
@@ -45,22 +46,32 @@ var defaultI18n *I18n
 var defaultMu sync.Mutex
 
 // InitI18n はi18nを初期化する。
-func InitI18n(appFiles embed.FS, userConfig config.IUserConfig) {
-	instance := initI18nFS(appFiles, userConfig)
+func InitI18n(appFiles embed.FS, userConfig config.IUserConfig) error {
+	instance, err := initI18nFS(appFiles, userConfig)
+	if err != nil {
+		return err
+	}
 	defaultMu.Lock()
 	defaultI18n = instance
 	defaultMu.Unlock()
+	return nil
 }
 
 // initI18nFS はFSからi18nを初期化する。
-func initI18nFS(appFiles fs.FS, userConfig config.IUserConfig) *I18n {
+func initI18nFS(appFiles fs.FS, userConfig config.IUserConfig) (*I18n, error) {
 	lang := detectLang(userConfig)
 	langs := []LangCode{LANG_JA, LANG_EN, LANG_ZH, LANG_KO}
 
 	messages := make(map[LangCode]map[string]string, len(langs))
 	for _, lc := range langs {
-		common := loadMessages(commonI18nFiles, "i18n/common."+string(lc)+".json")
-		app := loadMessages(appFiles, "i18n/app."+string(lc)+".json")
+		common, err := loadMessages(commonI18nFiles, "i18n/common."+string(lc)+".json")
+		if err != nil {
+			return nil, err
+		}
+		app, err := loadMessages(appFiles, "i18n/app."+string(lc)+".json")
+		if err != nil {
+			return nil, err
+		}
 		merged := mergeMessages(common, app)
 		messages[lc] = merged
 	}
@@ -70,15 +81,15 @@ func initI18nFS(appFiles fs.FS, userConfig config.IUserConfig) *I18n {
 		ready:      true,
 		messages:   messages,
 		userConfig: userConfig,
-	}
+	}, nil
 }
 
 // SetLang は言語を保存する。
-func SetLang(lang LangCode) i18n.LangChangeAction {
+func SetLang(lang LangCode) (i18n.LangChangeAction, error) {
 	defaultMu.Lock()
 	defer defaultMu.Unlock()
 	if defaultI18n == nil {
-		return i18n.LANG_CHANGE_RESTART_REQUIRED
+		return i18n.LANG_CHANGE_RESTART_REQUIRED, nil
 	}
 	return defaultI18n.SetLang(lang)
 }
@@ -122,18 +133,20 @@ func (i *I18n) Lang() LangCode {
 }
 
 // SetLang は言語を保存し、再起動が必要か返す。
-func (i *I18n) SetLang(lang LangCode) i18n.LangChangeAction {
+func (i *I18n) SetLang(lang LangCode) (i18n.LangChangeAction, error) {
 	if i == nil {
-		return i18n.LANG_CHANGE_RESTART_REQUIRED
+		return i18n.LANG_CHANGE_RESTART_REQUIRED, nil
 	}
 	lang = normalizeLang(lang)
 	if lang == i.lang {
-		return i18n.LANG_CHANGE_NONE
+		return i18n.LANG_CHANGE_NONE, nil
 	}
 	if i.userConfig != nil {
-		_ = i.userConfig.SetStringSlice(config.UserConfigKeyLang, []string{string(lang)}, 1)
+		if err := i.userConfig.SetStringSlice(config.UserConfigKeyLang, []string{string(lang)}, 1); err != nil {
+			return i18n.LANG_CHANGE_RESTART_REQUIRED, err
+		}
 	}
-	return i18n.LANG_CHANGE_RESTART_REQUIRED
+	return i18n.LANG_CHANGE_RESTART_REQUIRED, nil
 }
 
 // IsReady は初期化済みか判定する。
@@ -191,14 +204,14 @@ func normalizeLang(lang LangCode) LangCode {
 }
 
 // loadMessages はJSONを読み込んでマップ化する。
-func loadMessages(files fs.FS, path string) map[string]string {
+func loadMessages(files fs.FS, path string) (map[string]string, error) {
 	data, err := fs.ReadFile(files, path)
 	if err != nil {
-		return map[string]string{}
+		return nil, baseerr.NewFsPackageError("i18nメッセージ読込に失敗しました: "+path, err)
 	}
 	var entries []messageEntry
 	if err := json.Unmarshal(data, &entries); err != nil {
-		return map[string]string{}
+		return nil, baseerr.NewJsonPackageError("i18nメッセージ解析に失敗しました: "+path, err)
 	}
 	out := make(map[string]string, len(entries))
 	for _, e := range entries {
@@ -207,7 +220,7 @@ func loadMessages(files fs.FS, path string) map[string]string {
 		}
 		out[e.ID] = e.Translation
 	}
-	return out
+	return out, nil
 }
 
 // mergeMessages は共通とアプリを結合する。

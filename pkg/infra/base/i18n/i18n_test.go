@@ -3,16 +3,22 @@ package i18n
 
 import (
 	"embed"
+	"errors"
 	"testing"
 	"testing/fstest"
 
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
+	baseerr "github.com/miu200521358/mlib_go/pkg/shared/base/err"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
 )
+
+//go:embed i18n/app.*.json
+var testAppI18nFiles embed.FS
 
 type stubUserConfig struct {
 	lang    []string
 	setLang []string
+	setErr  error
 }
 
 // Get は未使用のため空実装。
@@ -34,7 +40,7 @@ func (s *stubUserConfig) SetStringSlice(key string, values []string, limit int) 
 	if key == config.UserConfigKeyLang {
 		s.setLang = values
 	}
-	return nil
+	return s.setErr
 }
 
 // GetBool は未使用のため既定値を返す。
@@ -64,7 +70,10 @@ func TestI18nTranslations(t *testing.T) {
 		"i18n/app.ko.json": &fstest.MapFile{Data: []byte(`[]`)},
 	}
 	cfg := &stubUserConfig{lang: []string{"ja"}}
-	i := initI18nFS(fsys, cfg)
+	i, err := initI18nFS(fsys, cfg)
+	if err != nil {
+		t.Fatalf("initI18nFS failed: %v", err)
+	}
 
 	if i.Lang() != LANG_JA {
 		t.Errorf("Lang: got=%v", i.Lang())
@@ -89,16 +98,38 @@ func TestSetLangAction(t *testing.T) {
 		"i18n/app.ko.json": &fstest.MapFile{Data: []byte(`[]`)},
 	}
 	cfg := &stubUserConfig{lang: []string{"ja"}}
-	i := initI18nFS(fsys, cfg)
-
-	if action := i.SetLang(LANG_JA); action != i18n.LANG_CHANGE_NONE {
-		t.Errorf("SetLang same: got=%v", action)
+	i, err := initI18nFS(fsys, cfg)
+	if err != nil {
+		t.Fatalf("initI18nFS failed: %v", err)
 	}
-	if action := i.SetLang(LANG_EN); action != i18n.LANG_CHANGE_RESTART_REQUIRED {
-		t.Errorf("SetLang change: got=%v", action)
+
+	if action, err := i.SetLang(LANG_JA); err != nil || action != i18n.LANG_CHANGE_NONE {
+		t.Errorf("SetLang same: action=%v err=%v", action, err)
+	}
+	if action, err := i.SetLang(LANG_EN); err != nil || action != i18n.LANG_CHANGE_RESTART_REQUIRED {
+		t.Errorf("SetLang change: action=%v err=%v", action, err)
 	}
 	if len(cfg.setLang) == 0 || cfg.setLang[0] != "en" {
 		t.Errorf("SetLang saved: got=%v", cfg.setLang)
+	}
+}
+
+// TestSetLangError は保存失敗時のエラー伝播を確認する。
+func TestSetLangError(t *testing.T) {
+	fsys := fstest.MapFS{
+		"i18n/app.ja.json": &fstest.MapFile{Data: []byte(`[]`)},
+		"i18n/app.en.json": &fstest.MapFile{Data: []byte(`[]`)},
+		"i18n/app.zh.json": &fstest.MapFile{Data: []byte(`[]`)},
+		"i18n/app.ko.json": &fstest.MapFile{Data: []byte(`[]`)},
+	}
+	cfg := &stubUserConfig{lang: []string{"ja"}, setErr: errors.New("save error")}
+	i, err := initI18nFS(fsys, cfg)
+	if err != nil {
+		t.Fatalf("initI18nFS failed: %v", err)
+	}
+	action, err := i.SetLang(LANG_EN)
+	if err == nil || action != i18n.LANG_CHANGE_RESTART_REQUIRED {
+		t.Errorf("SetLang error: action=%v err=%v", action, err)
 	}
 }
 
@@ -117,8 +148,8 @@ func TestDefaultI18nFallbacks(t *testing.T) {
 	if TWithLang(LANG_EN, "missing") != "●●missing●●" {
 		t.Errorf("TWithLang default: got=%v", TWithLang(LANG_EN, "missing"))
 	}
-	if SetLang(LANG_EN) != i18n.LANG_CHANGE_RESTART_REQUIRED {
-		t.Errorf("SetLang default expected restart")
+	if action, err := SetLang(LANG_EN); err != nil || action != i18n.LANG_CHANGE_RESTART_REQUIRED {
+		t.Errorf("SetLang default: action=%v err=%v", action, err)
 	}
 }
 
@@ -128,8 +159,8 @@ func TestI18nNilReceiver(t *testing.T) {
 	if i.Lang() != i18n.DefaultLang {
 		t.Errorf("Lang nil: got=%v", i.Lang())
 	}
-	if i.SetLang(LANG_EN) != i18n.LANG_CHANGE_RESTART_REQUIRED {
-		t.Errorf("SetLang nil expected restart")
+	if action, err := i.SetLang(LANG_EN); err != nil || action != i18n.LANG_CHANGE_RESTART_REQUIRED {
+		t.Errorf("SetLang nil: action=%v err=%v", action, err)
 	}
 	if i.IsReady() {
 		t.Errorf("IsReady nil should be false")
@@ -169,21 +200,22 @@ func TestLangDetection(t *testing.T) {
 
 // TestInitI18nGlobals はInitI18nとグローバル関数を確認する。
 func TestInitI18nGlobals(t *testing.T) {
-	var emptyFS embed.FS
 	cfg := &stubUserConfig{lang: []string{"en"}}
 
 	prev := defaultI18n
-	InitI18n(emptyFS, cfg)
+	if err := InitI18n(testAppI18nFiles, cfg); err != nil {
+		t.Fatalf("InitI18n failed: %v", err)
+	}
 	t.Cleanup(func() { defaultI18n = prev })
 
 	if CurrentLang() != LANG_EN {
 		t.Errorf("InitI18n CurrentLang: got=%v", CurrentLang())
 	}
-	if SetLang(LANG_EN) != i18n.LANG_CHANGE_NONE {
-		t.Errorf("SetLang same expected none")
+	if action, err := SetLang(LANG_EN); err != nil || action != i18n.LANG_CHANGE_NONE {
+		t.Errorf("SetLang same: action=%v err=%v", action, err)
 	}
-	if SetLang(LANG_JA) != i18n.LANG_CHANGE_RESTART_REQUIRED {
-		t.Errorf("SetLang change expected restart")
+	if action, err := SetLang(LANG_JA); err != nil || action != i18n.LANG_CHANGE_RESTART_REQUIRED {
+		t.Errorf("SetLang change: action=%v err=%v", action, err)
 	}
 	if T("開く") == "●●開く●●" {
 		t.Errorf("T should resolve key")
@@ -210,13 +242,20 @@ func TestLoadMessagesAndLookup(t *testing.T) {
 		"ok.json":  &fstest.MapFile{Data: []byte(`[{"id":"a","translation":"A"},{"id":"","translation":"skip"}]`)},
 		"bad.json": &fstest.MapFile{Data: []byte(`{invalid`)},
 	}
-	if got := loadMessages(fsys, "missing.json"); len(got) != 0 {
-		t.Errorf("loadMessages missing: got=%v", got)
+	if _, err := loadMessages(fsys, "missing.json"); err == nil {
+		t.Errorf("loadMessages missing should error")
+	} else if ce, ok := err.(*baseerr.CommonError); !ok || ce.ErrorID() != baseerr.FsPackageErrorID {
+		t.Errorf("loadMessages missing error ID: err=%v", err)
 	}
-	if got := loadMessages(fsys, "bad.json"); len(got) != 0 {
-		t.Errorf("loadMessages bad json: got=%v", got)
+	if _, err := loadMessages(fsys, "bad.json"); err == nil {
+		t.Errorf("loadMessages bad json should error")
+	} else if ce, ok := err.(*baseerr.CommonError); !ok || ce.ErrorID() != baseerr.JsonPackageErrorID {
+		t.Errorf("loadMessages bad json error ID: err=%v", err)
 	}
-	ok := loadMessages(fsys, "ok.json")
+	ok, err := loadMessages(fsys, "ok.json")
+	if err != nil {
+		t.Fatalf("loadMessages ok failed: %v", err)
+	}
 	if ok["a"] != "A" || ok[""] != "" {
 		t.Errorf("loadMessages ok: got=%v", ok)
 	}

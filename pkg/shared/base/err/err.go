@@ -40,6 +40,96 @@ type ErrorRecord struct {
 	SourcePaths []string
 }
 
+// CommonError は ErrorID 付きの共通エラー。
+type CommonError struct {
+	ID      string
+	Kind    ErrorKind
+	Message string
+	Cause   error
+}
+
+// Error はエラーメッセージを返す。
+func (e *CommonError) Error() string {
+	if e == nil {
+		return ""
+	}
+	if e.Message == "" && e.Cause == nil {
+		return ""
+	}
+	if e.Message == "" {
+		return e.Cause.Error()
+	}
+	if e.Cause == nil {
+		return e.Message
+	}
+	return e.Message + ": " + e.Cause.Error()
+}
+
+// Unwrap は原因エラーを返す。
+func (e *CommonError) Unwrap() error {
+	if e == nil {
+		return nil
+	}
+	return e.Cause
+}
+
+// ErrorID はエラーIDを返す。
+func (e *CommonError) ErrorID() string {
+	if e == nil {
+		return ""
+	}
+	return e.ID
+}
+
+// ErrorKind はエラー種別を返す。
+func (e *CommonError) ErrorKind() ErrorKind {
+	if e == nil {
+		return ""
+	}
+	return e.Kind
+}
+
+const (
+	// OsPackageErrorID は os パッケージの共通委譲エラーID。
+	OsPackageErrorID = "99001"
+	// JsonPackageErrorID は json パッケージの共通委譲エラーID。
+	JsonPackageErrorID = "99002"
+	// ImagePackageErrorID は image パッケージの共通委譲エラーID。
+	ImagePackageErrorID = "99003"
+	// FsPackageErrorID は io/fs パッケージの共通委譲エラーID。
+	FsPackageErrorID = "99004"
+)
+
+// NewCommonError は ErrorID 付きの共通エラーを生成する。
+func NewCommonError(id string, kind ErrorKind, message string, cause error) *CommonError {
+	return &CommonError{
+		ID:      id,
+		Kind:    kind,
+		Message: message,
+		Cause:   cause,
+	}
+}
+
+// NewOsPackageError は os パッケージ由来の共通委譲エラーを生成する。
+func NewOsPackageError(message string, cause error) *CommonError {
+	return NewCommonError(OsPackageErrorID, ErrorKindExternal, message, cause)
+}
+
+// NewJsonPackageError は json パッケージ由来の共通委譲エラーを生成する。
+func NewJsonPackageError(message string, cause error) *CommonError {
+	return NewCommonError(JsonPackageErrorID, ErrorKindExternal, message, cause)
+}
+
+// NewImagePackageError は image パッケージ由来の共通委譲エラーを生成する。
+func NewImagePackageError(message string, cause error) *CommonError {
+	return NewCommonError(ImagePackageErrorID, ErrorKindExternal, message, cause)
+}
+
+// NewFsPackageError は io/fs パッケージ由来の共通委譲エラーを生成する。
+func NewFsPackageError(message string, cause error) *CommonError {
+	return NewCommonError(FsPackageErrorID, ErrorKindExternal, message, cause)
+}
+
 // ErrorRegistryPath は埋め込みCSVのパス。
 const ErrorRegistryPath = "error_registry.csv"
 

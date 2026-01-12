@@ -133,7 +133,7 @@ func (l *Logger) Verbose(idx logging.VerboseIndex, msg string, params ...any) {
 		return
 	}
 	text := fmt.Sprintf(msg, params...)
-	_ = sink.WriteLine(text)
+	sink.WriteLine(text)
 }
 
 // Debug はデバッグログを出力する。

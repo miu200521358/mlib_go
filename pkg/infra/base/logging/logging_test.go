@@ -20,8 +20,8 @@ type stubI18n struct {
 func (s *stubI18n) Lang() i18n.LangCode { return "ja" }
 
 // SetLang は未使用のため固定値を返す。
-func (s *stubI18n) SetLang(lang i18n.LangCode) i18n.LangChangeAction {
-	return i18n.LANG_CHANGE_RESTART_REQUIRED
+func (s *stubI18n) SetLang(lang i18n.LangCode) (i18n.LangChangeAction, error) {
+	return i18n.LANG_CHANGE_RESTART_REQUIRED, nil
 }
 
 // IsReady は初期化済み扱いを返す。
@@ -38,9 +38,8 @@ type stubVerboseSink struct {
 }
 
 // WriteLine は行を追加する。
-func (s *stubVerboseSink) WriteLine(text string) error {
+func (s *stubVerboseSink) WriteLine(text string) {
 	s.lines = append(s.lines, text)
-	return nil
 }
 
 // Close は未使用のためnilを返す。

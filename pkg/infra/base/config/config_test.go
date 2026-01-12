@@ -15,12 +15,24 @@ import (
 	"testing/fstest"
 
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
+	baseerr "github.com/miu200521358/mlib_go/pkg/shared/base/err"
 )
 
 func removeFile(t *testing.T, path string) {
 	t.Helper()
 	if err := os.Remove(path); err != nil && !errors.Is(err, os.ErrNotExist) {
 		t.Fatalf("remove file failed: %v", err)
+	}
+}
+
+func assertCommonErrorID(t *testing.T, err error, id string) {
+	t.Helper()
+	ce, ok := err.(*baseerr.CommonError)
+	if !ok {
+		t.Fatalf("error type mismatch: %T", err)
+	}
+	if ce.ErrorID() != id {
+		t.Fatalf("ErrorID mismatch: got=%v want=%v", ce.ErrorID(), id)
 	}
 }
 
@@ -56,6 +68,8 @@ func TestLoadAppConfigError(t *testing.T) {
 	}
 	if _, err := loadAppConfigFS(fsys); err == nil {
 		t.Errorf("loadAppConfigFS expected error")
+	} else {
+		assertCommonErrorID(t, err, appConfigLoadFailedErrorID)
 	}
 }
 
@@ -64,6 +78,8 @@ func TestLoadAppConfigMissingFile(t *testing.T) {
 	fsys := fstest.MapFS{}
 	if _, err := loadAppConfigFS(fsys); err == nil {
 		t.Errorf("loadAppConfigFS expected read error")
+	} else {
+		assertCommonErrorID(t, err, appConfigLoadFailedErrorID)
 	}
 }
 
@@ -74,6 +90,8 @@ func TestLoadAppConfigIconMissing(t *testing.T) {
 	}
 	if _, err := loadAppConfigFS(fsys); err == nil {
 		t.Errorf("loadAppConfigFS expected icon read error")
+	} else {
+		assertCommonErrorID(t, err, appConfigLoadFailedErrorID)
 	}
 }
 
@@ -85,6 +103,8 @@ func TestLoadAppConfigIconDecode(t *testing.T) {
 	}
 	if _, err := loadAppConfigFS(fsys); err == nil {
 		t.Errorf("loadAppConfigFS expected decode error")
+	} else {
+		assertCommonErrorID(t, err, appConfigLoadFailedErrorID)
 	}
 }
 
@@ -93,6 +113,8 @@ func TestLoadAppConfig(t *testing.T) {
 	var emptyFS embed.FS
 	if _, err := LoadAppConfig(emptyFS); err == nil {
 		t.Errorf("LoadAppConfig expected error")
+	} else {
+		assertCommonErrorID(t, err, appConfigLoadFailedErrorID)
 	}
 }
 

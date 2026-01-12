@@ -1,10 +1,14 @@
 ID,Kind,Layer,Module,ErrorName,Summary,Remedy,SourcePaths
-20001,NotFound,domain,00,NameNotFoundError,名前解決に失敗,,vmd_sizing_t4/pkg/usecase/sizing.go
+20001,NotFound,domain,00,NameNotFoundError,名前解決に失敗,,-
 22201,NotFound,domain,22,ParentNotFoundError,親要素が見つからない,,-
 92202,Internal,domain,22,IndexOutOfRangeError,インデックスが範囲外,,-
 92203,Internal,domain,22,NameConflictError,名称が既存要素と衝突,,-
 92204,Internal,domain,22,NameMismatchError,名称が一致しない,,-
 90001,Internal,domain,00,InvariantViolationError,不変条件違反/NaNなどプログラム的異常,,-
+99001,External,shared,99,OsPackageError,osパッケージでエラーが発生,,mlib_go_t4/pkg/shared/base/err/err.go
+99002,External,shared,99,JsonPackageError,jsonパッケージでエラーが発生,,mlib_go_t4/pkg/shared/base/err/err.go
+99003,External,shared,99,ImagePackageError,imageパッケージでエラーが発生,,mlib_go_t4/pkg/shared/base/err/err.go
+99004,External,shared,99,FsPackageError,io/fsパッケージでエラーが発生,,mlib_go_t4/pkg/shared/base/err/err.go
 13001,Validate,usecase,39,PrerequisiteMissingError,前提不足で処理開始できない,前提を満たしてから再実行する,-
 14101,Validate,adapter,41,IoFileNotFound,入力ファイルが存在しない,パスを確認して再指定する,-
 14102,Validate,adapter,41,IoExtInvalid,拡張子が不正,拡張子を対応形式に修正する,-
@@ -33,6 +37,7 @@ ID,Kind,Layer,Module,ErrorName,Summary,Remedy,SourcePaths
 95201,Internal,infra,52,AppConfigLoadFailed,app_config.json読込に失敗,,mlib_go_t4/pkg/infra/base/config/config.go
 95202,Internal,infra,52,UserConfigSaveFailed,user_config.json保存に失敗,,mlib_go_t4/pkg/infra/base/config/config.go
 95203,Internal,infra,52,AppRootDirResolveFailed,アプリルート取得に失敗,,mlib_go_t4/pkg/infra/base/config/config.go
+95204,Internal,infra,52,ConfigValueTypeNotSupported,設定値の型が未対応,,mlib_go_t4/pkg/infra/base/config/config.go
 95207,Internal,infra,52,VerboseSinkWriteFailed,VERBOSE書き込みに失敗,,-
 95208,Internal,infra,52,VerboseSinkCloseFailed,VERBOSE出力のクローズに失敗,,-
 15301,Validate,infra,53,FileNotFoundError,ファイルが存在しない,パスを確認して再指定する,-

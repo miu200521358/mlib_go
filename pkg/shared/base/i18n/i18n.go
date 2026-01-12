@@ -20,7 +20,7 @@ const DefaultLang LangCode = "ja"
 // II18n は多言語変換のI/F。
 type II18n interface {
 	Lang() LangCode
-	SetLang(lang LangCode) LangChangeAction
+	SetLang(lang LangCode) (LangChangeAction, error)
 	IsReady() bool
 	T(key string) string
 	TWithLang(lang LangCode, key string) string

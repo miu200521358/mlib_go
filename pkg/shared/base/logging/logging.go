@@ -42,7 +42,7 @@ type IMessageBuffer interface {
 
 // IVerboseSink は冗長ログ出力のI/F。
 type IVerboseSink interface {
-	WriteLine(text string) error
+	WriteLine(text string)
 	Close() error
 }
 

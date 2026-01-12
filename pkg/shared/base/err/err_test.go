@@ -95,3 +95,78 @@ func TestSplitPaths(t *testing.T) {
 		t.Errorf("splitPaths: got=%v", out)
 	}
 }
+
+// TestCommonErrorNil はnil受信時の挙動を確認する。
+func TestCommonErrorNil(t *testing.T) {
+	var ce *CommonError
+	if ce.Error() != "" {
+		t.Errorf("nil Error should be empty")
+	}
+	if ce.Unwrap() != nil {
+		t.Errorf("nil Unwrap should be nil")
+	}
+	if ce.ErrorID() != "" {
+		t.Errorf("nil ErrorID should be empty")
+	}
+	if ce.ErrorKind() != "" {
+		t.Errorf("nil ErrorKind should be empty")
+	}
+}
+
+// TestCommonErrorValues は値とメッセージの組み立てを確認する。
+func TestCommonErrorValues(t *testing.T) {
+	cause := errors.New("cause")
+	ce := NewCommonError("id", ErrorKindExternal, "msg", cause)
+	if ce.Error() != "msg: cause" {
+		t.Errorf("Error: got=%v", ce.Error())
+	}
+	if ce.Unwrap() != cause {
+		t.Errorf("Unwrap mismatch")
+	}
+	if ce.ErrorID() != "id" {
+		t.Errorf("ErrorID: got=%v", ce.ErrorID())
+	}
+	if ce.ErrorKind() != ErrorKindExternal {
+		t.Errorf("ErrorKind: got=%v", ce.ErrorKind())
+	}
+}
+
+// TestCommonErrorMessageOnly はメッセージのみの分岐を確認する。
+func TestCommonErrorMessageOnly(t *testing.T) {
+	ce := NewCommonError("id", ErrorKindInternal, "only", nil)
+	if ce.Error() != "only" {
+		t.Errorf("Error: got=%v", ce.Error())
+	}
+}
+
+// TestCommonErrorCauseOnly は原因のみの分岐を確認する。
+func TestCommonErrorCauseOnly(t *testing.T) {
+	cause := errors.New("only-cause")
+	ce := NewCommonError("id", ErrorKindInternal, "", cause)
+	if ce.Error() != "only-cause" {
+		t.Errorf("Error: got=%v", ce.Error())
+	}
+}
+
+// TestNewPackageErrors は共通委譲エラーのID/種別を確認する。
+func TestNewPackageErrors(t *testing.T) {
+	cause := errors.New("cause")
+	tests := []struct {
+		name string
+		err  *CommonError
+		id   string
+	}{
+		{name: "os", err: NewOsPackageError("msg", cause), id: OsPackageErrorID},
+		{name: "json", err: NewJsonPackageError("msg", cause), id: JsonPackageErrorID},
+		{name: "image", err: NewImagePackageError("msg", cause), id: ImagePackageErrorID},
+		{name: "fs", err: NewFsPackageError("msg", cause), id: FsPackageErrorID},
+	}
+	for _, tt := range tests {
+		if tt.err.ErrorID() != tt.id {
+			t.Errorf("%s ErrorID: got=%v", tt.name, tt.err.ErrorID())
+		}
+		if tt.err.ErrorKind() != ErrorKindExternal {
+			t.Errorf("%s ErrorKind: got=%v", tt.name, tt.err.ErrorKind())
+		}
+	}
+}
