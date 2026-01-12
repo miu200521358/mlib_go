@@ -33,10 +33,12 @@ var (
 	}
 )
 
+// NewMat4 はMat4を生成する。
 func NewMat4() Mat4 {
 	return IDENT_MAT4
 }
 
+// NewMat4ByValues はMat4を生成する。
 func NewMat4ByValues(m11, m21, m31, m41, m12, m22, m32, m42, m13, m23, m33, m43, m14, m24, m34, m44 float64) Mat4 {
 	return Mat4{
 		m11, m21, m31, m41,
@@ -46,12 +48,14 @@ func NewMat4ByValues(m11, m21, m31, m41, m12, m22, m32, m42, m13, m23, m33, m43,
 	}
 }
 
+// NewMat4FromAxisAngle はMat4を生成する。
 func NewMat4FromAxisAngle(axis Vec3, angle float64) Mat4 {
 	rot := r3.NewRotation(angle, axis.Vec)
 	qq := Quaternion{quat.Number(rot)}
 	return qq.ToMat4()
 }
 
+// NewMat4FromLookAt はMat4を生成する。
 func NewMat4FromLookAt(eye, center, up Vec3) Mat4 {
 	f := center.Subed(eye).Normalized()
 	s := f.Cross(up).Normalized()
@@ -70,14 +74,17 @@ func NewMat4FromLookAt(eye, center, up Vec3) Mat4 {
 	return m
 }
 
+// IsZero はゼロか判定する。
 func (m Mat4) IsZero() bool {
 	return m == ZERO_MAT4
 }
 
+// IsIdent は単位行列か判定する。
 func (m Mat4) IsIdent() bool {
 	return m.NearEquals(IDENT_MAT4, 1e-10)
 }
 
+// String は文字列表現を返す。
 func (m Mat4) String() string {
 	return fmt.Sprintf("[%g %g %g %g; %g %g %g %g; %g %g %g %g; %g %g %g %g]",
 		m[0], m[4], m[8], m[12],
@@ -87,10 +94,12 @@ func (m Mat4) String() string {
 	)
 }
 
+// Copy はコピーを返す。
 func (m Mat4) Copy() (Mat4, error) {
 	return deepCopy(m)
 }
 
+// NearEquals は近似的に等しいか判定する。
 func (m Mat4) NearEquals(other Mat4, tolerance float64) bool {
 	for i := range m {
 		if math.Abs(m[i]-other[i]) > tolerance {
@@ -100,14 +109,17 @@ func (m Mat4) NearEquals(other Mat4, tolerance float64) bool {
 	return true
 }
 
+// Trace はトレースを返す。
 func (m Mat4) Trace() float64 {
 	return m[0] + m[5] + m[10] + m[15]
 }
 
+// Trace3 は3x3のトレースを返す。
 func (m Mat4) Trace3() float64 {
 	return m[0] + m[5] + m[10]
 }
 
+// MulVec3 はベクトルを変換する。
 func (m Mat4) MulVec3(other Vec3) Vec3 {
 	x := other.X*m[0] + other.Y*m[4] + other.Z*m[8] + m[12]
 	y := other.X*m[1] + other.Y*m[5] + other.Z*m[9] + m[13]
@@ -121,44 +133,53 @@ func (m Mat4) MulVec3(other Vec3) Vec3 {
 	return Vec3{r3.Vec{X: x, Y: y, Z: z}}
 }
 
+// Translate は平行移動する。
 func (m *Mat4) Translate(v Vec3) *Mat4 {
 	result := v.ToMat4().Muled(*m)
 	*m = result
 	return m
 }
 
+// Translated は平行移動結果を返す。
 func (m Mat4) Translated(v Vec3) Mat4 {
 	return v.ToMat4().Muled(m)
 }
 
+// Translation は平行移動成分を返す。
 func (m Mat4) Translation() Vec3 {
 	return Vec3{r3.Vec{X: m[12], Y: m[13], Z: m[14]}}
 }
 
+// Scale は拡大縮小する。
 func (m *Mat4) Scale(s Vec3) *Mat4 {
 	result := s.ToScaleMat4().Muled(*m)
 	*m = result
 	return m
 }
 
+// Scaled は拡大縮小結果を返す。
 func (m Mat4) Scaled(s Vec3) Mat4 {
 	return s.ToScaleMat4().Muled(m)
 }
 
+// Scaling は拡大縮小成分を返す。
 func (m Mat4) Scaling() Vec3 {
 	return Vec3{r3.Vec{X: m[0], Y: m[5], Z: m[10]}}
 }
 
+// Rotate は回転する。
 func (m *Mat4) Rotate(q Quaternion) *Mat4 {
 	result := q.ToMat4().Muled(*m)
 	*m = result
 	return m
 }
 
+// Rotated は回転結果を返す。
 func (m Mat4) Rotated(q Quaternion) Mat4 {
 	return q.ToMat4().Muled(m)
 }
 
+// Quaternion はクォータニオンを返す。
 func (m Mat4) Quaternion() Quaternion {
 	trace := m[0] + m[5] + m[10] + 1.0
 
@@ -192,6 +213,7 @@ func (m Mat4) Quaternion() Quaternion {
 	return NewQuaternionByValues(-x, -y, -z, w)
 }
 
+// Transpose は転置する。
 func (m *Mat4) Transpose() *Mat4 {
 	*m = Mat4{
 		m[0], m[4], m[8], m[12],
@@ -202,11 +224,13 @@ func (m *Mat4) Transpose() *Mat4 {
 	return m
 }
 
+// Mul は乗算する。
 func (m *Mat4) Mul(other Mat4) *Mat4 {
 	*m = m.Muled(other)
 	return m
 }
 
+// Muled は乗算結果を返す。
 func (m Mat4) Muled(other Mat4) Mat4 {
 	return Mat4{
 		m[0]*other[0] + m[4]*other[1] + m[8]*other[2] + m[12]*other[3],
@@ -231,6 +255,7 @@ func (m Mat4) Muled(other Mat4) Mat4 {
 	}
 }
 
+// Add は加算する。
 func (m *Mat4) Add(other Mat4) *Mat4 {
 	for i := range m {
 		m[i] += other[i]
@@ -238,6 +263,7 @@ func (m *Mat4) Add(other Mat4) *Mat4 {
 	return m
 }
 
+// Added は加算結果を返す。
 func (m Mat4) Added(other Mat4) Mat4 {
 	result := m
 	for i := range result {
@@ -246,6 +272,7 @@ func (m Mat4) Added(other Mat4) Mat4 {
 	return result
 }
 
+// MulScalar はスカラーを乗算する。
 func (m *Mat4) MulScalar(v float64) *Mat4 {
 	for i := range m {
 		m[i] *= v
@@ -253,6 +280,7 @@ func (m *Mat4) MulScalar(v float64) *Mat4 {
 	return m
 }
 
+// MuledScalar はスカラー乗算結果を返す。
 func (m Mat4) MuledScalar(v float64) Mat4 {
 	result := m
 	for i := range result {
@@ -261,16 +289,19 @@ func (m Mat4) MuledScalar(v float64) Mat4 {
 	return result
 }
 
+// Det は行列式を返す。
 func (m Mat4) Det() float64 {
 	return mat.Det(m.toDense())
 }
 
+// Inverse は逆行列にする。
 func (m *Mat4) Inverse() *Mat4 {
 	inv := m.Inverted()
 	*m = inv
 	return m
 }
 
+// Inverted は逆行列を返す。
 func (m Mat4) Inverted() Mat4 {
 	det := m.Det()
 	if math.Abs(det) < 1e-10 {
@@ -283,6 +314,7 @@ func (m Mat4) Inverted() Mat4 {
 	return mat4FromDense(&inv)
 }
 
+// ClampIfVerySmall は微小値を0に丸める。
 func (m *Mat4) ClampIfVerySmall() *Mat4 {
 	epsilon := 1e-6
 	for i := range m {
@@ -293,18 +325,22 @@ func (m *Mat4) ClampIfVerySmall() *Mat4 {
 	return m
 }
 
+// AxisX はX軸ベクトルを返す。
 func (m Mat4) AxisX() Vec3 {
 	return Vec3{r3.Vec{X: m[0], Y: m[1], Z: m[2]}}
 }
 
+// AxisY はY軸ベクトルを返す。
 func (m Mat4) AxisY() Vec3 {
 	return Vec3{r3.Vec{X: m[4], Y: m[5], Z: m[6]}}
 }
 
+// AxisZ はZ軸ベクトルを返す。
 func (m Mat4) AxisZ() Vec3 {
 	return Vec3{r3.Vec{X: m[8], Y: m[9], Z: m[10]}}
 }
 
+// toDense はmat.Denseへ変換する。
 func (m Mat4) toDense() *mat.Dense {
 	return mat.NewDense(4, 4, []float64{
 		m[0], m[4], m[8], m[12],
@@ -314,6 +350,7 @@ func (m Mat4) toDense() *mat.Dense {
 	})
 }
 
+// mat4FromDense はmat.DenseからMat4へ変換する。
 func mat4FromDense(d *mat.Dense) Mat4 {
 	return Mat4{
 		d.At(0, 0), d.At(1, 0), d.At(2, 0), d.At(3, 0),
@@ -322,3 +359,4 @@ func mat4FromDense(d *mat.Dense) Mat4 {
 		d.At(0, 3), d.At(1, 3), d.At(2, 3), d.At(3, 3),
 	}
 }
+

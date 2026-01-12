@@ -26,14 +26,17 @@ const (
 	HALF_RAD    = math.Pi / 2
 )
 
+// NewQuaternion はクォータニオンを生成する。
 func NewQuaternion() Quaternion {
 	return quaternionIdent
 }
 
+// NewQuaternionByValues はクォータニオンを生成する。
 func NewQuaternionByValues(x, y, z, w float64) Quaternion {
 	return Quaternion{quat.Number{Real: w, Imag: x, Jmag: y, Kmag: z}}
 }
 
+// NewQuaternionByValuesShort はクォータニオンを生成する。
 func NewQuaternionByValuesShort(x, y, z, w float64) Quaternion {
 	q := NewQuaternionByValues(x, y, z, w)
 	if q.W() < 0 {
@@ -42,11 +45,16 @@ func NewQuaternionByValuesShort(x, y, z, w float64) Quaternion {
 	return q
 }
 
+// X はX成分を返す。
 func (q Quaternion) X() float64 { return q.Imag }
+// Y はY成分を返す。
 func (q Quaternion) Y() float64 { return q.Jmag }
+// Z はZ成分を返す。
 func (q Quaternion) Z() float64 { return q.Kmag }
+// W はW成分を返す。
 func (q Quaternion) W() float64 { return q.Real }
 
+// set は各成分を設定する。
 func (q *Quaternion) set(x, y, z, w float64) {
 	q.Imag = x
 	q.Jmag = y
@@ -54,36 +62,43 @@ func (q *Quaternion) set(x, y, z, w float64) {
 	q.Real = w
 }
 
+// XYZ はXYZ成分を返す。
 func (q Quaternion) XYZ() Vec3 {
 	return Vec3{r3.Vec{X: q.Imag, Y: q.Jmag, Z: q.Kmag}}
 }
 
+// SetXYZ は値を設定する。
 func (q *Quaternion) SetXYZ(v Vec3) {
 	q.Imag = v.X
 	q.Jmag = v.Y
 	q.Kmag = v.Z
 }
 
+// String は文字列表現を返す。
 func (q Quaternion) String() string {
 	return fmt.Sprintf("[x=%.7f, y=%.7f, z=%.7f, w=%.7f]", q.Imag, q.Jmag, q.Kmag, q.Real)
 }
 
+// MMD はMMD向けの値を返す。
 func (q Quaternion) MMD() Quaternion {
 	return q
 }
 
+// NewQuaternionFromAxisAngles はクォータニオンを生成する。
 func NewQuaternionFromAxisAngles(axis Vec3, angle float64) Quaternion {
 	rot := r3.NewRotation(angle, axis.Vec)
 	qq := quat.Number(rot)
 	return Quaternion{qq}
 }
 
+// NewQuaternionFromAxisAnglesRotate はクォータニオンを生成する。
 func NewQuaternionFromAxisAnglesRotate(axis Vec3, angle float64) Quaternion {
 	rot := r3.NewRotation(angle, axis.Vec)
 	qq := quat.Number(rot)
 	return Quaternion{qq}
 }
 
+// NewQuaternionFromRadians はクォータニオンを生成する。
 func NewQuaternionFromRadians(xPitch, yHead, zRoll float64) Quaternion {
 	cx, sx := math.Cos(xPitch*0.5), math.Sin(xPitch*0.5)
 	cy, sy := math.Cos(yHead*0.5), math.Sin(yHead*0.5)
@@ -97,6 +112,7 @@ func NewQuaternionFromRadians(xPitch, yHead, zRoll float64) Quaternion {
 	return NewQuaternionByValues(x, y, z, w).Normalized()
 }
 
+// ToRadians はラジアン角を返す。
 func (q Quaternion) ToRadians() Vec3 {
 	sx := -(2*q.Jmag*q.Kmag - 2*q.Imag*q.Real)
 	unlocked := math.Abs(sx) < 0.99999
@@ -112,6 +128,7 @@ func (q Quaternion) ToRadians() Vec3 {
 	return Vec3{r3.Vec{X: xPitch, Y: yHead, Z: zRoll}}
 }
 
+// ToRadiansWithGimbal はジンバル判定付きでラジアン角を返す。
 func (q Quaternion) ToRadiansWithGimbal(axisIndex int) (Vec3, bool) {
 	r := q.ToRadians()
 	var other1Rad, other2Rad float64
@@ -132,28 +149,34 @@ func (q Quaternion) ToRadiansWithGimbal(axisIndex int) (Vec3, bool) {
 	return r, false
 }
 
+// NewQuaternionFromDegrees はクォータニオンを生成する。
 func NewQuaternionFromDegrees(xPitch, yHead, zRoll float64) Quaternion {
 	return NewQuaternionFromRadians(DegToRad(xPitch), DegToRad(yHead), DegToRad(zRoll))
 }
 
+// ToDegrees は度数法の角度を返す。
 func (q Quaternion) ToDegrees() Vec3 {
 	vec := q.ToRadians()
 	return Vec3{r3.Vec{X: RadToDeg(vec.X), Y: RadToDeg(vec.Y), Z: RadToDeg(vec.Z)}}
 }
 
+// ToMMDDegrees はMMD向けの度数法角度を返す。
 func (q Quaternion) ToMMDDegrees() Vec3 {
 	vec := q.MMD().ToRadians()
 	return Vec3{r3.Vec{X: RadToDeg(vec.X), Y: RadToDeg(-vec.Y), Z: RadToDeg(-vec.Z)}}
 }
 
+// Vec4 はVec4を返す。
 func (q Quaternion) Vec4() Vec4 {
 	return Vec4{q.Imag, q.Jmag, q.Kmag, q.Real}
 }
 
+// Vec3 はVec3を返す。
 func (q Quaternion) Vec3() Vec3 {
 	return Vec3{r3.Vec{X: q.Imag, Y: q.Jmag, Z: q.Kmag}}
 }
 
+// MulShort は乗算する。
 func (q Quaternion) MulShort(other Quaternion) Quaternion {
 	x := q.Real*other.Imag + q.Imag*other.Real + q.Jmag*other.Kmag - q.Kmag*other.Jmag
 	y := q.Real*other.Jmag + q.Jmag*other.Real + q.Kmag*other.Imag - q.Imag*other.Kmag
@@ -162,30 +185,36 @@ func (q Quaternion) MulShort(other Quaternion) Quaternion {
 	return NewQuaternionByValues(x, y, z, w)
 }
 
+// MuledShort は乗算結果を返す。
 func (q Quaternion) MuledShort(other Quaternion) Quaternion {
 	copied := q
 	copied.Mul(other)
 	return copied
 }
 
+// Mul は乗算する。
 func (q *Quaternion) Mul(other Quaternion) *Quaternion {
 	qq := quat.Mul(q.Number, other.Number)
 	q.Number = qq
 	return q
 }
 
+// Muled は乗算結果を返す。
 func (q Quaternion) Muled(other Quaternion) Quaternion {
 	return Quaternion{quat.Mul(q.Number, other.Number)}
 }
 
+// Norm はノルムを返す。
 func (q Quaternion) Norm() float64 {
 	return quat.Abs(q.Number)
 }
 
+// Length は長さを返す。
 func (q Quaternion) Length() float64 {
 	return quat.Abs(q.Number)
 }
 
+// Normalize は正規化する。
 func (q *Quaternion) Normalize() *Quaternion {
 	lenSq := q.Imag*q.Imag + q.Jmag*q.Jmag + q.Kmag*q.Kmag + q.Real*q.Real
 	if lenSq < 1e-10 {
@@ -200,12 +229,14 @@ func (q *Quaternion) Normalize() *Quaternion {
 	return q
 }
 
+// Normalized は正規化結果を返す。
 func (q Quaternion) Normalized() Quaternion {
 	vec := q
 	vec.Normalize()
 	return vec
 }
 
+// Negate は符号を反転する。
 func (q *Quaternion) Negate() *Quaternion {
 	q.Imag = -q.Imag
 	q.Jmag = -q.Jmag
@@ -214,10 +245,12 @@ func (q *Quaternion) Negate() *Quaternion {
 	return q
 }
 
+// Negated は符号反転結果を返す。
 func (q Quaternion) Negated() Quaternion {
 	return Quaternion{quat.Scale(-1, q.Number)}
 }
 
+// Inverse は逆行列にする。
 func (q *Quaternion) Inverse() *Quaternion {
 	lenSq := q.Imag*q.Imag + q.Jmag*q.Jmag + q.Kmag*q.Kmag + q.Real*q.Real
 	if lenSq < 1e-10 {
@@ -228,6 +261,7 @@ func (q *Quaternion) Inverse() *Quaternion {
 	return q
 }
 
+// Inverted は逆行列を返す。
 func (q Quaternion) Inverted() Quaternion {
 	lenSq := q.Imag*q.Imag + q.Jmag*q.Jmag + q.Kmag*q.Kmag + q.Real*q.Real
 	if lenSq < 1e-10 {
@@ -236,6 +270,7 @@ func (q Quaternion) Inverted() Quaternion {
 	return Quaternion{quat.Inv(q.Number)}
 }
 
+// SetShortestRotation は値を設定する。
 func (q *Quaternion) SetShortestRotation(other Quaternion) *Quaternion {
 	if !q.IsShortestRotation(other) {
 		q.Negate()
@@ -243,19 +278,23 @@ func (q *Quaternion) SetShortestRotation(other Quaternion) *Quaternion {
 	return q
 }
 
+// IsShortestRotation は最短回転か判定する。
 func (q Quaternion) IsShortestRotation(other Quaternion) bool {
 	return q.Dot(other) >= 0
 }
 
+// IsUnitQuat は単位クォータニオンか判定する。
 func (q Quaternion) IsUnitQuat(tolerance float64) bool {
 	norm := q.Norm()
 	return norm >= (1.0-tolerance) && norm <= (1.0+tolerance)
 }
 
+// Dot は内積を返す。
 func (q Quaternion) Dot(other Quaternion) float64 {
 	return q.Imag*other.Imag + q.Jmag*other.Jmag + q.Kmag*other.Kmag + q.Real*other.Real
 }
 
+// MuledScalar はスカラー乗算結果を返す。
 func (q Quaternion) MuledScalar(factor float64) Quaternion {
 	if factor == 0.0 {
 		return NewQuaternion()
@@ -269,6 +308,7 @@ func (q Quaternion) MuledScalar(factor float64) Quaternion {
 	return quaternionIdent.SlerpExtended(q, factor)
 }
 
+// SlerpExtended は球面線形補間する。
 func (q Quaternion) SlerpExtended(other Quaternion, t float64) Quaternion {
 	if q.NearEquals(other, 1e-8) {
 		return q
@@ -277,6 +317,7 @@ func (q Quaternion) SlerpExtended(other Quaternion, t float64) Quaternion {
 	cosOmega := q.Dot(other)
 	q2x, q2y, q2z, q2w := other.Imag, other.Jmag, other.Kmag, other.Real
 	if cosOmega < 0 {
+		// 最短経路になるよう符号を揃える。
 		cosOmega = -cosOmega
 		q2x = -q2x
 		q2y = -q2y
@@ -286,6 +327,7 @@ func (q Quaternion) SlerpExtended(other Quaternion, t float64) Quaternion {
 
 	var result Quaternion
 	if cosOmega > 0.9999 {
+		// 近接時は線形補間で近似する。
 		result = NewQuaternionByValues(
 			q.Imag*(1-t)+q2x*t,
 			q.Jmag*(1-t)+q2y*t,
@@ -308,10 +350,12 @@ func (q Quaternion) SlerpExtended(other Quaternion, t float64) Quaternion {
 	return result.Normalized()
 }
 
+// ToAxisAngle は軸角表現を返す。
 func (q Quaternion) ToAxisAngle() (Vec3, float64) {
 	lenSq := q.Imag*q.Imag + q.Jmag*q.Jmag + q.Kmag*q.Kmag + q.Real*q.Real
 	var normW float64
 	if math.Abs(lenSq-1.0) > 1e-10 {
+		// 正規化して実部を求める。
 		invLen := 1.0 / math.Sqrt(lenSq)
 		normW = q.Real * invLen
 	} else {
@@ -327,6 +371,7 @@ func (q Quaternion) ToAxisAngle() (Vec3, float64) {
 	return Vec3{r3.Vec{X: q.Imag * invS, Y: q.Jmag * invS, Z: q.Kmag * invS}}, angle
 }
 
+// Slerp は球面線形補間する。
 func (q Quaternion) Slerp(other Quaternion, t float64) Quaternion {
 	if t <= 0 {
 		return q
@@ -341,6 +386,7 @@ func (q Quaternion) Slerp(other Quaternion, t float64) Quaternion {
 	cosOmega := q.Dot(other)
 	q2x, q2y, q2z, q2w := other.Imag, other.Jmag, other.Kmag, other.Real
 	if cosOmega < 0 {
+		// 最短経路になるよう符号を揃える。
 		cosOmega = -cosOmega
 		q2x = -q2x
 		q2y = -q2y
@@ -350,6 +396,7 @@ func (q Quaternion) Slerp(other Quaternion, t float64) Quaternion {
 
 	var k1, k2 float64
 	if cosOmega > 0.9999 {
+		// 近接時は線形補間で近似する。
 		k1 = 1.0 - t
 		k2 = t
 	} else {
@@ -368,6 +415,7 @@ func (q Quaternion) Slerp(other Quaternion, t float64) Quaternion {
 	)
 }
 
+// Lerp は線形補間する。
 func (q Quaternion) Lerp(other Quaternion, t float64) Quaternion {
 	if t <= 0 {
 		return q
@@ -403,15 +451,18 @@ func (q Quaternion) Lerp(other Quaternion, t float64) Quaternion {
 	return NewQuaternionByValues(x, y, z, w)
 }
 
+// ToDegree は度数法の角度を返す。
 func (q *Quaternion) ToDegree() float64 {
 	return RadToDeg(q.ToRadian())
 }
 
+// ToRadian はラジアン角を返す。
 func (q *Quaternion) ToRadian() float64 {
 	q.Normalize()
 	return 2 * math.Acos(math.Min(1, math.Max(-1, q.Real)))
 }
 
+// ToSignedDegree は符号付き角度を返す。
 func (q *Quaternion) ToSignedDegree() float64 {
 	basicAngle := q.ToDegree()
 	if q.Vec3().Length() > 0 {
@@ -423,6 +474,7 @@ func (q *Quaternion) ToSignedDegree() float64 {
 	return basicAngle
 }
 
+// ToSignedRadian は符号付きラジアン角を返す。
 func (q *Quaternion) ToSignedRadian() float64 {
 	basicAngle := q.ToRadian()
 	if q.Vec3().Length() > 0 {
@@ -434,12 +486,14 @@ func (q *Quaternion) ToSignedRadian() float64 {
 	return basicAngle
 }
 
+// ToTheta は角度差を返す。
 func (q *Quaternion) ToTheta(other Quaternion) float64 {
 	q.Normalize()
 	v := other.Normalized()
 	return math.Acos(math.Min(1, math.Max(-1, q.Dot(v))))
 }
 
+// NewQuaternionFromDirection はクォータニオンを生成する。
 func NewQuaternionFromDirection(direction, up Vec3) Quaternion {
 	if direction.Length() == 0 {
 		return NewQuaternion()
@@ -454,6 +508,7 @@ func NewQuaternionFromDirection(direction, up Vec3) Quaternion {
 	return NewQuaternionFromAxes(xAxis, yAxis, zAxis).Normalized()
 }
 
+// NewQuaternionRotate はクォータニオンを生成する。
 func NewQuaternionRotate(fromV, toV Vec3) Quaternion {
 	if fromV.NearEquals(toV, 1e-6) || fromV.Length() == 0 || toV.Length() == 0 {
 		return NewQuaternion()
@@ -480,6 +535,7 @@ func NewQuaternionRotate(fromV, toV Vec3) Quaternion {
 	return NewQuaternionByValues(cross.X*oos, cross.Y*oos, cross.Z*oos, s*0.5).Normalized()
 }
 
+// NewQuaternionFromAxes はクォータニオンを生成する。
 func NewQuaternionFromAxes(xAxis, yAxis, zAxis Vec3) Quaternion {
 	mat := NewMat4ByValues(
 		xAxis.X, xAxis.Y, xAxis.Z, 0,
@@ -490,6 +546,7 @@ func NewQuaternionFromAxes(xAxis, yAxis, zAxis Vec3) Quaternion {
 	return mat.Quaternion()
 }
 
+// SeparateTwistByAxis はねじり成分を分離する。
 func (q Quaternion) SeparateTwistByAxis(globalAxis Vec3) (Quaternion, Quaternion) {
 	globalXAxis := globalAxis.Normalized()
 	globalXVec := q.MulVec3(globalXAxis)
@@ -499,6 +556,7 @@ func (q Quaternion) SeparateTwistByAxis(globalAxis Vec3) (Quaternion, Quaternion
 	return twistQQ, yzQQ
 }
 
+// SeparateByAxis は軸成分ごとに分離する。
 func (q Quaternion) SeparateByAxis(globalAxis Vec3) (Quaternion, Quaternion, Quaternion) {
 	localZAxis := Vec3{r3.Vec{Z: -1}}
 	globalXAxis := globalAxis.Normalized()
@@ -529,14 +587,17 @@ func (q Quaternion) SeparateByAxis(globalAxis Vec3) (Quaternion, Quaternion, Qua
 	return xQQ, yQQ, zQQ
 }
 
+// Copy はコピーを返す。
 func (q Quaternion) Copy() (Quaternion, error) {
 	return deepCopy(q)
 }
 
+// Vector はスライス表現を返す。
 func (q Quaternion) Vector() []float64 {
 	return []float64{q.Imag, q.Jmag, q.Kmag, q.Real}
 }
 
+// ToMat4 は行列に変換する。
 func (q Quaternion) ToMat4() Mat4 {
 	x, y, z, w := q.Imag, q.Jmag, q.Kmag, q.Real
 	xx, yy, zz := x*x, y*y, z*z
@@ -563,6 +624,7 @@ func (q Quaternion) ToMat4() Mat4 {
 	)
 }
 
+// ToFixedAxisRotation は固定軸回転に変換する。
 func (q Quaternion) ToFixedAxisRotation(fixedAxis Vec3) Quaternion {
 	normalizedFixedAxis := fixedAxis.Normalized()
 	quatAxis := q.XYZ().Normalized()
@@ -573,24 +635,29 @@ func (q Quaternion) ToFixedAxisRotation(fixedAxis Vec3) Quaternion {
 	return NewQuaternionFromAxisAngles(normalizedFixedAxis, rad)
 }
 
+// IsIdent は単位行列か判定する。
 func (q Quaternion) IsIdent() bool {
 	return q.NearEquals(quaternionIdent, 1e-6)
 }
 
+// NearEquals は近似的に等しいか判定する。
 func (q Quaternion) NearEquals(other Quaternion, epsilon float64) bool {
 	return math.Abs(q.Imag-other.Imag) <= epsilon && math.Abs(q.Jmag-other.Jmag) <= epsilon &&
 		math.Abs(q.Kmag-other.Kmag) <= epsilon && math.Abs(q.Real-other.Real) <= epsilon
 }
 
+// MulVec3 はベクトルを変換する。
 func (q Quaternion) MulVec3(v Vec3) Vec3 {
 	rot := r3.Rotation(q.Normalized().Number)
 	return Vec3{rot.Rotate(v.Vec)}
 }
 
+// VectorToDegree は角度を度数法で返す。
 func VectorToDegree(a, b Vec3) float64 {
 	return RadToDeg(VectorToRadian(a, b))
 }
 
+// VectorToRadian は角度をラジアンで返す。
 func VectorToRadian(a, b Vec3) float64 {
 	p := a.Dot(b)
 	normA := a.Length()
@@ -599,6 +666,7 @@ func VectorToRadian(a, b Vec3) float64 {
 	return math.Acos(math.Min(1, math.Max(-1, cosAngle)))
 }
 
+// Log はクォータニオンの対数を求める。
 func (q Quaternion) Log() (Quaternion, error) {
 	if math.Abs(q.Real) > 1.0 {
 		return Quaternion{}, errors.New("invalid quaternion scalar part")
@@ -612,6 +680,7 @@ func (q Quaternion) Log() (Quaternion, error) {
 	return NewQuaternionByValues(scale*q.Imag, scale*q.Jmag, scale*q.Kmag, 0), nil
 }
 
+// FindSlerpT はSlerpの係数tを求める。
 func FindSlerpT(q1, q2, qt Quaternion, initialT float64) float64 {
 	tol := 1e-10
 	phi := (1 + math.Sqrt(5)) / 2
@@ -626,6 +695,7 @@ func FindSlerpT(q1, q2, qt Quaternion, initialT float64) float64 {
 	c := b - (b-a)/phi
 	d := a + (b-a)/phi
 
+	// 黄金分割探索で誤差最小のtを探索する。
 	q2c := q2
 	if q1.Dot(q2) < 0 {
 		q2c = q2.Negated()
@@ -663,6 +733,7 @@ func FindSlerpT(q1, q2, qt Quaternion, initialT float64) float64 {
 	return (a + b) / 2
 }
 
+// FindLerpT はLerpの係数tを求める。
 func FindLerpT(q1, q2, qt Quaternion) float64 {
 	tol := 1e-8
 	phi := (1 + math.Sqrt(5)) / 2
@@ -673,6 +744,7 @@ func FindLerpT(q1, q2, qt Quaternion) float64 {
 	c := b - (b-a)/phi
 	d := a + (b-a)/phi
 
+	// 黄金分割探索で誤差最小のtを探索する。
 	q2c := q2
 	if q1.Dot(q2) < 0 {
 		q2c = q2.Negated()

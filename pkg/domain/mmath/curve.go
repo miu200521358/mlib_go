@@ -21,6 +21,7 @@ var (
 	CURVE_MAX_VEC = Vec2{CurveMax, CurveMax}
 )
 
+// NewCurve は曲線を生成する。
 func NewCurve() *Curve {
 	return &Curve{
 		Start: Vec2{20.0, 20.0},
@@ -28,6 +29,7 @@ func NewCurve() *Curve {
 	}
 }
 
+// Normalize は正規化する。
 func (curve *Curve) Normalize(begin, finish Vec2) {
 	diff := finish.Subed(begin)
 
@@ -46,6 +48,7 @@ func (curve *Curve) Normalize(begin, finish Vec2) {
 	curve.End = curve.End.MuledScalar(CurveMax).Round()
 }
 
+// tryCurveNormalize は曲線の正規化を試みる。
 func tryCurveNormalize(c0, c1, c2, c3 Vec2, decreasing bool) *Curve {
 	p0 := Vec2{X: c0.X, Y: c0.Y}
 	p3 := Vec2{X: c3.X, Y: c3.Y}
@@ -82,6 +85,7 @@ func tryCurveNormalize(c0, c1, c2, c3 Vec2, decreasing bool) *Curve {
 	return curve
 }
 
+// Evaluate は補間曲線を評価して値を返す。
 func Evaluate(curve *Curve, start, now, end float32) (x, y, t float64) {
 	if (now-start) == 0 || (end-start) == 0 {
 		return 0, 0, 0
@@ -101,6 +105,7 @@ func Evaluate(curve *Curve, start, now, end float32) (x, y, t float64) {
 	x2 := curve.End.X / CurveMax
 	y2 := curve.End.Y / CurveMax
 
+	// x に対応する t をニュートン法で求める。
 	t = newton(x1, x2, x, x, 1e-15, 1e-20)
 	s := 1.0 - t
 
@@ -109,6 +114,7 @@ func Evaluate(curve *Curve, start, now, end float32) (x, y, t float64) {
 	return x, y, t
 }
 
+// bezierCoeffs はベジェ係数を計算する。
 func bezierCoeffs(p1, p2 float64) (a, b, c float64) {
 	a = 3*p1 - 3*p2 + 1
 	b = -6*p1 + 3*p2
@@ -116,16 +122,20 @@ func bezierCoeffs(p1, p2 float64) (a, b, c float64) {
 	return a, b, c
 }
 
+// bezierValue はベジェ曲線の値を計算する。
 func bezierValue(a, b, c, t float64) float64 {
 	return ((a*t+b)*t + c) * t
 }
 
+// bezierDerivative はベジェ曲線の導関数値を計算する。
 func bezierDerivative(a, b, c, t float64) float64 {
 	return (3*a*t+2*b)*t + c
 }
 
+// newton はニュートン法で解を求める。
 func newton(x1, x2, x, t0, eps, err float64) float64 {
 	a, b, c := bezierCoeffs(x1, x2)
+	// ベジェ関数の逆関数をニュートン法で解く。
 	for i := 0; i < 20; i++ {
 		funcFValue := bezierValue(a, b, c, t0) - x
 		funcDF := bezierDerivative(a, b, c, t0)
@@ -142,6 +152,7 @@ func newton(x1, x2, x, t0, eps, err float64) float64 {
 	return t0
 }
 
+// SplitCurve は曲線を分割する。
 func SplitCurve(curve *Curve, start, now, end float32) (*Curve, *Curve) {
 	if (now-start) == 0 || (end-start) == 0 {
 		return NewCurve(), NewCurve()
@@ -149,6 +160,7 @@ func SplitCurve(curve *Curve, start, now, end float32) (*Curve, *Curve) {
 
 	_, _, t := Evaluate(curve, start, now, end)
 
+	// de Casteljau 法で分割点を求める。
 	iA := Vec2{0.0, 0.0}
 	iB := curve.Start.DivedScalar(CurveMax)
 	iC := curve.End.DivedScalar(CurveMax)
@@ -201,6 +213,7 @@ type controlPoints struct {
 
 var optimizePointsFunc = optimizePoints
 
+// NewCurveFromValues は曲線を生成する。
 func NewCurveFromValues(values []float64, threshold float64) (*Curve, error) {
 	if len(values) <= 2 {
 		return NewCurve(), nil
@@ -250,6 +263,7 @@ func NewCurveFromValues(values []float64, threshold float64) (*Curve, error) {
 	return curve, nil
 }
 
+// isLinearInterpolation は線形補間か判定する。
 func isLinearInterpolation(yCoords []float64, threshold float64) bool {
 	if IsAlmostAllSameValues(yCoords, threshold) {
 		return true
@@ -262,9 +276,11 @@ func isLinearInterpolation(yCoords []float64, threshold float64) bool {
 	return IsAlmostAllSameValues(diffs, threshold)
 }
 
+// optimizePoints は制御点を最適化する。
 func optimizePoints(xCoords, yCoords []float64, P0, P1, P2, P3 Vec2) (controlPoints, error) {
 	initial := []float64{P1.X, P1.Y, P2.X, P2.Y}
 
+	// 誤差最小化問題をBFGSで解く。
 	problem := optimize.Problem{
 		Func: func(p []float64) float64 {
 			P1 := Vec2{X: p[0], Y: p[1]}
@@ -291,6 +307,7 @@ func optimizePoints(xCoords, yCoords []float64, P0, P1, P2, P3 Vec2) (controlPoi
 	return controlPoints{P0, P1, P2, P3}, nil
 }
 
+// calculateError は誤差を計算する。
 func calculateError(xCoords, yCoords []float64, P1, P2 Vec2) float64 {
 	totalError := 0.0
 	for i, x := range xCoords {
