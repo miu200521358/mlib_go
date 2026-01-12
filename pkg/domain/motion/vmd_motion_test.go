@@ -46,6 +46,16 @@ func TestVmdMotionIndexes(t *testing.T) {
 	}
 }
 
+// TestVmdMotionMinFrame は最小フレームの判定を確認する。
+func TestVmdMotionMinFrame(t *testing.T) {
+	motion := NewVmdMotion("path.vmd")
+	motion.BoneFrames.Get("b").Append(NewBoneFrame(0))
+	motion.MorphFrames.Get("m").Append(NewMorphFrame(5))
+	if motion.MinFrame() != 0 {
+		t.Fatalf("MinFrame: got=%v", motion.MinFrame())
+	}
+}
+
 // TestVmdMotionCopy はCopyの挙動を確認する。
 func TestVmdMotionCopy(t *testing.T) {
 	motion := NewVmdMotion("path.vmd")

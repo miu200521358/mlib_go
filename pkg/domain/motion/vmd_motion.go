@@ -156,20 +156,19 @@ func (m *VmdMotion) MinFrame() Frame {
 	if m == nil {
 		return 0
 	}
-	boneMin := Frame(0)
-	morphMin := Frame(0)
-	if m.BoneFrames != nil {
-		boneMin = m.BoneFrames.MinFrame()
+	hasBone := m.BoneFrames != nil && m.BoneFrames.Len() > 0
+	hasMorph := m.MorphFrames != nil && m.MorphFrames.Len() > 0
+	if !hasBone && !hasMorph {
+		return 0
 	}
-	if m.MorphFrames != nil {
-		morphMin = m.MorphFrames.MinFrame()
+	if !hasBone {
+		return m.MorphFrames.MinFrame()
 	}
-	if boneMin == 0 {
-		return morphMin
+	if !hasMorph {
+		return m.BoneFrames.MinFrame()
 	}
-	if morphMin == 0 {
-		return boneMin
-	}
+	boneMin := m.BoneFrames.MinFrame()
+	morphMin := m.MorphFrames.MinFrame()
 	if boneMin < morphMin {
 		return boneMin
 	}

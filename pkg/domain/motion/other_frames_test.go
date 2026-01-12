@@ -39,6 +39,26 @@ func TestShadowFrameLerp(t *testing.T) {
 	}
 }
 
+// TestLightFramesClean は既定値のみの削除を確認する。
+func TestLightFramesClean(t *testing.T) {
+	frames := NewLightFrames()
+	frames.Append(NewLightFrame(0))
+	frames.Clean()
+	if frames.Len() != 0 {
+		t.Fatalf("Clean should delete default light")
+	}
+}
+
+// TestShadowFramesClean は既定値のみの削除を確認する。
+func TestShadowFramesClean(t *testing.T) {
+	frames := NewShadowFrames()
+	frames.Append(NewShadowFrame(0))
+	frames.Clean()
+	if frames.Len() != 0 {
+		t.Fatalf("Clean should delete default shadow")
+	}
+}
+
 // TestIkFrameIsEnable はIKの有効判定を確認する。
 func TestIkFrameIsEnable(t *testing.T) {
 	frame := NewIkFrame(0)

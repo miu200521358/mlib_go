@@ -50,6 +50,18 @@ func TestFixedTimeStep(t *testing.T) {
 
 // TestWindFramesDefaults は風フレームの既定値と係数計算を確認する。
 func TestWindFramesDefaults(t *testing.T) {
+	enabledFrames := NewWindEnabledFrames()
+	enabled := enabledFrames.Get(0)
+	if enabled == nil || enabled.Enabled {
+		t.Fatalf("WindEnabled default")
+	}
+
+	directionFrames := NewWindDirectionFrames()
+	direction := directionFrames.Get(0)
+	if direction == nil || direction.Direction == nil || !direction.Direction.NearEquals(vec3(0, 0, 0), 1e-8) {
+		t.Fatalf("WindDirection default")
+	}
+
 	lift := NewWindLiftCoeffFrame(0)
 	if lift.WindLiftCoeff() != 1.0/60.0 {
 		t.Fatalf("WindLiftCoeff default")
