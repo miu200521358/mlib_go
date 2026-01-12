@@ -57,16 +57,10 @@ func (next *CameraFrame) lerpFrame(prev *CameraFrame, index Frame) *CameraFrame 
 		return NewCameraFrame(index)
 	}
 	if prev == nil {
-		copied, _ := next.Copy()
-		out := copied.(*CameraFrame)
-		out.SetIndex(index)
-		return out
+		return next.copyWithIndex(index)
 	}
 	if next == nil {
-		copied, _ := prev.Copy()
-		out := copied.(*CameraFrame)
-		out.SetIndex(index)
-		return out
+		return prev.copyWithIndex(index)
 	}
 
 	cf := NewCameraFrame(index)
@@ -95,6 +89,27 @@ func (next *CameraFrame) lerpFrame(prev *CameraFrame, index Frame) *CameraFrame 
 	cf.IsPerspectiveOff = next.IsPerspectiveOff
 
 	return cf
+}
+
+// copyWithIndex は指定フレーム番号で複製する。
+func (f *CameraFrame) copyWithIndex(index Frame) *CameraFrame {
+	if f == nil {
+		return nil
+	}
+	var curves *CameraCurves
+	if f.Curves != nil {
+		curves = f.Curves.Copy()
+	}
+	return &CameraFrame{
+		BaseFrame:        &BaseFrame{index: index, Read: f.Read},
+		Position:         copyVec3(f.Position),
+		Degrees:          copyVec3(f.Degrees),
+		Quaternion:       copyQuaternion(f.Quaternion),
+		Distance:         f.Distance,
+		ViewOfAngle:      f.ViewOfAngle,
+		IsPerspectiveOff: f.IsPerspectiveOff,
+		Curves:           curves,
+	}
 }
 
 // splitCurve は曲線を分割する。

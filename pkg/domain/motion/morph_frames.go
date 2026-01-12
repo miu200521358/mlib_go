@@ -33,21 +33,23 @@ func (next *MorphFrame) lerpFrame(prev *MorphFrame, index Frame) *MorphFrame {
 		return NewMorphFrame(index)
 	}
 	if prev == nil {
-		copied, _ := next.Copy()
-		out := copied.(*MorphFrame)
-		out.SetIndex(index)
-		return out
+		return next.copyWithIndex(index)
 	}
 	if next == nil {
-		copied, _ := prev.Copy()
-		out := copied.(*MorphFrame)
-		out.SetIndex(index)
-		return out
+		return prev.copyWithIndex(index)
 	}
 	out := NewMorphFrame(index)
 	t := linearT(prev.Index(), index, next.Index())
 	out.Ratio = mmath.Effective(mmath.Lerp(prev.Ratio, next.Ratio, t))
 	return out
+}
+
+// copyWithIndex は指定フレーム番号で複製する。
+func (f *MorphFrame) copyWithIndex(index Frame) *MorphFrame {
+	if f == nil {
+		return nil
+	}
+	return &MorphFrame{BaseFrame: &BaseFrame{index: index, Read: f.Read}, Ratio: f.Ratio}
 }
 
 // splitCurve は何もしない。

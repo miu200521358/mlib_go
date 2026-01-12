@@ -9,7 +9,6 @@ type Frame = sharedtime.Frame
 // IBaseFrame はフレームの共通インターフェース。
 type IBaseFrame interface {
 	Index() Frame
-	SetIndex(frame Frame)
 	Copy() (IBaseFrame, error)
 }
 
@@ -30,14 +29,6 @@ func (f *BaseFrame) Index() Frame {
 		return 0
 	}
 	return f.index
-}
-
-// SetIndex はフレーム番号を設定する。
-func (f *BaseFrame) SetIndex(frame Frame) {
-	if f == nil {
-		return
-	}
-	f.index = frame
 }
 
 // Copy はフレームを複製する。

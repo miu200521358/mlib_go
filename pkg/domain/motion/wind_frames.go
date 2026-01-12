@@ -29,19 +29,24 @@ func (next *WindEnabledFrame) lerpFrame(prev *WindEnabledFrame, index Frame) *Wi
 		return NewWindEnabledFrame(index)
 	}
 	if prev == nil {
-		copied, _ := next.Copy()
-		out := copied.(*WindEnabledFrame)
-		out.SetIndex(index)
-		return out
+		return next.copyWithIndex(index)
 	}
-	copied, _ := prev.Copy()
-	out := copied.(*WindEnabledFrame)
-	out.SetIndex(index)
-	return out
+	return prev.copyWithIndex(index)
 }
 
 // splitCurve は何もしない。
 func (f *WindEnabledFrame) splitCurve(prev *WindEnabledFrame, next *WindEnabledFrame, index Frame) {
+}
+
+// copyWithIndex は指定フレーム番号で複製する。
+func (f *WindEnabledFrame) copyWithIndex(index Frame) *WindEnabledFrame {
+	if f == nil {
+		return nil
+	}
+	return &WindEnabledFrame{
+		BaseFrame: &BaseFrame{index: index, Read: f.Read},
+		Enabled:   f.Enabled,
+	}
 }
 
 // WindEnabledFrames は風有効フレーム集合を表す。
@@ -103,19 +108,24 @@ func (next *WindDirectionFrame) lerpFrame(prev *WindDirectionFrame, index Frame)
 		return NewWindDirectionFrame(index)
 	}
 	if prev == nil {
-		copied, _ := next.Copy()
-		out := copied.(*WindDirectionFrame)
-		out.SetIndex(index)
-		return out
+		return next.copyWithIndex(index)
 	}
-	copied, _ := prev.Copy()
-	out := copied.(*WindDirectionFrame)
-	out.SetIndex(index)
-	return out
+	return prev.copyWithIndex(index)
 }
 
 // splitCurve は何もしない。
 func (f *WindDirectionFrame) splitCurve(prev *WindDirectionFrame, next *WindDirectionFrame, index Frame) {
+}
+
+// copyWithIndex は指定フレーム番号で複製する。
+func (f *WindDirectionFrame) copyWithIndex(index Frame) *WindDirectionFrame {
+	if f == nil {
+		return nil
+	}
+	return &WindDirectionFrame{
+		BaseFrame: &BaseFrame{index: index, Read: f.Read},
+		Direction: copyVec3(f.Direction),
+	}
 }
 
 // WindDirectionFrames は風向きフレーム集合を表す。
@@ -185,19 +195,24 @@ func (next *WindLiftCoeffFrame) lerpFrame(prev *WindLiftCoeffFrame, index Frame)
 		return NewWindLiftCoeffFrame(index)
 	}
 	if prev == nil {
-		copied, _ := next.Copy()
-		out := copied.(*WindLiftCoeffFrame)
-		out.SetIndex(index)
-		return out
+		return next.copyWithIndex(index)
 	}
-	copied, _ := prev.Copy()
-	out := copied.(*WindLiftCoeffFrame)
-	out.SetIndex(index)
-	return out
+	return prev.copyWithIndex(index)
 }
 
 // splitCurve は何もしない。
 func (f *WindLiftCoeffFrame) splitCurve(prev *WindLiftCoeffFrame, next *WindLiftCoeffFrame, index Frame) {
+}
+
+// copyWithIndex は指定フレーム番号で複製する。
+func (f *WindLiftCoeffFrame) copyWithIndex(index Frame) *WindLiftCoeffFrame {
+	if f == nil {
+		return nil
+	}
+	return &WindLiftCoeffFrame{
+		BaseFrame: &BaseFrame{index: index, Read: f.Read},
+		LiftCoeff: f.LiftCoeff,
+	}
 }
 
 // WindLiftCoeffFrames は風揚力係数フレーム集合を表す。
@@ -267,19 +282,24 @@ func (next *WindDragCoeffFrame) lerpFrame(prev *WindDragCoeffFrame, index Frame)
 		return NewWindDragCoeffFrame(index)
 	}
 	if prev == nil {
-		copied, _ := next.Copy()
-		out := copied.(*WindDragCoeffFrame)
-		out.SetIndex(index)
-		return out
+		return next.copyWithIndex(index)
 	}
-	copied, _ := prev.Copy()
-	out := copied.(*WindDragCoeffFrame)
-	out.SetIndex(index)
-	return out
+	return prev.copyWithIndex(index)
 }
 
 // splitCurve は何もしない。
 func (f *WindDragCoeffFrame) splitCurve(prev *WindDragCoeffFrame, next *WindDragCoeffFrame, index Frame) {
+}
+
+// copyWithIndex は指定フレーム番号で複製する。
+func (f *WindDragCoeffFrame) copyWithIndex(index Frame) *WindDragCoeffFrame {
+	if f == nil {
+		return nil
+	}
+	return &WindDragCoeffFrame{
+		BaseFrame: &BaseFrame{index: index, Read: f.Read},
+		DragCoeff: f.DragCoeff,
+	}
 }
 
 // WindDragCoeffFrames は風抗力係数フレーム集合を表す。
@@ -349,19 +369,24 @@ func (next *WindRandomnessFrame) lerpFrame(prev *WindRandomnessFrame, index Fram
 		return NewWindRandomnessFrame(index)
 	}
 	if prev == nil {
-		copied, _ := next.Copy()
-		out := copied.(*WindRandomnessFrame)
-		out.SetIndex(index)
-		return out
+		return next.copyWithIndex(index)
 	}
-	copied, _ := prev.Copy()
-	out := copied.(*WindRandomnessFrame)
-	out.SetIndex(index)
-	return out
+	return prev.copyWithIndex(index)
 }
 
 // splitCurve は何もしない。
 func (f *WindRandomnessFrame) splitCurve(prev *WindRandomnessFrame, next *WindRandomnessFrame, index Frame) {
+}
+
+// copyWithIndex は指定フレーム番号で複製する。
+func (f *WindRandomnessFrame) copyWithIndex(index Frame) *WindRandomnessFrame {
+	if f == nil {
+		return nil
+	}
+	return &WindRandomnessFrame{
+		BaseFrame:  &BaseFrame{index: index, Read: f.Read},
+		Randomness: f.Randomness,
+	}
 }
 
 // WindRandomnessFrames は風乱流係数フレーム集合を表す。
@@ -431,19 +456,24 @@ func (next *WindSpeedFrame) lerpFrame(prev *WindSpeedFrame, index Frame) *WindSp
 		return NewWindSpeedFrame(index)
 	}
 	if prev == nil {
-		copied, _ := next.Copy()
-		out := copied.(*WindSpeedFrame)
-		out.SetIndex(index)
-		return out
+		return next.copyWithIndex(index)
 	}
-	copied, _ := prev.Copy()
-	out := copied.(*WindSpeedFrame)
-	out.SetIndex(index)
-	return out
+	return prev.copyWithIndex(index)
 }
 
 // splitCurve は何もしない。
 func (f *WindSpeedFrame) splitCurve(prev *WindSpeedFrame, next *WindSpeedFrame, index Frame) {
+}
+
+// copyWithIndex は指定フレーム番号で複製する。
+func (f *WindSpeedFrame) copyWithIndex(index Frame) *WindSpeedFrame {
+	if f == nil {
+		return nil
+	}
+	return &WindSpeedFrame{
+		BaseFrame: &BaseFrame{index: index, Read: f.Read},
+		Speed:     f.Speed,
+	}
 }
 
 // WindSpeedFrames は風速フレーム集合を表す。
@@ -513,19 +543,24 @@ func (next *WindTurbulenceFreqHzFrame) lerpFrame(prev *WindTurbulenceFreqHzFrame
 		return NewWindTurbulenceFreqHzFrame(index)
 	}
 	if prev == nil {
-		copied, _ := next.Copy()
-		out := copied.(*WindTurbulenceFreqHzFrame)
-		out.SetIndex(index)
-		return out
+		return next.copyWithIndex(index)
 	}
-	copied, _ := prev.Copy()
-	out := copied.(*WindTurbulenceFreqHzFrame)
-	out.SetIndex(index)
-	return out
+	return prev.copyWithIndex(index)
 }
 
 // splitCurve は何もしない。
 func (f *WindTurbulenceFreqHzFrame) splitCurve(prev *WindTurbulenceFreqHzFrame, next *WindTurbulenceFreqHzFrame, index Frame) {
+}
+
+// copyWithIndex は指定フレーム番号で複製する。
+func (f *WindTurbulenceFreqHzFrame) copyWithIndex(index Frame) *WindTurbulenceFreqHzFrame {
+	if f == nil {
+		return nil
+	}
+	return &WindTurbulenceFreqHzFrame{
+		BaseFrame:        &BaseFrame{index: index, Read: f.Read},
+		TurbulenceFreqHz: f.TurbulenceFreqHz,
+	}
 }
 
 // WindTurbulenceFreqHzFrames は風乱流周波数フレーム集合を表す。

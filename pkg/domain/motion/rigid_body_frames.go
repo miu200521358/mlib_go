@@ -40,16 +40,10 @@ func (next *RigidBodyFrame) lerpFrame(prev *RigidBodyFrame, index Frame) *RigidB
 		return NewRigidBodyFrame(index)
 	}
 	if prev == nil {
-		copied, _ := next.Copy()
-		out := copied.(*RigidBodyFrame)
-		out.SetIndex(index)
-		return out
+		return next.copyWithIndex(index)
 	}
 	if next == nil {
-		copied, _ := prev.Copy()
-		out := copied.(*RigidBodyFrame)
-		out.SetIndex(index)
-		return out
+		return prev.copyWithIndex(index)
 	}
 	out := NewRigidBodyFrame(index)
 	t := linearT(prev.Index(), index, next.Index())
@@ -63,6 +57,19 @@ func (next *RigidBodyFrame) lerpFrame(prev *RigidBodyFrame, index Frame) *RigidB
 	out.Size = &size
 	out.Mass = mmath.Lerp(prev.Mass, next.Mass, t)
 	return out
+}
+
+// copyWithIndex は指定フレーム番号で複製する。
+func (f *RigidBodyFrame) copyWithIndex(index Frame) *RigidBodyFrame {
+	if f == nil {
+		return nil
+	}
+	return &RigidBodyFrame{
+		BaseFrame: &BaseFrame{index: index, Read: f.Read},
+		Position:  copyVec3(f.Position),
+		Size:      copyVec3(f.Size),
+		Mass:      f.Mass,
+	}
 }
 
 // splitCurve は何もしない。

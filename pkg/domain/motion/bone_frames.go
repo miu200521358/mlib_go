@@ -57,16 +57,10 @@ func (next *BoneFrame) lerpFrame(prev *BoneFrame, index Frame) *BoneFrame {
 		return NewBoneFrame(index)
 	}
 	if prev == nil {
-		copied, _ := next.Copy()
-		out := copied.(*BoneFrame)
-		out.SetIndex(index)
-		return out
+		return next.copyWithIndex(index)
 	}
 	if next == nil {
-		copied, _ := prev.Copy()
-		out := copied.(*BoneFrame)
-		out.SetIndex(index)
-		return out
+		return prev.copyWithIndex(index)
 	}
 
 	bf := NewBoneFrame(index)
@@ -119,6 +113,29 @@ func (next *BoneFrame) lerpFrame(prev *BoneFrame, index Frame) *BoneFrame {
 	}
 
 	return bf
+}
+
+// copyWithIndex は指定フレーム番号で複製する。
+func (f *BoneFrame) copyWithIndex(index Frame) *BoneFrame {
+	if f == nil {
+		return nil
+	}
+	var curves *BoneCurves
+	if f.Curves != nil {
+		curves = f.Curves.Copy()
+	}
+	return &BoneFrame{
+		BaseFrame:          &BaseFrame{index: index, Read: f.Read},
+		Position:           copyVec3(f.Position),
+		Rotation:           copyQuaternion(f.Rotation),
+		UnitRotation:       copyQuaternion(f.UnitRotation),
+		Scale:              copyVec3(f.Scale),
+		CancelablePosition: copyVec3(f.CancelablePosition),
+		CancelableRotation: copyQuaternion(f.CancelableRotation),
+		CancelableScale:    copyVec3(f.CancelableScale),
+		Curves:             curves,
+		DisablePhysics:     copyBoolPtr(f.DisablePhysics),
+	}
 }
 
 // splitCurve は曲線を分割する。

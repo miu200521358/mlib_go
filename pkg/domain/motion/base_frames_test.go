@@ -30,6 +30,19 @@ func (d *dummyFrame) Copy() (IBaseFrame, error) {
 	return copied, nil
 }
 
+// copyWithIndex は指定フレーム番号で複製する。
+func (d *dummyFrame) copyWithIndex(index Frame) *dummyFrame {
+	if d == nil {
+		return nil
+	}
+	return &dummyFrame{
+		BaseFrame:  &BaseFrame{index: index, Read: d.Read},
+		Value:      d.Value,
+		LerpCount:  d.LerpCount,
+		SplitCount: d.SplitCount,
+	}
+}
+
 // lerpFrame は補間呼び出しを記録する。
 func (next *dummyFrame) lerpFrame(prev *dummyFrame, index Frame) *dummyFrame {
 	if next != nil && next.LerpCount != nil {

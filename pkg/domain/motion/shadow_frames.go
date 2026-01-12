@@ -32,22 +32,28 @@ func (next *ShadowFrame) lerpFrame(prev *ShadowFrame, index Frame) *ShadowFrame 
 		return NewShadowFrame(index)
 	}
 	if prev == nil {
-		copied, _ := next.Copy()
-		out := copied.(*ShadowFrame)
-		out.SetIndex(index)
-		return out
+		return next.copyWithIndex(index)
 	}
 	if next == nil {
-		copied, _ := prev.Copy()
-		out := copied.(*ShadowFrame)
-		out.SetIndex(index)
-		return out
+		return prev.copyWithIndex(index)
 	}
 	out := NewShadowFrame(index)
 	t := linearT(prev.Index(), index, next.Index())
 	out.ShadowMode = prev.ShadowMode
 	out.Distance = prev.Distance + (next.Distance-prev.Distance)*t
 	return out
+}
+
+// copyWithIndex は指定フレーム番号で複製する。
+func (f *ShadowFrame) copyWithIndex(index Frame) *ShadowFrame {
+	if f == nil {
+		return nil
+	}
+	return &ShadowFrame{
+		BaseFrame:  &BaseFrame{index: index, Read: f.Read},
+		ShadowMode: f.ShadowMode,
+		Distance:   f.Distance,
+	}
 }
 
 // splitCurve は何もしない。

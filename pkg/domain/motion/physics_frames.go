@@ -43,19 +43,24 @@ func (next *MaxSubStepsFrame) lerpFrame(prev *MaxSubStepsFrame, index Frame) *Ma
 		return NewMaxSubStepsFrame(index)
 	}
 	if prev == nil {
-		copied, _ := next.Copy()
-		out := copied.(*MaxSubStepsFrame)
-		out.SetIndex(index)
-		return out
+		return next.copyWithIndex(index)
 	}
-	copied, _ := prev.Copy()
-	out := copied.(*MaxSubStepsFrame)
-	out.SetIndex(index)
-	return out
+	return prev.copyWithIndex(index)
 }
 
 // splitCurve は何もしない。
 func (f *MaxSubStepsFrame) splitCurve(prev *MaxSubStepsFrame, next *MaxSubStepsFrame, index Frame) {
+}
+
+// copyWithIndex は指定フレーム番号で複製する。
+func (f *MaxSubStepsFrame) copyWithIndex(index Frame) *MaxSubStepsFrame {
+	if f == nil {
+		return nil
+	}
+	return &MaxSubStepsFrame{
+		BaseFrame:   &BaseFrame{index: index, Read: f.Read},
+		MaxSubSteps: f.MaxSubSteps,
+	}
 }
 
 // MaxSubStepsFrames は最大演算回数フレーム集合を表す。
@@ -125,19 +130,24 @@ func (next *FixedTimeStepFrame) lerpFrame(prev *FixedTimeStepFrame, index Frame)
 		return NewFixedTimeStepFrame(index)
 	}
 	if prev == nil {
-		copied, _ := next.Copy()
-		out := copied.(*FixedTimeStepFrame)
-		out.SetIndex(index)
-		return out
+		return next.copyWithIndex(index)
 	}
-	copied, _ := prev.Copy()
-	out := copied.(*FixedTimeStepFrame)
-	out.SetIndex(index)
-	return out
+	return prev.copyWithIndex(index)
 }
 
 // splitCurve は何もしない。
 func (f *FixedTimeStepFrame) splitCurve(prev *FixedTimeStepFrame, next *FixedTimeStepFrame, index Frame) {
+}
+
+// copyWithIndex は指定フレーム番号で複製する。
+func (f *FixedTimeStepFrame) copyWithIndex(index Frame) *FixedTimeStepFrame {
+	if f == nil {
+		return nil
+	}
+	return &FixedTimeStepFrame{
+		BaseFrame:        &BaseFrame{index: index, Read: f.Read},
+		FixedTimeStepNum: f.FixedTimeStepNum,
+	}
 }
 
 // FixedTimeStepFrames は演算頻度フレーム集合を表す。
@@ -202,19 +212,24 @@ func (next *GravityFrame) lerpFrame(prev *GravityFrame, index Frame) *GravityFra
 		return NewGravityFrame(index)
 	}
 	if prev == nil {
-		copied, _ := next.Copy()
-		out := copied.(*GravityFrame)
-		out.SetIndex(index)
-		return out
+		return next.copyWithIndex(index)
 	}
-	copied, _ := prev.Copy()
-	out := copied.(*GravityFrame)
-	out.SetIndex(index)
-	return out
+	return prev.copyWithIndex(index)
 }
 
 // splitCurve は何もしない。
 func (f *GravityFrame) splitCurve(prev *GravityFrame, next *GravityFrame, index Frame) {
+}
+
+// copyWithIndex は指定フレーム番号で複製する。
+func (f *GravityFrame) copyWithIndex(index Frame) *GravityFrame {
+	if f == nil {
+		return nil
+	}
+	return &GravityFrame{
+		BaseFrame: &BaseFrame{index: index, Read: f.Read},
+		Gravity:   copyVec3(f.Gravity),
+	}
 }
 
 // GravityFrames は重力フレーム集合を表す。
@@ -276,19 +291,24 @@ func (next *PhysicsResetFrame) lerpFrame(prev *PhysicsResetFrame, index Frame) *
 		return NewPhysicsResetFrame(index)
 	}
 	if prev == nil {
-		copied, _ := next.Copy()
-		out := copied.(*PhysicsResetFrame)
-		out.SetIndex(index)
-		return out
+		return next.copyWithIndex(index)
 	}
-	copied, _ := prev.Copy()
-	out := copied.(*PhysicsResetFrame)
-	out.SetIndex(index)
-	return out
+	return prev.copyWithIndex(index)
 }
 
 // splitCurve は何もしない。
 func (f *PhysicsResetFrame) splitCurve(prev *PhysicsResetFrame, next *PhysicsResetFrame, index Frame) {
+}
+
+// copyWithIndex は指定フレーム番号で複製する。
+func (f *PhysicsResetFrame) copyWithIndex(index Frame) *PhysicsResetFrame {
+	if f == nil {
+		return nil
+	}
+	return &PhysicsResetFrame{
+		BaseFrame:        &BaseFrame{index: index, Read: f.Read},
+		PhysicsResetType: f.PhysicsResetType,
+	}
 }
 
 // PhysicsResetFrames は物理リセットフレーム集合を表す。

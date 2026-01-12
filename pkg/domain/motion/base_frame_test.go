@@ -9,16 +9,12 @@ func TestBaseFrameMethods(t *testing.T) {
 	if f.Index() != 1 {
 		t.Fatalf("Index: got=%v", f.Index())
 	}
-	f.SetIndex(2)
-	if f.Index() != 2 {
-		t.Fatalf("SetIndex: got=%v", f.Index())
-	}
 	copied, err := f.Copy()
 	if err != nil {
 		t.Fatalf("Copy error: %v", err)
 	}
 	cf := copied.(*BaseFrame)
-	if cf.Index() != 2 || cf.Read != f.Read {
+	if cf.Index() != 1 || cf.Read != f.Read {
 		t.Fatalf("Copy mismatch")
 	}
 }

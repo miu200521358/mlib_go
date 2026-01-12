@@ -6,6 +6,7 @@ type frameOps[T any] interface {
 	IBaseFrame
 	lerpFrame(prev T, index Frame) T
 	splitCurve(prev, next T, index Frame)
+	copyWithIndex(index Frame) T
 }
 
 // BaseFrames はフレーム共通の格納を表す。
@@ -46,16 +47,7 @@ func (b *BaseFrames[T]) Get(frame Frame) T {
 		if !ok {
 			return b.nullValue()
 		}
-		copied, err := maxValue.Copy()
-		if err != nil {
-			return b.nullValue()
-		}
-		casted, ok := copied.(T)
-		if !ok {
-			return b.nullValue()
-		}
-		casted.SetIndex(frame)
-		return casted
+		return maxValue.copyWithIndex(frame)
 	}
 
 	prevValue, ok := b.frames[prevFrame]

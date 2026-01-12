@@ -32,19 +32,25 @@ func (next *IkEnabledFrame) lerpFrame(prev *IkEnabledFrame, index Frame) *IkEnab
 		return NewIkEnabledFrame(index, "")
 	}
 	if prev == nil {
-		copied, _ := next.Copy()
-		out := copied.(*IkEnabledFrame)
-		out.SetIndex(index)
-		return out
+		return next.copyWithIndex(index)
 	}
-	copied, _ := prev.Copy()
-	out := copied.(*IkEnabledFrame)
-	out.SetIndex(index)
-	return out
+	return prev.copyWithIndex(index)
 }
 
 // splitCurve は何もしない。
 func (f *IkEnabledFrame) splitCurve(prev *IkEnabledFrame, next *IkEnabledFrame, index Frame) {
+}
+
+// copyWithIndex は指定フレーム番号で複製する。
+func (f *IkEnabledFrame) copyWithIndex(index Frame) *IkEnabledFrame {
+	if f == nil {
+		return nil
+	}
+	return &IkEnabledFrame{
+		BaseFrame: &BaseFrame{index: index, Read: f.Read},
+		BoneName:  f.BoneName,
+		Enabled:   f.Enabled,
+	}
 }
 
 // IkFrame はIKフレームを表す。
@@ -78,19 +84,25 @@ func (next *IkFrame) lerpFrame(prev *IkFrame, index Frame) *IkFrame {
 		return NewIkFrame(index)
 	}
 	if prev == nil {
-		copied, _ := next.Copy()
-		out := copied.(*IkFrame)
-		out.SetIndex(index)
-		return out
+		return next.copyWithIndex(index)
 	}
-	copied, _ := prev.Copy()
-	out := copied.(*IkFrame)
-	out.SetIndex(index)
-	return out
+	return prev.copyWithIndex(index)
 }
 
 // splitCurve は何もしない。
 func (f *IkFrame) splitCurve(prev *IkFrame, next *IkFrame, index Frame) {
+}
+
+// copyWithIndex は指定フレーム番号で複製する。
+func (f *IkFrame) copyWithIndex(index Frame) *IkFrame {
+	if f == nil {
+		return nil
+	}
+	return &IkFrame{
+		BaseFrame: &BaseFrame{index: index, Read: f.Read},
+		Visible:   f.Visible,
+		IkList:    copyIkList(f.IkList),
+	}
 }
 
 // IsEnable はIKの有効/無効を返す。

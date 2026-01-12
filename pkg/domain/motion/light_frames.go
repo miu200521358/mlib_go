@@ -34,22 +34,28 @@ func (next *LightFrame) lerpFrame(prev *LightFrame, index Frame) *LightFrame {
 		return NewLightFrame(index)
 	}
 	if prev == nil {
-		copied, _ := next.Copy()
-		out := copied.(*LightFrame)
-		out.SetIndex(index)
-		return out
+		return next.copyWithIndex(index)
 	}
 	if next == nil {
-		copied, _ := prev.Copy()
-		out := copied.(*LightFrame)
-		out.SetIndex(index)
-		return out
+		return prev.copyWithIndex(index)
 	}
 	out := NewLightFrame(index)
 	t := linearT(prev.Index(), index, next.Index())
 	out.Position = prev.Position.Lerp(next.Position, t)
 	out.Color = prev.Color.Lerp(next.Color, t)
 	return out
+}
+
+// copyWithIndex は指定フレーム番号で複製する。
+func (f *LightFrame) copyWithIndex(index Frame) *LightFrame {
+	if f == nil {
+		return nil
+	}
+	return &LightFrame{
+		BaseFrame: &BaseFrame{index: index, Read: f.Read},
+		Position:  f.Position,
+		Color:     f.Color,
+	}
 }
 
 // splitCurve は何もしない。

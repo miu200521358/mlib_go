@@ -46,16 +46,10 @@ func (next *JointFrame) lerpFrame(prev *JointFrame, index Frame) *JointFrame {
 		return NewJointFrame(index)
 	}
 	if prev == nil {
-		copied, _ := next.Copy()
-		out := copied.(*JointFrame)
-		out.SetIndex(index)
-		return out
+		return next.copyWithIndex(index)
 	}
 	if next == nil {
-		copied, _ := prev.Copy()
-		out := copied.(*JointFrame)
-		out.SetIndex(index)
-		return out
+		return prev.copyWithIndex(index)
 	}
 	out := NewJointFrame(index)
 	t := linearT(prev.Index(), index, next.Index())
@@ -72,6 +66,22 @@ func (next *JointFrame) lerpFrame(prev *JointFrame, index Frame) *JointFrame {
 	out.SpringConstantTranslation = &springT
 	out.SpringConstantRotation = &springR
 	return out
+}
+
+// copyWithIndex は指定フレーム番号で複製する。
+func (f *JointFrame) copyWithIndex(index Frame) *JointFrame {
+	if f == nil {
+		return nil
+	}
+	return &JointFrame{
+		BaseFrame:                 &BaseFrame{index: index, Read: f.Read},
+		TranslationLimitMin:       copyVec3(f.TranslationLimitMin),
+		TranslationLimitMax:       copyVec3(f.TranslationLimitMax),
+		RotationLimitMin:          copyVec3(f.RotationLimitMin),
+		RotationLimitMax:          copyVec3(f.RotationLimitMax),
+		SpringConstantTranslation: copyVec3(f.SpringConstantTranslation),
+		SpringConstantRotation:    copyVec3(f.SpringConstantRotation),
+	}
 }
 
 // splitCurve は何もしない。
