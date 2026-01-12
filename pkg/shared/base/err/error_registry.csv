@@ -21,18 +21,18 @@ ID,Kind,Layer,Module,ErrorName,Summary,Remedy,SourcePaths
 94504,Internal,adapter,45,FramebufferIncomplete,Framebufferが不完全,MSAA/FBO設定を確認する,-
 94505,Internal,adapter,45,OpenGLError,OpenGLエラーが発生,ドライバ/GL状態/描画順序を確認する,-
 94506,Internal,adapter,45,GraphicsContextInitFailed,OpenGLコンテキスト初期化に失敗,,-
-92101,Internal,domain,21,MathCopyFailed,数学型のコピーに失敗,,-
+92101,Internal,domain,21,MathCopyFailed,数学型のコピーに失敗,,mlib_go_t4/pkg/domain/mmath/copy.go; mlib_go_t4/pkg/domain/mmath/vec2.go; mlib_go_t4/pkg/domain/mmath/vec3.go; mlib_go_t4/pkg/domain/mmath/vec4.go; mlib_go_t4/pkg/domain/mmath/quaternion.go; mlib_go_t4/pkg/domain/mmath/mat4.go
 92102,Internal,domain,21,MathLengthMismatch,配列長が一致しない,,-
-92103,Internal,domain,21,MathCalculateXFailed,CalculateXに失敗,,-
-92104,Internal,domain,21,MathQuaternionLogFailed,Quaternion.Logに失敗,,-
-92105,Internal,domain,21,MathIntersectLinePlaneFailed,平面との交点計算に失敗,,-
-92106,Internal,domain,21,MathCurveFitFailed,曲線フィットに失敗,,-
+92103,Internal,domain,21,MathCalculateXFailed,CalculateXに失敗,,mlib_go_t4/pkg/domain/mmath/scalar.go
+92104,Internal,domain,21,MathQuaternionLogFailed,Quaternion.Logに失敗,,mlib_go_t4/pkg/domain/mmath/quaternion.go
+92105,Internal,domain,21,MathIntersectLinePlaneFailed,平面との交点計算に失敗,,mlib_go_t4/pkg/domain/mmath/vec3.go
+92106,Internal,domain,21,MathCurveFitFailed,曲線フィットに失敗,,mlib_go_t4/pkg/domain/mmath/curve.go
 92201,Internal,domain,22,ModelCopyFailed,モデルコピーに失敗,,-
 92301,Internal,domain,23,MotionCopyFailed,モーションコピーに失敗,,-
 95209,Internal,infra,52,BaseError,エラー基底型,,mlib_go_t4/pkg/infra/base/err/err.go
-95201,Internal,infra,52,AppConfigLoadFailed,app_config.json読込に失敗,,-
-95202,Internal,infra,52,UserConfigSaveFailed,user_config.json保存に失敗,,-
-95203,Internal,infra,52,AppRootDirResolveFailed,アプリルート取得に失敗,,-
+95201,Internal,infra,52,AppConfigLoadFailed,app_config.json読込に失敗,,mlib_go_t4/pkg/infra/base/config/config.go
+95202,Internal,infra,52,UserConfigSaveFailed,user_config.json保存に失敗,,mlib_go_t4/pkg/infra/base/config/config.go
+95203,Internal,infra,52,AppRootDirResolveFailed,アプリルート取得に失敗,,mlib_go_t4/pkg/infra/base/config/config.go
 95207,Internal,infra,52,VerboseSinkWriteFailed,VERBOSE書き込みに失敗,,-
 95208,Internal,infra,52,VerboseSinkCloseFailed,VERBOSE出力のクローズに失敗,,-
 15301,Validate,infra,53,FileNotFoundError,ファイルが存在しない,パスを確認して再指定する,-

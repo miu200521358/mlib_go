@@ -37,7 +37,7 @@ type ConfigStore struct {
 }
 
 // NewConfigStore は設定ストアを生成する。
-func NewConfigStore(appConfig *config.AppConfig, userConfig config.IUserConfig) *ConfigStore {
+func NewConfigStore(appConfig *config.AppConfig, userConfig config.IUserConfig) config.IConfigStore {
 	return &ConfigStore{appConfig: appConfig, userConfig: userConfig}
 }
 
