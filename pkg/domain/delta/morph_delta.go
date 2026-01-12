@@ -159,6 +159,9 @@ func NewMaterialMorphDelta(material *model.Material) *MaterialMorphDelta {
 	mul.Ambient = mmath.ONE_VEC3
 	mul.Edge = mmath.Vec4{X: 1, Y: 1, Z: 1, W: 1}
 	mul.EdgeSize = 1
+	mul.TextureFactor = mmath.ONE_VEC4
+	mul.SphereTextureFactor = mmath.ONE_VEC4
+	mul.ToonTextureFactor = mmath.ONE_VEC4
 	return &MaterialMorphDelta{
 		Material:    *base,
 		AddMaterial: *add,
@@ -176,6 +179,9 @@ func (d *MaterialMorphDelta) Add(offset *model.MaterialMorphOffset, ratio float6
 	d.AddMaterial.Ambient = d.AddMaterial.Ambient.Added(offset.Ambient.MuledScalar(ratio))
 	d.AddMaterial.Edge = d.AddMaterial.Edge.Added(offset.Edge.MuledScalar(ratio))
 	d.AddMaterial.EdgeSize += offset.EdgeSize * ratio
+	d.AddMaterial.TextureFactor = d.AddMaterial.TextureFactor.Added(offset.TextureFactor.MuledScalar(ratio))
+	d.AddMaterial.SphereTextureFactor = d.AddMaterial.SphereTextureFactor.Added(offset.SphereTextureFactor.MuledScalar(ratio))
+	d.AddMaterial.ToonTextureFactor = d.AddMaterial.ToonTextureFactor.Added(offset.ToonTextureFactor.MuledScalar(ratio))
 }
 
 // Mul は乗算差分を反映する。
@@ -188,6 +194,9 @@ func (d *MaterialMorphDelta) Mul(offset *model.MaterialMorphOffset, ratio float6
 	d.MulMaterial.Ambient = d.MulMaterial.Ambient.Muled(lerpVec3(offset.Ambient, ratio))
 	d.MulMaterial.Edge = d.MulMaterial.Edge.Muled(lerpVec4(offset.Edge, ratio))
 	d.MulMaterial.EdgeSize *= mmath.Lerp(1, offset.EdgeSize, ratio)
+	d.MulMaterial.TextureFactor = d.MulMaterial.TextureFactor.Muled(lerpVec4(offset.TextureFactor, ratio))
+	d.MulMaterial.SphereTextureFactor = d.MulMaterial.SphereTextureFactor.Muled(lerpVec4(offset.SphereTextureFactor, ratio))
+	d.MulMaterial.ToonTextureFactor = d.MulMaterial.ToonTextureFactor.Muled(lerpVec4(offset.ToonTextureFactor, ratio))
 }
 
 // copyMaterial は材質を複製する。
@@ -207,6 +216,9 @@ func copyMaterial(src *model.Material) *model.Material {
 	dst.DrawFlag = src.DrawFlag
 	dst.Edge = src.Edge
 	dst.EdgeSize = src.EdgeSize
+	dst.TextureFactor = src.TextureFactor
+	dst.SphereTextureFactor = src.SphereTextureFactor
+	dst.ToonTextureFactor = src.ToonTextureFactor
 	dst.TextureIndex = src.TextureIndex
 	dst.SphereTextureIndex = src.SphereTextureIndex
 	dst.SphereMode = src.SphereMode

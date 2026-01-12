@@ -22,6 +22,7 @@ func ComputeBoneDeltas(
 	boneNames []string,
 	includeIk bool,
 	afterPhysics bool,
+	removeTwist bool,
 ) (*delta.BoneDeltas, []int) {
 	if modelData == nil {
 		return delta.NewBoneDeltas(nil), nil
@@ -106,7 +107,7 @@ func ComputeBoneDeltas(
 
 	if includeIk {
 		ApplyBoneMatrices(modelData, boneDeltas)
-		applyIkDeltas(modelData, motionData, boneDeltas, frame, deformBoneIndexes)
+		applyIkDeltas(modelData, motionData, boneDeltas, frame, deformBoneIndexes, removeTwist)
 		ApplyBoneMatrices(modelData, boneDeltas)
 	}
 
@@ -741,6 +742,7 @@ func applyIkDeltas(
 	boneDeltas *delta.BoneDeltas,
 	frame motion.Frame,
 	deformBoneIndexes []int,
+	removeTwist bool,
 ) {
 	if modelData == nil || boneDeltas == nil {
 		return
@@ -754,7 +756,7 @@ func applyIkDeltas(
 		if ikFrame != nil && !ikFrame.IsEnable(bone.Name()) {
 			continue
 		}
-		applyIkForBone(modelData, boneDeltas, bone, frame, deformBoneIndexes)
+		applyIkForBone(modelData, boneDeltas, bone, frame, deformBoneIndexes, removeTwist)
 	}
 }
 
@@ -773,6 +775,7 @@ func applyIkForBone(
 	ikBone *model.Bone,
 	frame motion.Frame,
 	deformBoneIndexes []int,
+	removeTwist bool,
 ) {
 	if modelData == nil || boneDeltas == nil || ikBone == nil || ikBone.Ik == nil {
 		return
@@ -839,7 +842,7 @@ func applyIkForBone(
 				LocalAngleLimit: link.LocalAngleLimit,
 				Loop:            loop,
 				LoopCount:       loopCount,
-				RemoveTwist:     false,
+				RemoveTwist:     removeTwist,
 				FixedAxis:       fixedAxisOrZero(linkBone),
 				ChildAxis:       boneChildDirection(modelData, linkBone),
 				LocalAxes:       localAxes(linkBone),

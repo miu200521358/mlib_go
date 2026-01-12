@@ -370,6 +370,9 @@ func applyMaterialMorphDeltas(modelData *model.PmxModel, deltas *delta.MaterialM
 		material.Ambient = material.Ambient.Muled(d.MulMaterial.Ambient).Added(d.AddMaterial.Ambient)
 		material.Edge = material.Edge.Muled(d.MulMaterial.Edge).Added(d.AddMaterial.Edge)
 		material.EdgeSize = material.EdgeSize*d.MulMaterial.EdgeSize + d.AddMaterial.EdgeSize
+		material.TextureFactor = material.TextureFactor.Muled(d.MulMaterial.TextureFactor).Added(d.AddMaterial.TextureFactor)
+		material.SphereTextureFactor = material.SphereTextureFactor.Muled(d.MulMaterial.SphereTextureFactor).Added(d.AddMaterial.SphereTextureFactor)
+		material.ToonTextureFactor = material.ToonTextureFactor.Muled(d.MulMaterial.ToonTextureFactor).Added(d.AddMaterial.ToonTextureFactor)
 		return true
 	})
 }

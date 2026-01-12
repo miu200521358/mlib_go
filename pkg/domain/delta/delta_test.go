@@ -119,19 +119,40 @@ func TestMaterialMorphDeltaCalc(t *testing.T) {
 	mat.SetName("mat")
 	delta := NewMaterialMorphDelta(mat)
 	offset := &model.MaterialMorphOffset{
-		Diffuse:  mmath.Vec4{X: 2, Y: 2, Z: 2, W: 2},
-		Specular: mmath.Vec4{X: 1, Y: 1, Z: 1, W: 1},
-		Ambient:  vec3(1, 2, 3),
-		Edge:     mmath.Vec4{X: 1, Y: 2, Z: 3, W: 4},
-		EdgeSize: 2,
+		Diffuse:             mmath.Vec4{X: 2, Y: 2, Z: 2, W: 2},
+		Specular:            mmath.Vec4{X: 1, Y: 1, Z: 1, W: 1},
+		Ambient:             vec3(1, 2, 3),
+		Edge:                mmath.Vec4{X: 1, Y: 2, Z: 3, W: 4},
+		EdgeSize:            2,
+		TextureFactor:       mmath.Vec4{X: 2, Y: 2, Z: 2, W: 2},
+		SphereTextureFactor: mmath.Vec4{X: 3, Y: 3, Z: 3, W: 3},
+		ToonTextureFactor:   mmath.Vec4{X: 4, Y: 4, Z: 4, W: 4},
 	}
 	delta.Mul(offset, 0.5)
 	if !delta.MulMaterial.Diffuse.NearEquals(mmath.Vec4{X: 1.5, Y: 1.5, Z: 1.5, W: 1.5}, 1e-6) {
 		t.Fatalf("mul diffuse mismatch: %v", delta.MulMaterial.Diffuse)
 	}
+	if !delta.MulMaterial.TextureFactor.NearEquals(mmath.Vec4{X: 1.5, Y: 1.5, Z: 1.5, W: 1.5}, 1e-6) {
+		t.Fatalf("mul texture factor mismatch: %v", delta.MulMaterial.TextureFactor)
+	}
+	if !delta.MulMaterial.SphereTextureFactor.NearEquals(mmath.Vec4{X: 2, Y: 2, Z: 2, W: 2}, 1e-6) {
+		t.Fatalf("mul sphere factor mismatch: %v", delta.MulMaterial.SphereTextureFactor)
+	}
+	if !delta.MulMaterial.ToonTextureFactor.NearEquals(mmath.Vec4{X: 2.5, Y: 2.5, Z: 2.5, W: 2.5}, 1e-6) {
+		t.Fatalf("mul toon factor mismatch: %v", delta.MulMaterial.ToonTextureFactor)
+	}
 	delta.Add(offset, 0.5)
 	if !delta.AddMaterial.Diffuse.NearEquals(mmath.Vec4{X: 1, Y: 1, Z: 1, W: 1}, 1e-6) {
 		t.Fatalf("add diffuse mismatch: %v", delta.AddMaterial.Diffuse)
+	}
+	if !delta.AddMaterial.TextureFactor.NearEquals(mmath.Vec4{X: 1, Y: 1, Z: 1, W: 1}, 1e-6) {
+		t.Fatalf("add texture factor mismatch: %v", delta.AddMaterial.TextureFactor)
+	}
+	if !delta.AddMaterial.SphereTextureFactor.NearEquals(mmath.Vec4{X: 1.5, Y: 1.5, Z: 1.5, W: 1.5}, 1e-6) {
+		t.Fatalf("add sphere factor mismatch: %v", delta.AddMaterial.SphereTextureFactor)
+	}
+	if !delta.AddMaterial.ToonTextureFactor.NearEquals(mmath.Vec4{X: 2, Y: 2, Z: 2, W: 2}, 1e-6) {
+		t.Fatalf("add toon factor mismatch: %v", delta.AddMaterial.ToonTextureFactor)
 	}
 }
 

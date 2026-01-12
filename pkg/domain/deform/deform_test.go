@@ -171,16 +171,34 @@ func TestMaterialMorphApply(t *testing.T) {
 	m := newTestModel()
 	mat := m.Materials.Values()[0]
 	mat.Diffuse = mmath.ONE_VEC4
+	mat.TextureFactor = mmath.ONE_VEC4
+	mat.SphereTextureFactor = mmath.ONE_VEC4
+	mat.ToonTextureFactor = mmath.ONE_VEC4
 	deltas := delta.NewMorphDeltas(m.Vertices, m.Materials, m.Bones)
 	mDelta := delta.NewMaterialMorphDelta(m.Materials.Values()[0])
 	mDelta.MulMaterial.Diffuse = mmath.Vec4{X: 2, Y: 2, Z: 2, W: 2}
 	mDelta.AddMaterial.Diffuse = mmath.Vec4{X: 1, Y: 1, Z: 1, W: 1}
+	mDelta.MulMaterial.TextureFactor = mmath.Vec4{X: 2, Y: 2, Z: 2, W: 2}
+	mDelta.AddMaterial.TextureFactor = mmath.Vec4{X: 1, Y: 1, Z: 1, W: 1}
+	mDelta.MulMaterial.SphereTextureFactor = mmath.Vec4{X: 2, Y: 2, Z: 2, W: 2}
+	mDelta.AddMaterial.SphereTextureFactor = mmath.Vec4{X: 1, Y: 1, Z: 1, W: 1}
+	mDelta.MulMaterial.ToonTextureFactor = mmath.Vec4{X: 2, Y: 2, Z: 2, W: 2}
+	mDelta.AddMaterial.ToonTextureFactor = mmath.Vec4{X: 1, Y: 1, Z: 1, W: 1}
 	deltas.Materials().Update(mDelta)
 
 	ApplyMorphDeltas(m, deltas)
 	mat, _ = m.Materials.Get(0)
 	if !mat.Diffuse.NearEquals(mmath.Vec4{X: 3, Y: 3, Z: 3, W: 3}, 1e-6) {
 		t.Fatalf("material apply mismatch: %v", mat.Diffuse)
+	}
+	if !mat.TextureFactor.NearEquals(mmath.Vec4{X: 3, Y: 3, Z: 3, W: 3}, 1e-6) {
+		t.Fatalf("texture factor apply mismatch: %v", mat.TextureFactor)
+	}
+	if !mat.SphereTextureFactor.NearEquals(mmath.Vec4{X: 3, Y: 3, Z: 3, W: 3}, 1e-6) {
+		t.Fatalf("sphere factor apply mismatch: %v", mat.SphereTextureFactor)
+	}
+	if !mat.ToonTextureFactor.NearEquals(mmath.Vec4{X: 3, Y: 3, Z: 3, W: 3}, 1e-6) {
+		t.Fatalf("toon factor apply mismatch: %v", mat.ToonTextureFactor)
 	}
 }
 

@@ -47,22 +47,25 @@ const (
 
 // Material は材質要素を表す。
 type Material struct {
-	index              int
-	name               string
-	EnglishName        string
-	Memo               string
-	Diffuse            mmath.Vec4
-	Specular           mmath.Vec4
-	Ambient            mmath.Vec3
-	DrawFlag           DrawFlag
-	Edge               mmath.Vec4
-	EdgeSize           float64
-	TextureIndex       int
-	SphereTextureIndex int
-	SphereMode         SphereMode
-	ToonSharingFlag    ToonSharingFlag
-	ToonTextureIndex   int
-	VerticesCount      int
+	index               int
+	name                string
+	EnglishName         string
+	Memo                string
+	Diffuse             mmath.Vec4
+	Specular            mmath.Vec4
+	Ambient             mmath.Vec3
+	DrawFlag            DrawFlag
+	Edge                mmath.Vec4
+	EdgeSize            float64
+	TextureFactor       mmath.Vec4
+	SphereTextureFactor mmath.Vec4
+	ToonTextureFactor   mmath.Vec4
+	TextureIndex        int
+	SphereTextureIndex  int
+	SphereMode          SphereMode
+	ToonSharingFlag     ToonSharingFlag
+	ToonTextureIndex    int
+	VerticesCount       int
 }
 
 // NewMaterial は既定値で Material を生成する。
