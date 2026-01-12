@@ -84,7 +84,9 @@ func TestUserConfigSetGet(t *testing.T) {
 	if err := store.Set("name", "v1"); err != nil {
 		t.Fatalf("Set string failed: %v", err)
 	}
-	if val, ok := store.Get("name"); !ok {
+	if val, ok, err := store.Get("name"); err != nil {
+		t.Fatalf("Get string failed: %v", err)
+	} else if !ok {
 		t.Errorf("Get string: ok=%v", ok)
 	} else if list, ok := val.([]interface{}); !ok || len(list) != 1 || list[0].(string) != "v1" {
 		t.Errorf("Get string: got=%v", val)
@@ -93,20 +95,26 @@ func TestUserConfigSetGet(t *testing.T) {
 	if err := store.Set("flag", true); err != nil {
 		t.Fatalf("Set bool failed: %v", err)
 	}
-	if !store.GetBool("flag", false) {
+	if got, err := store.GetBool("flag", false); err != nil {
+		t.Fatalf("GetBool failed: %v", err)
+	} else if !got {
 		t.Errorf("GetBool expected true")
 	}
 	if err := store.SetBool("flag2", false); err != nil {
 		t.Fatalf("SetBool false failed: %v", err)
 	}
-	if store.GetBool("flag2", true) {
+	if got, err := store.GetBool("flag2", true); err != nil {
+		t.Fatalf("GetBool failed: %v", err)
+	} else if got {
 		t.Errorf("GetBool expected false")
 	}
 
 	if err := store.Set("num", 3); err != nil {
 		t.Fatalf("Set int failed: %v", err)
 	}
-	if store.GetInt("num", 0) != 3 {
+	if got, err := store.GetInt("num", 0); err != nil {
+		t.Fatalf("GetInt failed: %v", err)
+	} else if got != 3 {
 		t.Errorf("GetInt expected 3")
 	}
 	if err := store.SetInt("num2", 4); err != nil {
@@ -119,17 +127,23 @@ func TestUserConfigSetGet(t *testing.T) {
 	if err := store.Set("list", []string{"a", "b"}); err != nil {
 		t.Fatalf("Set slice failed: %v", err)
 	}
-	if got := store.GetStringSlice("list"); !reflect.DeepEqual(got, []string{"a", "b"}) {
+	if got, err := store.GetStringSlice("list"); err != nil {
+		t.Fatalf("GetStringSlice failed: %v", err)
+	} else if !reflect.DeepEqual(got, []string{"a", "b"}) {
 		t.Errorf("GetStringSlice: got=%v", got)
 	}
-	if values, all := store.GetAll("list"); !reflect.DeepEqual(values, []string{"a", "b"}) || all["list"] == nil {
+	if values, all, err := store.GetAll("list"); err != nil {
+		t.Fatalf("GetAll failed: %v", err)
+	} else if !reflect.DeepEqual(values, []string{"a", "b"}) || all["list"] == nil {
 		t.Errorf("GetAll: values=%v all=%v", values, all)
 	}
 
 	if err := store.Set("empty", []string{}); err != nil {
 		t.Fatalf("Set empty slice failed: %v", err)
 	}
-	if _, ok := store.Get("empty"); ok {
+	if _, ok, err := store.Get("empty"); err != nil {
+		t.Fatalf("Get empty failed: %v", err)
+	} else if ok {
 		t.Errorf("empty slice should not be stored")
 	}
 
@@ -150,18 +164,26 @@ func TestUserConfigLoadAllVariants(t *testing.T) {
 	if err := os.WriteFile(path, []byte(`{"history":["a","b"]}`), 0644); err != nil {
 		t.Fatalf("seed config failed: %v", err)
 	}
-	values, _ := store.GetAll("history")
+	values, _, err := store.GetAll("history")
+	if err != nil {
+		t.Fatalf("GetAll failed: %v", err)
+	}
 	if !reflect.DeepEqual(values, []string{"a", "b"}) {
 		t.Errorf("GetAll list: got=%v", values)
 	}
-	if values, _ := store.GetAll("missing"); len(values) != 0 {
+	if values, _, err := store.GetAll("missing"); err != nil {
+		t.Fatalf("GetAll failed: %v", err)
+	} else if len(values) != 0 {
 		t.Errorf("GetAll missing: got=%v", values)
 	}
 
 	if err := os.WriteFile(path, []byte(`{"history":[1]}`), 0644); err != nil {
 		t.Fatalf("seed config failed: %v", err)
 	}
-	values, _ = store.GetAll("history")
+	values, _, err = store.GetAll("history")
+	if err != nil {
+		t.Fatalf("GetAll failed: %v", err)
+	}
 	if len(values) != 0 {
 		t.Errorf("GetAll non-string: got=%v", values)
 	}
@@ -169,7 +191,10 @@ func TestUserConfigLoadAllVariants(t *testing.T) {
 	if err := os.WriteFile(path, []byte(`{"history":"x"}`), 0644); err != nil {
 		t.Fatalf("seed config failed: %v", err)
 	}
-	values, _ = store.GetAll("history")
+	values, _, err = store.GetAll("history")
+	if err != nil {
+		t.Fatalf("GetAll failed: %v", err)
+	}
 	if len(values) != 0 {
 		t.Errorf("GetAll default: got=%v", values)
 	}
@@ -177,7 +202,10 @@ func TestUserConfigLoadAllVariants(t *testing.T) {
 	withLoadUserConfig(t, func() (map[string]any, error) {
 		return map[string]any{"history": []string{"x", "y"}}, nil
 	})
-	values, _ = store.GetAll("history")
+	values, _, err = store.GetAll("history")
+	if err != nil {
+		t.Fatalf("GetAll failed: %v", err)
+	}
 	if !reflect.DeepEqual(values, []string{"x", "y"}) {
 		t.Errorf("GetAll []string: got=%v", values)
 	}
@@ -204,7 +232,10 @@ func TestUserConfigSaveStringSlice(t *testing.T) {
 	if err := store.SetStringSlice("path", []string{"a", "", "b", "a"}, 2); err != nil {
 		t.Fatalf("SetStringSlice failed: %v", err)
 	}
-	values := store.GetStringSlice("path")
+	values, err := store.GetStringSlice("path")
+	if err != nil {
+		t.Fatalf("GetStringSlice failed: %v", err)
+	}
 	if !reflect.DeepEqual(values, []string{"a", "b"}) {
 		t.Errorf("GetStringSlice: got=%v", values)
 	}
@@ -214,10 +245,14 @@ func TestUserConfigSaveStringSlice(t *testing.T) {
 func TestUserConfigBoolIntDefaults(t *testing.T) {
 	withTempRoot(t)
 	store := &UserConfigStore{}
-	if !store.GetBool("missing", true) {
+	if got, err := store.GetBool("missing", true); err != nil {
+		t.Fatalf("GetBool failed: %v", err)
+	} else if !got {
 		t.Errorf("Bool default failed")
 	}
-	if store.GetInt("missing", 5) != 5 {
+	if got, err := store.GetInt("missing", 5); err != nil {
+		t.Fatalf("GetInt failed: %v", err)
+	} else if got != 5 {
 		t.Errorf("Int default failed")
 	}
 
@@ -226,7 +261,9 @@ func TestUserConfigBoolIntDefaults(t *testing.T) {
 	if err := os.WriteFile(path, []byte(`{"num":["bad"]}`), 0644); err != nil {
 		t.Fatalf("seed config failed: %v", err)
 	}
-	if store.GetInt("num", 7) != 7 {
+	if got, err := store.GetInt("num", 7); err != nil {
+		t.Fatalf("GetInt failed: %v", err)
+	} else if got != 7 {
 		t.Errorf("Int parse default failed")
 	}
 }
@@ -291,9 +328,10 @@ func TestLoadUserConfigInvalidJSON(t *testing.T) {
 		t.Fatalf("seed config failed: %v", err)
 	}
 	store := &UserConfigStore{}
-	values := store.GetStringSlice("missing")
-	if values == nil {
-		t.Errorf("GetStringSlice should not be nil")
+	if _, err := store.GetStringSlice("missing"); err == nil {
+		t.Fatalf("GetStringSlice expected error")
+	} else if ce, ok := err.(*baseerr.CommonError); !ok || ce.ErrorID() != baseerr.JsonPackageErrorID {
+		t.Fatalf("GetStringSlice ErrorID: err=%v", err)
 	}
 }
 

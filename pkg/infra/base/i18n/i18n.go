@@ -59,7 +59,10 @@ func InitI18n(appFiles embed.FS, userConfig config.IUserConfig) error {
 
 // initI18nFS はFSからi18nを初期化する。
 func initI18nFS(appFiles fs.FS, userConfig config.IUserConfig) (*I18n, error) {
-	lang := detectLang(userConfig)
+	lang, err := detectLang(userConfig)
+	if err != nil {
+		return nil, err
+	}
 	langs := []LangCode{LANG_JA, LANG_EN, LANG_ZH, LANG_KO}
 
 	messages := make(map[LangCode]map[string]string, len(langs))
@@ -176,20 +179,23 @@ func (i *I18n) TWithLang(lang LangCode, key string) string {
 	return lookupMessage(i.messages, lang, key)
 }
 
-// detectLang はユーザー設定から言語を取得する。
-func detectLang(userConfig config.IUserConfig) LangCode {
+// detectLang はユーザー設定から言語を取得する（読込失敗時は error を返す）。
+func detectLang(userConfig config.IUserConfig) (LangCode, error) {
 	if userConfig == nil {
-		return i18n.DefaultLang
+		return i18n.DefaultLang, nil
 	}
-	values := userConfig.GetStringSlice(config.UserConfigKeyLang)
+	values, err := userConfig.GetStringSlice(config.UserConfigKeyLang)
+	if err != nil {
+		return i18n.DefaultLang, err
+	}
 	if len(values) == 0 {
-		return i18n.DefaultLang
+		return i18n.DefaultLang, nil
 	}
 	switch LangCode(values[0]) {
 	case LANG_JA, LANG_EN, LANG_ZH, LANG_KO:
-		return LangCode(values[0])
+		return LangCode(values[0]), nil
 	default:
-		return i18n.DefaultLang
+		return i18n.DefaultLang, nil
 	}
 }
 

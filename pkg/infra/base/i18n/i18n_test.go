@@ -22,17 +22,17 @@ type stubUserConfig struct {
 }
 
 // Get は未使用のため空実装。
-func (s *stubUserConfig) Get(key string) (any, bool) { return nil, false }
+func (s *stubUserConfig) Get(key string) (any, bool, error) { return nil, false, nil }
 
 // Set は未使用のため空実装。
 func (s *stubUserConfig) Set(key string, value any) error { return nil }
 
 // GetStringSlice は言語設定を返す。
-func (s *stubUserConfig) GetStringSlice(key string) []string {
+func (s *stubUserConfig) GetStringSlice(key string) ([]string, error) {
 	if key == config.UserConfigKeyLang {
-		return s.lang
+		return s.lang, nil
 	}
-	return nil
+	return nil, nil
 }
 
 // SetStringSlice は言語設定の保存を記録する。
@@ -44,19 +44,25 @@ func (s *stubUserConfig) SetStringSlice(key string, values []string, limit int) 
 }
 
 // GetBool は未使用のため既定値を返す。
-func (s *stubUserConfig) GetBool(key string, defaultValue bool) bool { return defaultValue }
+func (s *stubUserConfig) GetBool(key string, defaultValue bool) (bool, error) {
+	return defaultValue, nil
+}
 
 // SetBool は未使用のため空実装。
 func (s *stubUserConfig) SetBool(key string, value bool) error { return nil }
 
 // GetInt は未使用のため既定値を返す。
-func (s *stubUserConfig) GetInt(key string, defaultValue int) int { return defaultValue }
+func (s *stubUserConfig) GetInt(key string, defaultValue int) (int, error) {
+	return defaultValue, nil
+}
 
 // SetInt は未使用のため空実装。
 func (s *stubUserConfig) SetInt(key string, value int) error { return nil }
 
 // GetAll は未使用のため空実装。
-func (s *stubUserConfig) GetAll(key string) ([]string, map[string]any) { return nil, map[string]any{} }
+func (s *stubUserConfig) GetAll(key string) ([]string, map[string]any, error) {
+	return nil, map[string]any{}, nil
+}
 
 // AppRootDir は未使用のため空実装。
 func (s *stubUserConfig) AppRootDir() (string, error) { return "", nil }
@@ -175,20 +181,20 @@ func TestI18nNilReceiver(t *testing.T) {
 
 // TestLangDetection は言語検出と正規化を確認する。
 func TestLangDetection(t *testing.T) {
-	if detectLang(nil) != i18n.DefaultLang {
-		t.Errorf("detectLang nil")
+	if lang, err := detectLang(nil); err != nil || lang != i18n.DefaultLang {
+		t.Errorf("detectLang nil: lang=%v err=%v", lang, err)
 	}
 	cfgEmpty := &stubUserConfig{lang: []string{}}
-	if detectLang(cfgEmpty) != i18n.DefaultLang {
-		t.Errorf("detectLang empty")
+	if lang, err := detectLang(cfgEmpty); err != nil || lang != i18n.DefaultLang {
+		t.Errorf("detectLang empty: lang=%v err=%v", lang, err)
 	}
 	cfg := &stubUserConfig{lang: []string{"zh"}}
-	if detectLang(cfg) != LANG_ZH {
-		t.Errorf("detectLang zh: got=%v", detectLang(cfg))
+	if lang, err := detectLang(cfg); err != nil || lang != LANG_ZH {
+		t.Errorf("detectLang zh: lang=%v err=%v", lang, err)
 	}
 	cfg = &stubUserConfig{lang: []string{"xx"}}
-	if detectLang(cfg) != i18n.DefaultLang {
-		t.Errorf("detectLang invalid: got=%v", detectLang(cfg))
+	if lang, err := detectLang(cfg); err != nil || lang != i18n.DefaultLang {
+		t.Errorf("detectLang invalid: lang=%v err=%v", lang, err)
 	}
 	if normalizeLang("xx") != i18n.DefaultLang {
 		t.Errorf("normalizeLang invalid")

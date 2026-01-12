@@ -100,11 +100,14 @@ func NewUserConfigStore() config.IUserConfig {
 // UserConfigStore はユーザー設定の実装。
 type UserConfigStore struct{}
 
-// Get はキーの値を返す。
-func (u *UserConfigStore) Get(key string) (any, bool) {
-	_, configMap := u.loadAll(key)
+// Get はキーの値を返す（読込失敗時は error を返す）。
+func (u *UserConfigStore) Get(key string) (any, bool, error) {
+	_, configMap, err := u.loadAll(key)
+	if err != nil {
+		return nil, false, err
+	}
 	val, ok := configMap[key]
-	return val, ok
+	return val, ok, nil
 }
 
 // Set はキーの値を保存する。
@@ -127,10 +130,13 @@ func (u *UserConfigStore) Set(key string, value any) error {
 	}
 }
 
-// GetStringSlice はキーのスライスを返す。
-func (u *UserConfigStore) GetStringSlice(key string) []string {
-	values, _ := u.loadAll(key)
-	return values
+// GetStringSlice はキーのスライスを返す（読込失敗時は error を返す）。
+func (u *UserConfigStore) GetStringSlice(key string) ([]string, error) {
+	values, _, err := u.loadAll(key)
+	if err != nil {
+		return []string{}, err
+	}
+	return values, nil
 }
 
 // SetStringSlice はスライス値を保存する。
@@ -138,8 +144,8 @@ func (u *UserConfigStore) SetStringSlice(key string, values []string, limit int)
 	return u.saveStringSlice(key, values, limit)
 }
 
-// GetBool はbool設定を返す。
-func (u *UserConfigStore) GetBool(key string, defaultValue bool) bool {
+// GetBool はbool設定を返す（読込失敗時は error を返す）。
+func (u *UserConfigStore) GetBool(key string, defaultValue bool) (bool, error) {
 	return u.boolValue(key, defaultValue)
 }
 
@@ -148,8 +154,8 @@ func (u *UserConfigStore) SetBool(key string, value bool) error {
 	return u.saveBool(key, value)
 }
 
-// GetInt はint設定を返す。
-func (u *UserConfigStore) GetInt(key string, defaultValue int) int {
+// GetInt はint設定を返す（読込失敗時は error を返す）。
+func (u *UserConfigStore) GetInt(key string, defaultValue int) (int, error) {
 	return u.intValue(key, defaultValue)
 }
 
@@ -158,14 +164,17 @@ func (u *UserConfigStore) SetInt(key string, value int) error {
 	return u.saveInt(key, value)
 }
 
-// GetAll はキーの値と全設定を返す。
-func (u *UserConfigStore) GetAll(key string) ([]string, map[string]any) {
-	values, configMap := u.loadAll(key)
+// GetAll はキーの値と全設定を返す（読込失敗時は error を返す）。
+func (u *UserConfigStore) GetAll(key string) ([]string, map[string]any, error) {
+	values, configMap, err := u.loadAll(key)
+	if err != nil {
+		return []string{}, map[string]any{}, err
+	}
 	out := make(map[string]any, len(configMap))
 	for k, v := range configMap {
 		out[k] = v
 	}
-	return values, out
+	return values, out, nil
 }
 
 // AppRootDir はアプリルートを返す。
@@ -182,12 +191,15 @@ func (u *UserConfigStore) saveValue(key, value string, limit int) error {
 }
 
 // boolValue はbool値を返す。
-func (u *UserConfigStore) boolValue(key string, defaultValue bool) bool {
-	values, _ := u.loadAll(key)
-	if len(values) == 0 {
-		return defaultValue
+func (u *UserConfigStore) boolValue(key string, defaultValue bool) (bool, error) {
+	values, err := u.GetStringSlice(key)
+	if err != nil {
+		return defaultValue, err
 	}
-	return values[0] == "ON"
+	if len(values) == 0 {
+		return defaultValue, nil
+	}
+	return values[0] == "ON", nil
 }
 
 // saveBool はbool値を保存する。
@@ -199,16 +211,19 @@ func (u *UserConfigStore) saveBool(key string, value bool) error {
 }
 
 // intValue はint値を返す。
-func (u *UserConfigStore) intValue(key string, defaultValue int) int {
-	values, _ := u.loadAll(key)
+func (u *UserConfigStore) intValue(key string, defaultValue int) (int, error) {
+	values, err := u.GetStringSlice(key)
+	if err != nil {
+		return defaultValue, err
+	}
 	if len(values) == 0 {
-		return defaultValue
+		return defaultValue, nil
 	}
 	parsed, err := strconv.Atoi(values[0])
 	if err != nil {
-		return defaultValue
+		return defaultValue, nil
 	}
-	return parsed
+	return parsed, nil
 }
 
 // saveInt はint値を保存する。
@@ -217,11 +232,14 @@ func (u *UserConfigStore) saveInt(key string, value int) error {
 }
 
 // loadAll は設定を読み込み、指定キーの値と全体を返す。
-func (u *UserConfigStore) loadAll(key string) ([]string, map[string]any) {
-	configMap, _ := loadUserConfigFn()
+func (u *UserConfigStore) loadAll(key string) ([]string, map[string]any, error) {
+	configMap, err := loadUserConfigFn()
+	if err != nil {
+		return []string{}, map[string]any{}, err
+	}
 	values, ok := configMap[key]
 	if !ok {
-		return []string{}, configMap
+		return []string{}, configMap, nil
 	}
 
 	switch list := values.(type) {
@@ -230,15 +248,15 @@ func (u *UserConfigStore) loadAll(key string) ([]string, map[string]any) {
 		for _, v := range list {
 			str, ok := v.(string)
 			if !ok {
-				return []string{}, configMap
+				return []string{}, configMap, nil
 			}
 			out = append(out, str)
 		}
-		return out, configMap
+		return out, configMap, nil
 	case []string:
-		return list, configMap
+		return list, configMap, nil
 	default:
-		return []string{}, configMap
+		return []string{}, configMap, nil
 	}
 }
 
@@ -247,7 +265,10 @@ func (u *UserConfigStore) saveStringSlice(key string, values []string, limit int
 	if len(values) == 0 {
 		return nil
 	}
-	current, configMap := u.loadAll(key)
+	current, configMap, err := u.loadAll(key)
+	if err != nil {
+		return newUserConfigSaveFailed("user_config.jsonの保存に失敗しました", err)
+	}
 	seen := make(map[string]struct{}, len(values)+len(current))
 	merged := make([]string, 0, len(values)+len(current))
 

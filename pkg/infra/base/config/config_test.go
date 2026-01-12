@@ -136,7 +136,10 @@ func TestUserConfigSetStringSlice(t *testing.T) {
 	if err := store.SetStringSlice("history", []string{"path2"}, 3); err != nil {
 		t.Fatalf("SetStringSlice failed: %v", err)
 	}
-	values := store.GetStringSlice("history")
+	values, err := store.GetStringSlice("history")
+	if err != nil {
+		t.Fatalf("GetStringSlice failed: %v", err)
+	}
 	expected := []string{"path2", "path1"}
 	if !reflect.DeepEqual(values, expected) {
 		t.Errorf("GetStringSlice: got=%v want=%v", values, expected)
@@ -161,7 +164,10 @@ func TestUserConfigFallback(t *testing.T) {
 		t.Fatalf("seed legacy config failed: %v", err)
 	}
 
-	values := store.GetStringSlice("lang")
+	values, err := store.GetStringSlice("lang")
+	if err != nil {
+		t.Fatalf("GetStringSlice failed: %v", err)
+	}
 	expected := []string{"ja"}
 	if !reflect.DeepEqual(values, expected) {
 		t.Errorf("GetStringSlice: got=%v want=%v", values, expected)

@@ -23,15 +23,15 @@ const (
 
 // AppConfig はアプリ設定を表す。
 type AppConfig struct {
-	AppName           string    `json:"AppName"`
-	Version           string    `json:"Version"`
-	EnvValue          AppEnv    `json:"Env"`
-	Horizontal        bool      `json:"Horizontal"`
+	AppName           string     `json:"AppName"`
+	Version           string     `json:"Version"`
+	EnvValue          AppEnv     `json:"Env"`
+	Horizontal        bool       `json:"Horizontal"`
 	ControlWindowSize WindowSize `json:"ControlWindowSize"`
 	ViewerWindowSize  WindowSize `json:"ViewerWindowSize"`
-	CloseConfirm      bool      `json:"CloseConfirm"`
-	IconPath          string    `json:"IconPath"`
-	IconImagePath     string    `json:"IconImagePath"`
+	CloseConfirm      bool       `json:"CloseConfirm"`
+	IconPath          string     `json:"IconPath"`
+	IconImagePath     string     `json:"IconImagePath"`
 }
 
 // UnmarshalJSON は旧キーを吸収して設定を取り込む。
@@ -106,15 +106,15 @@ func (ac *AppConfig) IsCloseConfirmEnabled() bool {
 
 // IUserConfig はユーザー設定のI/F。
 type IUserConfig interface {
-	Get(key string) (any, bool)
+	Get(key string) (any, bool, error)
 	Set(key string, value any) error
-	GetStringSlice(key string) []string
+	GetStringSlice(key string) ([]string, error)
 	SetStringSlice(key string, values []string, limit int) error
-	GetBool(key string, defaultValue bool) bool
+	GetBool(key string, defaultValue bool) (bool, error)
 	SetBool(key string, value bool) error
-	GetInt(key string, defaultValue int) int
+	GetInt(key string, defaultValue int) (int, error)
 	SetInt(key string, value int) error
-	GetAll(key string) ([]string, map[string]any)
+	GetAll(key string) ([]string, map[string]any, error)
 	AppRootDir() (string, error)
 }
 
