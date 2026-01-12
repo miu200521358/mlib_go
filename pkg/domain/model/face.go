@@ -1,3 +1,4 @@
+// 指示: miu200521358
 package model
 
 // Face は三角面を表す。

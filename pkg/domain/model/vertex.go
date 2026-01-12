@@ -1,3 +1,4 @@
+// 指示: miu200521358
 package model
 
 import "github.com/miu200521358/mlib_go/pkg/domain/mmath"

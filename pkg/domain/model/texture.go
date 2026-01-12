@@ -1,3 +1,4 @@
+// 指示: miu200521358
 package model
 
 // TextureType はテクスチャ種別を表す。

@@ -1,3 +1,4 @@
+// 指示: miu200521358
 package collection
 
 // IIndexable は可変な index を持つ要素を表す。

@@ -1,3 +1,4 @@
+// 指示: miu200521358
 package model
 
 // DisplayType は表示枠参照の種別を表す。

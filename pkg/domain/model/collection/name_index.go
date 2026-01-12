@@ -1,3 +1,4 @@
+// 指示: miu200521358
 package collection
 
 // NameIndex は name -> index の参照を提供する。
