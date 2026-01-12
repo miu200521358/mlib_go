@@ -2,10 +2,10 @@
 package mmath
 
 import (
-	"errors"
 	"fmt"
 	"math"
 
+	baseerr "github.com/miu200521358/mlib_go/pkg/shared/base/err"
 	"gonum.org/v1/gonum/num/quat"
 	"gonum.org/v1/gonum/spatial/r3"
 )
@@ -20,11 +20,20 @@ var (
 )
 
 const (
-	GIMBAL1_RAD = 88.0 / 180.0 * math.Pi
-	GIMBAL2_RAD = GIMBAL1_RAD * 2
-	ONE_RAD     = math.Pi
-	HALF_RAD    = math.Pi / 2
+	Gimbal1Rad = 88.0 / 180.0 * math.Pi
+	Gimbal2Rad = Gimbal1Rad * 2
+	OneRad     = math.Pi
+	HalfRad    = math.Pi / 2
 )
+
+const (
+	mathQuaternionLogFailedErrorID = "92104"
+)
+
+// newMathQuaternionLogFailed はQuaternion.Log失敗エラーを生成する。
+func newMathQuaternionLogFailed() error {
+	return baseerr.NewCommonError(mathQuaternionLogFailedErrorID, baseerr.ErrorKindInternal, "Quaternion.Logに失敗しました", nil)
+}
 
 // NewQuaternion はクォータニオンを生成する。
 func NewQuaternion() Quaternion {
@@ -143,7 +152,7 @@ func (q Quaternion) ToRadiansWithGimbal(axisIndex int) (Vec3, bool) {
 		other1Rad = math.Abs(r.X)
 		other2Rad = math.Abs(r.Y)
 	}
-	if other1Rad >= GIMBAL2_RAD && other2Rad >= GIMBAL2_RAD {
+	if other1Rad >= Gimbal2Rad && other2Rad >= Gimbal2Rad {
 		return r, true
 	}
 	return r, false
@@ -662,14 +671,21 @@ func VectorToRadian(a, b Vec3) float64 {
 	p := a.Dot(b)
 	normA := a.Length()
 	normB := b.Length()
-	cosAngle := p / (normA * normB)
+	denom := normA * normB
+	if denom == 0 || math.IsNaN(denom) || math.IsInf(denom, 0) {
+		return 0
+	}
+	cosAngle := p / denom
+	if math.IsNaN(cosAngle) || math.IsInf(cosAngle, 0) {
+		return 0
+	}
 	return math.Acos(math.Min(1, math.Max(-1, cosAngle)))
 }
 
 // Log はクォータニオンの対数を求める。
 func (q Quaternion) Log() (Quaternion, error) {
 	if math.Abs(q.Real) > 1.0 {
-		return Quaternion{}, errors.New("invalid quaternion scalar part")
+		return Quaternion{}, newMathQuaternionLogFailed()
 	}
 	vNorm := q.Norm()
 	if vNorm == 0 {

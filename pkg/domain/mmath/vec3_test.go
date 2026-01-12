@@ -209,8 +209,14 @@ func TestVec3Ops(t *testing.T) {
 	if DistanceFromPointToLine(Vec3{r3Vec(0, 0, 0)}, Vec3{r3Vec(1, 0, 0)}, Vec3{r3Vec(0, 1, 0)}) == 0 {
 		t.Errorf("DistanceFromPointToLine")
 	}
+	if DistanceFromPointToLine(Vec3{r3Vec(0, 0, 0)}, Vec3{r3Vec(0, 0, 0)}, Vec3{r3Vec(1, 0, 0)}) != 0 {
+		t.Errorf("DistanceFromPointToLine degenerate")
+	}
 	if DistanceFromPlaneToLine(Vec3{r3Vec(0, 0, 0)}, Vec3{r3Vec(0, 1, 0)}, Vec3{r3Vec(0, 0, 1)}, Vec3{r3Vec(1, 0, 0)}, Vec3{r3Vec(0, 1, 0)}, Vec3{r3Vec(0, 0, 0)}) != 0 {
 		t.Errorf("DistanceFromPlaneToLine")
+	}
+	if DistanceFromPlaneToLine(Vec3{r3Vec(0, 0, 0)}, Vec3{r3Vec(0, 1, 0)}, Vec3{r3Vec(1, 0, 0)}, Vec3{r3Vec(2, 0, 0)}, Vec3{r3Vec(0, 1, 0)}, Vec3{r3Vec(0, 0, 0)}) != 0 {
+		t.Errorf("DistanceFromPlaneToLine degenerate")
 	}
 	if _, err := IntersectLinePlane(Vec3{r3Vec(0, 0, 0)}, Vec3{r3Vec(1, 0, 0)}, Vec3{r3Vec(0, 0, 1)}, Vec3{r3Vec(1, 0, 0)}, Vec3{r3Vec(0, 1, 0)}, Vec3{r3Vec(0, 0, 0)}); err == nil {
 		t.Errorf("IntersectLinePlane error")
@@ -221,11 +227,17 @@ func TestVec3Ops(t *testing.T) {
 	if IntersectLinePoint(Vec3{r3Vec(0, 0, 0)}, Vec3{r3Vec(1, 0, 0)}, Vec3{r3Vec(2, 0, 0)}).X != 2 {
 		t.Errorf("IntersectLinePoint")
 	}
+	if IntersectLinePoint(Vec3{r3Vec(0, 0, 0)}, Vec3{r3Vec(0, 1, 0)}, Vec3{r3Vec(1, 0, 0)}) != (Vec3{}) {
+		t.Errorf("IntersectLinePoint degenerate")
+	}
 	if len(DistanceLineToPoints(Vec3{r3Vec(0, 0, 0)}, []Vec3{{r3Vec(0, 0, 1)}})) != 1 {
 		t.Errorf("DistanceLineToPoints")
 	}
 	if (Vec3{r3Vec(1, 0, 0)}).Project(Vec3{r3Vec(1, 0, 0)}) != (Vec3{r3Vec(1, 0, 0)}) {
 		t.Errorf("Project")
+	}
+	if (Vec3{r3Vec(1, 0, 0)}).Project(Vec3{}) != (Vec3{}) {
+		t.Errorf("Project zero")
 	}
 	if !(Vec3{r3Vec(1, 1, 1)}).IsPointInsideBox(Vec3{r3Vec(0, 0, 0)}, Vec3{r3Vec(2, 2, 2)}) {
 		t.Errorf("IsPointInsideBox")

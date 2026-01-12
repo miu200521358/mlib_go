@@ -181,22 +181,20 @@ func TestUserConfigLoadAllVariants(t *testing.T) {
 		t.Fatalf("seed config failed: %v", err)
 	}
 	values, _, err = store.GetAll("history")
-	if err != nil {
-		t.Fatalf("GetAll failed: %v", err)
-	}
-	if len(values) != 0 {
-		t.Errorf("GetAll non-string: got=%v", values)
+	if err == nil {
+		t.Fatalf("GetAll non-string expected error")
+	} else if ce, ok := err.(*baseerr.CommonError); !ok || ce.ErrorID() != configValueTypeNotSupportedErrorID {
+		t.Fatalf("GetAll non-string ErrorID: err=%v", err)
 	}
 
 	if err := os.WriteFile(path, []byte(`{"history":"x"}`), 0644); err != nil {
 		t.Fatalf("seed config failed: %v", err)
 	}
 	values, _, err = store.GetAll("history")
-	if err != nil {
-		t.Fatalf("GetAll failed: %v", err)
-	}
-	if len(values) != 0 {
-		t.Errorf("GetAll default: got=%v", values)
+	if err == nil {
+		t.Fatalf("GetAll non-slice expected error")
+	} else if ce, ok := err.(*baseerr.CommonError); !ok || ce.ErrorID() != configValueTypeNotSupportedErrorID {
+		t.Fatalf("GetAll non-slice ErrorID: err=%v", err)
 	}
 
 	withLoadUserConfig(t, func() (map[string]any, error) {

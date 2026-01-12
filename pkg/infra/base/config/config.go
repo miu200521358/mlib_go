@@ -253,7 +253,7 @@ func (u *UserConfigStore) loadAll(key string) ([]string, map[string]any, error) 
 		for _, v := range list {
 			str, ok := v.(string)
 			if !ok {
-				return []string{}, configMap, nil
+				return []string{}, map[string]any{}, newConfigValueTypeNotSupported("user_config.jsonの値が未対応です: " + key)
 			}
 			out = append(out, str)
 		}
@@ -261,7 +261,7 @@ func (u *UserConfigStore) loadAll(key string) ([]string, map[string]any, error) 
 	case []string:
 		return list, configMap, nil
 	default:
-		return []string{}, configMap, nil
+		return []string{}, map[string]any{}, newConfigValueTypeNotSupported("user_config.jsonの値が未対応です: " + key)
 	}
 }
 

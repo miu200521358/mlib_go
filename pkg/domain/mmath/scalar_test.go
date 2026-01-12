@@ -15,6 +15,10 @@ func TestScalarBasics(t *testing.T) {
 	if len(ratios) != 2 || ratios[0] != 0.1 || ratios[1] != 0.2 {
 		t.Errorf("Ratio")
 	}
+	ratiosZero := Ratio(0.0, []float64{1, 2})
+	if len(ratiosZero) != 2 || ratiosZero[0] != 0 || ratiosZero[1] != 0 {
+		t.Errorf("Ratio zero")
+	}
 	if Effective(math.NaN()) != 0 {
 		t.Errorf("Effective NaN")
 	}
@@ -28,16 +32,25 @@ func TestScalarBasics(t *testing.T) {
 	if Mean(values) != 2.5 {
 		t.Errorf("Mean")
 	}
+	if Mean([]float64{}) != 0 {
+		t.Errorf("Mean empty")
+	}
 	if Median([]int{3, 1, 2}) != 2 {
 		t.Errorf("Median odd")
 	}
 	if Median([]int{1, 2, 3, 4}) != 2 {
 		t.Errorf("Median even")
 	}
+	if Median([]int{}) != 0 {
+		t.Errorf("Median empty")
+	}
 	if math.Abs(Std([]float64{1, 2})-0.5) < 1e-9 {
 		// 問題なし
 	} else {
 		t.Errorf("Std")
+	}
+	if Std([]float64{}) != 0 {
+		t.Errorf("Std empty")
 	}
 	if Lerp(1, 2, -1) != 1 || Lerp(1, 2, 2) != 2 || Lerp(1, 3, 0.5) != 2 {
 		t.Errorf("Lerp")
@@ -88,8 +101,17 @@ func TestScalarBasics(t *testing.T) {
 	if got := Mean2DVertical([][]float64{{1, 2}, {3, 4}}); got[0] != 2 || got[1] != 3 {
 		t.Errorf("Mean2DVertical")
 	}
+	if got := Mean2DVertical([][]float64{}); len(got) != 0 {
+		t.Errorf("Mean2DVertical empty")
+	}
+	if got := Mean2DVertical([][]float64{{}}); len(got) != 0 {
+		t.Errorf("Mean2DVertical empty row")
+	}
 	if got := Mean2DHorizontal([][]float64{{1, 2}, {3, 4}}); got[0] != 1.5 || got[1] != 3.5 {
 		t.Errorf("Mean2DHorizontal")
+	}
+	if got := Mean2DHorizontal([][]float64{}); len(got) != 0 {
+		t.Errorf("Mean2DHorizontal empty")
 	}
 	if ClampIfVerySmall(1e-7) != 0 || ClampIfVerySmall(1e-3) == 0 {
 		t.Errorf("ClampIfVerySmall")

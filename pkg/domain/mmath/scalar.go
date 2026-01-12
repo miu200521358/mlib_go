@@ -2,16 +2,26 @@
 package mmath
 
 import (
-	"fmt"
 	"math"
 	"slices"
 	"sort"
+
+	baseerr "github.com/miu200521358/mlib_go/pkg/shared/base/err"
 )
 
 type Number interface {
 	~int | ~int8 | ~int16 | ~int32 | ~int64 |
 		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr |
 		~float32 | ~float64
+}
+
+const (
+	mathCalculateXFailedErrorID = "92103"
+)
+
+// newMathCalculateXFailed はCalculateX失敗エラーを生成する。
+func newMathCalculateXFailed() error {
+	return baseerr.NewCommonError(mathCalculateXFailedErrorID, baseerr.ErrorKindInternal, "CalculateXに失敗しました", nil)
 }
 
 // Sum は合計を返す。
@@ -25,9 +35,17 @@ func Sum[T Number](values []T) T {
 
 // Ratio は比率配列を返す。
 func Ratio[T Number](total T, values []T) []float64 {
+	denom := float64(total)
+	if denom == 0 || math.IsNaN(denom) || math.IsInf(denom, 0) {
+		return make([]float64, len(values))
+	}
 	ratios := make([]float64, len(values))
 	for i, v := range values {
-		ratios[i] = float64(v) / float64(total)
+		ratio := float64(v) / denom
+		if math.IsNaN(ratio) || math.IsInf(ratio, 0) {
+			ratio = 0
+		}
+		ratios[i] = ratio
 	}
 	return ratios
 }
@@ -55,33 +73,64 @@ func Unique[T comparable](values []T) []T {
 
 // Mean は平均を返す。
 func Mean[T Number](values []T) float64 {
+	if len(values) == 0 {
+		return 0
+	}
 	sum := 0.0
 	for _, v := range values {
 		sum += float64(v)
 	}
-	return sum / float64(len(values))
+	if math.IsNaN(sum) || math.IsInf(sum, 0) {
+		return 0
+	}
+	result := sum / float64(len(values))
+	if math.IsNaN(result) || math.IsInf(result, 0) {
+		return 0
+	}
+	return result
 }
 
 // Median は中央値を返す。
 func Median[T Number](values []T) T {
+	if len(values) == 0 {
+		var zero T
+		return zero
+	}
 	sorted := make([]T, len(values))
 	copy(sorted, values)
 	Sort(sorted)
 	middle := len(sorted) / 2
 	if len(sorted)%2 == 0 {
-		return (sorted[middle-1] + sorted[middle]) / 2
+		result := (sorted[middle-1] + sorted[middle]) / 2
+		if isNaN(result) {
+			var zero T
+			return zero
+		}
+		return result
 	}
-	return sorted[middle]
+	result := sorted[middle]
+	if isNaN(result) {
+		var zero T
+		return zero
+	}
+	return result
 }
 
 // Std は標準偏差を返す。
 func Std[T Number](values []T) float64 {
+	if len(values) == 0 {
+		return 0
+	}
 	mean := T(Mean(values))
 	variance := 0.0
 	for _, num := range values {
 		variance += math.Pow(float64(num-mean), 2)
 	}
-	return math.Sqrt(variance / float64(len(values)))
+	result := math.Sqrt(variance / float64(len(values)))
+	if math.IsNaN(result) || math.IsInf(result, 0) {
+		return 0
+	}
+	return result
 }
 
 // Lerp は線形補間する。
@@ -202,6 +251,9 @@ func IntRangesByStep(min, max, step int) []int {
 
 // Mean2DVertical は縦方向の平均を返す。
 func Mean2DVertical(nums [][]float64) []float64 {
+	if len(nums) == 0 || len(nums[0]) == 0 {
+		return nil
+	}
 	vertical := make([]float64, len(nums[0]))
 	for _, num := range nums {
 		for i, n := range num {
@@ -209,16 +261,27 @@ func Mean2DVertical(nums [][]float64) []float64 {
 		}
 	}
 	for i, n := range vertical {
-		vertical[i] = n / float64(len(nums))
+		val := n / float64(len(nums))
+		if math.IsNaN(val) || math.IsInf(val, 0) {
+			val = 0
+		}
+		vertical[i] = val
 	}
 	return vertical
 }
 
 // Mean2DHorizontal は横方向の平均を返す。
 func Mean2DHorizontal(nums [][]float64) []float64 {
+	if len(nums) == 0 {
+		return nil
+	}
 	horizontal := make([]float64, len(nums))
 	for i, num := range nums {
-		horizontal[i] = Mean(num)
+		val := Mean(num)
+		if math.IsNaN(val) || math.IsInf(val, 0) {
+			val = 0
+		}
+		horizontal[i] = val
 	}
 	return horizontal
 }
@@ -296,7 +359,7 @@ func BoolToFlag(b bool) float64 {
 func CalculateX(length, y, z float64) (float64, error) {
 	squareTerm := length*length - y*y - z*z
 	if squareTerm < 0 {
-		return 0, fmt.Errorf("no real solution")
+		return 0, newMathCalculateXFailed()
 	}
 	return math.Sqrt(squareTerm), nil
 }
@@ -328,5 +391,3 @@ func Sort[T Number](values []T) {
 func isNaN[T Number](v T) bool {
 	return math.IsNaN(float64(v))
 }
-
-

@@ -241,6 +241,9 @@ func TestQuaternionAdvanced(t *testing.T) {
 	if VectorToDegree(Vec3{r3Vec(1, 0, 0)}, Vec3{r3Vec(1, 0, 0)}) != 0 {
 		t.Errorf("VectorToDegree")
 	}
+	if VectorToRadian(Vec3{}, Vec3{}) != 0 {
+		t.Errorf("VectorToRadian zero")
+	}
 	if _, err := NewQuaternionByValues(0, 0, 0, 2).Log(); err == nil {
 		t.Errorf("Log error")
 	}

@@ -2,9 +2,9 @@
 package mmath
 
 import (
-	"errors"
 	"math"
 
+	baseerr "github.com/miu200521358/mlib_go/pkg/shared/base/err"
 	"gonum.org/v1/gonum/diff/fd"
 	"gonum.org/v1/gonum/optimize"
 )
@@ -20,6 +20,15 @@ var (
 	CURVE_MIN_VEC = Vec2{0.0, 0.0}
 	CURVE_MAX_VEC = Vec2{CurveMax, CurveMax}
 )
+
+const (
+	mathCurveFitFailedErrorID = "92106"
+)
+
+// newMathCurveFitFailed は曲線フィット失敗エラーを生成する。
+func newMathCurveFitFailed(cause error) error {
+	return baseerr.NewCommonError(mathCurveFitFailedErrorID, baseerr.ErrorKindInternal, "曲線フィットに失敗しました", cause)
+}
 
 // NewCurve は曲線を生成する。
 func NewCurve() *Curve {
@@ -253,12 +262,12 @@ func NewCurveFromValues(values []float64, threshold float64) (*Curve, error) {
 
 	result, err := optimizePointsFunc(xCoords, yCoords, P0, P1, P2, P3)
 	if err != nil {
-		return nil, err
+		return nil, newMathCurveFitFailed(err)
 	}
 
 	curve := tryCurveNormalize(result.P0, result.P1, result.P2, result.P3, decreasing)
 	if curve == nil {
-		return nil, errors.New("curve normalize failed")
+		return nil, newMathCurveFitFailed(nil)
 	}
 	return curve, nil
 }

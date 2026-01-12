@@ -8,11 +8,21 @@ import (
 	"math"
 	"sort"
 
+	baseerr "github.com/miu200521358/mlib_go/pkg/shared/base/err"
 	"gonum.org/v1/gonum/spatial/r3"
 )
 
 type Vec3 struct {
 	r3.Vec
+}
+
+const (
+	mathIntersectLinePlaneFailedErrorID = "92105"
+)
+
+// newMathIntersectLinePlaneFailed は交点計算失敗エラーを生成する。
+func newMathIntersectLinePlaneFailed() error {
+	return baseerr.NewCommonError(mathIntersectLinePlaneFailedErrorID, baseerr.ErrorKindInternal, "平面との交点計算に失敗しました", nil)
 }
 
 var (
@@ -600,7 +610,17 @@ func DistanceFromPointToLine(vec1, vec2, point Vec3) float64 {
 	crossVec := lineVec.Cross(pointVec)
 	area := crossVec.Length()
 	lineLength := lineVec.Length()
-	return area / lineLength
+	if lineLength == 0 || math.IsNaN(lineLength) || math.IsInf(lineLength, 0) {
+		return 0
+	}
+	if math.IsNaN(area) || math.IsInf(area, 0) {
+		return 0
+	}
+	distance := area / lineLength
+	if math.IsNaN(distance) || math.IsInf(distance, 0) {
+		return 0
+	}
+	return distance
 }
 
 // DistanceFromPlaneToLine は平面と線分の距離を返す。
@@ -609,7 +629,14 @@ func DistanceFromPlaneToLine(near, far, forward, right, up, point Vec3) float64 
 	// 平面法線と点の距離を求める。
 	normal := forward.Cross(right)
 	vectorToPlane := point.Subed(near)
-	distance := math.Abs(vectorToPlane.Dot(normal)) / normal.Length()
+	denom := normal.Length()
+	if denom == 0 || math.IsNaN(denom) || math.IsInf(denom, 0) {
+		return 0
+	}
+	distance := math.Abs(vectorToPlane.Dot(normal)) / denom
+	if math.IsNaN(distance) || math.IsInf(distance, 0) {
+		return 0
+	}
 	return distance
 }
 
@@ -622,7 +649,7 @@ func IntersectLinePlane(near, far, forward, right, up, point Vec3) (Vec3, error)
 	D := -normal.Dot(point)
 	denom := normal.Dot(direction)
 	if math.Abs(denom) < 1e-6 {
-		return Vec3{}, fmt.Errorf("line and plane are parallel")
+		return Vec3{}, newMathIntersectLinePlaneFailed()
 	}
 	t := -(normal.Dot(near) + D) / denom
 	intersection := near.Added(direction.MuledScalar(t))
@@ -632,7 +659,14 @@ func IntersectLinePlane(near, far, forward, right, up, point Vec3) (Vec3, error)
 // IntersectLinePoint は線分上の最近点を返す。
 func IntersectLinePoint(near, far, point Vec3) Vec3 {
 	direction := far.Subed(near)
-	t := (point.X - near.X) / direction.X
+	denom := direction.X
+	if denom == 0 || math.IsNaN(denom) || math.IsInf(denom, 0) {
+		return Vec3{}
+	}
+	t := (point.X - near.X) / denom
+	if math.IsNaN(t) || math.IsInf(t, 0) {
+		return Vec3{}
+	}
 	intersection := near.Added(direction.MuledScalar(t))
 	return intersection
 }
@@ -649,7 +683,15 @@ func DistanceLineToPoints(worldPos Vec3, points []Vec3) []float64 {
 
 // Project は射影ベクトルを返す。
 func (v Vec3) Project(other Vec3) Vec3 {
-	return other.MuledScalar(v.Dot(other) / other.LengthSqr())
+	denom := other.LengthSqr()
+	if denom == 0 || math.IsNaN(denom) || math.IsInf(denom, 0) {
+		return Vec3{}
+	}
+	factor := v.Dot(other) / denom
+	if math.IsNaN(factor) || math.IsInf(factor, 0) {
+		return Vec3{}
+	}
+	return other.MuledScalar(factor)
 }
 
 // IsPointInsideBox は判定する。
