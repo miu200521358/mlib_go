@@ -1,3 +1,4 @@
+// 指示: miu200521358
 package mmath
 
 import "github.com/tiendc/go-deepcopy"
