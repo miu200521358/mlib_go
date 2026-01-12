@@ -98,6 +98,8 @@ const (
 	ImagePackageErrorID = "99003"
 	// FsPackageErrorID は io/fs パッケージの共通委譲エラーID。
 	FsPackageErrorID = "99004"
+	// DeepcopyPackageErrorID は go-deepcopy パッケージの共通委譲エラーID。
+	DeepcopyPackageErrorID = "99005"
 )
 
 // NewCommonError は ErrorID 付きの共通エラーを生成する。
@@ -128,6 +130,11 @@ func NewImagePackageError(message string, cause error) *CommonError {
 // NewFsPackageError は io/fs パッケージ由来の共通委譲エラーを生成する。
 func NewFsPackageError(message string, cause error) *CommonError {
 	return NewCommonError(FsPackageErrorID, ErrorKindExternal, message, cause)
+}
+
+// NewDeepcopyPackageError は go-deepcopy パッケージ由来の共通委譲エラーを生成する。
+func NewDeepcopyPackageError(message string, cause error) *CommonError {
+	return NewCommonError(DeepcopyPackageErrorID, ErrorKindExternal, message, cause)
 }
 
 // ErrorRegistryPath は埋め込みCSVのパス。

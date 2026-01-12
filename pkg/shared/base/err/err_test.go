@@ -160,6 +160,7 @@ func TestNewPackageErrors(t *testing.T) {
 		{name: "json", err: NewJsonPackageError("msg", cause), id: JsonPackageErrorID},
 		{name: "image", err: NewImagePackageError("msg", cause), id: ImagePackageErrorID},
 		{name: "fs", err: NewFsPackageError("msg", cause), id: FsPackageErrorID},
+		{name: "deepcopy", err: NewDeepcopyPackageError("msg", cause), id: DeepcopyPackageErrorID},
 	}
 	for _, tt := range tests {
 		if tt.err.ErrorID() != tt.id {
