@@ -970,7 +970,7 @@ func applyIkDeltas(
 			d.SetGlobalIkOffMatrix(off)
 			boneDeltas.Update(d)
 		}
-		applyIkForBone(modelData, motionData, boneDeltas, bone, frame, deformBoneIndexes, removeTwist)
+		applyIkForBone(modelData, motionData, boneDeltas, bone, frame, deformBoneIndexes, ikIndexes, removeTwist)
 	}
 }
 
@@ -990,6 +990,7 @@ func applyIkForBone(
 	ikBone *model.Bone,
 	frame motion.Frame,
 	deformBoneIndexes []int,
+	ikIndexes []int,
 	removeTwist bool,
 ) {
 	if modelData == nil || boneDeltas == nil || ikBone == nil || ikBone.Ik == nil {
@@ -1092,7 +1093,11 @@ func applyIkForBone(
 			rot := resultQuat
 			linkDelta.FrameRotation = &rot
 			linkDelta.InvalidateTotals()
-			ApplyBoneMatricesWithIndexes(modelData, boneDeltas, deformBoneIndexes)
+			if len(ikIndexes) > 0 {
+				ApplyBoneMatricesWithIndexes(modelData, boneDeltas, ikIndexes)
+			} else {
+				ApplyBoneMatricesWithIndexes(modelData, boneDeltas, deformBoneIndexes)
+			}
 		}
 
 		threshold := ikTargetDistance(boneDeltas, ikBone.Index(), ikTargetIndex)
