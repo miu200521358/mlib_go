@@ -20,8 +20,11 @@ import (
 )
 
 const (
-	defaultVmdPath = "internal/test_resources/サンプルモーション.vmd"
-	defaultPmxPath = "internal/test_resources/サンプルモデル.pmx"
+	defaultVmdPath = "D:/MMD/MikuMikuDance_v926x64/UserFile/Motion/ダンス_1人/[A]ddiction_モーション hino/[A]ddiction_Lat式.vmd"
+	defaultPmxPath = "D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/ISAO式ミク/I_ミクv4チャイナ/Miku_V4_チャイナ.pmx"
+
+	// defaultVmdPath = "D:/MMD/MikuMikuDance_v926x64/UserFile/Motion/ダンス_1人/CH4NGE mobiusP/CH4NGE.vmd"
+	// defaultPmxPath = "D:/MMD/MikuMikuDance_v926x64/UserFile/Model/_VMDサイジング/mlibkiller/mlibkiller.pmx"
 )
 
 // main はCPUプロファイルを取得しながらボーン変形を実行する。
