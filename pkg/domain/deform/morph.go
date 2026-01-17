@@ -3,7 +3,6 @@ package deform
 
 import (
 	"math"
-	"slices"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
@@ -37,10 +36,9 @@ func ComputeMorphDeltas(
 		}
 	}
 
-	motionNames := motionData.MorphFrames.Names()
 	visited := make(map[int]struct{})
 	for _, name := range names {
-		if !slices.Contains(motionNames, name) {
+		if !motionData.MorphFrames.Has(name) {
 			continue
 		}
 		mf := motionData.MorphFrames.Get(name).Get(frame)

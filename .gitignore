@@ -38,3 +38,4 @@ cmd/viewerPng/
 cmd/log_*.txt
 bin/
 .gocache/
+.gomodcache/

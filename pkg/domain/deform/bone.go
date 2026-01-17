@@ -456,7 +456,7 @@ func getBoneFrame(motionData *motion.VmdMotion, name string, frame motion.Frame)
 	if motionData == nil || motionData.BoneFrames == nil {
 		return nil
 	}
-	if !slices.Contains(motionData.BoneFrames.Names(), name) {
+	if !motionData.BoneFrames.Has(name) {
 		return nil
 	}
 	return motionData.BoneFrames.Get(name).Get(frame)

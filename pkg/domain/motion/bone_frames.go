@@ -360,6 +360,15 @@ func (b *BoneFrames) Names() []string {
 	return append([]string(nil), b.names...)
 }
 
+// Has は名前が登録済みかを返す。
+func (b *BoneFrames) Has(name string) bool {
+	if b == nil {
+		return false
+	}
+	_, ok := b.nameIndex[name]
+	return ok
+}
+
 // Get は名前に対応するフレーム集合を返す。
 func (b *BoneFrames) Get(name string) *BoneNameFrames {
 	if b == nil {

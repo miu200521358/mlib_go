@@ -118,6 +118,15 @@ func (m *MorphFrames) Names() []string {
 	return append([]string(nil), m.names...)
 }
 
+// Has は名前が登録済みかを返す。
+func (m *MorphFrames) Has(name string) bool {
+	if m == nil {
+		return false
+	}
+	_, ok := m.nameIndex[name]
+	return ok
+}
+
 // Get は名前に対応するフレーム集合を返す。
 func (m *MorphFrames) Get(name string) *MorphNameFrames {
 	if m == nil {
