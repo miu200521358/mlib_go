@@ -764,25 +764,27 @@ func boneHasFixedAxis(bone *model.Bone) bool {
 }
 
 // boneLocalAxes はローカル軸ベクトルを返す。
-func boneLocalAxes(bone *model.Bone) (mmath.Vec3, mmath.Vec3, mmath.Vec3) {
-	if bone == nil || bone.BoneFlag&model.BONE_FLAG_HAS_LOCAL_AXIS == 0 {
+func boneLocalAxes(modelData *model.PmxModel, bone *model.Bone) (mmath.Vec3, mmath.Vec3, mmath.Vec3) {
+	if bone == nil {
 		return mmath.UNIT_X_VEC3, mmath.UNIT_Y_VEC3, mmath.UNIT_Z_NEG_VEC3
 	}
-	xAxis := bone.LocalAxisX
-	zAxis := bone.LocalAxisZ
+	xAxis := boneChildDirection(modelData, bone)
+	if boneHasFixedAxis(bone) {
+		xAxis = bone.FixedAxis
+	}
 	if xAxis.IsZero() {
 		xAxis = mmath.UNIT_X_VEC3
 	}
-	if zAxis.IsZero() {
-		zAxis = mmath.UNIT_Z_NEG_VEC3
-	}
 	xAxis = xAxis.Normalized()
-	zAxis = zAxis.Normalized()
-	yAxis := zAxis.Cross(xAxis)
+	yAxis := xAxis.Cross(mmath.UNIT_Z_NEG_VEC3)
 	if yAxis.Length() == 0 {
 		yAxis = mmath.UNIT_Y_VEC3
 	}
-	return xAxis, yAxis.Normalized(), zAxis
+	zAxis := xAxis.Cross(yAxis)
+	if zAxis.Length() == 0 {
+		zAxis = mmath.UNIT_Z_NEG_VEC3
+	}
+	return xAxis, yAxis, zAxis
 }
 
 // boneChildDirection は子方向の軸ベクトルを返す。
@@ -951,7 +953,7 @@ func applyIkForBone(
 				RemoveTwist:     removeTwist,
 				FixedAxis:       fixedAxisOrZero(linkBone),
 				ChildAxis:       boneChildDirection(modelData, linkBone),
-				LocalAxes:       localAxes(linkBone),
+				LocalAxes:       localAxes(modelData, linkBone),
 			})
 
 			if linkDelta.FrameMorphRotation != nil && !linkDelta.FrameMorphRotation.IsIdent() {

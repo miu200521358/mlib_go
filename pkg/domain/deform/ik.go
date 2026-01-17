@@ -151,8 +151,8 @@ func fixedAxisOrZero(bone *model.Bone) mmath.Vec3 {
 }
 
 // localAxes はローカル軸を返す。
-func localAxes(bone *model.Bone) IkLocalAxes {
-	x, y, z := boneLocalAxes(bone)
+func localAxes(modelData *model.PmxModel, bone *model.Bone) IkLocalAxes {
+	x, y, z := boneLocalAxes(modelData, bone)
 	return IkLocalAxes{X: x, Y: y, Z: z}
 }
 

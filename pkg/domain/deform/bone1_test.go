@@ -688,7 +688,7 @@ func TestVmdMotion_DeformLegIk6_KoshiIkOff(t *testing.T) {
 func TestVmdMotion_DeformLegIk7_Syou_ISAO(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	motion := loadVmd(t, "C:/MMD/mmd_base/tests/resources/唱(ダンスのみ)_0274F.vmd")
+	motion := loadVmd(t, "../../../test_resources/唱（ダンスのみ）_0274F.vmd")
 
 	model := loadPmx(t, "D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/ISAO式ミク/I_ミクv4/Miku_V4_準標準.pmx")
 
@@ -856,7 +856,7 @@ func TestVmdMotion_DeformLegIk7_Syou_ISAO(t *testing.T) {
 func TestVmdMotion_DeformLegIk7_Syou(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	motion := loadVmd(t, "../../../test_resources/唱(ダンスのみ)_0278F.vmd")
+	motion := loadVmd(t, "../../../test_resources/唱（ダンスのみ）_0278F.vmd")
 
 	model := loadPmx(t, "../../../test_resources/サンプルモデル.pmx")
 
@@ -901,7 +901,7 @@ func TestVmdMotion_DeformLegIk7_Syou(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk8_Syou(t *testing.T) {
-	motion := loadVmd(t, "../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
+	motion := loadVmd(t, "../../../test_resources/唱（ダンスのみ）_0-300F.vmd")
 
 	model := loadPmx(t, "../../../test_resources/サンプルモデル.pmx")
 
@@ -945,7 +945,7 @@ func TestVmdMotion_DeformLegIk8_Syou(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk10_Syou1(t *testing.T) {
-	motion := loadVmd(t, "../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
+	motion := loadVmd(t, "../../../test_resources/唱（ダンスのみ）_0-300F.vmd")
 
 	model := loadPmx(t, "../../../test_resources/サンプルモデル.pmx")
 
@@ -990,7 +990,7 @@ func TestVmdMotion_DeformLegIk10_Syou1(t *testing.T) {
 
 func TestVmdMotion_DeformLegIk10_Syou2(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
-	motion := loadVmd(t, "../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
+	motion := loadVmd(t, "../../../test_resources/唱（ダンスのみ）_0-300F.vmd")
 
 	model := loadPmx(t, "../../../test_resources/サンプルモデル.pmx")
 
@@ -1036,7 +1036,7 @@ func TestVmdMotion_DeformLegIk10_Syou2(t *testing.T) {
 
 func TestVmdMotion_DeformLegIk10_Syou3(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
-	motion := loadVmd(t, "../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
+	motion := loadVmd(t, "../../../test_resources/唱（ダンスのみ）_0-300F.vmd")
 
 	model := loadPmx(t, "../../../test_resources/サンプルモデル.pmx")
 
@@ -1081,7 +1081,7 @@ func TestVmdMotion_DeformLegIk10_Syou3(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk10_Syou4(t *testing.T) {
-	motion := loadVmd(t, "../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
+	motion := loadVmd(t, "../../../test_resources/唱（ダンスのみ）_0-300F.vmd")
 
 	model := loadPmx(t, "../../../test_resources/サンプルモデル.pmx")
 
@@ -1126,7 +1126,7 @@ func TestVmdMotion_DeformLegIk10_Syou4(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk10_Syou5(t *testing.T) {
-	motion := loadVmd(t, "../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
+	motion := loadVmd(t, "../../../test_resources/唱（ダンスのみ）_0-300F.vmd")
 
 	model := loadPmx(t, "../../../test_resources/サンプルモデル.pmx")
 
@@ -1171,7 +1171,7 @@ func TestVmdMotion_DeformLegIk10_Syou5(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk10_Syou6(t *testing.T) {
-	motion := loadVmd(t, "../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
+	motion := loadVmd(t, "../../../test_resources/唱（ダンスのみ）_0-300F.vmd")
 
 	model := loadPmx(t, "../../../test_resources/サンプルモデル.pmx")
 
@@ -1669,7 +1669,7 @@ func TestVmdMotion_DeformLegIk17_Snow(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk18_Syou(t *testing.T) {
-	motion := loadVmd(t, "../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
+	motion := loadVmd(t, "../../../test_resources/唱（ダンスのみ）_0-300F.vmd")
 
 	model := loadPmx(t, "../../../test_resources/サンプルモデル.pmx")
 
@@ -1752,7 +1752,7 @@ func TestVmdMotion_DeformLegIk19_Wa(t *testing.T) {
 }
 
 func TestVmdMotion_DeformLegIk20_Syou(t *testing.T) {
-	motion := loadVmd(t, "../../../test_resources/唱(ダンスのみ)_0-300F.vmd")
+	motion := loadVmd(t, "../../../test_resources/唱（ダンスのみ）_0-300F.vmd")
 
 	model := loadPmx(t, "../../../test_resources/サンプルモデル.pmx")
 
@@ -2140,7 +2140,7 @@ func TestVmdMotion_DeformArmIk(t *testing.T) {
 }
 
 func TestVmdMotion_DeformArmIk3(t *testing.T) {
-	motion := loadVmd(t, "C:/MMD/mlib_go/test_resources/Addiction_0F.vmd")
+	motion := loadVmd(t, "../../../test_resources/Addiction_0F.vmd")
 
 	model := loadPmx(t, "D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/Sour式初音ミクVer.1.02/Black_全表示.pmx")
 
@@ -3021,7 +3021,7 @@ func TestVmdMotion_DeformIk29_Simple(t *testing.T) {
 func TestVmdMotion_DeformArmIk2(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
-	motion := loadVmd(t, "C:/MMD/mmd_base/tests/resources/唱(ダンスのみ)_0274F.vmd")
+	motion := loadVmd(t, "../../../test_resources/唱（ダンスのみ）_0274F.vmd")
 
 	model := loadPmx(t, "D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/ISAO式ミク/I_ミクv4/Miku_V4_準標準.pmx")
 	boneDeltas, _ := computeBoneDeltas(model, motion, motionpkg.Frame(0), nil, true, false, false)
