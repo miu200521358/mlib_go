@@ -1092,7 +1092,6 @@ func applyIkForBone(
 			rot := resultQuat
 			linkDelta.FrameRotation = &rot
 			linkDelta.InvalidateTotals()
-			updateBoneDelta(modelData, boneDeltas, linkDelta)
 			ApplyBoneMatricesWithIndexes(modelData, boneDeltas, deformBoneIndexes)
 		}
 
