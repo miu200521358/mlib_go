@@ -141,7 +141,7 @@ func ApplyGlobalMatricesWithIndexes(modelData *model.PmxModel, boneDeltas *delta
 		if d.UnitMatrix == nil {
 			updateBoneDelta(modelData, boneDeltas, d)
 		}
-		applyGlobalMatrix(boneDeltas, d)
+		applyGlobalMatrixNoLocal(boneDeltas, d)
 		boneDeltas.Update(d)
 	}
 }
@@ -571,6 +571,34 @@ func applyGlobalMatrix(boneDeltas *delta.BoneDeltas, d *delta.BoneDelta) {
 	neg := d.Bone.Position.Negated()
 	global.MulTranslateTo(&neg, local)
 	d.SetGlobalPosition(global.Translation())
+}
+
+// applyGlobalMatrixNoLocal はグローバル行列のみ更新する。
+func applyGlobalMatrixNoLocal(boneDeltas *delta.BoneDeltas, d *delta.BoneDelta) {
+	if boneDeltas == nil || d == nil || d.Bone == nil {
+		return
+	}
+	if d.UnitMatrix == nil {
+		d.ResetUnitMatrix()
+	}
+	parent := boneDeltas.Get(d.Bone.ParentIndex)
+	var global *mmath.Mat4
+	switch {
+	case parent != nil && parent.GlobalIkOffMatrix != nil && boneIsIk(parent.Bone):
+		global = d.GlobalMatrixPtr()
+		parent.GlobalIkOffMatrix.MulToPtr(d.UnitMatrix, global)
+	case parent != nil && parent.GlobalMatrix != nil:
+		global = d.GlobalMatrixPtr()
+		parent.GlobalMatrix.MulToPtr(d.UnitMatrix, global)
+	default:
+		d.GlobalMatrix = d.UnitMatrix
+		global = d.UnitMatrix
+	}
+	if global == nil {
+		return
+	}
+	d.LocalMatrix = nil
+	d.GlobalPosition = nil
 }
 
 // calculateTotalRotationMat は総回転行列をoutへ書き込み、反映有無を返す。
