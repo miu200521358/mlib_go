@@ -9,6 +9,7 @@ import (
 	"io"
 	"math"
 	"os"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -4225,6 +4226,7 @@ func loadVmd(t *testing.T, path string) *motionpkg.VmdMotion {
 func loadPmx(t *testing.T, path string) *model.PmxModel {
 	t.Helper()
 
+	path = convertWindowsPathToWsl(path)
 	file, err := os.Open(path)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -4251,6 +4253,25 @@ func loadPmx(t *testing.T, path string) *model.PmxModel {
 	modelData.UpdateHash()
 
 	return modelData
+}
+
+// convertWindowsPathToWsl はLinux環境でWindowsパスをWSLパスに変換する。
+func convertWindowsPathToWsl(path string) string {
+	if runtime.GOOS != "linux" {
+		return path
+	}
+	if len(path) < 2 || path[1] != ':' {
+		return path
+	}
+	drive := strings.ToLower(path[:1])
+	rest := strings.ReplaceAll(path[2:], "\\", "/")
+	if rest == "" {
+		return "/mnt/" + drive
+	}
+	if !strings.HasPrefix(rest, "/") {
+		rest = "/" + rest
+	}
+	return "/mnt/" + drive + rest
 }
 
 // computeBoneDeltas は行列更新まで実施したボーン差分を返す。
