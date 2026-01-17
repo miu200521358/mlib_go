@@ -519,11 +519,11 @@ func (s *pmxWriteState) writeBones() error {
 
 		boneFlag := bone.BoneFlag
 		tailIsBone := boneFlag&model.BONE_FLAG_TAIL_IS_BONE != 0
+		mappedTail := bone.TailIndex
 		if tailIsBone {
-			mappedTail := s.boneMapping.mapIndex(bone.TailIndex)
+			mappedTail = s.boneMapping.mapIndex(bone.TailIndex)
 			if mappedTail < 0 {
-				boneFlag &^= model.BONE_FLAG_TAIL_IS_BONE
-				tailIsBone = false
+				mappedTail = -1
 			}
 		}
 		ik := s.prepareIk(bone.Ik)
@@ -535,7 +535,6 @@ func (s *pmxWriteState) writeBones() error {
 			return io_common.NewIoSaveFailed("PMXボーンフラグの書き込みに失敗しました", err)
 		}
 		if tailIsBone {
-			mappedTail := s.boneMapping.mapIndex(bone.TailIndex)
 			if err := writeSignedIndex(s.writer, s.boneIndexSize, mappedTail); err != nil {
 				return io_common.NewIoSaveFailed("PMXボーン接続インデックスの書き込みに失敗しました", err)
 			}

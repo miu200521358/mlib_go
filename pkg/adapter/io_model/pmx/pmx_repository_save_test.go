@@ -130,4 +130,28 @@ func TestPmxRepository_Save(t *testing.T) {
 			t.Errorf("Expected EdgeFactor to be %v, got %v", expectedEdgeFactor, v.EdgeFactor)
 		}
 	}
+
+	{
+		b, _ := savedModel.Bones.Get(12)
+		expectedBoneFlag := model.BONE_FLAG_CAN_ROTATE | model.BONE_FLAG_IS_VISIBLE | model.BONE_FLAG_CAN_MANIPULATE | model.BONE_FLAG_TAIL_IS_BONE | model.BONE_FLAG_IS_EXTERNAL_ROTATION
+		if b.BoneFlag != expectedBoneFlag {
+			t.Errorf("Expected BoneFlag to be %v, got %v", expectedBoneFlag, b.BoneFlag)
+		}
+		expectedTailIndex := -1
+		if b.TailIndex != expectedTailIndex {
+			t.Errorf("Expected TailIndex to be %v, got %v", expectedTailIndex, b.TailIndex)
+		}
+	}
+
+	{
+		b, _ := savedModel.Bones.Get(28)
+		expectedBoneFlag := model.BONE_FLAG_CAN_ROTATE | model.BONE_FLAG_IS_VISIBLE | model.BONE_FLAG_CAN_MANIPULATE | model.BONE_FLAG_TAIL_IS_BONE | model.BONE_FLAG_HAS_FIXED_AXIS | model.BONE_FLAG_HAS_LOCAL_AXIS
+		if b.BoneFlag != expectedBoneFlag {
+			t.Errorf("Expected BoneFlag to be %v, got %v", expectedBoneFlag, b.BoneFlag)
+		}
+		expectedTailIndex := -1
+		if b.TailIndex != expectedTailIndex {
+			t.Errorf("Expected TailIndex to be %v, got %v", expectedTailIndex, b.TailIndex)
+		}
+	}
 }
