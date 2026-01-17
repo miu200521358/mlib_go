@@ -145,16 +145,14 @@ func collectBoneIndexes(
 	if len(boneNames) == 0 {
 		return collectAllBones(modelData, afterPhysics)
 	}
+	effectorChildren, ikTargets, ikLinks := buildReverseBoneRelations(modelData)
 	indexes := make(map[int]struct{})
 	for _, name := range boneNames {
 		bone, err := modelData.Bones.GetByName(name)
 		if err != nil || bone == nil {
 			continue
 		}
-		addBoneWithDependencies(modelData, bone, includeIk, indexes)
-	}
-	if includeIk {
-		addIkBonesByTargets(modelData, indexes)
+		addRelatedBoneIndexes(modelData, bone, includeIk, indexes, effectorChildren, ikTargets, ikLinks)
 	}
 	out := make([]int, 0, len(indexes))
 	for idx := range indexes {
@@ -162,6 +160,95 @@ func collectBoneIndexes(
 	}
 	sortBoneIndexes(modelData, out)
 	return out
+}
+
+// buildReverseBoneRelations は逆引き関係を構築する。
+func buildReverseBoneRelations(modelData *model.PmxModel) (map[int][]int, map[int][]int, map[int][]int) {
+	effectorChildren := map[int][]int{}
+	ikTargets := map[int][]int{}
+	ikLinks := map[int][]int{}
+	if modelData == nil || modelData.Bones == nil {
+		return effectorChildren, ikTargets, ikLinks
+	}
+	for _, bone := range modelData.Bones.Values() {
+		if bone == nil {
+			continue
+		}
+		if boneHasEffector(bone) && bone.EffectIndex >= 0 {
+			effectorChildren[bone.EffectIndex] = append(effectorChildren[bone.EffectIndex], bone.Index())
+		}
+		if boneIsIk(bone) && bone.Ik != nil {
+			if bone.Ik.BoneIndex >= 0 {
+				ikTargets[bone.Ik.BoneIndex] = append(ikTargets[bone.Ik.BoneIndex], bone.Index())
+			}
+			for _, link := range bone.Ik.Links {
+				if link.BoneIndex < 0 {
+					continue
+				}
+				ikLinks[link.BoneIndex] = append(ikLinks[link.BoneIndex], bone.Index())
+			}
+		}
+	}
+	return effectorChildren, ikTargets, ikLinks
+}
+
+// addRelatedBoneIndexes は関連ボーンを再帰的に追加する。
+func addRelatedBoneIndexes(
+	modelData *model.PmxModel,
+	bone *model.Bone,
+	includeIk bool,
+	indexes map[int]struct{},
+	effectorChildren map[int][]int,
+	ikTargets map[int][]int,
+	ikLinks map[int][]int,
+) {
+	if modelData == nil || bone == nil {
+		return
+	}
+	queue := []int{bone.Index()}
+	visited := map[int]struct{}{}
+	for len(queue) > 0 {
+		idx := queue[0]
+		queue = queue[1:]
+		if _, ok := visited[idx]; ok {
+			continue
+		}
+		visited[idx] = struct{}{}
+		current, err := modelData.Bones.Get(idx)
+		if err != nil || current == nil {
+			continue
+		}
+		if current.ParentIndex >= 0 && modelData.Bones.Contains(current.ParentIndex) {
+			queue = append(queue, current.ParentIndex)
+		}
+		if boneHasEffector(current) && current.EffectIndex >= 0 && modelData.Bones.Contains(current.EffectIndex) {
+			queue = append(queue, current.EffectIndex)
+		}
+		if includeIk && boneIsIk(current) && current.Ik != nil {
+			if current.Ik.BoneIndex >= 0 && modelData.Bones.Contains(current.Ik.BoneIndex) {
+				queue = append(queue, current.Ik.BoneIndex)
+			}
+			for _, link := range current.Ik.Links {
+				if link.BoneIndex >= 0 && modelData.Bones.Contains(link.BoneIndex) {
+					queue = append(queue, link.BoneIndex)
+				}
+			}
+		}
+		if children := effectorChildren[idx]; len(children) > 0 {
+			queue = append(queue, children...)
+		}
+		if includeIk {
+			if targets := ikTargets[idx]; len(targets) > 0 {
+				queue = append(queue, targets...)
+			}
+			if links := ikLinks[idx]; len(links) > 0 {
+				queue = append(queue, links...)
+			}
+		}
+	}
+	for idx := range visited {
+		indexes[idx] = struct{}{}
+	}
 }
 
 // collectIkChainIndexes はIKボーンに関連するインデックスを収集する。
@@ -224,27 +311,36 @@ func addBoneWithDependencies(
 	}
 }
 
-// addIkBonesByTargets は選択済みボーンに紐づくIKボーンを追加する。
-func addIkBonesByTargets(modelData *model.PmxModel, indexes map[int]struct{}) {
+// addRelatedBonesByTargets は選択済みボーンに紐づく関連ボーンを追加する。
+func addRelatedBonesByTargets(modelData *model.PmxModel, includeIk bool, indexes map[int]struct{}) {
 	if modelData == nil || modelData.Bones == nil {
 		return
 	}
 	for {
 		added := false
 		for _, bone := range modelData.Bones.Values() {
-			if bone == nil || !boneIsIk(bone) {
+			if bone == nil {
 				continue
 			}
 			if _, ok := indexes[bone.Index()]; ok {
 				continue
 			}
-			if !ikHasTargetInIndexes(bone.Ik, indexes) {
+			if includeIk && boneIsIk(bone) && ikHasTargetInIndexes(bone.Ik, indexes) {
+				prevLen := len(indexes)
+				addBoneWithDependencies(modelData, bone, includeIk, indexes)
+				if len(indexes) != prevLen {
+					added = true
+				}
 				continue
 			}
-			prevLen := len(indexes)
-			addBoneWithDependencies(modelData, bone, true, indexes)
-			if len(indexes) != prevLen {
-				added = true
+			if boneHasEffector(bone) {
+				if _, ok := indexes[bone.EffectIndex]; ok {
+					prevLen := len(indexes)
+					addBoneWithDependencies(modelData, bone, includeIk, indexes)
+					if len(indexes) != prevLen {
+						added = true
+					}
+				}
 			}
 		}
 		if !added {
