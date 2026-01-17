@@ -41,6 +41,43 @@ func NewBoneDelta(bone *model.Bone, frame sharedtime.Frame) *BoneDelta {
 	return &BoneDelta{Bone: bone, Frame: frame}
 }
 
+// NewBoneDeltaByGlobalMatrix はグローバル行列をもとにボーン差分を生成する。
+func NewBoneDeltaByGlobalMatrix(
+	bone *model.Bone,
+	frame sharedtime.Frame,
+	globalMatrix mmath.Mat4,
+	parent *BoneDelta,
+) *BoneDelta {
+	if bone == nil {
+		return nil
+	}
+	parentGlobal := mmath.NewMat4()
+	parentPos := mmath.NewVec3()
+	if parent != nil {
+		parentGlobal = parent.FilledGlobalMatrix()
+		if parent.Bone != nil {
+			parentPos = parent.Bone.Position
+		}
+	}
+	localMat := globalMatrix.Muled(bone.Position.Negated().ToMat4())
+	unitMat := parentGlobal.Inverted().Muled(globalMatrix)
+	parentRelative := bone.Position.Subed(parentPos)
+	framePos := unitMat.Translation().Subed(parentRelative)
+	frameRot := unitMat.Quaternion()
+	global := globalMatrix
+	local := localMat
+	unit := unitMat
+	return &BoneDelta{
+		Bone:          bone,
+		Frame:         frame,
+		GlobalMatrix:  &global,
+		LocalMatrix:   &local,
+		UnitMatrix:    &unit,
+		FramePosition: &framePos,
+		FrameRotation: &frameRot,
+	}
+}
+
 // FilledGlobalMatrix はグローバル行列を返す。
 func (d *BoneDelta) FilledGlobalMatrix() mmath.Mat4 {
 	if d == nil || d.GlobalMatrix == nil {

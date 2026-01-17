@@ -52,9 +52,9 @@ func SolveIk(input IkSolveInput) mmath.Quaternion {
 	minLimit := input.MinAngleLimit
 	maxLimit := input.MaxAngleLimit
 	switch {
-	case minLimit.IsOnlyX() || maxLimit.IsOnlyX():
+	case minLimit.X > -math.Pi/2 && maxLimit.X < math.Pi/2:
 		return solveIkAxisX(ikMat, input)
-	case minLimit.IsOnlyY() || maxLimit.IsOnlyY():
+	case minLimit.Y > -math.Pi/2 && maxLimit.Y < math.Pi/2:
 		return solveIkAxisY(ikMat, input)
 	default:
 		return solveIkAxisZ(ikMat, input)

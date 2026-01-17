@@ -5,6 +5,7 @@ import (
 	"math"
 	"slices"
 	"sort"
+	"strings"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
@@ -152,6 +153,24 @@ func collectBoneIndexes(
 		}
 		addBoneWithDependencies(modelData, bone, includeIk, indexes)
 	}
+	if includeIk {
+		addIkBonesByTargets(modelData, indexes)
+	}
+	out := make([]int, 0, len(indexes))
+	for idx := range indexes {
+		out = append(out, idx)
+	}
+	sortBoneIndexes(modelData, out)
+	return out
+}
+
+// collectIkChainIndexes はIKボーンに関連するインデックスを収集する。
+func collectIkChainIndexes(modelData *model.PmxModel, ikBone *model.Bone) []int {
+	if modelData == nil || ikBone == nil {
+		return nil
+	}
+	indexes := make(map[int]struct{})
+	addBoneWithDependencies(modelData, ikBone, true, indexes)
 	out := make([]int, 0, len(indexes))
 	for idx := range indexes {
 		out = append(out, idx)
@@ -203,6 +222,56 @@ func addBoneWithDependencies(
 	if includeIk && boneIsIk(bone) {
 		addIkDependencies(modelData, bone, indexes)
 	}
+}
+
+// addIkBonesByTargets は選択済みボーンに紐づくIKボーンを追加する。
+func addIkBonesByTargets(modelData *model.PmxModel, indexes map[int]struct{}) {
+	if modelData == nil || modelData.Bones == nil {
+		return
+	}
+	for {
+		added := false
+		for _, bone := range modelData.Bones.Values() {
+			if bone == nil || !boneIsIk(bone) {
+				continue
+			}
+			if _, ok := indexes[bone.Index()]; ok {
+				continue
+			}
+			if !ikHasTargetInIndexes(bone.Ik, indexes) {
+				continue
+			}
+			prevLen := len(indexes)
+			addBoneWithDependencies(modelData, bone, true, indexes)
+			if len(indexes) != prevLen {
+				added = true
+			}
+		}
+		if !added {
+			break
+		}
+	}
+}
+
+// ikHasTargetInIndexes はIKターゲット/リンクが指定集合にあるか判定する。
+func ikHasTargetInIndexes(ik *model.Ik, indexes map[int]struct{}) bool {
+	if ik == nil {
+		return false
+	}
+	if ik.BoneIndex >= 0 {
+		if _, ok := indexes[ik.BoneIndex]; ok {
+			return true
+		}
+	}
+	for _, link := range ik.Links {
+		if link.BoneIndex < 0 {
+			continue
+		}
+		if _, ok := indexes[link.BoneIndex]; ok {
+			return true
+		}
+	}
+	return false
 }
 
 // addBoneAndParents はボーンと親階層を追加する。
@@ -756,7 +825,17 @@ func applyIkDeltas(
 		if ikFrame != nil && !ikFrame.IsEnable(bone.Name()) {
 			continue
 		}
-		applyIkForBone(modelData, boneDeltas, bone, frame, deformBoneIndexes, removeTwist)
+		ikIndexes := collectIkChainIndexes(modelData, bone)
+		for _, idx := range ikIndexes {
+			d := boneDeltas.Get(idx)
+			if d == nil {
+				continue
+			}
+			off := d.FilledGlobalMatrix()
+			d.GlobalIkOffMatrix = &off
+			boneDeltas.Update(d)
+		}
+		applyIkForBone(modelData, motionData, boneDeltas, bone, frame, deformBoneIndexes, removeTwist)
 	}
 }
 
@@ -771,6 +850,7 @@ func getIkFrame(motionData *motion.VmdMotion, frame motion.Frame) *motion.IkFram
 // applyIkForBone はIKボーンの回転を更新する。
 func applyIkForBone(
 	modelData *model.PmxModel,
+	motionData *motion.VmdMotion,
 	boneDeltas *delta.BoneDeltas,
 	ikBone *model.Bone,
 	frame motion.Frame,
@@ -788,10 +868,31 @@ func applyIkForBone(
 		return
 	}
 	loopCount := max(ikBone.Ik.LoopCount, 1)
-	if isTargetBeforeIk(deformBoneIndexes, ikTargetIndex, ikBone.Index()) {
+	targetBeforeIk := isTargetBeforeIk(deformBoneIndexes, ikTargetIndex, ikBone.Index())
+	if targetBeforeIk {
 		loopCount++
 	}
-	loopCount = min(loopCount, 20)
+
+	isSingleIk := len(ikBone.Ik.Links) == 1
+	ikDelta := boneDeltas.Get(ikBone.Index())
+	if ikDelta == nil {
+		ikDelta = delta.NewBoneDelta(ikBone, frame)
+	}
+	ikPos := ikDelta.FilledGlobalPosition()
+	ikOnPos := ikPos
+	useToeIk := false
+	if targetBeforeIk && len(ikBone.Ik.Links) == 1 && isToeIkBone(ikBone) && motionData != nil {
+		if targetBone, err := modelData.Bones.Get(ikTargetIndex); err == nil && targetBone != nil {
+			ikOffDeltas, _ := ComputeBoneDeltas(modelData, motionData, frame, []string{targetBone.Name()}, false, false, false)
+			ApplyBoneMatrices(modelData, ikOffDeltas)
+			if ikOffDeltas != nil {
+				if targetDelta := ikOffDeltas.Get(ikTargetIndex); targetDelta != nil {
+					ikPos = targetDelta.FilledGlobalPosition()
+					useToeIk = true
+				}
+			}
+		}
+	}
 
 	bestThreshold := math.MaxFloat64
 	bestRotations := map[int]mmath.Quaternion{}
@@ -808,26 +909,31 @@ func applyIkForBone(
 			}
 			linkQuat := linkDelta.FilledTotalRotation()
 
+			if useToeIk && loop == 1 && linkIndex == 0 {
+				ikPos = ikOnPos
+			}
+
 			ikTargetDelta := boneDeltas.Get(ikTargetIndex)
-			ikDelta := boneDeltas.Get(ikBone.Index())
-			if ikTargetDelta == nil || ikDelta == nil {
+			if ikTargetDelta == nil {
 				continue
 			}
-			linkPos := linkDelta.FilledGlobalPosition()
 			ikTargetPos := ikTargetDelta.FilledGlobalPosition()
-			ikPos := ikDelta.FilledGlobalPosition()
-
-			ikTargetLocalPos := linkQuat.Inverted().MulVec3(ikTargetPos.Subed(linkPos))
-			ikLocalPos := linkQuat.Inverted().MulVec3(ikPos.Subed(linkPos))
+			linkGlobal := linkDelta.FilledGlobalMatrix()
+			linkInv := linkGlobal.Inverted()
+			ikTargetLocalPos := linkInv.MulVec3(ikTargetPos).Normalized()
+			ikLocalPos := linkInv.MulVec3(ikPos).Normalized()
 			if ikTargetLocalPos.Length() == 0 || ikLocalPos.Length() == 0 {
 				continue
 			}
 
 			unitRad := ikBone.Ik.UnitRotation.X * float64(linkIndex+1)
-			limitedAxis := getLinkAxis(link, ikTargetLocalPos, ikLocalPos)
 			linkAngle := mmath.VectorToRadian(ikTargetLocalPos, ikLocalPos)
 			if linkAngle > unitRad {
 				linkAngle = unitRad
+			}
+			limitedAxis := ikTargetLocalPos.Cross(ikLocalPos).Normalized()
+			if (!isSingleIk || linkAngle > mmath.Gimbal1Rad) && (link.AngleLimit || link.LocalAngleLimit) {
+				limitedAxis = getLinkAxis(link, ikTargetLocalPos, ikLocalPos)
 			}
 
 			resultQuat := SolveIkStep(IkSolveStepInput{
@@ -924,6 +1030,15 @@ func isTargetBeforeIk(indexes []int, targetIndex, ikIndex int) bool {
 		return false
 	}
 	return targetPos < ikPos
+}
+
+// isToeIkBone はつま先IKボーンか判定する。
+func isToeIkBone(bone *model.Bone) bool {
+	if bone == nil {
+		return false
+	}
+	name := bone.Name()
+	return strings.Contains(name, "つま先ＩＫ") || strings.Contains(name, "つま先IK")
 }
 
 // max は最大値を返す。

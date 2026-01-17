@@ -62,6 +62,40 @@ func TestBoneDeltaTotals(t *testing.T) {
 	}
 }
 
+// TestNewBoneDeltaByGlobalMatrix はグローバル行列由来の差分を確認する。
+func TestNewBoneDeltaByGlobalMatrix(t *testing.T) {
+	parent := newTestBone(0, "parent")
+	parent.Position = vec3(10, 0, 0)
+	parentDelta := NewBoneDelta(parent, 0)
+	parentGlobal := parent.Position.ToMat4()
+	parentDelta.GlobalMatrix = &parentGlobal
+
+	child := newTestBone(1, "child")
+	child.Position = vec3(12, 0, 0)
+	global := child.Position.ToMat4()
+
+	delta := NewBoneDeltaByGlobalMatrix(child, sharedtime.Frame(1), global, parentDelta)
+	if delta == nil {
+		t.Fatalf("expected delta")
+	}
+	expectedUnit := parentGlobal.Inverted().Muled(global)
+	if !delta.FilledUnitMatrix().NearEquals(expectedUnit, 1e-6) {
+		t.Fatalf("unit matrix mismatch: %v", delta.FilledUnitMatrix())
+	}
+	expectedLocal := global.Muled(child.Position.Negated().ToMat4())
+	if !delta.FilledLocalMatrix().NearEquals(expectedLocal, 1e-6) {
+		t.Fatalf("local matrix mismatch: %v", delta.FilledLocalMatrix())
+	}
+	parentRelative := child.Position.Subed(parent.Position)
+	expectedFramePos := expectedUnit.Translation().Subed(parentRelative)
+	if delta.FramePosition == nil || !delta.FramePosition.NearEquals(expectedFramePos, 1e-6) {
+		t.Fatalf("frame position mismatch: %v", delta.FramePosition)
+	}
+	if delta.FrameRotation == nil || !delta.FrameRotation.NearEquals(mmath.NewQuaternion(), 1e-6) {
+		t.Fatalf("frame rotation mismatch: %v", delta.FrameRotation)
+	}
+}
+
 // TestBoneDeltasLookup は検索系の動作を確認する。
 func TestBoneDeltasLookup(t *testing.T) {
 	bones := model.NewBoneCollection(0)
