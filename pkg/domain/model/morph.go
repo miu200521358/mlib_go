@@ -134,6 +134,7 @@ type Morph struct {
 	MorphType   MorphType
 	Offsets     []MorphOffset
 	DisplaySlot int
+	IsSystem    bool // システム追加モーフの場合はtrue
 }
 
 // Index はモーフ index を返す。

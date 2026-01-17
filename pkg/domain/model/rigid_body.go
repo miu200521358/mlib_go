@@ -55,6 +55,7 @@ type RigidBody struct {
 	Rotation       mmath.Vec3
 	Param          RigidBodyParam
 	PhysicsType    PhysicsType
+	IsSystem       bool // システム追加剛体の場合はtrue
 }
 
 // Index は剛体 index を返す。

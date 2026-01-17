@@ -75,6 +75,7 @@ type Bone struct {
 	EffectorKey      int
 	Ik               *Ik
 	DisplaySlotIndex int
+	IsSystem         bool // システム追加ボーンの場合はtrue
 }
 
 // Index はボーン index を返す。
