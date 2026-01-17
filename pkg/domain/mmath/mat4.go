@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math"
 
-	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/num/quat"
 	"gonum.org/v1/gonum/spatial/r3"
 )
@@ -291,7 +290,7 @@ func (m Mat4) MuledScalar(v float64) Mat4 {
 
 // Det は行列式を返す。
 func (m Mat4) Det() float64 {
-	return mat.Det(m.toDense())
+	return mat4Det(m)
 }
 
 // Inverse は逆行列にする。
@@ -303,15 +302,15 @@ func (m *Mat4) Inverse() *Mat4 {
 
 // Inverted は逆行列を返す。
 func (m Mat4) Inverted() Mat4 {
-	det := m.Det()
-	if math.Abs(det) < 1e-10 {
+	det := mat4Det(m)
+	if math.IsNaN(det) || math.IsInf(det, 0) || math.Abs(det) < 1e-10 {
 		return NewMat4()
 	}
-	var inv mat.Dense
-	if err := inv.Inverse(m.toDense()); err != nil || math.IsNaN(inv.At(0, 0)) || math.IsInf(inv.At(0, 0), 0) {
+	inv, ok := mat4Inverse(m, det)
+	if !ok {
 		return NewMat4()
 	}
-	return mat4FromDense(&inv)
+	return inv
 }
 
 // ClampIfVerySmall は微小値を0に丸める。
@@ -340,23 +339,73 @@ func (m Mat4) AxisZ() Vec3 {
 	return Vec3{r3.Vec{X: m[8], Y: m[9], Z: m[10]}}
 }
 
-// toDense はmat.Denseへ変換する。
-func (m Mat4) toDense() *mat.Dense {
-	return mat.NewDense(4, 4, []float64{
-		m[0], m[4], m[8], m[12],
-		m[1], m[5], m[9], m[13],
-		m[2], m[6], m[10], m[14],
-		m[3], m[7], m[11], m[15],
-	})
+func mat4Det(m Mat4) float64 {
+	a00, a01, a02, a03 := m[0], m[1], m[2], m[3]
+	a10, a11, a12, a13 := m[4], m[5], m[6], m[7]
+	a20, a21, a22, a23 := m[8], m[9], m[10], m[11]
+	a30, a31, a32, a33 := m[12], m[13], m[14], m[15]
+
+	b00 := a00*a11 - a01*a10
+	b01 := a00*a12 - a02*a10
+	b02 := a00*a13 - a03*a10
+	b03 := a01*a12 - a02*a11
+	b04 := a01*a13 - a03*a11
+	b05 := a02*a13 - a03*a12
+	b06 := a20*a31 - a21*a30
+	b07 := a20*a32 - a22*a30
+	b08 := a20*a33 - a23*a30
+	b09 := a21*a32 - a22*a31
+	b10 := a21*a33 - a23*a31
+	b11 := a22*a33 - a23*a32
+
+	return b00*b11 - b01*b10 + b02*b09 + b03*b08 - b04*b07 + b05*b06
 }
 
-// mat4FromDense はmat.DenseからMat4へ変換する。
-func mat4FromDense(d *mat.Dense) Mat4 {
-	return Mat4{
-		d.At(0, 0), d.At(1, 0), d.At(2, 0), d.At(3, 0),
-		d.At(0, 1), d.At(1, 1), d.At(2, 1), d.At(3, 1),
-		d.At(0, 2), d.At(1, 2), d.At(2, 2), d.At(3, 2),
-		d.At(0, 3), d.At(1, 3), d.At(2, 3), d.At(3, 3),
+func mat4Inverse(m Mat4, det float64) (Mat4, bool) {
+	a00, a01, a02, a03 := m[0], m[1], m[2], m[3]
+	a10, a11, a12, a13 := m[4], m[5], m[6], m[7]
+	a20, a21, a22, a23 := m[8], m[9], m[10], m[11]
+	a30, a31, a32, a33 := m[12], m[13], m[14], m[15]
+
+	b00 := a00*a11 - a01*a10
+	b01 := a00*a12 - a02*a10
+	b02 := a00*a13 - a03*a10
+	b03 := a01*a12 - a02*a11
+	b04 := a01*a13 - a03*a11
+	b05 := a02*a13 - a03*a12
+	b06 := a20*a31 - a21*a30
+	b07 := a20*a32 - a22*a30
+	b08 := a20*a33 - a23*a30
+	b09 := a21*a32 - a22*a31
+	b10 := a21*a33 - a23*a31
+	b11 := a22*a33 - a23*a32
+
+	if det == 0 {
+		return Mat4{}, false
 	}
-}
+	invDet := 1.0 / det
 
+	inv := Mat4{
+		(a11*b11 - a12*b10 + a13*b09) * invDet,
+		(a02*b10 - a01*b11 - a03*b09) * invDet,
+		(a31*b05 - a32*b04 + a33*b03) * invDet,
+		(a22*b04 - a21*b05 - a23*b03) * invDet,
+		(a12*b08 - a10*b11 - a13*b07) * invDet,
+		(a00*b11 - a02*b08 + a03*b07) * invDet,
+		(a32*b02 - a30*b05 - a33*b01) * invDet,
+		(a20*b05 - a22*b02 + a23*b01) * invDet,
+		(a10*b10 - a11*b08 + a13*b06) * invDet,
+		(a01*b08 - a00*b10 - a03*b06) * invDet,
+		(a30*b04 - a31*b02 + a33*b00) * invDet,
+		(a21*b02 - a20*b04 - a23*b00) * invDet,
+		(a11*b07 - a10*b09 - a12*b06) * invDet,
+		(a00*b09 - a01*b07 + a02*b06) * invDet,
+		(a31*b01 - a30*b03 - a32*b00) * invDet,
+		(a20*b03 - a21*b01 + a22*b00) * invDet,
+	}
+
+	if math.IsNaN(inv[0]) || math.IsInf(inv[0], 0) {
+		return Mat4{}, false
+	}
+	return inv, true
+}
