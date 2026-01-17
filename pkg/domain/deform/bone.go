@@ -345,13 +345,13 @@ func collectDescendantFlags(children [][]int, start int, flags []bool, updated *
 	}
 }
 
-// appendIndexesByFlags はフラグが立っているindexをoutへ詰める。
-func appendIndexesByFlags(out []int, indexes []int, flags []bool) []int {
-	if len(indexes) == 0 || len(flags) == 0 {
+// appendIndexesByOrder はorderが有効なindexをoutへ詰める。
+func appendIndexesByOrder(out []int, indexes []int, order []int) []int {
+	if len(indexes) == 0 || len(order) == 0 {
 		return out
 	}
 	for _, idx := range indexes {
-		if idx >= 0 && idx < len(flags) && flags[idx] {
+		if idx >= 0 && idx < len(order) && order[idx] >= 0 {
 			out = append(out, idx)
 		}
 	}
@@ -1155,6 +1155,7 @@ func applyIkDeltas(
 	}
 	effectorChildren := buildEffectorChildrenSlice(modelData)
 	children := buildChildRelations(modelData)
+	scratch := newIkScratch(modelData, deformBoneIndexes)
 	ikFrame := getIkFrame(motionData, frame)
 	for _, boneIndex := range deformBoneIndexes {
 		bone, err := modelData.Bones.Get(boneIndex)
@@ -1174,7 +1175,7 @@ func applyIkDeltas(
 			d.SetGlobalIkOffMatrix(off)
 			boneDeltas.Update(d)
 		}
-		applyIkForBone(modelData, motionData, boneDeltas, bone, frame, deformBoneIndexes, effectorChildren, children, removeTwist)
+		applyIkForBone(modelData, motionData, boneDeltas, bone, frame, deformBoneIndexes, effectorChildren, children, scratch, removeTwist)
 	}
 }
 
@@ -1184,6 +1185,44 @@ func getIkFrame(motionData *motion.VmdMotion, frame motion.Frame) *motion.IkFram
 		return nil
 	}
 	return motionData.IkFrames.Get(frame)
+}
+
+// ikScratch はIK計算の作業用バッファを保持する。
+type ikScratch struct {
+	unitUpdatedFlags   []bool
+	unitUpdatedList    []int
+	unitQueue          []int
+	globalUpdatedFlags []bool
+	globalUpdatedList  []int
+	globalQueue        []int
+	globalRecalc       []int
+	order              []int
+}
+
+func newIkScratch(modelData *model.PmxModel, deformBoneIndexes []int) *ikScratch {
+	size := 0
+	if modelData != nil && modelData.Bones != nil {
+		size = modelData.Bones.Len()
+	}
+	order := make([]int, size)
+	for i := range order {
+		order[i] = -1
+	}
+	for i, idx := range deformBoneIndexes {
+		if idx >= 0 && idx < len(order) {
+			order[idx] = i
+		}
+	}
+	return &ikScratch{
+		unitUpdatedFlags:   make([]bool, size),
+		unitUpdatedList:    make([]int, 0, size),
+		unitQueue:          make([]int, 0, size),
+		globalUpdatedFlags: make([]bool, size),
+		globalUpdatedList:  make([]int, 0, size),
+		globalQueue:        make([]int, 0, size),
+		globalRecalc:       make([]int, 0, len(deformBoneIndexes)),
+		order:              order,
+	}
 }
 
 // applyIkForBone はIKボーンの回転を更新する。
@@ -1196,6 +1235,7 @@ func applyIkForBone(
 	deformBoneIndexes []int,
 	effectorChildren [][]int,
 	children [][]int,
+	scratch *ikScratch,
 	removeTwist bool,
 ) {
 	if modelData == nil || boneDeltas == nil || ikBone == nil || ikBone.Ik == nil {
@@ -1235,13 +1275,17 @@ func applyIkForBone(
 		}
 	}
 
-	unitUpdatedFlags := make([]bool, len(children))
-	unitUpdatedList := make([]int, 0, len(children))
-	unitQueue := make([]int, 0, len(children))
-	globalUpdatedFlags := make([]bool, len(children))
-	globalUpdatedList := make([]int, 0, len(children))
-	globalQueue := make([]int, 0, len(children))
-	globalRecalc := make([]int, 0, len(deformBoneIndexes))
+	if scratch == nil {
+		scratch = newIkScratch(modelData, deformBoneIndexes)
+	}
+	unitUpdatedFlags := scratch.unitUpdatedFlags
+	unitUpdatedList := scratch.unitUpdatedList[:0]
+	unitQueue := scratch.unitQueue[:0]
+	globalUpdatedFlags := scratch.globalUpdatedFlags
+	globalUpdatedList := scratch.globalUpdatedList[:0]
+	globalQueue := scratch.globalQueue[:0]
+	globalRecalc := scratch.globalRecalc[:0]
+	order := scratch.order
 	for loop := 0; loop < loopCount; loop++ {
 		for linkIndex, link := range ikBone.Ik.Links {
 			linkBone, err := modelData.Bones.Get(link.BoneIndex)
@@ -1320,7 +1364,10 @@ func applyIkForBone(
 			for _, idx := range unitUpdatedList {
 				collectDescendantFlags(children, idx, globalUpdatedFlags, &globalUpdatedList, &globalQueue)
 			}
-			globalRecalc = appendIndexesByFlags(globalRecalc[:0], deformBoneIndexes, globalUpdatedFlags)
+			globalRecalc = appendIndexesByOrder(globalRecalc[:0], globalUpdatedList, order)
+			sort.Slice(globalRecalc, func(i, j int) bool {
+				return order[globalRecalc[i]] < order[globalRecalc[j]]
+			})
 			ApplyGlobalMatricesWithIndexes(modelData, boneDeltas, globalRecalc)
 			for _, idx := range unitUpdatedList {
 				unitUpdatedFlags[idx] = false
@@ -1337,6 +1384,11 @@ func applyIkForBone(
 			break
 		}
 	}
+	scratch.unitUpdatedList = unitUpdatedList
+	scratch.unitQueue = unitQueue
+	scratch.globalUpdatedList = globalUpdatedList
+	scratch.globalQueue = globalQueue
+	scratch.globalRecalc = globalRecalc
 }
 
 // ikTargetDistance はIKターゲット距離を返す。
