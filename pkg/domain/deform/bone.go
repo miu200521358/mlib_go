@@ -348,13 +348,29 @@ func collectDescendantFlags(children [][]int, start int, flags []bool, updated *
 // appendIndexesByOrder はorderが有効なindexをoutへ詰める。
 func appendIndexesByOrder(out []int, indexes []int, order []int) []int {
 	if len(indexes) == 0 || len(order) == 0 {
-		return out
+		return out[:0]
 	}
+	out = out[:0]
 	for _, idx := range indexes {
 		if idx >= 0 && idx < len(order) && order[idx] >= 0 {
 			out = append(out, idx)
 		}
 	}
+	return out
+}
+
+// buildRecalcIndexesByOrder は変形順に再計算対象のindexを整列する。
+func buildRecalcIndexesByOrder(order []int, updated []int, out []int) []int {
+	if len(updated) == 0 || len(order) == 0 {
+		return out[:0]
+	}
+	out = appendIndexesByOrder(out, updated, order)
+	if len(out) < 2 {
+		return out
+	}
+	sort.Slice(out, func(i, j int) bool {
+		return order[out[i]] < order[out[j]]
+	})
 	return out
 }
 
@@ -390,6 +406,13 @@ func collectEffectorRelatedFlags(
 		if next := children[idx]; len(next) > 0 {
 			*q = append(*q, next...)
 		}
+	}
+}
+
+// resetFlagsByList はlistで指定されたフラグを解除する。
+func resetFlagsByList(flags []bool, list []int) {
+	for _, idx := range list {
+		flags[idx] = false
 	}
 }
 
@@ -1199,6 +1222,7 @@ type ikScratch struct {
 	order              []int
 }
 
+// newIkScratch はIK計算の作業バッファを初期化する。
 func newIkScratch(modelData *model.PmxModel, deformBoneIndexes []int) *ikScratch {
 	size := 0
 	if modelData != nil && modelData.Bones != nil {
@@ -1364,18 +1388,11 @@ func applyIkForBone(
 			for _, idx := range unitUpdatedList {
 				collectDescendantFlags(children, idx, globalUpdatedFlags, &globalUpdatedList, &globalQueue)
 			}
-			globalRecalc = appendIndexesByOrder(globalRecalc[:0], globalUpdatedList, order)
-			sort.Slice(globalRecalc, func(i, j int) bool {
-				return order[globalRecalc[i]] < order[globalRecalc[j]]
-			})
+			globalRecalc = buildRecalcIndexesByOrder(order, globalUpdatedList, globalRecalc)
 			ApplyGlobalMatricesWithIndexes(modelData, boneDeltas, globalRecalc)
-			for _, idx := range unitUpdatedList {
-				unitUpdatedFlags[idx] = false
-			}
+			resetFlagsByList(unitUpdatedFlags, unitUpdatedList)
 			unitUpdatedList = unitUpdatedList[:0]
-			for _, idx := range globalUpdatedList {
-				globalUpdatedFlags[idx] = false
-			}
+			resetFlagsByList(globalUpdatedFlags, globalUpdatedList)
 			globalUpdatedList = globalUpdatedList[:0]
 		}
 
