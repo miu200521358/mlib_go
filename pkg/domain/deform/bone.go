@@ -548,18 +548,21 @@ func applyGlobalMatrix(boneDeltas *delta.BoneDeltas, d *delta.BoneDelta) {
 	if d.UnitMatrix == nil {
 		d.ResetUnitMatrix()
 	}
-	global := d.GlobalMatrixPtr()
-	if global == nil {
-		return
-	}
 	parent := boneDeltas.Get(d.Bone.ParentIndex)
+	var global *mmath.Mat4
 	switch {
 	case parent != nil && parent.GlobalIkOffMatrix != nil && boneIsIk(parent.Bone):
+		global = d.GlobalMatrixPtr()
 		parent.GlobalIkOffMatrix.MulToPtr(d.UnitMatrix, global)
 	case parent != nil && parent.GlobalMatrix != nil:
+		global = d.GlobalMatrixPtr()
 		parent.GlobalMatrix.MulToPtr(d.UnitMatrix, global)
 	default:
-		*global = *d.UnitMatrix
+		d.GlobalMatrix = d.UnitMatrix
+		global = d.UnitMatrix
+	}
+	if global == nil {
+		return
 	}
 	local := d.LocalMatrixPtr()
 	if local == nil {
