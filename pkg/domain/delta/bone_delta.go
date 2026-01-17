@@ -9,18 +9,30 @@ import (
 
 // BoneDelta は1ボーンの差分と派生行列を保持する。
 type BoneDelta struct {
-	Bone              *model.Bone
-	Frame             sharedtime.Frame
-	globalIkOffMatrix mmath.Mat4
-	globalMatrix      mmath.Mat4
-	localMatrix       mmath.Mat4
-	unitMatrix        mmath.Mat4
-	globalPosition    mmath.Vec3
-	GlobalIkOffMatrix *mmath.Mat4
-	GlobalMatrix      *mmath.Mat4
-	LocalMatrix       *mmath.Mat4
-	UnitMatrix        *mmath.Mat4
-	GlobalPosition    *mmath.Vec3
+	Bone                *model.Bone
+	Frame               sharedtime.Frame
+	globalIkOffMatrix   mmath.Mat4
+	globalMatrix        mmath.Mat4
+	localMatrix         mmath.Mat4
+	unitMatrix          mmath.Mat4
+	globalPosition      mmath.Vec3
+	totalLocalMat       mmath.Mat4
+	totalRotation       mmath.Quaternion
+	totalPosition       mmath.Vec3
+	totalScale          mmath.Vec3
+	totalLocalCached    bool
+	totalLocalHas       bool
+	totalRotationCached bool
+	totalRotationHas    bool
+	totalPositionCached bool
+	totalPositionHas    bool
+	totalScaleCached    bool
+	totalScaleHas       bool
+	GlobalIkOffMatrix   *mmath.Mat4
+	GlobalMatrix        *mmath.Mat4
+	LocalMatrix         *mmath.Mat4
+	UnitMatrix          *mmath.Mat4
+	GlobalPosition      *mmath.Vec3
 
 	FramePosition                *mmath.Vec3
 	FrameMorphPosition           *mmath.Vec3
@@ -44,6 +56,21 @@ type BoneDelta struct {
 // NewBoneDelta はBoneDeltaを生成する。
 func NewBoneDelta(bone *model.Bone, frame sharedtime.Frame) *BoneDelta {
 	return &BoneDelta{Bone: bone, Frame: frame}
+}
+
+// InvalidateTotals は総合成のキャッシュを無効化する。
+func (d *BoneDelta) InvalidateTotals() {
+	if d == nil {
+		return
+	}
+	d.totalLocalCached = false
+	d.totalLocalHas = false
+	d.totalRotationCached = false
+	d.totalRotationHas = false
+	d.totalPositionCached = false
+	d.totalPositionHas = false
+	d.totalScaleCached = false
+	d.totalScaleHas = false
 }
 
 // SetGlobalIkOffMatrix はIKオフ用の行列を設定する。
@@ -217,6 +244,12 @@ func (d *BoneDelta) TotalRotation() *mmath.Quaternion {
 	if d == nil {
 		return nil
 	}
+	if d.totalRotationCached {
+		if !d.totalRotationHas {
+			return nil
+		}
+		return &d.totalRotation
+	}
 	var rot mmath.Quaternion
 	hasRot := false
 	if d.FrameRotation != nil {
@@ -232,12 +265,17 @@ func (d *BoneDelta) TotalRotation() *mmath.Quaternion {
 		}
 	}
 	if !hasRot {
+		d.totalRotationCached = true
+		d.totalRotationHas = false
 		return nil
 	}
 	if boneHasFixedAxis(d.Bone) {
 		rot = rot.ToFixedAxisRotation(d.Bone.FixedAxis.Normalized())
 	}
-	return &rot
+	d.totalRotation = rot
+	d.totalRotationCached = true
+	d.totalRotationHas = true
+	return &d.totalRotation
 }
 
 // FilledTotalRotation はモーフ込みの回転を返す。
@@ -286,6 +324,12 @@ func (d *BoneDelta) TotalPosition() *mmath.Vec3 {
 	if d == nil {
 		return nil
 	}
+	if d.totalPositionCached {
+		if !d.totalPositionHas {
+			return nil
+		}
+		return &d.totalPosition
+	}
 	var pos mmath.Vec3
 	hasPos := false
 	if d.FramePosition != nil {
@@ -301,9 +345,14 @@ func (d *BoneDelta) TotalPosition() *mmath.Vec3 {
 		}
 	}
 	if !hasPos {
+		d.totalPositionCached = true
+		d.totalPositionHas = false
 		return nil
 	}
-	return &pos
+	d.totalPosition = pos
+	d.totalPositionCached = true
+	d.totalPositionHas = true
+	return &d.totalPosition
 }
 
 // FilledTotalPosition はモーフ込みの位置を返す。
@@ -352,6 +401,12 @@ func (d *BoneDelta) TotalScale() *mmath.Vec3 {
 	if d == nil {
 		return nil
 	}
+	if d.totalScaleCached {
+		if !d.totalScaleHas {
+			return nil
+		}
+		return &d.totalScale
+	}
 	var scale mmath.Vec3
 	hasScale := false
 	if d.FrameScale != nil {
@@ -367,9 +422,14 @@ func (d *BoneDelta) TotalScale() *mmath.Vec3 {
 		}
 	}
 	if !hasScale {
+		d.totalScaleCached = true
+		d.totalScaleHas = false
 		return nil
 	}
-	return &scale
+	d.totalScale = scale
+	d.totalScaleCached = true
+	d.totalScaleHas = true
+	return &d.totalScale
 }
 
 // FilledTotalScale はモーフ込みのスケールを返す。
@@ -402,6 +462,12 @@ func (d *BoneDelta) TotalLocalMat() *mmath.Mat4 {
 	if d == nil {
 		return nil
 	}
+	if d.totalLocalCached {
+		if !d.totalLocalHas {
+			return nil
+		}
+		return &d.totalLocalMat
+	}
 	var mat mmath.Mat4
 	hasMat := false
 	if d.FrameLocalMat != nil && !d.FrameLocalMat.IsIdent() {
@@ -413,13 +479,18 @@ func (d *BoneDelta) TotalLocalMat() *mmath.Mat4 {
 			mat = *d.FrameLocalMorphMat
 			hasMat = true
 		} else {
-			mat = mat.Muled(*d.FrameLocalMorphMat)
+			mat.MulTo(*d.FrameLocalMorphMat, &mat)
 		}
 	}
 	if !hasMat {
+		d.totalLocalCached = true
+		d.totalLocalHas = false
 		return nil
 	}
-	return &mat
+	d.totalLocalMat = mat
+	d.totalLocalCached = true
+	d.totalLocalHas = true
+	return &d.totalLocalMat
 }
 
 // FilledTotalLocalMat はモーフ込みのローカル行列を返す。
