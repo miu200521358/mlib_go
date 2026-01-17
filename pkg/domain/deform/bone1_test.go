@@ -10,7 +10,6 @@ import (
 	pmxio "github.com/miu200521358/mlib_go/pkg/adapter/io_model/pmx"
 	vmdio "github.com/miu200521358/mlib_go/pkg/adapter/io_motion/vmd"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
-	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	motionpkg "github.com/miu200521358/mlib_go/pkg/domain/motion"
 )
