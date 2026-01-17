@@ -207,16 +207,37 @@ func buildReverseBoneRelations(modelData *model.PmxModel) (map[int][]int, map[in
 }
 
 // buildChildRelations は親子関係の逆引きを構築する。
-func buildChildRelations(modelData *model.PmxModel) map[int][]int {
-	children := map[int][]int{}
+func buildChildRelations(modelData *model.PmxModel) [][]int {
 	if modelData == nil || modelData.Bones == nil {
-		return children
+		return nil
 	}
+	children := make([][]int, modelData.Bones.Len())
 	for _, bone := range modelData.Bones.Values() {
 		if bone == nil || bone.ParentIndex < 0 {
 			continue
 		}
+		if bone.ParentIndex >= len(children) {
+			continue
+		}
 		children[bone.ParentIndex] = append(children[bone.ParentIndex], bone.Index())
+	}
+	return children
+}
+
+// buildEffectorChildrenSlice は付与関係の逆引きを構築する。
+func buildEffectorChildrenSlice(modelData *model.PmxModel) [][]int {
+	if modelData == nil || modelData.Bones == nil {
+		return nil
+	}
+	children := make([][]int, modelData.Bones.Len())
+	for _, bone := range modelData.Bones.Values() {
+		if bone == nil || !boneHasEffector(bone) || bone.EffectIndex < 0 {
+			continue
+		}
+		if bone.EffectIndex >= len(children) {
+			continue
+		}
+		children[bone.EffectIndex] = append(children[bone.EffectIndex], bone.Index())
 	}
 	return children
 }
@@ -295,66 +316,81 @@ func collectIkChainIndexes(modelData *model.PmxModel, ikBone *model.Bone) []int 
 	return out
 }
 
-// collectDescendantIndexes は開始ボーン以下のインデックスを収集する。
-func collectDescendantIndexes(children map[int][]int, start int, out map[int]struct{}) {
-	if out == nil {
+// collectDescendantFlags は開始ボーン以下をフラグ化する。
+func collectDescendantFlags(children [][]int, start int, flags []bool, updated *[]int, queue *[]int) {
+	if len(children) == 0 || len(flags) == 0 || start < 0 || start >= len(children) {
 		return
 	}
-	queue := []int{start}
-	for len(queue) > 0 {
-		idx := queue[0]
-		queue = queue[1:]
-		if _, ok := out[idx]; ok {
+	q := queue
+	if q == nil {
+		return
+	}
+	*q = append((*q)[:0], start)
+	for len(*q) > 0 {
+		idx := (*q)[0]
+		*q = (*q)[1:]
+		if idx < 0 || idx >= len(flags) {
 			continue
 		}
-		out[idx] = struct{}{}
+		if flags[idx] {
+			continue
+		}
+		flags[idx] = true
+		if updated != nil {
+			*updated = append(*updated, idx)
+		}
 		if next := children[idx]; len(next) > 0 {
-			queue = append(queue, next...)
+			*q = append(*q, next...)
 		}
 	}
 }
 
-// mapKeysSorted はmapのキーをソート済みスライスで返す。
-func mapKeysSorted(modelData *model.PmxModel, indexes map[int]struct{}) []int {
-	if len(indexes) == 0 {
-		return nil
+// appendIndexesByFlags はフラグが立っているindexをoutへ詰める。
+func appendIndexesByFlags(out []int, indexes []int, flags []bool) []int {
+	if len(indexes) == 0 || len(flags) == 0 {
+		return out
 	}
-	out := make([]int, 0, len(indexes))
-	for idx := range indexes {
-		out = append(out, idx)
+	for _, idx := range indexes {
+		if idx >= 0 && idx < len(flags) && flags[idx] {
+			out = append(out, idx)
+		}
 	}
-	sortBoneIndexes(modelData, out)
 	return out
 }
 
-// collectEffectorRelatedIndexes は付与関係で影響するボーンindexを収集する。
-func collectEffectorRelatedIndexes(
-	modelData *model.PmxModel,
+// collectEffectorRelatedFlags は付与関係で影響するボーンをフラグ化する。
+func collectEffectorRelatedFlags(
+	children [][]int,
 	start int,
-	effectorChildren map[int][]int,
-) []int {
-	if modelData == nil || start < 0 {
-		return nil
+	flags []bool,
+	updated *[]int,
+	queue *[]int,
+) {
+	if len(children) == 0 || len(flags) == 0 || start < 0 || start >= len(children) {
+		return
 	}
-	visited := make(map[int]struct{})
-	queue := []int{start}
-	for len(queue) > 0 {
-		idx := queue[0]
-		queue = queue[1:]
-		if _, ok := visited[idx]; ok {
+	q := queue
+	if q == nil {
+		return
+	}
+	*q = append((*q)[:0], start)
+	for len(*q) > 0 {
+		idx := (*q)[0]
+		*q = (*q)[1:]
+		if idx < 0 || idx >= len(flags) {
 			continue
 		}
-		visited[idx] = struct{}{}
-		if children := effectorChildren[idx]; len(children) > 0 {
-			queue = append(queue, children...)
+		if flags[idx] {
+			continue
+		}
+		flags[idx] = true
+		if updated != nil {
+			*updated = append(*updated, idx)
+		}
+		if next := children[idx]; len(next) > 0 {
+			*q = append(*q, next...)
 		}
 	}
-	out := make([]int, 0, len(visited))
-	for idx := range visited {
-		out = append(out, idx)
-	}
-	sortBoneIndexes(modelData, out)
-	return out
 }
 
 // collectAllBones は全ボーンindexを収集する。
@@ -597,13 +633,22 @@ func applyGlobalMatrix(boneDeltas *delta.BoneDeltas, d *delta.BoneDelta) {
 	}
 	parent := boneDeltas.Get(d.Bone.ParentIndex)
 	var global *mmath.Mat4
+	unitIsIdent := d.UnitMatrix != nil && *d.UnitMatrix == mmath.IDENT_MAT4
 	switch {
 	case parent != nil && parent.GlobalIkOffMatrix != nil && boneIsIk(parent.Bone):
 		global = d.GlobalMatrixPtr()
-		parent.GlobalIkOffMatrix.MulToPtr(d.UnitMatrix, global)
+		if unitIsIdent {
+			copyMat4(global, parent.GlobalIkOffMatrix)
+		} else {
+			parent.GlobalIkOffMatrix.MulToPtr(d.UnitMatrix, global)
+		}
 	case parent != nil && parent.GlobalMatrix != nil:
 		global = d.GlobalMatrixPtr()
-		parent.GlobalMatrix.MulToPtr(d.UnitMatrix, global)
+		if unitIsIdent {
+			copyMat4(global, parent.GlobalMatrix)
+		} else {
+			parent.GlobalMatrix.MulToPtr(d.UnitMatrix, global)
+		}
 	default:
 		d.GlobalMatrix = d.UnitMatrix
 		global = d.UnitMatrix
@@ -630,13 +675,22 @@ func applyGlobalMatrixNoLocal(boneDeltas *delta.BoneDeltas, d *delta.BoneDelta) 
 	}
 	parent := boneDeltas.Get(d.Bone.ParentIndex)
 	var global *mmath.Mat4
+	unitIsIdent := d.UnitMatrix != nil && *d.UnitMatrix == mmath.IDENT_MAT4
 	switch {
 	case parent != nil && parent.GlobalIkOffMatrix != nil && boneIsIk(parent.Bone):
 		global = d.GlobalMatrixPtr()
-		parent.GlobalIkOffMatrix.MulToPtr(d.UnitMatrix, global)
+		if unitIsIdent {
+			copyMat4(global, parent.GlobalIkOffMatrix)
+		} else {
+			parent.GlobalIkOffMatrix.MulToPtr(d.UnitMatrix, global)
+		}
 	case parent != nil && parent.GlobalMatrix != nil:
 		global = d.GlobalMatrixPtr()
-		parent.GlobalMatrix.MulToPtr(d.UnitMatrix, global)
+		if unitIsIdent {
+			copyMat4(global, parent.GlobalMatrix)
+		} else {
+			parent.GlobalMatrix.MulToPtr(d.UnitMatrix, global)
+		}
 	default:
 		d.GlobalMatrix = d.UnitMatrix
 		global = d.UnitMatrix
@@ -646,6 +700,28 @@ func applyGlobalMatrixNoLocal(boneDeltas *delta.BoneDeltas, d *delta.BoneDelta) 
 	}
 	d.LocalMatrix = nil
 	d.GlobalPosition = nil
+}
+
+func copyMat4(dst, src *mmath.Mat4) {
+	if dst == nil || src == nil {
+		return
+	}
+	dst[0] = src[0]
+	dst[1] = src[1]
+	dst[2] = src[2]
+	dst[3] = src[3]
+	dst[4] = src[4]
+	dst[5] = src[5]
+	dst[6] = src[6]
+	dst[7] = src[7]
+	dst[8] = src[8]
+	dst[9] = src[9]
+	dst[10] = src[10]
+	dst[11] = src[11]
+	dst[12] = src[12]
+	dst[13] = src[13]
+	dst[14] = src[14]
+	dst[15] = src[15]
 }
 
 // calculateTotalRotationMat は総回転行列をoutへ書き込み、反映有無を返す。
@@ -1077,7 +1153,7 @@ func applyIkDeltas(
 	if modelData == nil || boneDeltas == nil {
 		return
 	}
-	effectorChildren, _, _ := buildReverseBoneRelations(modelData)
+	effectorChildren := buildEffectorChildrenSlice(modelData)
 	children := buildChildRelations(modelData)
 	ikFrame := getIkFrame(motionData, frame)
 	for _, boneIndex := range deformBoneIndexes {
@@ -1118,8 +1194,8 @@ func applyIkForBone(
 	ikBone *model.Bone,
 	frame motion.Frame,
 	deformBoneIndexes []int,
-	effectorChildren map[int][]int,
-	children map[int][]int,
+	effectorChildren [][]int,
+	children [][]int,
 	removeTwist bool,
 ) {
 	if modelData == nil || boneDeltas == nil || ikBone == nil || ikBone.Ik == nil {
@@ -1159,6 +1235,13 @@ func applyIkForBone(
 		}
 	}
 
+	unitUpdatedFlags := make([]bool, len(children))
+	unitUpdatedList := make([]int, 0, len(children))
+	unitQueue := make([]int, 0, len(children))
+	globalUpdatedFlags := make([]bool, len(children))
+	globalUpdatedList := make([]int, 0, len(children))
+	globalQueue := make([]int, 0, len(children))
+	globalRecalc := make([]int, 0, len(deformBoneIndexes))
 	for loop := 0; loop < loopCount; loop++ {
 		for linkIndex, link := range ikBone.Ik.Links {
 			linkBone, err := modelData.Bones.Get(link.BoneIndex)
@@ -1223,8 +1306,8 @@ func applyIkForBone(
 			linkDelta.FrameRotation = &rot
 			linkDelta.InvalidateTotals()
 			updateBoneDelta(modelData, boneDeltas, linkDelta)
-			unitUpdated := collectEffectorRelatedIndexes(modelData, linkBone.Index(), effectorChildren)
-			for _, idx := range unitUpdated {
+			collectEffectorRelatedFlags(effectorChildren, linkBone.Index(), unitUpdatedFlags, &unitUpdatedList, &unitQueue)
+			for _, idx := range unitUpdatedList {
 				if idx == linkBone.Index() {
 					continue
 				}
@@ -1234,11 +1317,19 @@ func applyIkForBone(
 				}
 				updateBoneDelta(modelData, boneDeltas, d)
 			}
-			globalUpdated := make(map[int]struct{})
-			for _, idx := range unitUpdated {
-				collectDescendantIndexes(children, idx, globalUpdated)
+			for _, idx := range unitUpdatedList {
+				collectDescendantFlags(children, idx, globalUpdatedFlags, &globalUpdatedList, &globalQueue)
 			}
-			ApplyGlobalMatricesWithIndexes(modelData, boneDeltas, mapKeysSorted(modelData, globalUpdated))
+			globalRecalc = appendIndexesByFlags(globalRecalc[:0], deformBoneIndexes, globalUpdatedFlags)
+			ApplyGlobalMatricesWithIndexes(modelData, boneDeltas, globalRecalc)
+			for _, idx := range unitUpdatedList {
+				unitUpdatedFlags[idx] = false
+			}
+			unitUpdatedList = unitUpdatedList[:0]
+			for _, idx := range globalUpdatedList {
+				globalUpdatedFlags[idx] = false
+			}
+			globalUpdatedList = globalUpdatedList[:0]
 		}
 
 		threshold := ikTargetDistance(boneDeltas, ikBone.Index(), ikTargetIndex)
