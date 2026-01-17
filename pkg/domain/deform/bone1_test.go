@@ -17,6 +17,8 @@ import (
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/encoding/unicode"
 
+	pmxio "github.com/miu200521358/mlib_go/pkg/adapter/io_model/pmx"
+	vmdio "github.com/miu200521358/mlib_go/pkg/adapter/io_motion/vmd"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
@@ -4195,30 +4197,19 @@ func TestVmdMotion_Neck(t *testing.T) {
 func loadVmd(t *testing.T, path string) *motionpkg.VmdMotion {
 	t.Helper()
 
-	file, err := os.Open(path)
+	path = convertWindowsPathToWsl(path)
+	repo := vmdio.NewVmdRepository()
+	data, err := repo.Load(path)
 	if err != nil {
 		if os.IsNotExist(err) {
 			t.Skip("テスト用VMDが見つからないためスキップ")
 		}
-		t.Fatalf("VMDファイルの読み込み準備に失敗しました")
+		t.Fatalf("VMDファイルの読み込みに失敗しました: %v", err)
 	}
-	defer file.Close()
-
-	motionData := motionpkg.NewVmdMotion(path)
-	if info, err := file.Stat(); err == nil {
-		motionData.SetFileModTime(info.ModTime().Unix())
+	motionData, ok := data.(*motionpkg.VmdMotion)
+	if !ok || motionData == nil {
+		t.Fatalf("VMD読み込み結果が不正です")
 	}
-
-	reader := newBinaryReader(file)
-	vmd := newVmdReader(reader)
-	if err := vmd.readHeader(motionData); err != nil {
-		t.Fatalf("VMDヘッダの読み込みに失敗しました: %v", err)
-	}
-	if err := vmd.readMotion(motionData); err != nil {
-		t.Fatalf("VMD本体の読み込みに失敗しました: %v", err)
-	}
-	motionData.UpdateHash()
-
 	return motionData
 }
 
@@ -4227,31 +4218,18 @@ func loadPmx(t *testing.T, path string) *model.PmxModel {
 	t.Helper()
 
 	path = convertWindowsPathToWsl(path)
-	file, err := os.Open(path)
+	repo := pmxio.NewPmxRepository()
+	data, err := repo.Load(path)
 	if err != nil {
 		if os.IsNotExist(err) {
 			t.Skip("テスト用PMXが見つからないためスキップ")
 		}
-		t.Fatalf("PMXファイルの読み込み準備に失敗しました")
+		t.Fatalf("PMXファイルの読み込みに失敗しました: %v", err)
 	}
-	defer file.Close()
-
-	modelData := model.NewPmxModel()
-	modelData.SetPath(path)
-	if info, err := file.Stat(); err == nil {
-		modelData.SetFileModTime(info.ModTime().Unix())
+	modelData, ok := data.(*model.PmxModel)
+	if !ok || modelData == nil {
+		t.Fatalf("PMX読み込み結果が不正です")
 	}
-
-	reader := newBinaryReader(file)
-	pmx := newPmxReader(reader)
-	if err := pmx.readHeader(modelData); err != nil {
-		t.Fatalf("PMXヘッダの読み込みに失敗しました: %v", err)
-	}
-	if err := pmx.readModel(modelData); err != nil {
-		t.Fatalf("PMX本体の読み込みに失敗しました: %v", err)
-	}
-	modelData.UpdateHash()
-
 	return modelData
 }
 
