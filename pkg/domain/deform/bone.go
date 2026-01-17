@@ -481,7 +481,7 @@ func updateBoneDelta(modelData *model.PmxModel, boneDeltas *delta.BoneDeltas, d 
 	}
 	revert := boneRevertOffsetMat(modelData, d.Bone)
 	unit = revert.Muled(unit)
-	d.UnitMatrix = &unit
+	d.SetUnitMatrix(unit)
 	d.GlobalMatrix = nil
 	d.LocalMatrix = nil
 	d.GlobalPosition = nil
@@ -494,8 +494,7 @@ func applyGlobalMatrix(boneDeltas *delta.BoneDeltas, d *delta.BoneDelta) {
 		return
 	}
 	if d.UnitMatrix == nil {
-		unit := mmath.NewMat4()
-		d.UnitMatrix = &unit
+		d.SetUnitMatrix(mmath.NewMat4())
 	}
 	parent := boneDeltas.Get(d.Bone.ParentIndex)
 	var global mmath.Mat4
@@ -507,11 +506,11 @@ func applyGlobalMatrix(boneDeltas *delta.BoneDeltas, d *delta.BoneDelta) {
 	default:
 		global = *d.UnitMatrix
 	}
-	d.GlobalMatrix = &global
+	d.SetGlobalMatrix(global)
 	local := global.Muled(boneOffsetMat(d.Bone))
-	d.LocalMatrix = &local
+	d.SetLocalMatrix(local)
 	pos := global.Translation()
-	d.GlobalPosition = &pos
+	d.SetGlobalPosition(pos)
 }
 
 // calculateTotalRotationMat は総回転行列を返す。
@@ -925,7 +924,7 @@ func applyIkDeltas(
 				continue
 			}
 			off := d.FilledGlobalMatrix()
-			d.GlobalIkOffMatrix = &off
+			d.SetGlobalIkOffMatrix(off)
 			boneDeltas.Update(d)
 		}
 		applyIkForBone(modelData, motionData, boneDeltas, bone, frame, deformBoneIndexes, removeTwist)

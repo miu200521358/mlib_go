@@ -39,12 +39,9 @@ func NewMat4() Mat4 {
 
 // NewMat4ByValues はMat4を生成する。
 func NewMat4ByValues(m11, m21, m31, m41, m12, m22, m32, m42, m13, m23, m33, m43, m14, m24, m34, m44 float64) Mat4 {
-	return Mat4{
-		m11, m21, m31, m41,
-		m12, m22, m32, m42,
-		m13, m23, m33, m43,
-		m14, m24, m34, m44,
-	}
+	var m Mat4
+	m.SetByValues(m11, m21, m31, m41, m12, m22, m32, m42, m13, m23, m33, m43, m14, m24, m34, m44)
+	return m
 }
 
 // NewMat4FromAxisAngle はMat4を生成する。
@@ -225,33 +222,67 @@ func (m *Mat4) Transpose() *Mat4 {
 
 // Mul は乗算する。
 func (m *Mat4) Mul(other Mat4) *Mat4 {
-	*m = m.Muled(other)
+	m.MulTo(other, m)
 	return m
+}
+
+// MulTo は乗算結果をoutへ書き込む。
+func (m Mat4) MulTo(other Mat4, out *Mat4) {
+	if out == nil {
+		return
+	}
+	a00, a01, a02, a03 := m[0], m[1], m[2], m[3]
+	a10, a11, a12, a13 := m[4], m[5], m[6], m[7]
+	a20, a21, a22, a23 := m[8], m[9], m[10], m[11]
+	a30, a31, a32, a33 := m[12], m[13], m[14], m[15]
+
+	b00, b01, b02, b03 := other[0], other[1], other[2], other[3]
+	b10, b11, b12, b13 := other[4], other[5], other[6], other[7]
+	b20, b21, b22, b23 := other[8], other[9], other[10], other[11]
+	b30, b31, b32, b33 := other[12], other[13], other[14], other[15]
+
+	*out = Mat4{
+		a00*b00 + a10*b01 + a20*b02 + a30*b03,
+		a01*b00 + a11*b01 + a21*b02 + a31*b03,
+		a02*b00 + a12*b01 + a22*b02 + a32*b03,
+		a03*b00 + a13*b01 + a23*b02 + a33*b03,
+
+		a00*b10 + a10*b11 + a20*b12 + a30*b13,
+		a01*b10 + a11*b11 + a21*b12 + a31*b13,
+		a02*b10 + a12*b11 + a22*b12 + a32*b13,
+		a03*b10 + a13*b11 + a23*b12 + a33*b13,
+
+		a00*b20 + a10*b21 + a20*b22 + a30*b23,
+		a01*b20 + a11*b21 + a21*b22 + a31*b23,
+		a02*b20 + a12*b21 + a22*b22 + a32*b23,
+		a03*b20 + a13*b21 + a23*b22 + a33*b23,
+
+		a00*b30 + a10*b31 + a20*b32 + a30*b33,
+		a01*b30 + a11*b31 + a21*b32 + a31*b33,
+		a02*b30 + a12*b31 + a22*b32 + a32*b33,
+		a03*b30 + a13*b31 + a23*b32 + a33*b33,
+	}
 }
 
 // Muled は乗算結果を返す。
 func (m Mat4) Muled(other Mat4) Mat4 {
-	return Mat4{
-		m[0]*other[0] + m[4]*other[1] + m[8]*other[2] + m[12]*other[3],
-		m[1]*other[0] + m[5]*other[1] + m[9]*other[2] + m[13]*other[3],
-		m[2]*other[0] + m[6]*other[1] + m[10]*other[2] + m[14]*other[3],
-		m[3]*other[0] + m[7]*other[1] + m[11]*other[2] + m[15]*other[3],
+	var out Mat4
+	m.MulTo(other, &out)
+	return out
+}
 
-		m[0]*other[4] + m[4]*other[5] + m[8]*other[6] + m[12]*other[7],
-		m[1]*other[4] + m[5]*other[5] + m[9]*other[6] + m[13]*other[7],
-		m[2]*other[4] + m[6]*other[5] + m[10]*other[6] + m[14]*other[7],
-		m[3]*other[4] + m[7]*other[5] + m[11]*other[6] + m[15]*other[7],
-
-		m[0]*other[8] + m[4]*other[9] + m[8]*other[10] + m[12]*other[11],
-		m[1]*other[8] + m[5]*other[9] + m[9]*other[10] + m[13]*other[11],
-		m[2]*other[8] + m[6]*other[9] + m[10]*other[10] + m[14]*other[11],
-		m[3]*other[8] + m[7]*other[9] + m[11]*other[10] + m[15]*other[11],
-
-		m[0]*other[12] + m[4]*other[13] + m[8]*other[14] + m[12]*other[15],
-		m[1]*other[12] + m[5]*other[13] + m[9]*other[14] + m[13]*other[15],
-		m[2]*other[12] + m[6]*other[13] + m[10]*other[14] + m[14]*other[15],
-		m[3]*other[12] + m[7]*other[13] + m[11]*other[14] + m[15]*other[15],
+// SetByValues は値を設定する。
+func (m *Mat4) SetByValues(m11, m21, m31, m41, m12, m22, m32, m42, m13, m23, m33, m43, m14, m24, m34, m44 float64) *Mat4 {
+	if m == nil {
+		return nil
 	}
+	*m = Mat4{
+		m11, m21, m31, m41,
+		m12, m22, m32, m42,
+		m13, m23, m33, m43,
+		m14, m24, m34, m44,
+	}
+	return m
 }
 
 // Add は加算する。

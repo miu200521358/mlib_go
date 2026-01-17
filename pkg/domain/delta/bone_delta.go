@@ -11,6 +11,11 @@ import (
 type BoneDelta struct {
 	Bone              *model.Bone
 	Frame             sharedtime.Frame
+	globalIkOffMatrix mmath.Mat4
+	globalMatrix      mmath.Mat4
+	localMatrix       mmath.Mat4
+	unitMatrix        mmath.Mat4
+	globalPosition    mmath.Vec3
 	GlobalIkOffMatrix *mmath.Mat4
 	GlobalMatrix      *mmath.Mat4
 	LocalMatrix       *mmath.Mat4
@@ -41,6 +46,51 @@ func NewBoneDelta(bone *model.Bone, frame sharedtime.Frame) *BoneDelta {
 	return &BoneDelta{Bone: bone, Frame: frame}
 }
 
+// SetGlobalIkOffMatrix はIKオフ用の行列を設定する。
+func (d *BoneDelta) SetGlobalIkOffMatrix(mat mmath.Mat4) {
+	if d == nil {
+		return
+	}
+	d.globalIkOffMatrix = mat
+	d.GlobalIkOffMatrix = &d.globalIkOffMatrix
+}
+
+// SetGlobalMatrix はグローバル行列を設定する。
+func (d *BoneDelta) SetGlobalMatrix(mat mmath.Mat4) {
+	if d == nil {
+		return
+	}
+	d.globalMatrix = mat
+	d.GlobalMatrix = &d.globalMatrix
+}
+
+// SetLocalMatrix はローカル行列を設定する。
+func (d *BoneDelta) SetLocalMatrix(mat mmath.Mat4) {
+	if d == nil {
+		return
+	}
+	d.localMatrix = mat
+	d.LocalMatrix = &d.localMatrix
+}
+
+// SetUnitMatrix はユニット行列を設定する。
+func (d *BoneDelta) SetUnitMatrix(mat mmath.Mat4) {
+	if d == nil {
+		return
+	}
+	d.unitMatrix = mat
+	d.UnitMatrix = &d.unitMatrix
+}
+
+// SetGlobalPosition はグローバル位置を設定する。
+func (d *BoneDelta) SetGlobalPosition(pos mmath.Vec3) {
+	if d == nil {
+		return
+	}
+	d.globalPosition = pos
+	d.GlobalPosition = &d.globalPosition
+}
+
 // NewBoneDeltaByGlobalMatrix はグローバル行列をもとにボーン差分を生成する。
 func NewBoneDeltaByGlobalMatrix(
 	bone *model.Bone,
@@ -67,15 +117,19 @@ func NewBoneDeltaByGlobalMatrix(
 	global := globalMatrix
 	local := localMat
 	unit := unitMat
-	return &BoneDelta{
+	d := &BoneDelta{
 		Bone:          bone,
 		Frame:         frame,
-		GlobalMatrix:  &global,
-		LocalMatrix:   &local,
-		UnitMatrix:    &unit,
 		FramePosition: &framePos,
 		FrameRotation: &frameRot,
 	}
+	d.globalMatrix = global
+	d.GlobalMatrix = &d.globalMatrix
+	d.localMatrix = local
+	d.LocalMatrix = &d.localMatrix
+	d.unitMatrix = unit
+	d.UnitMatrix = &d.unitMatrix
+	return d
 }
 
 // FilledGlobalMatrix はグローバル行列を返す。
@@ -97,8 +151,8 @@ func (d *BoneDelta) FilledLocalMatrix() mmath.Mat4 {
 		if d.Bone != nil {
 			offset = d.Bone.Position.Negated().ToMat4()
 		}
-		local := global.Muled(offset)
-		d.LocalMatrix = &local
+		d.localMatrix = global.Muled(offset)
+		d.LocalMatrix = &d.localMatrix
 	}
 	return *d.LocalMatrix
 }
@@ -117,8 +171,8 @@ func (d *BoneDelta) FilledGlobalPosition() mmath.Vec3 {
 		return mmath.NewVec3()
 	}
 	if d.GlobalPosition == nil {
-		pos := d.FilledGlobalMatrix().Translation()
-		d.GlobalPosition = &pos
+		d.globalPosition = d.FilledGlobalMatrix().Translation()
+		d.GlobalPosition = &d.globalPosition
 	}
 	return *d.GlobalPosition
 }
