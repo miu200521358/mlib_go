@@ -154,4 +154,121 @@ func TestPmxRepository_Save(t *testing.T) {
 			t.Errorf("Expected TailIndex to be %v, got %v", expectedTailIndex, b.TailIndex)
 		}
 	}
+
+	{
+		rigid, err := savedModel.RigidBodies.GetByName("右腕")
+		if err != nil {
+			t.Fatalf("Expected rigid body to be found, got %v", err)
+		}
+		expectedEnglishName := "J_Bip_R_UpperArm"
+		if rigid.EnglishName != expectedEnglishName {
+			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, rigid.EnglishName)
+		}
+		expectedBoneIndex := 61
+		if rigid.BoneIndex != expectedBoneIndex {
+			t.Errorf("Expected BoneIndex to be %v, got %v", expectedBoneIndex, rigid.BoneIndex)
+		}
+		expectedGroupIndex := byte(2)
+		if rigid.CollisionGroup.Group != expectedGroupIndex {
+			t.Errorf("Expected GroupIndex to be %v, got %v", expectedGroupIndex, rigid.CollisionGroup.Group)
+		}
+		expectedCollisionGroupMasks := []uint16{1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+		actualCollisionMasks := collisionMaskToSlice(rigid.CollisionGroup.Mask)
+		for i := 0; i < 16; i++ {
+			if actualCollisionMasks[i] != expectedCollisionGroupMasks[i] {
+				t.Errorf("Expected CollisionGroupMask to be %v, got %v (%v)", expectedCollisionGroupMasks[i], actualCollisionMasks[i], i)
+			}
+		}
+		expectedShapeType := model.SHAPE_CAPSULE
+		if rigid.Shape != expectedShapeType {
+			t.Errorf("Expected ShapeType to be %v, got %v", expectedShapeType, rigid.Shape)
+		}
+		expectedSize := vec3(0.5398922, 2.553789, 0.0)
+		if !rigid.Size.NearEquals(expectedSize, 1e-5) {
+			t.Errorf("Expected Size to be %v, got %v", expectedSize, rigid.Size)
+		}
+		expectedPosition := vec3(-2.52586, 15.45157, 0.241455)
+		if !rigid.Position.MMD().NearEquals(expectedPosition, 1e-5) {
+			t.Errorf("Expected Position to be %v, got %v", expectedPosition, rigid.Position)
+		}
+		expectedRotation := vec3(0.0, 0.0, 125.00)
+		if !rigid.Rotation.RadToDeg().NearEquals(expectedRotation, 1e-5) {
+			t.Errorf("Expected Rotation to be %v, got %v", expectedRotation, rigid.Rotation.RadToDeg())
+		}
+		expectedMass := 1.0
+		if math.Abs(rigid.Param.Mass-expectedMass) > 1e-5 {
+			t.Errorf("Expected Mass to be %v, got %v", expectedMass, rigid.Param.Mass)
+		}
+		expectedLinearDamping := 0.5
+		if math.Abs(rigid.Param.LinearDamping-expectedLinearDamping) > 1e-5 {
+			t.Errorf("Expected LinearDamping to be %v, got %v", expectedLinearDamping, rigid.Param.LinearDamping)
+		}
+		expectedAngularDamping := 0.5
+		if math.Abs(rigid.Param.AngularDamping-expectedAngularDamping) > 1e-5 {
+			t.Errorf("Expected AngularDamping to be %v, got %v", expectedAngularDamping, rigid.Param.AngularDamping)
+		}
+		expectedRestitution := 0.0
+		if math.Abs(rigid.Param.Restitution-expectedRestitution) > 1e-5 {
+			t.Errorf("Expected Restitution to be %v, got %v", expectedRestitution, rigid.Param.Restitution)
+		}
+		expectedFriction := 0.0
+		if math.Abs(rigid.Param.Friction-expectedFriction) > 1e-5 {
+			t.Errorf("Expected Friction to be %v, got %v", expectedFriction, rigid.Param.Friction)
+		}
+		expectedPhysicsType := model.PHYSICS_TYPE_STATIC
+		if rigid.PhysicsType != expectedPhysicsType {
+			t.Errorf("Expected PhysicsType to be %v, got %v", expectedPhysicsType, rigid.PhysicsType)
+		}
+	}
+
+	{
+		joint, err := savedModel.Joints.GetByName("↓|頭|髪_06-01")
+		if err != nil {
+			t.Fatalf("Expected joint to be found, got %v", err)
+		}
+		expectedEnglishName := "↓|頭|髪_06-01"
+		if joint.EnglishName != expectedEnglishName {
+			t.Errorf("Expected EnglishName to be %q, got %q", expectedEnglishName, joint.EnglishName)
+		}
+		expectedRigidBodyIndexA := 5
+		if joint.RigidBodyIndexA != expectedRigidBodyIndexA {
+			t.Errorf("Expected RigidBodyIndexA to be %v, got %v", expectedRigidBodyIndexA, joint.RigidBodyIndexA)
+		}
+		expectedRigidBodyIndexB := 45
+		if joint.RigidBodyIndexB != expectedRigidBodyIndexB {
+			t.Errorf("Expected RigidBodyIndexB to be %v, got %v", expectedRigidBodyIndexB, joint.RigidBodyIndexB)
+		}
+		expectedPosition := vec3(-1.189768, 18.56266, 0.07277258)
+		if !joint.Param.Position.MMD().NearEquals(expectedPosition, 1e-5) {
+			t.Errorf("Expected Position to be %v, got %v", expectedPosition, joint.Param.Position)
+		}
+		expectedRotation := vec3(-15.10554, 91.26718, -4.187446)
+		if !joint.Param.Rotation.RadToDeg().NearEquals(expectedRotation, 1e-5) {
+			t.Errorf("Expected Rotation to be %v, got %v", expectedRotation, joint.Param.Rotation.RadToDeg())
+		}
+		expectedTranslationLimitMin := vec3(0.0, 0.0, 0.0)
+		if !joint.Param.TranslationLimitMin.NearEquals(expectedTranslationLimitMin, 1e-5) {
+			t.Errorf("Expected TranslationLimitation1 to be %v, got %v", expectedTranslationLimitMin, joint.Param.TranslationLimitMin)
+		}
+		expectedTranslationLimitMax := vec3(0.0, 0.0, 0.0)
+		if !joint.Param.TranslationLimitMax.NearEquals(expectedTranslationLimitMax, 1e-5) {
+			t.Errorf("Expected TranslationLimitation2 to be %v, got %v", expectedTranslationLimitMax, joint.Param.TranslationLimitMax)
+		}
+		expectedRotationLimitMin := vec3(-29.04, -14.3587, -29.04)
+		if !joint.Param.RotationLimitMin.RadToDeg().NearEquals(expectedRotationLimitMin, 1e-5) {
+			t.Errorf("Expected RotationLimitation1 to be %v, got %v", expectedRotationLimitMin, joint.Param.RotationLimitMin.RadToDeg())
+		}
+		expectedRotationLimitMax := vec3(29.04, 14.3587, 29.04)
+		if !joint.Param.RotationLimitMax.RadToDeg().NearEquals(expectedRotationLimitMax, 1e-5) {
+			t.Errorf("Expected RotationLimitation2 to be %v, got %v", expectedRotationLimitMax, joint.Param.RotationLimitMax.RadToDeg())
+		}
+		expectedSpringConstantTranslation := vec3(0.0, 0.0, 0.0)
+		if !joint.Param.SpringConstantTranslation.NearEquals(expectedSpringConstantTranslation, 1e-5) {
+			t.Errorf("Expected SpringConstantTranslation to be %v, got %v", expectedSpringConstantTranslation, joint.Param.SpringConstantTranslation)
+		}
+		expectedSpringConstantRotation := vec3(60.0, 29.6667, 60.0)
+		if !joint.Param.SpringConstantRotation.NearEquals(expectedSpringConstantRotation, 1e-5) {
+			t.Errorf("Expected SpringConstantRotation to be %v, got %v", expectedSpringConstantRotation, joint.Param.SpringConstantRotation)
+		}
+	}
 }
