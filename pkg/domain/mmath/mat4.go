@@ -382,6 +382,24 @@ func (m Mat4) Inverted() Mat4 {
 	return inv
 }
 
+// InvertedTo は逆行列をoutへ書き込む。
+func (m *Mat4) InvertedTo(out *Mat4) {
+	if m == nil || out == nil {
+		return
+	}
+	det := mat4Det(*m)
+	if math.IsNaN(det) || math.IsInf(det, 0) || math.Abs(det) < 1e-10 {
+		*out = NewMat4()
+		return
+	}
+	inv, ok := mat4Inverse(*m, det)
+	if !ok {
+		*out = NewMat4()
+		return
+	}
+	*out = inv
+}
+
 // ClampIfVerySmall は微小値を0に丸める。
 func (m *Mat4) ClampIfVerySmall() *Mat4 {
 	epsilon := 1e-6

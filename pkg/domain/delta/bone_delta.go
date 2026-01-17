@@ -109,6 +109,34 @@ func (d *BoneDelta) SetUnitMatrix(mat mmath.Mat4) {
 	d.UnitMatrix = &d.unitMatrix
 }
 
+// ResetUnitMatrix はユニット行列を初期化して返す。
+func (d *BoneDelta) ResetUnitMatrix() *mmath.Mat4 {
+	if d == nil {
+		return nil
+	}
+	d.unitMatrix = mmath.NewMat4()
+	d.UnitMatrix = &d.unitMatrix
+	return d.UnitMatrix
+}
+
+// GlobalMatrixPtr はグローバル行列の参照を返す。
+func (d *BoneDelta) GlobalMatrixPtr() *mmath.Mat4 {
+	if d == nil {
+		return nil
+	}
+	d.GlobalMatrix = &d.globalMatrix
+	return d.GlobalMatrix
+}
+
+// LocalMatrixPtr はローカル行列の参照を返す。
+func (d *BoneDelta) LocalMatrixPtr() *mmath.Mat4 {
+	if d == nil {
+		return nil
+	}
+	d.LocalMatrix = &d.localMatrix
+	return d.LocalMatrix
+}
+
 // SetGlobalPosition はグローバル位置を設定する。
 func (d *BoneDelta) SetGlobalPosition(pos mmath.Vec3) {
 	if d == nil {
