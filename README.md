@@ -96,3 +96,10 @@ go list -m -mod=mod -versions github.com/miu200521358/walk
 3. `(mtool) C:\MMD\mlib_go\crumb>go run profile.go`
 4. `go tool pprof profile.go cpu.pprof`
 5. `go tool pprof -http=:8080 cpu.pprof`
+
+
+## License
+
+Source code is licensed under CC-BY-NC-4.0.
+Official binaries distributed by the author may be used commercially
+under the LICENSE-EXCEPTION.
