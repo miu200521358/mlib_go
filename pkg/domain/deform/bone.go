@@ -128,6 +128,24 @@ func ApplyBoneMatricesWithIndexes(modelData *model.PmxModel, boneDeltas *delta.B
 	}
 }
 
+// ApplyGlobalMatricesWithIndexes は指定インデックス順でグローバル行列のみ更新する。
+func ApplyGlobalMatricesWithIndexes(modelData *model.PmxModel, boneDeltas *delta.BoneDeltas, indexes []int) {
+	if modelData == nil || boneDeltas == nil {
+		return
+	}
+	for _, boneIndex := range indexes {
+		d := boneDeltas.Get(boneIndex)
+		if d == nil || d.Bone == nil {
+			continue
+		}
+		if d.UnitMatrix == nil {
+			updateBoneDelta(modelData, boneDeltas, d)
+		}
+		applyGlobalMatrix(boneDeltas, d)
+		boneDeltas.Update(d)
+	}
+}
+
 // collectBoneIndexes は変形対象ボーンのindexを収集する。
 func collectBoneIndexes(
 	modelData *model.PmxModel,
@@ -256,6 +274,36 @@ func collectIkChainIndexes(modelData *model.PmxModel, ikBone *model.Bone) []int 
 	addBoneWithDependencies(modelData, ikBone, true, indexes)
 	out := make([]int, 0, len(indexes))
 	for idx := range indexes {
+		out = append(out, idx)
+	}
+	sortBoneIndexes(modelData, out)
+	return out
+}
+
+// collectEffectorRelatedIndexes は付与関係で影響するボーンindexを収集する。
+func collectEffectorRelatedIndexes(
+	modelData *model.PmxModel,
+	start int,
+	effectorChildren map[int][]int,
+) []int {
+	if modelData == nil || start < 0 {
+		return nil
+	}
+	visited := make(map[int]struct{})
+	queue := []int{start}
+	for len(queue) > 0 {
+		idx := queue[0]
+		queue = queue[1:]
+		if _, ok := visited[idx]; ok {
+			continue
+		}
+		visited[idx] = struct{}{}
+		if children := effectorChildren[idx]; len(children) > 0 {
+			queue = append(queue, children...)
+		}
+	}
+	out := make([]int, 0, len(visited))
+	for idx := range visited {
 		out = append(out, idx)
 	}
 	sortBoneIndexes(modelData, out)
@@ -951,6 +999,7 @@ func applyIkDeltas(
 	if modelData == nil || boneDeltas == nil {
 		return
 	}
+	effectorChildren, _, _ := buildReverseBoneRelations(modelData)
 	ikFrame := getIkFrame(motionData, frame)
 	for _, boneIndex := range deformBoneIndexes {
 		bone, err := modelData.Bones.Get(boneIndex)
@@ -970,7 +1019,7 @@ func applyIkDeltas(
 			d.SetGlobalIkOffMatrix(off)
 			boneDeltas.Update(d)
 		}
-		applyIkForBone(modelData, motionData, boneDeltas, bone, frame, deformBoneIndexes, removeTwist)
+		applyIkForBone(modelData, motionData, boneDeltas, bone, frame, deformBoneIndexes, effectorChildren, removeTwist)
 	}
 }
 
@@ -990,6 +1039,7 @@ func applyIkForBone(
 	ikBone *model.Bone,
 	frame motion.Frame,
 	deformBoneIndexes []int,
+	effectorChildren map[int][]int,
 	removeTwist bool,
 ) {
 	if modelData == nil || boneDeltas == nil || ikBone == nil || ikBone.Ik == nil {
@@ -1092,7 +1142,18 @@ func applyIkForBone(
 			rot := resultQuat
 			linkDelta.FrameRotation = &rot
 			linkDelta.InvalidateTotals()
-			ApplyBoneMatricesWithIndexes(modelData, boneDeltas, deformBoneIndexes)
+			updateBoneDelta(modelData, boneDeltas, linkDelta)
+			for _, idx := range collectEffectorRelatedIndexes(modelData, linkBone.Index(), effectorChildren) {
+				if idx == linkBone.Index() {
+					continue
+				}
+				d := boneDeltas.Get(idx)
+				if d == nil || d.Bone == nil {
+					continue
+				}
+				updateBoneDelta(modelData, boneDeltas, d)
+			}
+			ApplyGlobalMatricesWithIndexes(modelData, boneDeltas, deformBoneIndexes)
 		}
 
 		threshold := ikTargetDistance(boneDeltas, ikBone.Index(), ikTargetIndex)
