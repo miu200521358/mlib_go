@@ -54,6 +54,51 @@ func ComputeMorphDeltas(
 	return deltas
 }
 
+func computeBoneMorphDeltas(
+	modelData *model.PmxModel,
+	motionData *motion.VmdMotion,
+	frame motion.Frame,
+	morphNames []string,
+) *delta.BoneMorphDeltas {
+	boneCount := 0
+	if modelData != nil && modelData.Bones != nil {
+		boneCount = modelData.Bones.Len()
+	}
+	deltas := delta.NewBoneMorphDeltas(boneCount)
+	if modelData == nil || motionData == nil || motionData.MorphFrames == nil {
+		return deltas
+	}
+
+	names := morphNames
+	if names == nil {
+		values := modelData.Morphs.Values()
+		names = make([]string, 0, len(values))
+		for _, morph := range values {
+			if morph == nil {
+				continue
+			}
+			names = append(names, morph.Name())
+		}
+	}
+
+	visited := make(map[int]struct{})
+	for _, name := range names {
+		if !motionData.MorphFrames.Has(name) {
+			continue
+		}
+		mf := motionData.MorphFrames.Get(name).Get(frame)
+		if mf == nil || math.Abs(mf.Ratio) < 1e-12 {
+			continue
+		}
+		morph, err := modelData.Morphs.GetByName(name)
+		if err != nil || morph == nil {
+			continue
+		}
+		applyBoneMorphDelta(deltas, modelData, morph, mf.Ratio, visited)
+	}
+	return deltas
+}
+
 // ApplyMorphDeltas はモーフ差分をモデルへ適用する。
 func ApplyMorphDeltas(modelData *model.PmxModel, deltas *delta.MorphDeltas) {
 	if modelData == nil || deltas == nil {
@@ -95,6 +140,43 @@ func applyMorphDelta(
 		applyMaterialMorph(deltas.Materials(), modelData, morph, ratio)
 	case model.MORPH_TYPE_GROUP:
 		applyGroupMorph(deltas, modelData, morph, ratio, visited)
+	}
+}
+
+func applyBoneMorphDelta(
+	deltas *delta.BoneMorphDeltas,
+	modelData *model.PmxModel,
+	morph *model.Morph,
+	ratio float64,
+	visited map[int]struct{},
+) {
+	if deltas == nil || modelData == nil || morph == nil {
+		return
+	}
+	if math.Abs(ratio) < 1e-12 {
+		return
+	}
+	if _, ok := visited[morph.Index()]; ok {
+		return
+	}
+	visited[morph.Index()] = struct{}{}
+	defer delete(visited, morph.Index())
+
+	switch morph.MorphType {
+	case model.MORPH_TYPE_BONE:
+		applyBoneMorph(deltas, morph, ratio)
+	case model.MORPH_TYPE_GROUP:
+		for _, raw := range morph.Offsets {
+			offset, ok := raw.(*model.GroupMorphOffset)
+			if !ok || offset.MorphIndex < 0 {
+				continue
+			}
+			groupMorph, err := modelData.Morphs.Get(offset.MorphIndex)
+			if err != nil || groupMorph == nil {
+				continue
+			}
+			applyBoneMorphDelta(deltas, modelData, groupMorph, ratio*offset.MorphFactor, visited)
+		}
 	}
 }
 

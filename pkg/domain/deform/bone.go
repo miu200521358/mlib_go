@@ -30,7 +30,7 @@ func ComputeBoneDeltas(
 	}
 	boneDeltas := delta.NewBoneDeltas(modelData.Bones)
 	deformBoneIndexes := collectBoneIndexes(modelData, boneNames, includeIk, afterPhysics)
-	morphDeltas := ComputeMorphDeltas(modelData, motionData, frame, nil)
+	boneMorphDeltas := computeBoneMorphDeltas(modelData, motionData, frame, nil)
 
 	for _, boneIndex := range deformBoneIndexes {
 		bone, err := modelData.Bones.Get(boneIndex)
@@ -44,61 +44,48 @@ func ComputeBoneDeltas(
 		bf := getBoneFrame(motionData, bone.Name(), frame)
 		if bf != nil {
 			if bf.Position != nil {
-				pos := *bf.Position
-				d.FramePosition = &pos
+				d.FramePosition = bf.Position
 			}
 			if bf.Rotation != nil {
-				rot := *bf.Rotation
-				d.FrameRotation = &rot
+				d.FrameRotation = bf.Rotation
 			}
 			if bf.CancelablePosition != nil {
-				pos := *bf.CancelablePosition
-				d.FrameCancelablePosition = &pos
+				d.FrameCancelablePosition = bf.CancelablePosition
 			}
 			if bf.CancelableRotation != nil {
-				rot := *bf.CancelableRotation
-				d.FrameCancelableRotation = &rot
+				d.FrameCancelableRotation = bf.CancelableRotation
 			}
 			if bf.Scale != nil {
-				scale := *bf.Scale
-				d.FrameScale = &scale
+				d.FrameScale = bf.Scale
 			}
 			if bf.CancelableScale != nil {
-				scale := *bf.CancelableScale
-				d.FrameCancelableScale = &scale
+				d.FrameCancelableScale = bf.CancelableScale
 			}
 		}
 
-		if morphDeltas != nil && morphDeltas.Bones() != nil {
-			morphDelta := morphDeltas.Bones().Get(boneIndex)
+		if boneMorphDeltas != nil {
+			morphDelta := boneMorphDeltas.Get(boneIndex)
 			if morphDelta != nil {
 				if morphDelta.FramePosition != nil {
-					pos := *morphDelta.FramePosition
-					d.FrameMorphPosition = &pos
+					d.FrameMorphPosition = morphDelta.FramePosition
 				}
 				if morphDelta.FrameRotation != nil {
-					rot := *morphDelta.FrameRotation
-					d.FrameMorphRotation = &rot
+					d.FrameMorphRotation = morphDelta.FrameRotation
 				}
 				if morphDelta.FrameCancelablePosition != nil {
-					pos := *morphDelta.FrameCancelablePosition
-					d.FrameMorphCancelablePosition = &pos
+					d.FrameMorphCancelablePosition = morphDelta.FrameCancelablePosition
 				}
 				if morphDelta.FrameCancelableRotation != nil {
-					rot := *morphDelta.FrameCancelableRotation
-					d.FrameMorphCancelableRotation = &rot
+					d.FrameMorphCancelableRotation = morphDelta.FrameCancelableRotation
 				}
 				if morphDelta.FrameScale != nil {
-					scale := *morphDelta.FrameScale
-					d.FrameMorphScale = &scale
+					d.FrameMorphScale = morphDelta.FrameScale
 				}
 				if morphDelta.FrameCancelableScale != nil {
-					scale := *morphDelta.FrameCancelableScale
-					d.FrameMorphCancelableScale = &scale
+					d.FrameMorphCancelableScale = morphDelta.FrameCancelableScale
 				}
 				if morphDelta.FrameLocalMat != nil {
-					mat := *morphDelta.FrameLocalMat
-					d.FrameLocalMorphMat = &mat
+					d.FrameLocalMorphMat = morphDelta.FrameLocalMat
 				}
 			}
 		}
@@ -107,9 +94,9 @@ func ComputeBoneDeltas(
 	}
 
 	if includeIk {
-		ApplyBoneMatrices(modelData, boneDeltas)
+		ApplyBoneMatricesWithIndexes(modelData, boneDeltas, deformBoneIndexes)
 		applyIkDeltas(modelData, motionData, boneDeltas, frame, deformBoneIndexes, removeTwist)
-		ApplyBoneMatrices(modelData, boneDeltas)
+		ApplyBoneMatricesWithIndexes(modelData, boneDeltas, deformBoneIndexes)
 	}
 
 	return boneDeltas, deformBoneIndexes
@@ -121,6 +108,14 @@ func ApplyBoneMatrices(modelData *model.PmxModel, boneDeltas *delta.BoneDeltas) 
 		return
 	}
 	indexes := sortedBoneIndexes(modelData, boneDeltas)
+	ApplyBoneMatricesWithIndexes(modelData, boneDeltas, indexes)
+}
+
+// ApplyBoneMatricesWithIndexes は指定インデックス順でボーン行列を合成する。
+func ApplyBoneMatricesWithIndexes(modelData *model.PmxModel, boneDeltas *delta.BoneDeltas, indexes []int) {
+	if modelData == nil || boneDeltas == nil {
+		return
+	}
 	for _, boneIndex := range indexes {
 		d := boneDeltas.Get(boneIndex)
 		if d == nil || d.Bone == nil {
@@ -981,8 +976,8 @@ func applyIkForBone(
 	useToeIk := false
 	if targetBeforeIk && len(ikBone.Ik.Links) == 1 && isToeIkBone(ikBone) && motionData != nil {
 		if targetBone, err := modelData.Bones.Get(ikTargetIndex); err == nil && targetBone != nil {
-			ikOffDeltas, _ := ComputeBoneDeltas(modelData, motionData, frame, []string{targetBone.Name()}, false, false, false)
-			ApplyBoneMatrices(modelData, ikOffDeltas)
+			ikOffDeltas, ikIndexes := ComputeBoneDeltas(modelData, motionData, frame, []string{targetBone.Name()}, false, false, false)
+			ApplyBoneMatricesWithIndexes(modelData, ikOffDeltas, ikIndexes)
 			if ikOffDeltas != nil {
 				if targetDelta := ikOffDeltas.Get(ikTargetIndex); targetDelta != nil {
 					ikPos = targetDelta.FilledGlobalPosition()
@@ -1055,7 +1050,7 @@ func applyIkForBone(
 			rot := resultQuat
 			linkDelta.FrameRotation = &rot
 			updateBoneDelta(modelData, boneDeltas, linkDelta)
-			ApplyBoneMatrices(modelData, boneDeltas)
+			ApplyBoneMatricesWithIndexes(modelData, boneDeltas, deformBoneIndexes)
 		}
 
 		threshold := ikTargetDistance(boneDeltas, ikBone.Index(), ikTargetIndex)
