@@ -992,9 +992,6 @@ func applyIkForBone(
 		}
 	}
 
-	bestThreshold := math.MaxFloat64
-	bestRotations := map[int]mmath.Quaternion{}
-
 	for loop := 0; loop < loopCount; loop++ {
 		for linkIndex, link := range ikBone.Ik.Links {
 			linkBone, err := modelData.Bones.Get(link.BoneIndex)
@@ -1062,26 +1059,9 @@ func applyIkForBone(
 		}
 
 		threshold := ikTargetDistance(boneDeltas, ikBone.Index(), ikTargetIndex)
-		if threshold < bestThreshold {
-			bestThreshold = threshold
-			bestRotations = snapshotLinkRotations(boneDeltas, ikBone.Ik.Links)
-		}
 		if threshold <= 1e-5 {
 			break
 		}
-	}
-
-	if len(bestRotations) > 0 {
-		for linkIndex, rot := range bestRotations {
-			linkDelta := boneDeltas.Get(linkIndex)
-			if linkDelta == nil {
-				continue
-			}
-			copyRot := rot
-			linkDelta.FrameRotation = &copyRot
-			updateBoneDelta(modelData, boneDeltas, linkDelta)
-		}
-		ApplyBoneMatrices(modelData, boneDeltas)
 	}
 }
 
