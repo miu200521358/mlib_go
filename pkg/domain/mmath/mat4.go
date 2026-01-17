@@ -302,6 +302,28 @@ func (m *Mat4) MulToPtr(other *Mat4, out *Mat4) {
 	}
 }
 
+// MulTranslateTo は平行移動の乗算結果をoutへ書き込む。
+func (m *Mat4) MulTranslateTo(v *Vec3, out *Mat4) {
+	if m == nil || v == nil || out == nil {
+		return
+	}
+	a00, a01, a02, a03 := m[0], m[1], m[2], m[3]
+	a10, a11, a12, a13 := m[4], m[5], m[6], m[7]
+	a20, a21, a22, a23 := m[8], m[9], m[10], m[11]
+	a30, a31, a32, a33 := m[12], m[13], m[14], m[15]
+	x, y, z := v.X, v.Y, v.Z
+
+	*out = Mat4{
+		a00, a01, a02, a03,
+		a10, a11, a12, a13,
+		a20, a21, a22, a23,
+		a00*x + a10*y + a20*z + a30,
+		a01*x + a11*y + a21*z + a31,
+		a02*x + a12*y + a22*z + a32,
+		a03*x + a13*y + a23*z + a33,
+	}
+}
+
 // Muled は乗算結果を返す。
 func (m Mat4) Muled(other Mat4) Mat4 {
 	var out Mat4

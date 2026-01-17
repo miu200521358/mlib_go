@@ -444,20 +444,38 @@ func (v Vec3) Vector() []float64 {
 
 // ToMat4 は行列に変換する。
 func (v Vec3) ToMat4() Mat4 {
-	mat := NewMat4()
-	mat[12] = v.X
-	mat[13] = v.Y
-	mat[14] = v.Z
+	var mat Mat4
+	v.ToMat4To(&mat)
 	return mat
+}
+
+// ToMat4To は行列に変換してoutへ書き込む。
+func (v Vec3) ToMat4To(out *Mat4) {
+	if out == nil {
+		return
+	}
+	*out = NewMat4()
+	out[12] = v.X
+	out[13] = v.Y
+	out[14] = v.Z
 }
 
 // ToScaleMat4 はスケール行列に変換する。
 func (v Vec3) ToScaleMat4() Mat4 {
-	mat := NewMat4()
-	mat[0] = v.X
-	mat[5] = v.Y
-	mat[10] = v.Z
+	var mat Mat4
+	v.ToScaleMat4To(&mat)
 	return mat
+}
+
+// ToScaleMat4To はスケール行列に変換してoutへ書き込む。
+func (v Vec3) ToScaleMat4To(out *Mat4) {
+	if out == nil {
+		return
+	}
+	*out = NewMat4()
+	out[0] = v.X
+	out[5] = v.Y
+	out[10] = v.Z
 }
 
 // ClampIfVerySmall は微小値を0に丸める。

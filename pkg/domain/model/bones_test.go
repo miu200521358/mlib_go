@@ -36,7 +36,9 @@ func TestBoneCollectionAppendGetContains(t *testing.T) {
 		t.Fatalf("Contains out of range should be false")
 	}
 
-	delete(bones.indexToPos, 0)
+	if len(bones.indexToPos) > 0 {
+		bones.indexToPos[0] = -1
+	}
 	if _, err := bones.Get(0); err == nil || !modelerrors.IsIndexOutOfRangeError(err) {
 		t.Fatalf("Get missing map should return IndexOutOfRangeError")
 	}
@@ -189,7 +191,9 @@ func TestBoneCollectionRemoveUpdateRename(t *testing.T) {
 func TestBoneCollectionRemoveInvalidMap(t *testing.T) {
 	bones := NewBoneCollection(0)
 	bones.Append(newBone("a", 0))
-	delete(bones.indexToPos, 0)
+	if len(bones.indexToPos) > 0 {
+		bones.indexToPos[0] = -1
+	}
 	if _, err := bones.Remove(0); err == nil || !modelerrors.IsIndexOutOfRangeError(err) {
 		t.Fatalf("Remove missing map should return IndexOutOfRangeError")
 	}

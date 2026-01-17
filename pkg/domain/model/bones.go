@@ -10,7 +10,7 @@ import (
 type BoneCollection struct {
 	values     []*Bone
 	nameIndex  *collection.NameIndex[*Bone]
-	indexToPos map[int]int
+	indexToPos []int
 }
 
 // NewBoneCollection は capacity を指定して BoneCollection を生成する。
@@ -18,7 +18,7 @@ func NewBoneCollection(capacity int) *BoneCollection {
 	return &BoneCollection{
 		values:     make([]*Bone, 0, capacity),
 		nameIndex:  collection.NewNameIndex[*Bone](),
-		indexToPos: make(map[int]int),
+		indexToPos: make([]int, 0, capacity),
 	}
 }
 
@@ -37,8 +37,11 @@ func (c *BoneCollection) Get(index int) (*Bone, error) {
 	if index < 0 || index >= len(c.values) {
 		return nil, modelerrors.NewIndexOutOfRangeError(index, len(c.values))
 	}
-	pos, ok := c.indexToPos[index]
-	if !ok {
+	if index >= len(c.indexToPos) {
+		return nil, modelerrors.NewIndexOutOfRangeError(index, len(c.values))
+	}
+	pos := c.indexToPos[index]
+	if pos < 0 || pos >= len(c.values) {
 		return nil, modelerrors.NewIndexOutOfRangeError(index, len(c.values))
 	}
 	return c.values[pos], nil
@@ -58,7 +61,7 @@ func (c *BoneCollection) Append(value *Bone) (int, collection.ReindexResult) {
 	oldLen := len(c.values)
 	value.SetIndex(oldLen)
 	c.values = append(c.values, value)
-	c.indexToPos[oldLen] = len(c.values) - 1
+	c.indexToPos = append(c.indexToPos, len(c.values)-1)
 	if value.IsValid() {
 		c.nameIndex.SetIfAbsent(value.Name(), value.Index())
 	}
@@ -79,7 +82,7 @@ func (c *BoneCollection) AppendRaw(value *Bone) int {
 	oldLen := len(c.values)
 	value.SetIndex(oldLen)
 	c.values = append(c.values, value)
-	c.indexToPos[oldLen] = len(c.values) - 1
+	c.indexToPos = append(c.indexToPos, len(c.values)-1)
 	if value.IsValid() {
 		c.nameIndex.SetIfAbsent(value.Name(), value.Index())
 	}
@@ -98,23 +101,31 @@ func (c *BoneCollection) Insert(value *Bone, afterBoneIndex int) (int, collectio
 			}
 		}
 		value.Layer = 0
-	} else if pos, ok := c.indexToPos[afterBoneIndex]; ok {
-		insertPos = pos + 1
-		prevLayer := 0
-		if c.values[pos] != nil {
-			prevLayer = c.values[pos].Layer
-		}
-		if insertPos >= len(c.values) {
-			value.Layer = prevLayer
-		} else {
-			nextLayer := prevLayer
-			if c.values[insertPos] != nil {
-				nextLayer = c.values[insertPos].Layer
+	} else if afterBoneIndex >= 0 && afterBoneIndex < len(c.indexToPos) {
+		pos := c.indexToPos[afterBoneIndex]
+		if pos >= 0 && pos < len(c.values) {
+			insertPos = pos + 1
+			prevLayer := 0
+			if c.values[pos] != nil {
+				prevLayer = c.values[pos].Layer
 			}
-			if nextLayer <= prevLayer+1 {
+			if insertPos >= len(c.values) {
 				value.Layer = prevLayer
 			} else {
-				value.Layer = prevLayer + 1
+				nextLayer := prevLayer
+				if c.values[insertPos] != nil {
+					nextLayer = c.values[insertPos].Layer
+				}
+				if nextLayer <= prevLayer+1 {
+					value.Layer = prevLayer
+				} else {
+					value.Layer = prevLayer + 1
+				}
+			}
+		} else if oldLen > 0 {
+			last := c.values[oldLen-1]
+			if last != nil {
+				value.Layer = last.Layer
 			}
 		}
 	} else if oldLen > 0 {
@@ -129,12 +140,7 @@ func (c *BoneCollection) Insert(value *Bone, afterBoneIndex int) (int, collectio
 		copy(c.values[insertPos+1:], c.values[insertPos:])
 		c.values[insertPos] = value
 	}
-	for i := insertPos; i < len(c.values); i++ {
-		bone := c.values[i]
-		if bone != nil {
-			c.indexToPos[bone.Index()] = i
-		}
-	}
+	c.rebuildIndexToPos()
 	if value.IsValid() {
 		c.nameIndex.SetIfAbsent(value.Name(), value.Index())
 	}
@@ -152,8 +158,11 @@ func (c *BoneCollection) Remove(index int) (collection.ReindexResult, error) {
 	if index < 0 || index >= len(c.values) {
 		return collection.ReindexResult{}, modelerrors.NewIndexOutOfRangeError(index, len(c.values))
 	}
-	pos, ok := c.indexToPos[index]
-	if !ok {
+	if index >= len(c.indexToPos) {
+		return collection.ReindexResult{}, modelerrors.NewIndexOutOfRangeError(index, len(c.values))
+	}
+	pos := c.indexToPos[index]
+	if pos < 0 || pos >= len(c.values) {
 		return collection.ReindexResult{}, modelerrors.NewIndexOutOfRangeError(index, len(c.values))
 	}
 	oldLen := len(c.values)
@@ -208,7 +217,13 @@ func (c *BoneCollection) Update(index int, value *Bone) (collection.ReindexResul
 	if current.Name() != value.Name() {
 		return collection.ReindexResult{}, modelerrors.NewNameMismatchError(index, current.Name(), value.Name())
 	}
+	if index < 0 || index >= len(c.indexToPos) {
+		return collection.ReindexResult{}, modelerrors.NewIndexOutOfRangeError(index, len(c.values))
+	}
 	pos := c.indexToPos[index]
+	if pos < 0 || pos >= len(c.values) {
+		return collection.ReindexResult{}, modelerrors.NewIndexOutOfRangeError(index, len(c.values))
+	}
 	value.SetIndex(index)
 	c.values[pos] = value
 	oldToNew, newToOld := identityMappings(len(c.values))
@@ -242,8 +257,11 @@ func (c *BoneCollection) Contains(index int) bool {
 	if index < 0 || index >= len(c.values) {
 		return false
 	}
-	pos, ok := c.indexToPos[index]
-	if !ok {
+	if index >= len(c.indexToPos) {
+		return false
+	}
+	pos := c.indexToPos[index]
+	if pos < 0 || pos >= len(c.values) {
 		return false
 	}
 	return c.values[pos].IsValid()
@@ -251,9 +269,15 @@ func (c *BoneCollection) Contains(index int) bool {
 
 // rebuildIndexToPos は values の順序から indexToPos を再構築する。
 func (c *BoneCollection) rebuildIndexToPos() {
-	c.indexToPos = make(map[int]int, len(c.values))
+	c.indexToPos = make([]int, len(c.values))
+	for i := range c.indexToPos {
+		c.indexToPos[i] = -1
+	}
 	for pos, bone := range c.values {
 		if bone == nil {
+			continue
+		}
+		if bone.Index() < 0 || bone.Index() >= len(c.indexToPos) {
 			continue
 		}
 		c.indexToPos[bone.Index()] = pos
@@ -263,9 +287,8 @@ func (c *BoneCollection) rebuildIndexToPos() {
 // rebuildNameIndex は現在の indexToPos を基に NameIndex を再構築する。
 func (c *BoneCollection) rebuildNameIndex() {
 	ordered := make([]*Bone, len(c.values))
-	for idx := 0; idx < len(c.values); idx++ {
-		pos, ok := c.indexToPos[idx]
-		if !ok {
+	for idx, pos := range c.indexToPos {
+		if pos < 0 || pos >= len(c.values) {
 			continue
 		}
 		ordered[idx] = c.values[pos]

@@ -56,10 +56,13 @@ func NewQuaternionByValuesShort(x, y, z, w float64) Quaternion {
 
 // X はX成分を返す。
 func (q Quaternion) X() float64 { return q.Imag }
+
 // Y はY成分を返す。
 func (q Quaternion) Y() float64 { return q.Jmag }
+
 // Z はZ成分を返す。
 func (q Quaternion) Z() float64 { return q.Kmag }
+
 // W はW成分を返す。
 func (q Quaternion) W() float64 { return q.Real }
 
@@ -608,6 +611,16 @@ func (q Quaternion) Vector() []float64 {
 
 // ToMat4 は行列に変換する。
 func (q Quaternion) ToMat4() Mat4 {
+	var mat Mat4
+	q.ToMat4To(&mat)
+	return mat
+}
+
+// ToMat4To は行列に変換してoutへ書き込む。
+func (q Quaternion) ToMat4To(out *Mat4) {
+	if out == nil {
+		return
+	}
 	x, y, z, w := q.Imag, q.Jmag, q.Kmag, q.Real
 	xx, yy, zz := x*x, y*y, z*z
 	xy, xz, yz := x*y, x*z, y*z
@@ -625,7 +638,7 @@ func (q Quaternion) ToMat4() Mat4 {
 	m21 := 2 * (yz + wx)
 	m22 := 1 - 2*(xx+yy)
 
-	return NewMat4ByValues(
+	out.SetByValues(
 		m00, m10, m20, 0,
 		m01, m11, m21, 0,
 		m02, m12, m22, 0,

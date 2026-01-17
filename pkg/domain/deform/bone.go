@@ -475,15 +475,16 @@ func updateBoneDelta(modelData *model.PmxModel, boneDeltas *delta.BoneDeltas, d 
 	if calculateTotalScaleMat(boneDeltas, d.Bone.Index(), &scaleMat) {
 		unit.MulToPtr(&scaleMat, unit)
 	}
-	var posMat mmath.Mat4
-	if calculateTotalPositionMat(boneDeltas, d.Bone.Index(), &posMat) {
-		unit.MulToPtr(&posMat, unit)
+	var pos mmath.Vec3
+	if calculateTotalPosition(boneDeltas, d.Bone.Index(), &pos) {
+		unit.MulTranslateTo(&pos, unit)
 	}
 	var rotMat mmath.Mat4
 	if calculateTotalRotationMat(boneDeltas, d.Bone.Index(), &rotMat) {
 		unit.MulToPtr(&rotMat, unit)
 	}
-	revert := boneRevertOffsetMat(modelData, d.Bone)
+	var revert mmath.Mat4
+	boneRevertOffsetMatTo(modelData, d.Bone, &revert)
 	revert.MulToPtr(unit, unit)
 	d.GlobalMatrix = nil
 	d.LocalMatrix = nil
@@ -516,8 +517,8 @@ func applyGlobalMatrix(boneDeltas *delta.BoneDeltas, d *delta.BoneDelta) {
 	if local == nil {
 		return
 	}
-	offset := boneOffsetMat(d.Bone)
-	global.MulToPtr(&offset, local)
+	neg := d.Bone.Position.Negated()
+	global.MulTranslateTo(&neg, local)
 	d.SetGlobalPosition(global.Translation())
 }
 
@@ -529,26 +530,25 @@ func calculateTotalRotationMat(boneDeltas *delta.BoneDeltas, boneIndex int, out 
 	rot := accumulateTotalRotation(boneDeltas, boneIndex, 0, 1.0)
 	hasRot := rot != nil && !rot.IsIdent()
 	if rot != nil {
-		*out = rot.ToMat4()
+		rot.ToMat4To(out)
 	} else {
 		*out = mmath.NewMat4()
 	}
 	return applyCancelableRotation(boneDeltas, boneIndex, out, hasRot)
 }
 
-// calculateTotalPositionMat は総移動行列をoutへ書き込み、反映有無を返す。
-func calculateTotalPositionMat(boneDeltas *delta.BoneDeltas, boneIndex int, out *mmath.Mat4) bool {
+// calculateTotalPosition は総移動ベクトルをoutへ書き込み、反映有無を返す。
+func calculateTotalPosition(boneDeltas *delta.BoneDeltas, boneIndex int, out *mmath.Vec3) bool {
 	if out == nil {
 		return false
 	}
 	pos := accumulateTotalPosition(boneDeltas, boneIndex, 0)
-	hasPos := pos != nil && !pos.IsZero()
 	if pos != nil {
-		*out = pos.ToMat4()
+		*out = *pos
 	} else {
-		*out = mmath.NewMat4()
+		*out = mmath.NewVec3()
 	}
-	return applyCancelablePosition(boneDeltas, boneIndex, out, hasPos)
+	return applyCancelablePosition(boneDeltas, boneIndex, out)
 }
 
 // calculateTotalScaleMat は総スケール行列をoutへ書き込み、反映有無を返す。
@@ -559,7 +559,7 @@ func calculateTotalScaleMat(boneDeltas *delta.BoneDeltas, boneIndex int, out *mm
 	scale := accumulateTotalScale(boneDeltas, boneIndex, 0)
 	hasScale := scale != nil && !scale.IsOne()
 	if scale != nil {
-		*out = scale.ToScaleMat4()
+		scale.ToScaleMat4To(out)
 	} else {
 		*out = mmath.NewMat4()
 	}
@@ -664,11 +664,13 @@ func applyCancelableRotation(boneDeltas *delta.BoneDeltas, boneIndex int, rotMat
 		return true
 	}
 	if bd.FrameCancelableRotation != nil && !bd.FrameCancelableRotation.IsIdent() {
-		cancelMat := bd.FrameCancelableRotation.ToMat4()
+		var cancelMat mmath.Mat4
+		bd.FrameCancelableRotation.ToMat4To(&cancelMat)
 		rotMat.MulToPtr(&cancelMat, rotMat)
 	}
 	if bd.FrameMorphCancelableRotation != nil && !bd.FrameMorphCancelableRotation.IsIdent() {
-		morphMat := bd.FrameMorphCancelableRotation.ToMat4()
+		var morphMat mmath.Mat4
+		bd.FrameMorphCancelableRotation.ToMat4To(&morphMat)
 		rotMat.MulToPtr(&morphMat, rotMat)
 	}
 	if parentMat == nil {
@@ -681,38 +683,28 @@ func applyCancelableRotation(boneDeltas *delta.BoneDeltas, boneIndex int, rotMat
 }
 
 // applyCancelablePosition はキャンセル移動を適用し、反映有無を返す。
-func applyCancelablePosition(boneDeltas *delta.BoneDeltas, boneIndex int, posMat *mmath.Mat4, hasPos bool) bool {
+func applyCancelablePosition(boneDeltas *delta.BoneDeltas, boneIndex int, pos *mmath.Vec3) bool {
 	bd := boneDeltas.Get(boneIndex)
-	if bd == nil || posMat == nil {
+	if bd == nil || pos == nil {
 		return false
 	}
-	parentMat := getParentCancelablePositionMat(boneDeltas, bd.Bone.ParentIndex)
+	var parentPos mmath.Vec3
+	hasParent := getParentCancelablePosition(boneDeltas, bd.Bone.ParentIndex, &parentPos)
 	hasSelfCancel := (bd.FrameCancelablePosition != nil && !bd.FrameCancelablePosition.IsZero()) ||
 		(bd.FrameMorphCancelablePosition != nil && !bd.FrameMorphCancelablePosition.IsZero())
-	if !hasSelfCancel {
-		if parentMat == nil {
-			return hasPos
+
+	if hasSelfCancel {
+		if bd.FrameCancelablePosition != nil && !bd.FrameCancelablePosition.IsZero() {
+			*pos = pos.Added(*bd.FrameCancelablePosition)
 		}
-		var inv mmath.Mat4
-		parentMat.InvertedTo(&inv)
-		posMat.MulToPtr(&inv, posMat)
-		return true
+		if bd.FrameMorphCancelablePosition != nil && !bd.FrameMorphCancelablePosition.IsZero() {
+			*pos = pos.Added(*bd.FrameMorphCancelablePosition)
+		}
 	}
-	if bd.FrameCancelablePosition != nil && !bd.FrameCancelablePosition.IsZero() {
-		cancelMat := bd.FrameCancelablePosition.ToMat4()
-		posMat.MulToPtr(&cancelMat, posMat)
+	if hasParent {
+		*pos = pos.Subed(parentPos)
 	}
-	if bd.FrameMorphCancelablePosition != nil && !bd.FrameMorphCancelablePosition.IsZero() {
-		morphMat := bd.FrameMorphCancelablePosition.ToMat4()
-		posMat.MulToPtr(&morphMat, posMat)
-	}
-	if parentMat == nil {
-		return true
-	}
-	var inv mmath.Mat4
-	parentMat.InvertedTo(&inv)
-	posMat.MulToPtr(&inv, posMat)
-	return true
+	return !pos.IsZero()
 }
 
 // applyCancelableScale はキャンセルスケールを適用し、反映有無を返す。
@@ -734,11 +726,13 @@ func applyCancelableScale(boneDeltas *delta.BoneDeltas, boneIndex int, scaleMat 
 		return true
 	}
 	if bd.FrameCancelableScale != nil && !bd.FrameCancelableScale.IsZero() {
-		cancelMat := bd.FrameCancelableScale.ToScaleMat4()
+		var cancelMat mmath.Mat4
+		bd.FrameCancelableScale.ToScaleMat4To(&cancelMat)
 		scaleMat.MulToPtr(&cancelMat, scaleMat)
 	}
 	if bd.FrameMorphCancelableScale != nil && !bd.FrameMorphCancelableScale.IsZero() {
-		morphMat := bd.FrameMorphCancelableScale.ToScaleMat4()
+		var morphMat mmath.Mat4
+		bd.FrameMorphCancelableScale.ToScaleMat4To(&morphMat)
 		scaleMat.MulToPtr(&morphMat, scaleMat)
 	}
 	if parentMat == nil {
@@ -761,11 +755,13 @@ func getParentCancelableRotationMat(boneDeltas *delta.BoneDeltas, parentIndex in
 	}
 	var mat *mmath.Mat4
 	if parent.FrameCancelableRotation != nil && !parent.FrameCancelableRotation.IsIdent() {
-		tmp := parent.FrameCancelableRotation.ToMat4()
+		var tmp mmath.Mat4
+		parent.FrameCancelableRotation.ToMat4To(&tmp)
 		mat = &tmp
 	}
 	if parent.FrameMorphCancelableRotation != nil && !parent.FrameMorphCancelableRotation.IsIdent() {
-		tmp := parent.FrameMorphCancelableRotation.ToMat4()
+		var tmp mmath.Mat4
+		parent.FrameMorphCancelableRotation.ToMat4To(&tmp)
 		if mat == nil {
 			mat = &tmp
 		} else {
@@ -775,29 +771,34 @@ func getParentCancelableRotationMat(boneDeltas *delta.BoneDeltas, parentIndex in
 	return mat
 }
 
-// getParentCancelablePositionMat は親キャンセル移動行列を返す。
-func getParentCancelablePositionMat(boneDeltas *delta.BoneDeltas, parentIndex int) *mmath.Mat4 {
-	if boneDeltas == nil || !boneDeltas.Contains(parentIndex) {
-		return nil
+// getParentCancelablePosition は親キャンセル移動ベクトルを返す。
+func getParentCancelablePosition(boneDeltas *delta.BoneDeltas, parentIndex int, out *mmath.Vec3) bool {
+	if boneDeltas == nil || out == nil || !boneDeltas.Contains(parentIndex) {
+		return false
 	}
 	parent := boneDeltas.Get(parentIndex)
 	if parent == nil {
-		return nil
+		return false
 	}
-	var mat *mmath.Mat4
+	hasPos := false
+	var pos mmath.Vec3
 	if parent.FrameCancelablePosition != nil && !parent.FrameCancelablePosition.IsZero() {
-		tmp := parent.FrameCancelablePosition.ToMat4()
-		mat = &tmp
+		pos = *parent.FrameCancelablePosition
+		hasPos = true
 	}
 	if parent.FrameMorphCancelablePosition != nil && !parent.FrameMorphCancelablePosition.IsZero() {
-		tmp := parent.FrameMorphCancelablePosition.ToMat4()
-		if mat == nil {
-			mat = &tmp
+		if !hasPos {
+			pos = *parent.FrameMorphCancelablePosition
+			hasPos = true
 		} else {
-			mat.MulToPtr(&tmp, mat)
+			pos = pos.Added(*parent.FrameMorphCancelablePosition)
 		}
 	}
-	return mat
+	if !hasPos {
+		return false
+	}
+	*out = pos
+	return true
 }
 
 // getParentCancelableScaleMat は親キャンセルスケール行列を返す。
@@ -811,11 +812,13 @@ func getParentCancelableScaleMat(boneDeltas *delta.BoneDeltas, parentIndex int) 
 	}
 	var mat *mmath.Mat4
 	if parent.FrameCancelableScale != nil && !parent.FrameCancelableScale.IsZero() {
-		tmp := parent.FrameCancelableScale.ToScaleMat4()
+		var tmp mmath.Mat4
+		parent.FrameCancelableScale.ToScaleMat4To(&tmp)
 		mat = &tmp
 	}
 	if parent.FrameMorphCancelableScale != nil && !parent.FrameMorphCancelableScale.IsZero() {
-		tmp := parent.FrameMorphCancelableScale.ToScaleMat4()
+		var tmp mmath.Mat4
+		parent.FrameMorphCancelableScale.ToScaleMat4To(&tmp)
 		if mat == nil {
 			mat = &tmp
 		} else {
@@ -825,18 +828,14 @@ func getParentCancelableScaleMat(boneDeltas *delta.BoneDeltas, parentIndex int) 
 	return mat
 }
 
-// boneOffsetMat はオフセット行列を返す。
-func boneOffsetMat(bone *model.Bone) mmath.Mat4 {
-	if bone == nil {
-		return mmath.NewMat4()
+// boneRevertOffsetMatTo は逆オフセット行列をoutへ書き込む。
+func boneRevertOffsetMatTo(modelData *model.PmxModel, bone *model.Bone, out *mmath.Mat4) {
+	if out == nil {
+		return
 	}
-	return bone.Position.Negated().ToMat4()
-}
-
-// boneRevertOffsetMat は逆オフセット行列を返す。
-func boneRevertOffsetMat(modelData *model.PmxModel, bone *model.Bone) mmath.Mat4 {
 	if bone == nil {
-		return mmath.NewMat4()
+		*out = mmath.NewMat4()
+		return
 	}
 	parentPos := mmath.NewVec3()
 	if modelData != nil && bone.ParentIndex >= 0 {
@@ -846,7 +845,7 @@ func boneRevertOffsetMat(modelData *model.PmxModel, bone *model.Bone) mmath.Mat4
 		}
 	}
 	relative := bone.Position.Subed(parentPos)
-	return relative.ToMat4()
+	relative.ToMat4To(out)
 }
 
 // boneIsAfterPhysics は物理後変形ボーンか判定する。
