@@ -264,6 +264,44 @@ func (m Mat4) MulTo(other Mat4, out *Mat4) {
 	}
 }
 
+// MulToPtr は乗算結果をoutへ書き込む。
+func (m *Mat4) MulToPtr(other *Mat4, out *Mat4) {
+	if m == nil || other == nil || out == nil {
+		return
+	}
+	a00, a01, a02, a03 := m[0], m[1], m[2], m[3]
+	a10, a11, a12, a13 := m[4], m[5], m[6], m[7]
+	a20, a21, a22, a23 := m[8], m[9], m[10], m[11]
+	a30, a31, a32, a33 := m[12], m[13], m[14], m[15]
+
+	b00, b01, b02, b03 := other[0], other[1], other[2], other[3]
+	b10, b11, b12, b13 := other[4], other[5], other[6], other[7]
+	b20, b21, b22, b23 := other[8], other[9], other[10], other[11]
+	b30, b31, b32, b33 := other[12], other[13], other[14], other[15]
+
+	*out = Mat4{
+		a00*b00 + a10*b01 + a20*b02 + a30*b03,
+		a01*b00 + a11*b01 + a21*b02 + a31*b03,
+		a02*b00 + a12*b01 + a22*b02 + a32*b03,
+		a03*b00 + a13*b01 + a23*b02 + a33*b03,
+
+		a00*b10 + a10*b11 + a20*b12 + a30*b13,
+		a01*b10 + a11*b11 + a21*b12 + a31*b13,
+		a02*b10 + a12*b11 + a22*b12 + a32*b13,
+		a03*b10 + a13*b11 + a23*b12 + a33*b13,
+
+		a00*b20 + a10*b21 + a20*b22 + a30*b23,
+		a01*b20 + a11*b21 + a21*b22 + a31*b23,
+		a02*b20 + a12*b21 + a22*b22 + a32*b23,
+		a03*b20 + a13*b21 + a23*b22 + a33*b23,
+
+		a00*b30 + a10*b31 + a20*b32 + a30*b33,
+		a01*b30 + a11*b31 + a21*b32 + a31*b33,
+		a02*b30 + a12*b31 + a22*b32 + a32*b33,
+		a03*b30 + a13*b31 + a23*b32 + a33*b33,
+	}
+}
+
 // Muled は乗算結果を返す。
 func (m Mat4) Muled(other Mat4) Mat4 {
 	var out Mat4

@@ -466,22 +466,22 @@ func updateBoneDelta(modelData *model.PmxModel, boneDeltas *delta.BoneDeltas, d 
 	unit := mmath.NewMat4()
 	localMat := calculateTotalLocalMat(boneDeltas, d.Bone.Index())
 	if !localMat.IsIdent() {
-		unit.MulTo(localMat, &unit)
+		unit.MulToPtr(&localMat, &unit)
 	}
 	scaleMat := calculateTotalScaleMat(boneDeltas, d.Bone.Index())
 	if !scaleMat.IsIdent() {
-		unit.MulTo(scaleMat, &unit)
+		unit.MulToPtr(&scaleMat, &unit)
 	}
 	posMat := calculateTotalPositionMat(boneDeltas, d.Bone.Index())
 	if !posMat.IsIdent() {
-		unit.MulTo(posMat, &unit)
+		unit.MulToPtr(&posMat, &unit)
 	}
 	rotMat := calculateTotalRotationMat(boneDeltas, d.Bone.Index())
 	if !rotMat.IsIdent() {
-		unit.MulTo(rotMat, &unit)
+		unit.MulToPtr(&rotMat, &unit)
 	}
 	revert := boneRevertOffsetMat(modelData, d.Bone)
-	revert.MulTo(unit, &unit)
+	revert.MulToPtr(&unit, &unit)
 	d.SetUnitMatrix(unit)
 	d.GlobalMatrix = nil
 	d.LocalMatrix = nil
@@ -501,15 +501,16 @@ func applyGlobalMatrix(boneDeltas *delta.BoneDeltas, d *delta.BoneDelta) {
 	var global mmath.Mat4
 	switch {
 	case parent != nil && parent.GlobalIkOffMatrix != nil && boneIsIk(parent.Bone):
-		parent.GlobalIkOffMatrix.MulTo(*d.UnitMatrix, &global)
+		parent.GlobalIkOffMatrix.MulToPtr(d.UnitMatrix, &global)
 	case parent != nil && parent.GlobalMatrix != nil:
-		parent.GlobalMatrix.MulTo(*d.UnitMatrix, &global)
+		parent.GlobalMatrix.MulToPtr(d.UnitMatrix, &global)
 	default:
 		global = *d.UnitMatrix
 	}
 	d.SetGlobalMatrix(global)
 	var local mmath.Mat4
-	global.MulTo(boneOffsetMat(d.Bone), &local)
+	offset := boneOffsetMat(d.Bone)
+	global.MulToPtr(&offset, &local)
 	d.SetLocalMatrix(local)
 	pos := global.Translation()
 	d.SetGlobalPosition(pos)
@@ -602,13 +603,10 @@ func accumulateTotalPosition(boneDeltas *delta.BoneDeltas, boneIndex int, recurs
 		if effectorPos != nil {
 			factorPos := effectorPos.MuledScalar(bd.Bone.EffectFactor)
 			if pos == nil {
-				out := factorPos.ToMat4().Translation()
+				out := factorPos
 				return &out
 			}
-			posMat := pos.ToMat4()
-			factorMat := factorPos.ToMat4()
-			posMat.MulTo(factorMat, &posMat)
-			out := posMat.Translation()
+			out := pos.Added(factorPos)
 			return &out
 		}
 	}
@@ -641,20 +639,22 @@ func applyCancelableRotation(boneDeltas *delta.BoneDeltas, boneIndex int, rotMat
 			return rotMat
 		}
 		inv := parentMat.Inverted()
-		rotMat.MulTo(inv, &rotMat)
+		rotMat.MulToPtr(&inv, &rotMat)
 		return rotMat
 	}
 	if bd.FrameCancelableRotation != nil && !bd.FrameCancelableRotation.IsIdent() {
-		rotMat.MulTo(bd.FrameCancelableRotation.ToMat4(), &rotMat)
+		cancelMat := bd.FrameCancelableRotation.ToMat4()
+		rotMat.MulToPtr(&cancelMat, &rotMat)
 	}
 	if bd.FrameMorphCancelableRotation != nil && !bd.FrameMorphCancelableRotation.IsIdent() {
-		rotMat.MulTo(bd.FrameMorphCancelableRotation.ToMat4(), &rotMat)
+		morphMat := bd.FrameMorphCancelableRotation.ToMat4()
+		rotMat.MulToPtr(&morphMat, &rotMat)
 	}
 	if parentMat == nil {
 		return rotMat
 	}
 	inv := parentMat.Inverted()
-	rotMat.MulTo(inv, &rotMat)
+	rotMat.MulToPtr(&inv, &rotMat)
 	return rotMat
 }
 
@@ -672,20 +672,22 @@ func applyCancelablePosition(boneDeltas *delta.BoneDeltas, boneIndex int, posMat
 			return posMat
 		}
 		inv := parentMat.Inverted()
-		posMat.MulTo(inv, &posMat)
+		posMat.MulToPtr(&inv, &posMat)
 		return posMat
 	}
 	if bd.FrameCancelablePosition != nil && !bd.FrameCancelablePosition.IsZero() {
-		posMat.MulTo(bd.FrameCancelablePosition.ToMat4(), &posMat)
+		cancelMat := bd.FrameCancelablePosition.ToMat4()
+		posMat.MulToPtr(&cancelMat, &posMat)
 	}
 	if bd.FrameMorphCancelablePosition != nil && !bd.FrameMorphCancelablePosition.IsZero() {
-		posMat.MulTo(bd.FrameMorphCancelablePosition.ToMat4(), &posMat)
+		morphMat := bd.FrameMorphCancelablePosition.ToMat4()
+		posMat.MulToPtr(&morphMat, &posMat)
 	}
 	if parentMat == nil {
 		return posMat
 	}
 	inv := parentMat.Inverted()
-	posMat.MulTo(inv, &posMat)
+	posMat.MulToPtr(&inv, &posMat)
 	return posMat
 }
 
@@ -703,20 +705,22 @@ func applyCancelableScale(boneDeltas *delta.BoneDeltas, boneIndex int, scaleMat 
 			return scaleMat
 		}
 		inv := parentMat.Inverted()
-		scaleMat.MulTo(inv, &scaleMat)
+		scaleMat.MulToPtr(&inv, &scaleMat)
 		return scaleMat
 	}
 	if bd.FrameCancelableScale != nil && !bd.FrameCancelableScale.IsZero() {
-		scaleMat.MulTo(bd.FrameCancelableScale.ToScaleMat4(), &scaleMat)
+		cancelMat := bd.FrameCancelableScale.ToScaleMat4()
+		scaleMat.MulToPtr(&cancelMat, &scaleMat)
 	}
 	if bd.FrameMorphCancelableScale != nil && !bd.FrameMorphCancelableScale.IsZero() {
-		scaleMat.MulTo(bd.FrameMorphCancelableScale.ToScaleMat4(), &scaleMat)
+		morphMat := bd.FrameMorphCancelableScale.ToScaleMat4()
+		scaleMat.MulToPtr(&morphMat, &scaleMat)
 	}
 	if parentMat == nil {
 		return scaleMat
 	}
 	inv := parentMat.Inverted()
-	scaleMat.MulTo(inv, &scaleMat)
+	scaleMat.MulToPtr(&inv, &scaleMat)
 	return scaleMat
 }
 
@@ -739,7 +743,7 @@ func getParentCancelableRotationMat(boneDeltas *delta.BoneDeltas, parentIndex in
 		if mat == nil {
 			mat = &tmp
 		} else {
-			(*mat).MulTo(tmp, mat)
+			mat.MulToPtr(&tmp, mat)
 		}
 	}
 	return mat
@@ -764,7 +768,7 @@ func getParentCancelablePositionMat(boneDeltas *delta.BoneDeltas, parentIndex in
 		if mat == nil {
 			mat = &tmp
 		} else {
-			(*mat).MulTo(tmp, mat)
+			mat.MulToPtr(&tmp, mat)
 		}
 	}
 	return mat
@@ -789,7 +793,7 @@ func getParentCancelableScaleMat(boneDeltas *delta.BoneDeltas, parentIndex int) 
 		if mat == nil {
 			mat = &tmp
 		} else {
-			(*mat).MulTo(tmp, mat)
+			mat.MulToPtr(&tmp, mat)
 		}
 	}
 	return mat
