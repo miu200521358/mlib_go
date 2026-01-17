@@ -109,8 +109,11 @@ func NewBoneDeltaByGlobalMatrix(
 			parentPos = parent.Bone.Position
 		}
 	}
-	localMat := globalMatrix.Muled(bone.Position.Negated().ToMat4())
-	unitMat := parentGlobal.Inverted().Muled(globalMatrix)
+	var localMat mmath.Mat4
+	globalMatrix.MulTo(bone.Position.Negated().ToMat4(), &localMat)
+	invParent := parentGlobal.Inverted()
+	var unitMat mmath.Mat4
+	invParent.MulTo(globalMatrix, &unitMat)
 	parentRelative := bone.Position.Subed(parentPos)
 	framePos := unitMat.Translation().Subed(parentRelative)
 	frameRot := unitMat.Quaternion()
@@ -151,7 +154,7 @@ func (d *BoneDelta) FilledLocalMatrix() mmath.Mat4 {
 		if d.Bone != nil {
 			offset = d.Bone.Position.Negated().ToMat4()
 		}
-		d.localMatrix = global.Muled(offset)
+		global.MulTo(offset, &d.localMatrix)
 		d.LocalMatrix = &d.localMatrix
 	}
 	return *d.LocalMatrix

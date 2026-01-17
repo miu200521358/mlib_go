@@ -261,7 +261,7 @@ func (p *pmxReader) readVertices(modelData *model.PmxModel) error {
 			Deform:      deform,
 			EdgeFactor:  edgeFactor,
 		}
-		modelData.Vertices.Append(vertex)
+		modelData.Vertices.AppendRaw(vertex)
 	}
 	return nil
 }
@@ -369,7 +369,7 @@ func (p *pmxReader) readFaces(modelData *model.PmxModel) error {
 			return wrapParseFailed("PMX面インデックスの読み込みに失敗しました", err)
 		}
 		face := &model.Face{VertexIndexes: [3]int{idx0, idx1, idx2}}
-		modelData.Faces.Append(face)
+		modelData.Faces.AppendRaw(face)
 	}
 	return nil
 }
@@ -391,7 +391,7 @@ func (p *pmxReader) readTextures(modelData *model.PmxModel) error {
 		tex := model.NewTexture()
 		tex.SetName(name)
 		tex.SetValid(true)
-		modelData.Textures.Append(tex)
+		modelData.Textures.AppendRaw(tex)
 	}
 	return nil
 }
@@ -497,7 +497,7 @@ func (p *pmxReader) readMaterials(modelData *model.PmxModel) error {
 		material.ToonTextureIndex = toonTextureIndex
 		material.Memo = memo
 		material.VerticesCount = int(verticesCount)
-		modelData.Materials.Append(material)
+		modelData.Materials.AppendRaw(material)
 	}
 	return nil
 }
@@ -612,7 +612,7 @@ func (p *pmxReader) readBones(modelData *model.PmxModel) error {
 			bone.Ik = ik
 		}
 
-		modelData.Bones.Append(bone)
+		modelData.Bones.AppendRaw(bone)
 	}
 	return nil
 }
@@ -713,7 +713,7 @@ func (p *pmxReader) readMorphs(modelData *model.PmxModel) error {
 			}
 			morph.Offsets = append(morph.Offsets, offset)
 		}
-		modelData.Morphs.Append(morph)
+		modelData.Morphs.AppendRaw(morph)
 	}
 	return nil
 }
@@ -888,7 +888,7 @@ func (p *pmxReader) readDisplaySlots(modelData *model.PmxModel) error {
 			}
 			slot.References = append(slot.References, ref)
 		}
-		modelData.DisplaySlots.Append(slot)
+		modelData.DisplaySlots.AppendRaw(slot)
 	}
 	return nil
 }
@@ -979,7 +979,7 @@ func (p *pmxReader) readRigidBodies(modelData *model.PmxModel) error {
 			PhysicsType: model.PhysicsType(physicsType),
 		}
 		rigid.SetName(name)
-		modelData.RigidBodies.Append(rigid)
+		modelData.RigidBodies.AppendRaw(rigid)
 	}
 	return nil
 }
@@ -1066,7 +1066,7 @@ func (p *pmxReader) readJoints(modelData *model.PmxModel) error {
 			},
 		}
 		joint.SetName(name)
-		modelData.Joints.Append(joint)
+		modelData.Joints.AppendRaw(joint)
 	}
 	return nil
 }

@@ -49,6 +49,17 @@ func (c *IndexedCollection[T]) Append(value T) (int, ReindexResult) {
 	}
 }
 
+// AppendRaw は再インデックス情報を作らずに末尾へ追加する。
+func (c *IndexedCollection[T]) AppendRaw(value T) int {
+	if c == nil {
+		return -1
+	}
+	oldLen := len(c.values)
+	value.SetIndex(oldLen)
+	c.values = append(c.values, value)
+	return oldLen
+}
+
 // Insert は insertIndex に挿入し、以降の要素を再インデックスする。
 func (c *IndexedCollection[T]) Insert(value T, insertIndex int) (int, ReindexResult, error) {
 	if insertIndex < 0 || insertIndex > len(c.values) {

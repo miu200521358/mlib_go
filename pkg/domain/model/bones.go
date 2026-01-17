@@ -71,6 +71,21 @@ func (c *BoneCollection) Append(value *Bone) (int, collection.ReindexResult) {
 	}
 }
 
+// AppendRaw は再インデックス情報を作らずに末尾へ追加する。
+func (c *BoneCollection) AppendRaw(value *Bone) int {
+	if c == nil || value == nil {
+		return -1
+	}
+	oldLen := len(c.values)
+	value.SetIndex(oldLen)
+	c.values = append(c.values, value)
+	c.indexToPos[oldLen] = len(c.values) - 1
+	if value.IsValid() {
+		c.nameIndex.SetIfAbsent(value.Name(), value.Index())
+	}
+	return oldLen
+}
+
 // Insert は既存 index を変えずにボーンを挿入する。
 func (c *BoneCollection) Insert(value *Bone, afterBoneIndex int) (int, collection.ReindexResult, error) {
 	oldLen := len(c.values)

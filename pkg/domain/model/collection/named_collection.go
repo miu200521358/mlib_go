@@ -53,6 +53,18 @@ func (c *NamedCollection[T]) Append(value T) (int, ReindexResult) {
 	return idx, res
 }
 
+// AppendRaw は再インデックス情報を作らずに追加し、NameIndex を更新する。
+func (c *NamedCollection[T]) AppendRaw(value T) int {
+	if c == nil {
+		return -1
+	}
+	idx := c.indexed.AppendRaw(value)
+	if value.IsValid() {
+		c.nameIndex.SetIfAbsent(value.Name(), idx)
+	}
+	return idx
+}
+
 // Insert は insertIndex に挿入し、NameIndex を再構築する。
 func (c *NamedCollection[T]) Insert(value T, insertIndex int) (int, ReindexResult, error) {
 	idx, res, err := c.indexed.Insert(value, insertIndex)

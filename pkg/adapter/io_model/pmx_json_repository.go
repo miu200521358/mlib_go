@@ -232,7 +232,7 @@ func loadBonesFromJSON(modelData *model.PmxModel, bones []boneJSON) error {
 			}
 			bone.Ik = ik
 		}
-		modelData.Bones.Append(bone)
+		modelData.Bones.AppendRaw(bone)
 	}
 	return nil
 }
@@ -254,7 +254,7 @@ func loadDisplaySlotsFromJSON(modelData *model.PmxModel, slots []displaySlotJSON
 				DisplayIndex: ref.DisplayIndex,
 			})
 		}
-		modelData.DisplaySlots.Append(slot)
+		modelData.DisplaySlots.AppendRaw(slot)
 	}
 	return nil
 }
@@ -279,7 +279,7 @@ func loadRigidBodiesFromJSON(modelData *model.PmxModel, bodies []rigidBodyJSON) 
 			PhysicsType: model.PhysicsType(item.PhysicsType),
 		}
 		rigid.SetName(item.Name)
-		modelData.RigidBodies.Append(rigid)
+		modelData.RigidBodies.AppendRaw(rigid)
 	}
 	return nil
 }
