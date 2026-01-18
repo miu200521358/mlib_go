@@ -12,16 +12,14 @@ import (
 
 // ModelRepository はモデル入出力のルーティングを表す。
 type ModelRepository struct {
-	pmxRepository  *pmx.PmxRepository
-	jsonRepository *PmxJsonRepository
-	xRepository    io_common.IFileReader
+	pmxRepository *pmx.PmxRepository
+	xRepository   io_common.IFileReader
 }
 
 // NewModelRepository はModelRepositoryを生成する。
 func NewModelRepository() *ModelRepository {
 	return &ModelRepository{
-		pmxRepository:  pmx.NewPmxRepository(),
-		jsonRepository: NewPmxJsonRepository(),
+		pmxRepository: pmx.NewPmxRepository(),
 	}
 }
 
@@ -37,7 +35,7 @@ func (r *ModelRepository) SetXRepository(repository io_common.IFileReader) {
 func (r *ModelRepository) CanLoad(path string) bool {
 	ext := strings.ToLower(filepath.Ext(path))
 	switch ext {
-	case ".pmx", ".json", ".x":
+	case ".pmx", ".x":
 		return true
 	default:
 		return false
@@ -50,8 +48,6 @@ func (r *ModelRepository) Load(path string) (hashable.IHashable, error) {
 	switch ext {
 	case ".pmx":
 		return r.pmxRepository.Load(path)
-	case ".json":
-		return r.jsonRepository.Load(path)
 	case ".x":
 		if r.xRepository != nil {
 			return r.xRepository.Load(path)
@@ -78,8 +74,6 @@ func (r *ModelRepository) Save(path string, data hashable.IHashable, opts io_com
 	switch ext {
 	case ".pmx":
 		return r.pmxRepository.Save(path, data, opts)
-	case ".json":
-		return r.jsonRepository.Save(path, data, opts)
 	case ".x":
 		return io_common.NewIoEncodeFailed("X形式の保存は未実装です", nil)
 	default:

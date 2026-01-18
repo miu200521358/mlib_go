@@ -4258,6 +4258,6 @@ func computeBoneDeltas(
 		afterPhysics,
 		removeTwist,
 	)
-	ApplyBoneMatricesWithIndexes(modelData, boneDeltas, indexes)
+	applyBoneMatricesWithIndexes(modelData, boneDeltas, indexes)
 	return boneDeltas, indexes
 }

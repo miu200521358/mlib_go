@@ -95,9 +95,9 @@ func ComputeBoneDeltas(
 	}
 
 	if includeIk {
-		ApplyBoneMatricesWithIndexes(modelData, boneDeltas, deformBoneIndexes)
+		applyBoneMatricesWithIndexes(modelData, boneDeltas, deformBoneIndexes)
 		applyIkDeltas(modelData, motionData, boneDeltas, frame, deformBoneIndexes, removeTwist)
-		ApplyBoneMatricesWithIndexes(modelData, boneDeltas, deformBoneIndexes)
+		applyBoneMatricesWithIndexes(modelData, boneDeltas, deformBoneIndexes)
 	}
 
 	return boneDeltas, deformBoneIndexes
@@ -109,11 +109,11 @@ func ApplyBoneMatrices(modelData *model.PmxModel, boneDeltas *delta.BoneDeltas) 
 		return
 	}
 	indexes := sortedBoneIndexes(modelData, boneDeltas)
-	ApplyBoneMatricesWithIndexes(modelData, boneDeltas, indexes)
+	applyBoneMatricesWithIndexes(modelData, boneDeltas, indexes)
 }
 
-// ApplyBoneMatricesWithIndexes は指定インデックス順でボーン行列を合成する。
-func ApplyBoneMatricesWithIndexes(modelData *model.PmxModel, boneDeltas *delta.BoneDeltas, indexes []int) {
+// applyBoneMatricesWithIndexes は指定インデックス順でボーン行列を合成する。
+func applyBoneMatricesWithIndexes(modelData *model.PmxModel, boneDeltas *delta.BoneDeltas, indexes []int) {
 	if modelData == nil || boneDeltas == nil {
 		return
 	}
@@ -128,8 +128,8 @@ func ApplyBoneMatricesWithIndexes(modelData *model.PmxModel, boneDeltas *delta.B
 	}
 }
 
-// ApplyGlobalMatricesWithIndexes は指定インデックス順でグローバル行列のみ更新する。
-func ApplyGlobalMatricesWithIndexes(modelData *model.PmxModel, boneDeltas *delta.BoneDeltas, indexes []int) {
+// applyGlobalMatricesWithIndexes は指定インデックス順でグローバル行列のみ更新する。
+func applyGlobalMatricesWithIndexes(modelData *model.PmxModel, boneDeltas *delta.BoneDeltas, indexes []int) {
 	if modelData == nil || boneDeltas == nil {
 		return
 	}
@@ -1290,7 +1290,7 @@ func applyIkForBone(
 	if targetBeforeIk && len(ikBone.Ik.Links) == 1 && isToeIkBone(ikBone) && motionData != nil {
 		if targetBone, err := modelData.Bones.Get(ikTargetIndex); err == nil && targetBone != nil {
 			ikOffDeltas, ikIndexes := ComputeBoneDeltas(modelData, motionData, frame, []string{targetBone.Name()}, false, false, false)
-			ApplyBoneMatricesWithIndexes(modelData, ikOffDeltas, ikIndexes)
+			applyBoneMatricesWithIndexes(modelData, ikOffDeltas, ikIndexes)
 			if ikOffDeltas != nil {
 				if targetDelta := ikOffDeltas.Get(ikTargetIndex); targetDelta != nil {
 					ikPos = targetDelta.FilledGlobalPosition()
@@ -1390,7 +1390,7 @@ func applyIkForBone(
 				collectDescendantFlags(children, idx, globalUpdatedFlags, &globalUpdatedList, &globalQueue)
 			}
 			globalRecalc = buildRecalcIndexesByOrder(order, globalUpdatedList, globalRecalc)
-			ApplyGlobalMatricesWithIndexes(modelData, boneDeltas, globalRecalc)
+			applyGlobalMatricesWithIndexes(modelData, boneDeltas, globalRecalc)
 			resetFlagsByList(unitUpdatedFlags, unitUpdatedList)
 			unitUpdatedList = unitUpdatedList[:0]
 			resetFlagsByList(globalUpdatedFlags, globalUpdatedList)
