@@ -585,12 +585,18 @@ func (p *textParser) parseMeshMaterialList() error {
 	if err != nil {
 		return err
 	}
+	if nMaterials < 0 {
+		return fmt.Errorf("MeshMaterialListの材質数が不正です")
+	}
 	if _, err := p.expect(tokSemicolon); err != nil {
 		return err
 	}
 	nFaceIdx, err := p.parseNumberAsInt()
 	if err != nil {
 		return err
+	}
+	if nFaceIdx < 0 {
+		return fmt.Errorf("MeshMaterialListの面数が不正です")
 	}
 	if _, err := p.expect(tokSemicolon); err != nil {
 		return err
