@@ -4,6 +4,8 @@
 package render
 
 import (
+	"slices"
+
 	"github.com/go-gl/gl/v4.3-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 
@@ -266,11 +268,62 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.LEQUAL)
 
-	// 選択頂点インデックスの更新結果を返す（ここではサンプルとして空スライス）
-	return []int{}
+	selectedSet := make(map[int]struct{}, len(nowSelectedVertexes))
+	vertexCount := vertices.Len()
+	for _, idx := range nowSelectedVertexes {
+		if idx >= 0 && idx < vertexCount {
+			selectedSet[idx] = struct{}{}
+		}
+	}
+	for _, idx := range nowNoSelectedVertexes {
+		delete(selectedSet, idx)
+	}
+	if vertexCount == 0 || mr.ssbo == 0 || (len(cursorPositions) == 0 && len(removeCursorPositions) == 0) {
+		return selectedSetToSlice(selectedSet)
+	}
+
+	// シェーダ側のSSBO書き込み完了を待ってから読み出す。
+	gl.MemoryBarrier(gl.SHADER_STORAGE_BARRIER_BIT)
+	gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, mr.ssbo)
+	positions := make([]float32, vertexCount*4)
+	if len(positions) > 0 {
+		gl.GetBufferSubData(gl.SHADER_STORAGE_BUFFER, 0, len(positions)*4, gl.Ptr(&positions[0]))
+	}
+	gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, 0)
+
+	// w成分に距離が入るため、w >= 0 の頂点を選択対象とする。
+	if removeCursorPositions != nil {
+		for i := 0; i+3 < len(positions); i += 4 {
+			if positions[i+3] >= 0 {
+				delete(selectedSet, i/4)
+			}
+		}
+	} else {
+		for i := 0; i+3 < len(positions); i += 4 {
+			if positions[i+3] >= 0 {
+				selectedSet[i/4] = struct{}{}
+			}
+		}
+	}
+
+	// 選択頂点インデックスの更新結果を返す。
+	return selectedSetToSlice(selectedSet)
 }
 
 // --- 内部ヘルパー関数 ---
+
+// selectedSetToSlice は選択頂点インデックス集合をスライス化する。
+func selectedSetToSlice(selectedSet map[int]struct{}) []int {
+	if len(selectedSet) == 0 {
+		return []int{}
+	}
+	out := make([]int, 0, len(selectedSet))
+	for idx := range selectedSet {
+		out = append(out, idx)
+	}
+	slices.Sort(out)
+	return out
+}
 
 // fetchBoneLineDeltas は、ボーンライン描画用のデバッグカラー情報を取得します。
 func (mr *ModelRenderer) fetchBoneLineDeltas(bones *model.BoneCollection, shared *state.SharedState, info boneDebugInfo, debugBoneHover []*mgl.DebugBoneHover) ([]int, [][]float32) {
