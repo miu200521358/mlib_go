@@ -23,7 +23,7 @@ func decompressMSZip(data []byte) ([]byte, error) {
 	if finalSize < xHeaderSize {
 		return nil, fmt.Errorf("X圧縮データの最終サイズが不正です")
 	}
-	out := make([]byte, finalSize)
+	out := make([]byte, int(finalSize))
 	copy(out[:xHeaderSize], data[:xHeaderSize])
 
 	outPos := xHeaderSize

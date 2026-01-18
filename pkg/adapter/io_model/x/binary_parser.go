@@ -391,8 +391,8 @@ func (p *binaryParser) readIntegerList(objectName string) ([]uint32, error) {
 	if err != nil {
 		return nil, err
 	}
-	list := make([]uint32, count)
-	for i := range count {
+	list := make([]uint32, int(count))
+	for i := range list {
 		value, err := p.readDWORD()
 		if err != nil {
 			return nil, err
@@ -457,8 +457,8 @@ func (p *binaryParser) readFloatList(objectName string) ([]float64, error) {
 	if err != nil {
 		return nil, err
 	}
-	list := make([]float64, count)
-	for i := range count {
+	list := make([]float64, int(count))
+	for i := range list {
 		value, err := p.readFloat()
 		if err != nil {
 			return nil, err
