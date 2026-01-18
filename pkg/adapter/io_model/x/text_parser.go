@@ -604,7 +604,7 @@ func (p *textParser) parseMeshMaterialList() error {
 	if p.meshCtx == nil {
 		return fmt.Errorf("MeshMaterialListがMesh外で検出されました")
 	}
-	if nFaceIdx > len(p.meshCtx.faceGroups) {
+	if nFaceIdx != len(p.meshCtx.faceGroups) {
 		return fmt.Errorf("MeshMaterialListの面数が不正です")
 	}
 	facesByMaterial := make([][][]*model.Face, nMaterials)
