@@ -54,6 +54,7 @@ func ComputeMorphDeltas(
 	return deltas
 }
 
+// computeBoneMorphDeltas はボーンモーフ差分を算出して返す。
 func computeBoneMorphDeltas(
 	modelData *model.PmxModel,
 	motionData *motion.VmdMotion,
@@ -143,6 +144,7 @@ func applyMorphDelta(
 	}
 }
 
+// applyBoneMorphDelta はボーン/グループモーフの差分を集計する。
 func applyBoneMorphDelta(
 	deltas *delta.BoneMorphDeltas,
 	modelData *model.PmxModel,

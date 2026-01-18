@@ -725,6 +725,7 @@ func applyGlobalMatrixNoLocal(boneDeltas *delta.BoneDeltas, d *delta.BoneDelta) 
 	d.GlobalPosition = nil
 }
 
+// copyMat4 はMat4の値をdstへコピーする。
 func copyMat4(dst, src *mmath.Mat4) {
 	if dst == nil || src == nil {
 		return

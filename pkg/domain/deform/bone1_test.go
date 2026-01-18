@@ -709,7 +709,7 @@ func TestVmdMotion_DeformLegIk7_Syou_ISAO(t *testing.T) {
 			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("下半身").FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName("下半身").FilledGlobalPosition()))
 		}
 	}
-	// FIXME: 物理後なので求められない
+	// TODO(miu200521358, 2026-01-18): 物理後のため現時点では検証不可
 	// {
 	// 	expectedPosition := vec3(-0.24102019, 9.79926074, 1.08498769)
 	// 	if !boneDeltas.GetByName("下半身先").GetGlobalPosition().NearEquals(expectedPosition, 0.01) {
@@ -3695,7 +3695,6 @@ func TestVmdMotion_DeformArmIk4_DMF(t *testing.T) {
 		}
 	}
 	{
-		// FIXME
 		expectedPosition := vec3(9.560862, 13.926876, 1.431514)
 		if !boneDeltas.GetByName("左ひじY先").FilledGlobalPosition().NearEquals(expectedPosition, 0.02) {
 			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左ひじY先").FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName("左ひじY先").FilledGlobalPosition()))
@@ -3947,7 +3946,6 @@ func TestVmdMotion_DeformLegIk25_Addiction_Wa_Left(t *testing.T) {
 		}
 	}
 	{
-		// FIXME
 		expectedPosition := vec3(0.860159, 13.190875, 3.122428)
 		if !boneDeltas.GetByName("左肩Ry検先").FilledGlobalPosition().NearEquals(expectedPosition, 0.03) {
 			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左肩Ry検先").FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName("左肩Ry検先").FilledGlobalPosition()))

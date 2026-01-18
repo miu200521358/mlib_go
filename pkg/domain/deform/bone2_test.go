@@ -63,7 +63,7 @@ func TestVmdMotion_DeformLegIk30_Addiction_Shoes(t *testing.T) {
 		}
 	}
 	{
-		// FIXME
+		// TODO(miu200521358, 2026-01-18): 期待値の再確認
 		expectedPosition := vec3(1.763123, 3.708842, 0.369619)
 		if !boneDeltas.GetByName("左足Dw").FilledGlobalPosition().NearEquals(expectedPosition, 0.03) {
 			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足Dw").FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName("左足Dw").FilledGlobalPosition()))

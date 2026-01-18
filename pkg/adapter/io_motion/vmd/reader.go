@@ -34,16 +34,16 @@ func (v *vmdReader) Read(motionData *motion.VmdMotion) error {
 		return err
 	}
 	if err := v.readCameraFrames(motionData); err != nil {
-		return nil
+		return err
 	}
 	if err := v.readLightFrames(motionData); err != nil {
-		return nil
+		return err
 	}
 	if err := v.readShadowFrames(motionData); err != nil {
-		return nil
+		return err
 	}
 	if err := v.readIkFrames(motionData); err != nil {
-		return nil
+		return err
 	}
 	return nil
 }
