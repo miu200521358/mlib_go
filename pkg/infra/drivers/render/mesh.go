@@ -8,10 +8,63 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/graphics_api"
+	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/mgl"
 )
+
+// ライト定数。
+const (
+	LIGHT_DIFFUSE  float32 = 0
+	LIGHT_SPECULAR float32 = 154.0 / 255.0
+	LIGHT_AMBIENT  float32 = 154.0 / 255.0
+)
+
+// MeshDelta は材質モーフ差分を描画用に変換した値を表す。
+type MeshDelta struct {
+	Diffuse  mgl32.Vec4
+	Specular mgl32.Vec4
+	Ambient  mgl32.Vec3
+	Emissive mgl32.Vec3
+	Edge     mgl32.Vec4
+	EdgeSize float32
+}
+
+// NewMeshDelta は材質モーフ差分を描画向けに変換する。
+func NewMeshDelta(materialDelta *delta.MaterialMorphDelta) *MeshDelta {
+	if materialDelta == nil {
+		materialDelta = delta.NewMaterialMorphDelta(nil)
+	}
+
+	base := materialDelta.Material
+	add := materialDelta.AddMaterial
+	mul := materialDelta.MulMaterial
+
+	diffuse := base.Diffuse.Muled(mul.Diffuse).Added(add.Diffuse)
+	specular := base.Specular.Muled(mul.Specular).Added(add.Specular)
+	ambient := base.Diffuse.XYZ().Muled(mul.Diffuse.XYZ()).Added(add.Diffuse.XYZ())
+	emissive := base.Ambient.Muled(mul.Ambient).Added(add.Ambient)
+	edge := base.Edge.Muled(mul.Edge).Added(add.Edge)
+	edgeSize := float32(base.EdgeSize*mul.EdgeSize + add.EdgeSize)
+
+	return &MeshDelta{
+		Diffuse:  vec4ToMgl(diffuse),
+		Specular: vec4ToMgl(specular),
+		Ambient:  vec3ToMgl(ambient),
+		Emissive: vec3ToMgl(emissive),
+		Edge:     vec4ToMgl(edge),
+		EdgeSize: edgeSize,
+	}
+}
+
+func vec3ToMgl(v mmath.Vec3) mgl32.Vec3 {
+	return mgl32.Vec3{float32(v.X), float32(v.Y), float32(v.Z)}
+}
+
+func vec4ToMgl(v mmath.Vec4) mgl32.Vec4 {
+	return mgl32.Vec4{float32(v.X), float32(v.Y), float32(v.Z), float32(v.W)}
+}
 
 // MeshRenderer はメッシュ描画専用の構造体。
 type MeshRenderer struct {

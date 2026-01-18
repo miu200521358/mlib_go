@@ -7,12 +7,12 @@ import (
 	"github.com/go-gl/gl/v4.3-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 
+	"github.com/miu200521358/mlib_go/pkg/adapter/graphics_api"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
-	"github.com/miu200521358/mlib_go/pkg/adapter/graphics_api"
-	"github.com/miu200521358/mlib_go/pkg/shared/state"
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/mgl"
+	"github.com/miu200521358/mlib_go/pkg/shared/state"
 )
 
 // ModelDrawer は、モデル全体の描画処理のうち、バッファ初期化以外の各描画処理を担当する。
@@ -23,21 +23,21 @@ type ModelDrawer struct {
 
 	// 以下は初期化済みの VertexBufferHandle と関連バッファ
 	normalBufferHandle *mgl.VertexBufferHandle
-	normalIbo          *mgl.ElementBuffer
+	normalIbo          *mgl.IndexBuffer
 	normalVertices     []float32
 
 	boneLineBufferHandle *mgl.VertexBufferHandle
-	boneLineIbo          *mgl.ElementBuffer
+	boneLineIbo          *mgl.IndexBuffer
 	boneLineCount        int
 	boneLineIndexes      []int
 
 	bonePointBufferHandle *mgl.VertexBufferHandle
-	bonePointIbo          *mgl.ElementBuffer
+	bonePointIbo          *mgl.IndexBuffer
 	bonePointCount        int
 	bonePointIndexes      []int
 
 	selectedVertexBufferHandle *mgl.VertexBufferHandle
-	selectedVertexIbo          *mgl.ElementBuffer
+	selectedVertexIbo          *mgl.IndexBuffer
 
 	cursorPositionBufferHandle *mgl.VertexBufferHandle
 
@@ -85,8 +85,8 @@ func (md *ModelDrawer) delete() {
 }
 
 // drawNormal 描画処理：法線表示
-func (mr *ModelRenderer) drawNormal(windowIndex int, shader rendering.IShader, paddedMatrixes []float32, width, height int) {
-	program := shader.Program(rendering.ProgramTypeNormal)
+func (mr *ModelRenderer) drawNormal(windowIndex int, shader graphics_api.IShader, paddedMatrixes []float32, width, height int) {
+	program := shader.Program(graphics_api.ProgramTypeNormal)
 	gl.UseProgram(program)
 
 	mr.normalBufferHandle.Bind()
@@ -114,12 +114,12 @@ func (mr *ModelRenderer) drawNormal(windowIndex int, shader rendering.IShader, p
 }
 
 // drawBone は、ボーン表示（ラインとポイント）の描画処理を行います。
-func (mr *ModelRenderer) drawBone(windowIndex int, shader rendering.IShader, bones *pmx.Bones, shared *state.SharedState, paddedMatrixes []float32, width, height int, debugBoneHover []*mgl.DebugBoneHover) {
+func (mr *ModelRenderer) drawBone(windowIndex int, shader graphics_api.IShader, bones *model.BoneCollection, shared *state.SharedState, paddedMatrixes []float32, width, height int, debugBoneHover []*mgl.DebugBoneHover) {
 	// モデルの前面にボーンを描画するため、深度テストの設定を変更
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.ALWAYS)
 
-	program := shader.Program(rendering.ProgramTypeBone)
+	program := shader.Program(graphics_api.ProgramTypeBone)
 	gl.UseProgram(program)
 
 	// ボーン行列テクスチャ設定
@@ -127,9 +127,10 @@ func (mr *ModelRenderer) drawBone(windowIndex int, shader rendering.IShader, bon
 	defer unbindBoneMatrixes()
 
 	// --- ボーンライン描画 ---
+	info := buildBoneDebugInfo(bones)
 	mr.boneLineBufferHandle.Bind()
 	// 取得したデバッグカラー情報で更新
-	boneLineIndexes, boneLineDeltas := mr.fetchBoneLineDeltas(bones, shared, debugBoneHover)
+	boneLineIndexes, boneLineDeltas := mr.fetchBoneLineDeltas(bones, shared, info, debugBoneHover)
 	mr.boneLineBufferHandle.UpdateBoneDeltas(boneLineIndexes, boneLineDeltas)
 
 	mr.boneLineIbo.Bind()
@@ -147,7 +148,7 @@ func (mr *ModelRenderer) drawBone(windowIndex int, shader rendering.IShader, bon
 	// --- ボーンポイント描画 ---
 	mr.bonePointBufferHandle.Bind()
 	// 取得したデバッグカラー情報で更新
-	bonePointIndexes, bonePointDeltas := mr.fetchBonePointDeltas(bones, shared, debugBoneHover)
+	bonePointIndexes, bonePointDeltas := mr.fetchBonePointDeltas(bones, shared, info, debugBoneHover)
 	mr.bonePointBufferHandle.UpdateBoneDeltas(bonePointIndexes, bonePointDeltas)
 
 	mr.bonePointIbo.Bind()
@@ -156,7 +157,7 @@ func (mr *ModelRenderer) drawBone(windowIndex int, shader rendering.IShader, bon
 	gl.PointSize(5.0)
 	gl.DrawElements(
 		gl.POINTS,
-		int32(bones.Length()),
+		int32(bones.Len()),
 		gl.UNSIGNED_INT,
 		nil,
 	)
@@ -170,12 +171,12 @@ func (mr *ModelRenderer) drawBone(windowIndex int, shader rendering.IShader, bon
 }
 
 // drawCursorLine は、カーソルの軌跡をラインで描画する処理です。
-func (mr *ModelRenderer) drawCursorLine(shader rendering.IShader, cursorPositions []float32, vertexColor mgl32.Vec4) {
+func (mr *ModelRenderer) drawCursorLine(shader graphics_api.IShader, cursorPositions []float32, vertexColor mgl32.Vec4) {
 	// モデルの前面に描画するため深度テストを一時無効化
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.ALWAYS)
 
-	program := shader.Program(rendering.ProgramTypeCursor)
+	program := shader.Program(graphics_api.ProgramTypeCursor)
 	gl.UseProgram(program)
 
 	colorUniform := gl.GetUniformLocation(program, gl.Str(mgl.ShaderColor))
@@ -194,11 +195,11 @@ func (mr *ModelRenderer) drawCursorLine(shader rendering.IShader, cursorPosition
 // 更新後の選択頂点インデックスを返します。
 func (mr *ModelRenderer) drawSelectedVertex(
 	windowIndex int,
-	vertices *pmx.Vertices,
+	vertices *model.VertexCollection,
 	invisibleMaterialIndexes []int,
 	nowSelectedVertexes []int,
 	nowNoSelectedVertexes []int,
-	shader rendering.IShader,
+	shader graphics_api.IShader,
 	paddedMatrixes []float32,
 	width, height int,
 	cursorPositions []float32,
@@ -207,19 +208,19 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.ALWAYS)
 
-	program := shader.Program(rendering.ProgramTypeSelectedVertex)
+	program := shader.Program(graphics_api.ProgramTypeSelectedVertex)
 	gl.UseProgram(program)
 
 	// 選択頂点のモーフデルタ情報を生成
-	selectedVertexDeltas := delta.NewVertexMorphDeltas(vertices)
+	selectedVertexDeltas := delta.NewVertexMorphDeltas(vertices.Len())
 	for _, index := range nowNoSelectedVertexes {
 		vd := delta.NewVertexMorphDelta(index)
-		vd.Uv = &mmath.MVec2{X: -1, Y: 0}
+		vd.Uv = &mmath.Vec2{X: -1, Y: 0}
 		selectedVertexDeltas.Update(vd)
 	}
 	for _, index := range nowSelectedVertexes {
 		vd := delta.NewVertexMorphDelta(index)
-		vd.Uv = &mmath.MVec2{X: 1, Y: 0}
+		vd.Uv = &mmath.Vec2{X: 1, Y: 0}
 		selectedVertexDeltas.Update(vd)
 	}
 
@@ -228,7 +229,7 @@ func (mr *ModelRenderer) drawSelectedVertex(
 
 	mr.selectedVertexBufferHandle.Bind()
 	mr.selectedVertexBufferHandle.VBO.Bind()
-	mr.selectedVertexBufferHandle.VBO.BufferData(len(vertexData), 3+4+4+3, 4, gl.Ptr(vertexData), rendering.BufferUsageStatic)
+	mr.selectedVertexBufferHandle.VBO.BufferData(len(vertexData)*4, gl.Ptr(vertexData), graphics_api.BufferUsageStatic)
 	mr.selectedVertexBufferHandle.VBO.Unbind()
 	mr.selectedVertexIbo.Bind()
 
@@ -272,7 +273,7 @@ func (mr *ModelRenderer) drawSelectedVertex(
 // --- 内部ヘルパー関数 ---
 
 // fetchBoneLineDeltas は、ボーンライン描画用のデバッグカラー情報を取得します。
-func (mr *ModelRenderer) fetchBoneLineDeltas(bones *pmx.Bones, shared *state.SharedState, debugBoneHover []*mgl.DebugBoneHover) ([]int, [][]float32) {
+func (mr *ModelRenderer) fetchBoneLineDeltas(bones *model.BoneCollection, shared *state.SharedState, info boneDebugInfo, debugBoneHover []*mgl.DebugBoneHover) ([]int, [][]float32) {
 	indexes := make([]int, len(mr.boneLineIndexes))
 	deltas := make([][]float32, len(mr.boneLineIndexes))
 	for i, boneIndex := range mr.boneLineIndexes {
@@ -280,19 +281,19 @@ func (mr *ModelRenderer) fetchBoneLineDeltas(bones *pmx.Bones, shared *state.Sha
 		if bone, err := bones.Get(boneIndex); err == nil {
 			isHover := false
 			for _, hover := range debugBoneHover {
-				if hover.Bone.Index() == bone.Index() && mr.Model.Index() == hover.ModelIndex {
+				if hover.Bone.Index() == bone.Index() && mr.modelIndex == hover.ModelIndex {
 					isHover = true
 					break
 				}
 			}
-			deltas[i] = getBoneDebugColor(bone, shared, isHover)
+			deltas[i] = getBoneDebugColor(bone, shared, info, isHover)
 		}
 	}
 	return indexes, deltas
 }
 
 // fetchBonePointDeltas は、ボーンポイント描画用のデバッグカラー情報を取得します。
-func (mr *ModelRenderer) fetchBonePointDeltas(bones *pmx.Bones, shared *state.SharedState, debugBoneHover []*mgl.DebugBoneHover) ([]int, [][]float32) {
+func (mr *ModelRenderer) fetchBonePointDeltas(bones *model.BoneCollection, shared *state.SharedState, info boneDebugInfo, debugBoneHover []*mgl.DebugBoneHover) ([]int, [][]float32) {
 	indexes := make([]int, len(mr.bonePointIndexes))
 	deltas := make([][]float32, len(mr.bonePointIndexes))
 	for i, boneIndex := range mr.bonePointIndexes {
@@ -300,12 +301,12 @@ func (mr *ModelRenderer) fetchBonePointDeltas(bones *pmx.Bones, shared *state.Sh
 		if bone, err := bones.Get(boneIndex); err == nil {
 			isHover := false
 			for _, hover := range debugBoneHover {
-				if hover.Bone.Index() == bone.Index() && mr.Model.Index() == hover.ModelIndex {
+				if hover.Bone.Index() == bone.Index() && mr.modelIndex == hover.ModelIndex {
 					isHover = true
 					break
 				}
 			}
-			deltas[i] = getBoneDebugColor(bone, shared, isHover)
+			deltas[i] = getBoneDebugColor(bone, shared, info, isHover)
 		}
 	}
 	return indexes, deltas
@@ -324,10 +325,11 @@ func flattenFloat32Matrix(data [][]float32) []float32 {
 // ここでは、各 VertexMorphDelta に対して newVertexMorphDeltaGl を呼び出し、その結果を連結します。
 func convertVertexMorphDeltasToFloat32(deltas *delta.VertexMorphDeltas) []float32 {
 	var result []float32
-	deltas.ForEach(func(index int, vd *delta.VertexMorphDelta) {
+	deltas.ForEach(func(index int, vd *delta.VertexMorphDelta) bool {
 		// newVertexMorphDeltaGl は、1つの VertexMorphDelta を []float32 に変換する既存関数です。
 		data := newVertexMorphDeltaGl(vd)
 		result = append(result, data...)
+		return true
 	})
 	return result
 }

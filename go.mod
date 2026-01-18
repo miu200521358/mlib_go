@@ -9,6 +9,8 @@ replace github.com/miu200521358/win => ../win
 replace github.com/miu200521358/dds => ../dds
 
 require (
+	github.com/ftrvxmtrx/tga v0.0.0-20150524081124-bd8e8d5be13a
+	github.com/miu200521358/dds v0.0.1
 	github.com/tiendc/go-deepcopy v1.7.2
 	golang.org/x/text v0.33.0
 	gonum.org/v1/gonum v0.16.0
@@ -16,7 +18,7 @@ require (
 
 require (
 	github.com/felixge/fgprof v0.9.3 // indirect
-	github.com/go-gl/gl v0.0.0-20231021071112-07e5d0ea2e71 // indirect
+	github.com/go-gl/gl v0.0.0-20231021071112-07e5d0ea2e71
 	github.com/google/pprof v0.0.0-20211214055906-6f57359322fd // indirect
 )
 

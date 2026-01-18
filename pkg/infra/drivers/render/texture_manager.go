@@ -4,21 +4,35 @@
 package render
 
 import (
+	"bytes"
 	"embed"
+	"errors"
 	"fmt"
+	"image"
+	"image/draw"
+	"image/gif"
+	"image/jpeg"
+	"image/png"
+	"io"
+	"io/fs"
+	"os"
 	"path/filepath"
+	"strings"
 
+	"github.com/ftrvxmtrx/tga"
 	"github.com/go-gl/gl/v4.3-core/gl"
-	"github.com/miu200521358/mlib_go/pkg/config/mi18n"
-	"github.com/miu200521358/mlib_go/pkg/config/mlog"
+	"github.com/miu200521358/dds/pkg/dds"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
-	"github.com/miu200521358/mlib_go/pkg/infrastructure/mfile"
+	"github.com/miu200521358/mlib_go/pkg/infra/base/logging"
+	baseerr "github.com/miu200521358/mlib_go/pkg/shared/base/err"
+	"golang.org/x/image/bmp"
+	_ "golang.org/x/image/riff"
+	_ "golang.org/x/image/tiff"
 )
 
 // ----------------------------------------------------------------------------
 // 埋め込みリソース：toonフォルダ内のファイルをすべて埋め込む
-// プロジェクト構成によっては外部ファイルや別の管理方法でもOK
 // ----------------------------------------------------------------------------
 
 //go:embed toon/*
@@ -29,36 +43,32 @@ var toonFiles embed.FS
 // ----------------------------------------------------------------------------
 
 type textureGl struct {
-	// pmx.Texture との紐づけ情報
-	*pmx.Texture
-
-	// 実際の OpenGL テクスチャID
+	// Texture は元のテクスチャ情報。
+	*model.Texture
+	// Id はOpenGLのテクスチャID。
 	Id uint32
-
-	// テクスチャの種類 (通常 or Toon or スフィア)
-	TextureType pmx.TextureType
-
-	// OpenGLのテクスチャユニット (gl.TEXTURE0 等)
+	// TextureType はテクスチャ種別。
+	TextureType model.TextureType
+	// TextureUnitId はOpenGLのテクスチャユニット。
 	TextureUnitId uint32
-
-	// テクスチャユニット番号 (0,1,2,...)
+	// TextureUnitNo はテクスチャユニット番号。
 	TextureUnitNo uint32
-
-	// ミップマップが生成済みかどうか
+	// IsGeneratedMipmap はミップマップ生成済みフラグ。
 	IsGeneratedMipmap bool
-
-	// 初期化済みフラグ
+	// Initialized は初期化済みフラグ。
 	Initialized bool
 }
 
-// bind / unbind / delete は OpenGL のバインド処理
-
+// bind はテクスチャをバインドする。
 func (texGl *textureGl) bind() {
+	if texGl == nil || texGl.Id == 0 {
+		return
+	}
 	gl.ActiveTexture(texGl.TextureUnitId)
 	gl.BindTexture(gl.TEXTURE_2D, texGl.Id)
 
-	// Toonテクスチャの場合はリピートするなど、場合に応じて設定
-	if texGl.TextureType == pmx.TEXTURE_TYPE_TOON {
+	// Toonテクスチャのみ wrap を REPEAT にする
+	if texGl.TextureType == model.TEXTURE_TYPE_TOON {
 		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
 		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
 	}
@@ -73,11 +83,16 @@ func (texGl *textureGl) bind() {
 	}
 }
 
+// unbind はテクスチャのバインドを解除する。
 func (texGl *textureGl) unbind() {
 	gl.BindTexture(gl.TEXTURE_2D, 0)
 }
 
+// delete はテクスチャを削除する。
 func (texGl *textureGl) delete() {
+	if texGl == nil || texGl.Id == 0 {
+		return
+	}
 	gl.DeleteTextures(1, &texGl.Id)
 }
 
@@ -86,89 +101,104 @@ func (texGl *textureGl) delete() {
 // ----------------------------------------------------------------------------
 
 type TextureManager struct {
-	// テクスチャを配列 or マップで保持
-	// 例: インデックスを pmx.Texture.Index() としてアクセス
 	textures     []*textureGl
 	toonTextures []*textureGl
 }
 
-// NewTextureManager : TextureManagerの生成
+// NewTextureManager はTextureManagerを生成する。
 func NewTextureManager() *TextureManager {
 	return &TextureManager{
 		textures:     nil,
-		toonTextures: make([]*textureGl, 10), // Toonは10個分(toon01〜toon10)想定
+		toonTextures: make([]*textureGl, 10),
 	}
 }
 
-// LoadAllTextures : PMXが持つ "通常テクスチャ" / "スフィアテクスチャ" をロードし、
-// インデックスを揃えた配列 (tm.textures) に格納する
-func (tm *TextureManager) LoadAllTextures(windowIndex int, textures *pmx.Textures, modelPath string) error {
-	// まず textures の長さに応じてスライスを確保
-	tm.textures = make([]*textureGl, textures.Length())
+// LoadAllTextures はモデルに紐づくテクスチャをロードする。
+func (tm *TextureManager) LoadAllTextures(windowIndex int, textures *model.TextureCollection, modelPath string) error {
+	if tm == nil || textures == nil {
+		return nil
+	}
+	// インデックスで参照できるようにスライスを確保する
+	tm.textures = make([]*textureGl, textures.Len())
 
-	textures.ForEach(func(index int, texture *pmx.Texture) bool {
+	for _, texture := range textures.Values() {
+		if texture == nil || !texture.IsValid() {
+			continue
+		}
 		texGl, err := tm.loadTextureGl(windowIndex, texture, modelPath)
 		if err != nil {
-			mlog.W(fmt.Sprintf("texture initialize error: %s", err))
-			return true // エラーでも次のテクスチャを処理する
+			logging.DefaultLogger().Warn("テクスチャ読み込みに失敗しました: %v", err)
+			continue
 		}
-		// インデックス位置に格納
-		tm.textures[texture.Index()] = texGl
-		return true
-	})
+		idx := texture.Index()
+		if idx < 0 || idx >= len(tm.textures) {
+			logging.DefaultLogger().Warn("テクスチャインデックスが範囲外です: %d", idx)
+			continue
+		}
+		tm.textures[idx] = texGl
+	}
 
 	return nil
 }
 
-// Texture : 引数の pmx.Texture.Index() に対応する textureGl を返す
-// 見つからなければ nil
+// Texture はインデックスに対応するテクスチャを返す。
 func (tm *TextureManager) Texture(textureIndex int) *textureGl {
-	if textureIndex < 0 || textureIndex >= len(tm.textures) {
+	if tm == nil || textureIndex < 0 || textureIndex >= len(tm.textures) {
 		return nil
 	}
 	return tm.textures[textureIndex]
 }
 
-// LoadToonTextures : toon01〜toon10 を埋め込みリソースから読み込み
+// LoadToonTextures は埋め込みトゥーンテクスチャをロードする。
 func (tm *TextureManager) LoadToonTextures(windowIndex int) error {
+	if tm == nil {
+		return nil
+	}
+	if tm.toonTextures == nil || len(tm.toonTextures) != 10 {
+		tm.toonTextures = make([]*textureGl, 10)
+	}
+
 	for i := 0; i < 10; i++ {
 		filePath := fmt.Sprintf("toon/toon%02d.bmp", i+1)
 
-		// テクスチャ領域
-		toonGl := &textureGl{
-			Texture:     pmx.NewTexture(), // 一応 pmx.Texture構造体を割り当て
-			TextureType: pmx.TEXTURE_TYPE_TOON,
-		}
-		toonGl.Texture.SetIndex(i)       // インデックスは 0〜9
-		toonGl.Texture.SetName(filePath) // ファイル名
-		toonGl.Texture.SetEnglishName(filePath)
-		toonGl.Texture.SetValid(true) // 有効
+		tex := model.NewTexture()
+		tex.SetIndex(i)
+		tex.SetName(filePath)
+		tex.EnglishName = filePath
+		tex.TextureType = model.TEXTURE_TYPE_TOON
+		tex.SetValid(true)
 
-		// OpenGLテクスチャ生成
+		toonGl := &textureGl{
+			Texture:     tex,
+			TextureType: model.TEXTURE_TYPE_TOON,
+		}
+
 		gl.GenTextures(1, &toonGl.Id)
 
 		// Toon用テクスチャユニットを設定
-		if windowIndex == 0 {
+		switch windowIndex {
+		case 0:
 			toonGl.TextureUnitId = gl.TEXTURE10
 			toonGl.TextureUnitNo = 10
-		} else if windowIndex == 1 {
+		case 1:
 			toonGl.TextureUnitId = gl.TEXTURE11
 			toonGl.TextureUnitNo = 11
-		} else if windowIndex == 2 {
+		case 2:
 			toonGl.TextureUnitId = gl.TEXTURE12
 			toonGl.TextureUnitNo = 12
 		}
 
-		// ファイルを埋め込みリソースからロード
-		img, err := mfile.LoadImageFromResources(toonFiles, filePath)
+		img, err := loadImageFromResources(toonFiles, filePath)
 		if err != nil {
 			return err
 		}
-		image := mfile.ConvertToNRGBA(img)
+		image := convertToNRGBA(img)
+		if image == nil {
+			return baseerr.NewImagePackageError("トゥーンテクスチャの変換に失敗しました: "+filePath, nil)
+		}
 
 		toonGl.bind()
 
-		// glTexImage2D
 		gl.TexImage2D(
 			gl.TEXTURE_2D,
 			0,
@@ -183,22 +213,24 @@ func (tm *TextureManager) LoadToonTextures(windowIndex int) error {
 
 		toonGl.unbind()
 		toonGl.Initialized = true
-
 		tm.toonTextures[i] = toonGl
 	}
 	return nil
 }
 
-// ToonTexture : 引数のインデックス (0〜9) の Toonテクスチャを返す
+// ToonTexture は指定インデックスのトゥーンテクスチャを返す。
 func (tm *TextureManager) ToonTexture(index int) *textureGl {
-	if index < 0 || index >= len(tm.toonTextures) {
+	if tm == nil || index < 0 || index >= len(tm.toonTextures) {
 		return nil
 	}
 	return tm.toonTextures[index]
 }
 
-// Delete : 管理しているすべてのテクスチャを削除
+// Delete は管理しているテクスチャを削除する。
 func (tm *TextureManager) Delete() {
+	if tm == nil {
+		return
+	}
 	for _, texGl := range tm.textures {
 		if texGl != nil {
 			texGl.delete()
@@ -211,52 +243,36 @@ func (tm *TextureManager) Delete() {
 	}
 }
 
-// ----------------------------------------------------------------------------
-// 内部メソッド : テクスチャのロード処理
-// ----------------------------------------------------------------------------
-
-func (tm *TextureManager) loadTextureGl(
-	windowIndex int,
-	texture *pmx.Texture,
-	modelPath string,
-) (*textureGl, error) {
+// loadTextureGl は単一テクスチャをOpenGL向けにロードする。
+func (tm *TextureManager) loadTextureGl(windowIndex int, texture *model.Texture, modelPath string) (*textureGl, error) {
+	if texture == nil || texture.Name() == "" {
+		return nil, baseerr.NewImagePackageError("テクスチャ名が不正です", nil)
+	}
 
 	texGl := &textureGl{
-		Texture:     texture, // pmx.Texture と紐づけ
+		Texture:     texture,
 		TextureType: texture.TextureType,
 	}
 
 	// モデルパス + テクスチャ相対パス
 	texPath := filepath.Join(filepath.Dir(modelPath), texture.Name())
 
-	valid, err := mfile.ExistsFile(texPath)
-	if !valid || err != nil {
-		texGl.Initialized = false
-		errMsg := ""
-		if err != nil {
-			errMsg = err.Error()
-		}
-		return texGl, fmt.Errorf("not found texture file: %s, error: %s", texPath, errMsg)
-	}
-
-	// 画像を読み込み
-	img, err := mfile.LoadImage(texPath)
+	img, err := loadImageFromFile(texPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to load image: %s, error: %s", texPath, err.Error())
+		texGl.Initialized = false
+		return texGl, err
 	}
-	image := mfile.ConvertToNRGBA(img)
+	image := convertToNRGBA(img)
+	if image == nil {
+		return texGl, baseerr.NewImagePackageError("テクスチャの変換に失敗しました: "+texture.Name(), nil)
+	}
 
-	// ミップマップが作れるか (2の累乗かどうか)
 	texGl.IsGeneratedMipmap =
 		mmath.IsPowerOfTwo(image.Rect.Size().X) && mmath.IsPowerOfTwo(image.Rect.Size().Y)
 
-	// OpenGLテクスチャ生成
 	gl.GenTextures(1, &texGl.Id)
-
-	// テクスチャユニット決定 (windowIndex によるオフセットを加味)
 	texGl.setTextureUnit(windowIndex)
 
-	// バインドしてデータ転送
 	texGl.bind()
 
 	gl.TexImage2D(
@@ -271,11 +287,10 @@ func (tm *TextureManager) loadTextureGl(
 		gl.Ptr(image.Pix),
 	)
 
-	// ミップマップ生成
 	if texGl.IsGeneratedMipmap {
 		gl.GenerateMipmap(gl.TEXTURE_2D)
 	} else {
-		mlog.D(mi18n.T("ミップマップ生成エラー", map[string]interface{}{"Name": texture.Name()}))
+		logging.DefaultLogger().Debug("ミップマップ生成エラー: %s", texture.Name())
 	}
 
 	texGl.unbind()
@@ -284,10 +299,11 @@ func (tm *TextureManager) loadTextureGl(
 	return texGl, nil
 }
 
-// setTextureUnit : windowIndexとTextureTypeに応じてTextureUnitId, TextureUnitNoを決める
+// setTextureUnit はwindowIndexとTextureTypeに応じてテクスチャユニットを決める。
 func (texGl *textureGl) setTextureUnit(windowIndex int) {
-	// windowIndexごとに 0,3,6.. など
-	// TextureTypeごとに +0, +1, +2.. のように振り分け
+	if texGl == nil {
+		return
+	}
 	var baseUnit uint32
 	switch windowIndex {
 	case 0:
@@ -300,21 +316,142 @@ func (texGl *textureGl) setTextureUnit(windowIndex int) {
 
 	var offsetUnit uint32
 	switch texGl.TextureType {
-	case pmx.TEXTURE_TYPE_TEXTURE:
+	case model.TEXTURE_TYPE_TEXTURE:
 		offsetUnit = 0
-	case pmx.TEXTURE_TYPE_TOON:
+	case model.TEXTURE_TYPE_TOON:
 		offsetUnit = 1
-	case pmx.TEXTURE_TYPE_SPHERE:
+	case model.TEXTURE_TYPE_SPHERE:
 		offsetUnit = 2
 	}
 
-	// 実際のユニットIDを決定
 	texGl.TextureUnitId = baseUnit + offsetUnit
 
-	// ユニット番号も合わせて設定
-	// 例: TEXTURE0 → 0, TEXTURE1 → 1, TEXTURE3 → 3, etc.
-	// OpenGL定数 TEXTURE0 は 33984 (0x84C0) なので注意
-	// ここでは簡易的に (base - TEXTURE0) + offset で計算
-	baseVal := uint32(gl.TEXTURE0) // 0x84C0
+	baseVal := uint32(gl.TEXTURE0)
 	texGl.TextureUnitNo = (texGl.TextureUnitId - baseVal)
+}
+
+// ----------------------------------------------------------------------------
+// 画像読み込み補助
+// ----------------------------------------------------------------------------
+
+// imageOpenFunc は画像データを取得する関数型。
+type imageOpenFunc func() (io.ReadCloser, error)
+
+var errUnsupportedImageFormat = errors.New("unsupported image format")
+
+// loadImageFromResources は埋め込みFSから画像を読み込む。
+func loadImageFromResources(resources embed.FS, fileName string) (image.Image, error) {
+	data, err := fs.ReadFile(resources, fileName)
+	if err != nil {
+		return nil, baseerr.NewFsPackageError("トゥーンテクスチャの読み込みに失敗しました: "+fileName, nil)
+	}
+	open := func() (io.ReadCloser, error) {
+		return io.NopCloser(bytes.NewReader(data)), nil
+	}
+	return loadImage(fileName, fileName, open)
+}
+
+// loadImageFromFile はファイルパスから画像を読み込む。
+func loadImageFromFile(path string) (image.Image, error) {
+	baseName := filepath.Base(path)
+	open := func() (io.ReadCloser, error) {
+		file, err := os.Open(path)
+		if err != nil {
+			return nil, baseerr.NewOsPackageError("テクスチャファイルの読み込みに失敗しました: "+baseName, nil)
+		}
+		return file, nil
+	}
+	return loadImage(path, baseName, open)
+}
+
+// loadImage は拡張子に応じて画像を読み込む。
+func loadImage(path string, displayName string, open imageOpenFunc) (image.Image, error) {
+	candidates := imageExtensionCandidates(path)
+	if len(candidates) == 0 {
+		return nil, baseerr.NewImagePackageError("未対応の画像形式です: "+displayName, nil)
+	}
+	var lastErr error
+	for _, ext := range candidates {
+		reader, err := open()
+		if err != nil {
+			return nil, err
+		}
+		img, err := loadImageByExtension(reader, ext)
+		_ = reader.Close()
+		if err == nil {
+			return img, nil
+		}
+		lastErr = err
+	}
+
+	reader, err := open()
+	if err != nil {
+		return nil, err
+	}
+	defer reader.Close()
+	img, _, err := image.Decode(reader)
+	if err != nil {
+		if lastErr == nil {
+			lastErr = err
+		}
+		return nil, baseerr.NewImagePackageError("テクスチャのデコードに失敗しました: "+displayName, lastErr)
+	}
+	return img, nil
+}
+
+// imageExtensionCandidates は拡張子に応じたデコード順を返す。
+func imageExtensionCandidates(path string) []string {
+	ext := strings.ToLower(strings.TrimPrefix(filepath.Ext(path), "."))
+	switch ext {
+	case "png":
+		return []string{"png", "gif", "jpg", "bmp", "tga", "dds"}
+	case "tga":
+		return []string{"tga", "png", "gif", "jpg", "bmp", "dds"}
+	case "gif":
+		return []string{"gif", "png", "jpg", "bmp", "tga", "dds"}
+	case "dds":
+		return []string{"dds", "png", "gif", "jpg", "bmp", "tga"}
+	case "jpg", "jpeg":
+		return []string{"jpg", "png", "gif", "bmp", "tga", "dds"}
+	case "bmp":
+		return []string{"bmp", "png", "gif", "jpg", "tga", "dds"}
+	case "spa", "sph":
+		return []string{"bmp", "png", "gif", "jpg", "tga", "dds"}
+	default:
+		return nil
+	}
+}
+
+// loadImageByExtension は指定形式でデコードを試みる。
+func loadImageByExtension(reader io.Reader, ext string) (image.Image, error) {
+	switch ext {
+	case "png":
+		return png.Decode(reader)
+	case "tga":
+		return tga.Decode(reader)
+	case "gif":
+		return gif.Decode(reader)
+	case "dds":
+		return dds.Decode(reader)
+	case "jpg", "jpeg":
+		return jpeg.Decode(reader)
+	case "bmp":
+		return bmp.Decode(reader)
+	default:
+		return nil, errUnsupportedImageFormat
+	}
+}
+
+// convertToNRGBA は画像を NRGBA に変換する。
+func convertToNRGBA(img image.Image) *image.NRGBA {
+	if img == nil {
+		return nil
+	}
+	if rgba, ok := img.(*image.NRGBA); ok {
+		return rgba
+	}
+	bounds := img.Bounds()
+	rgba := image.NewNRGBA(bounds)
+	draw.Draw(rgba, bounds, img, bounds.Min, draw.Src)
+	return rgba
 }

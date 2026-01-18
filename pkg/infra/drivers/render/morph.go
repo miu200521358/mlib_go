@@ -11,9 +11,10 @@ import (
 func newVertexMorphDeltasGl(mds *delta.VertexMorphDeltas) ([]int, [][]float32) {
 	vertices := make([][]float32, 0)
 	indexes := make([]int, 0)
-	mds.ForEach(func(i int, v *delta.VertexMorphDelta) {
+	mds.ForEach(func(i int, v *delta.VertexMorphDelta) bool {
 		vertices = append(vertices, newVertexMorphDeltaGl(v))
 		indexes = append(indexes, i)
+		return true
 	})
 	return indexes, vertices
 }
