@@ -7,6 +7,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_motion/vmd"
+	"github.com/miu200521358/mlib_go/pkg/adapter/io_motion/vpd"
 	"github.com/miu200521358/mlib_go/pkg/shared/hashable"
 )
 
@@ -18,7 +19,10 @@ type VmdVpdRepository struct {
 
 // NewVmdVpdRepository はVmdVpdRepositoryを生成する。
 func NewVmdVpdRepository() *VmdVpdRepository {
-	return &VmdVpdRepository{vmdRepository: vmd.NewVmdRepository()}
+	return &VmdVpdRepository{
+		vmdRepository: vmd.NewVmdRepository(),
+		vpdRepository: vpd.NewVpdRepository(),
+	}
 }
 
 // SetVpdRepository はVPD読み取りリポジトリを設定する。

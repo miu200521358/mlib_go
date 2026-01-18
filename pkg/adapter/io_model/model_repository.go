@@ -7,6 +7,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_model/pmx"
+	"github.com/miu200521358/mlib_go/pkg/adapter/io_model/x"
 	"github.com/miu200521358/mlib_go/pkg/shared/hashable"
 )
 
@@ -20,6 +21,7 @@ type ModelRepository struct {
 func NewModelRepository() *ModelRepository {
 	return &ModelRepository{
 		pmxRepository: pmx.NewPmxRepository(),
+		xRepository:   x.NewXRepository(),
 	}
 }
 
