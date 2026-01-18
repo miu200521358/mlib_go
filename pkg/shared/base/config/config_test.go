@@ -35,11 +35,14 @@ func TestAppConfigUnmarshal(t *testing.T) {
 	if cfg.Env() != APP_ENV_DEV {
 		t.Errorf("Env default: got=%v", cfg.Env())
 	}
+	if cfg.CursorPositionLimit != 100 {
+		t.Errorf("CursorPositionLimit default: got=%v", cfg.CursorPositionLimit)
+	}
 }
 
 // TestAppConfigUnmarshalAppName はAppName優先とViewerWindowSize優先を確認する。
 func TestAppConfigUnmarshalAppName(t *testing.T) {
-	payload := `{"AppName":"MainApp","Name":"Legacy","Env":"stg","ViewerWindowSize":{"Width":3,"Height":4},"ViewWindowSize":{"Width":7,"Height":8},"CloseConfirm":true}`
+	payload := `{"AppName":"MainApp","Name":"Legacy","Env":"stg","ViewerWindowSize":{"Width":3,"Height":4},"ViewWindowSize":{"Width":7,"Height":8},"CloseConfirm":true,"CursorPositionLimit":5}`
 	var cfg AppConfig
 	if err := json.Unmarshal([]byte(payload), &cfg); err != nil {
 		t.Fatalf("Unmarshal failed: %v", err)
@@ -55,6 +58,9 @@ func TestAppConfigUnmarshalAppName(t *testing.T) {
 	}
 	if !cfg.IsCloseConfirmEnabled() {
 		t.Errorf("CloseConfirm: expected true")
+	}
+	if cfg.CursorPositionLimit != 5 {
+		t.Errorf("CursorPositionLimit: got=%v", cfg.CursorPositionLimit)
 	}
 }
 

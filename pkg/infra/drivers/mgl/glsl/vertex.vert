@@ -8,7 +8,7 @@ uniform sampler2D boneMatrixTexture;
 uniform int boneMatrixWidth;
 uniform int boneMatrixHeight;
 
-uniform vec3 cursorPositions[30];
+uniform vec3 cursorPositions[100];
 uniform float cursorThreshold;
 
 in layout(location = 0) vec3 position;
@@ -209,7 +209,7 @@ mat4 inverse(mat4 m) {
 
 float distanceToVectors(vec3 point) {
     float minDistance = 1000000.0;
-    for(int i = 0; i < 30; i++) {
+    for(int i = 0; i < 100; i++) {
         vec3 cursorPosition = cursorPositions[i];
         if (cursorPosition.x == 0 && cursorPosition.y == 0 && cursorPosition.z == 0) {
             continue;

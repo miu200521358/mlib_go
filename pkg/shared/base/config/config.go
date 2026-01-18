@@ -32,6 +32,7 @@ type AppConfig struct {
 	CloseConfirm      bool       `json:"CloseConfirm"`
 	IconPath          string     `json:"IconPath"`
 	IconImagePath     string     `json:"IconImagePath"`
+	CursorPositionLimit int      `json:"CursorPositionLimit"`
 }
 
 // UnmarshalJSON は旧キーを吸収して設定を取り込む。
@@ -48,6 +49,7 @@ func (ac *AppConfig) UnmarshalJSON(data []byte) error {
 		CloseConfirm      bool       `json:"CloseConfirm"`
 		IconPath          string     `json:"IconPath"`
 		IconImagePath     string     `json:"IconImagePath"`
+		CursorPositionLimit int      `json:"CursorPositionLimit"`
 	}
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
@@ -67,6 +69,10 @@ func (ac *AppConfig) UnmarshalJSON(data []byte) error {
 	ac.CloseConfirm = raw.CloseConfirm
 	ac.IconPath = raw.IconPath
 	ac.IconImagePath = raw.IconImagePath
+	ac.CursorPositionLimit = raw.CursorPositionLimit
+	if ac.CursorPositionLimit <= 0 {
+		ac.CursorPositionLimit = 100
+	}
 	return nil
 }
 

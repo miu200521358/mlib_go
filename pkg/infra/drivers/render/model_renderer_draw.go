@@ -51,6 +51,9 @@ type ModelDrawer struct {
 
 	// SSBO
 	ssbo uint32
+
+	// cursorPositionLimit はカーソル位置の上限数。
+	cursorPositionLimit int
 }
 
 // delete はModelDrawerが保持するリソースを解放します
@@ -180,6 +183,11 @@ func (mr *ModelRenderer) drawCursorLine(shader graphics_api.IShader, cursorPosit
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.ALWAYS)
 
+	vertexCount := len(cursorPositions) / 3
+	if limit := mr.effectiveCursorPositionLimit(); limit < vertexCount {
+		vertexCount = limit
+	}
+
 	program := shader.Program(graphics_api.ProgramTypeCursor)
 	gl.UseProgram(program)
 
@@ -187,7 +195,7 @@ func (mr *ModelRenderer) drawCursorLine(shader graphics_api.IShader, cursorPosit
 	gl.Uniform4fv(colorUniform, 1, &vertexColor[0])
 
 	mr.cursorPositionBufferHandle.Bind()
-	gl.DrawArrays(gl.LINES, 0, int32(len(cursorPositions)/3))
+	gl.DrawArrays(gl.LINES, 0, int32(vertexCount))
 	mr.cursorPositionBufferHandle.Unbind()
 
 	gl.UseProgram(0)
@@ -249,12 +257,20 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	thresholdUniform := gl.GetUniformLocation(program, gl.Str(mgl.ShaderCursorThreshold))
 	gl.Uniform1f(thresholdUniform, shader.Camera().FieldOfView)
 
-	const maxCursorPositions = 30
+	const maxCursorPositions = 100
+	effectiveLimit := mr.effectiveCursorPositionLimit()
 	cursorPositionsUniform := gl.GetUniformLocation(program, gl.Str(mgl.ShaderCursorPositions))
 	var cursorValues [maxCursorPositions * 3]float32
 	srcCursorPositions := cursorPositions
 	if removeCursorPositions != nil {
 		srcCursorPositions = removeCursorPositions
+	}
+	maxValueCount := effectiveLimit * 3
+	if maxValueCount > len(cursorValues) {
+		maxValueCount = len(cursorValues)
+	}
+	if len(srcCursorPositions) > maxValueCount {
+		srcCursorPositions = srcCursorPositions[:maxValueCount]
 	}
 	if len(srcCursorPositions) > len(cursorValues) {
 		srcCursorPositions = srcCursorPositions[:len(cursorValues)]
@@ -286,7 +302,15 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	for _, idx := range nowNoSelectedVertexes {
 		delete(selectedSet, idx)
 	}
-	if vertexCount == 0 || mr.ssbo == 0 || (len(cursorPositions) == 0 && len(removeCursorPositions) == 0) {
+	truncatedCursorPositions := cursorPositions
+	if len(truncatedCursorPositions) > maxValueCount {
+		truncatedCursorPositions = truncatedCursorPositions[:maxValueCount]
+	}
+	truncatedRemoveCursorPositions := removeCursorPositions
+	if len(truncatedRemoveCursorPositions) > maxValueCount {
+		truncatedRemoveCursorPositions = truncatedRemoveCursorPositions[:maxValueCount]
+	}
+	if vertexCount == 0 || mr.ssbo == 0 || (len(truncatedCursorPositions) == 0 && len(truncatedRemoveCursorPositions) == 0) {
 		return selectedSetToSlice(selectedSet)
 	}
 
@@ -319,6 +343,20 @@ func (mr *ModelRenderer) drawSelectedVertex(
 }
 
 // --- 内部ヘルパー関数 ---
+
+// effectiveCursorPositionLimit はカーソル位置の上限値を取得する。
+func (mr *ModelRenderer) effectiveCursorPositionLimit() int {
+	const defaultCursorPositionLimit = 100
+	const maxCursorPositions = 100
+	limit := mr.cursorPositionLimit
+	if limit <= 0 {
+		limit = defaultCursorPositionLimit
+	}
+	if limit > maxCursorPositions {
+		return maxCursorPositions
+	}
+	return limit
+}
 
 // selectedSetToSlice は選択頂点インデックス集合をスライス化する。
 func selectedSetToSlice(selectedSet map[int]struct{}) []int {

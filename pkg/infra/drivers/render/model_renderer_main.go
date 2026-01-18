@@ -52,6 +52,8 @@ func NewModelRenderer(windowIndex int, modelData *model.PmxModel) *ModelRenderer
 		modelIndex:  0,
 	}
 
+	applyTextureTypesForRender(modelData)
+
 	tm := NewTextureManager()
 	if err := tm.LoadToonTextures(windowIndex); err != nil {
 		logging.DefaultLogger().Warn("トゥーンテクスチャの読み込みに失敗しました: %v", err)
@@ -86,6 +88,14 @@ func NewModelRenderer(windowIndex int, modelData *model.PmxModel) *ModelRenderer
 // Hash はモデルのハッシュ値を返す。
 func (mr *ModelRenderer) Hash() string {
 	return mr.hash
+}
+
+// SetCursorPositionLimit はカーソル位置の上限数を設定する。
+func (mr *ModelRenderer) SetCursorPositionLimit(limit int) {
+	if mr == nil {
+		return
+	}
+	mr.cursorPositionLimit = limit
 }
 
 // SetModelIndex はモデルインデックスを設定する。
@@ -160,5 +170,49 @@ func (mr *ModelRenderer) Render(shader graphics_api.IShader, shared *state.Share
 	// ボーン描画
 	if shared.IsAnyBoneVisible() {
 		mr.drawBone(mr.windowIndex, shader, mr.Model.Bones, shared, paddedMatrixes, matrixWidth, matrixHeight, debugBoneHover)
+	}
+}
+
+// applyTextureTypesForRender は材質参照に基づいてテクスチャ種別を確定する。
+func applyTextureTypesForRender(modelData *model.PmxModel) {
+	if modelData == nil || modelData.Materials == nil || modelData.Textures == nil {
+		return
+	}
+
+	normal := make(map[int]struct{})
+	sphere := make(map[int]struct{})
+	toon := make(map[int]struct{})
+
+	for _, material := range modelData.Materials.Values() {
+		if material == nil {
+			continue
+		}
+		if material.TextureIndex >= 0 {
+			normal[material.TextureIndex] = struct{}{}
+		}
+		if material.SphereMode != model.SPHERE_MODE_INVALID && material.SphereTextureIndex >= 0 {
+			sphere[material.SphereTextureIndex] = struct{}{}
+		}
+		if material.ToonSharingFlag == model.TOON_SHARING_INDIVIDUAL && material.ToonTextureIndex >= 0 {
+			toon[material.ToonTextureIndex] = struct{}{}
+		}
+	}
+
+	for _, texture := range modelData.Textures.Values() {
+		if texture == nil || !texture.IsValid() {
+			continue
+		}
+		idx := texture.Index()
+		if _, ok := normal[idx]; ok {
+			texture.TextureType = model.TEXTURE_TYPE_TEXTURE
+			continue
+		}
+		if _, ok := sphere[idx]; ok {
+			texture.TextureType = model.TEXTURE_TYPE_SPHERE
+			continue
+		}
+		if _, ok := toon[idx]; ok {
+			texture.TextureType = model.TEXTURE_TYPE_TOON
+		}
 	}
 }
