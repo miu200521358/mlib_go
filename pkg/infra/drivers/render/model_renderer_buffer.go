@@ -62,7 +62,7 @@ func (mr *ModelRenderer) initializeBuffers(factory *mgl.BufferFactory, modelData
 
 	// 法線表示用のインデックスバッファ
 	normalIndexes := createNormalIndexesData(modelData)
-
+	md.normalIndexCount = len(normalIndexes)
 	md.normalIbo = factory.NewIndexBuffer(gl.Ptr(normalIndexes), len(normalIndexes))
 
 	// ボーンラインバッファの設定
@@ -90,6 +90,7 @@ func (mr *ModelRenderer) initializeBuffers(factory *mgl.BufferFactory, modelData
 
 	// 選択頂点用のインデックスバッファ（すべての頂点のインデックス）
 	indexes := createAllVertexIndexesData(modelData)
+	md.selectedVertexCount = len(indexes)
 	md.selectedVertexIbo = factory.NewIndexBuffer(gl.Ptr(indexes), len(indexes))
 
 	// // カーソル位置表示用バッファの初期化

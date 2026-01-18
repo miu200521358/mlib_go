@@ -343,7 +343,7 @@ var errUnsupportedImageFormat = errors.New("unsupported image format")
 func loadImageFromResources(resources embed.FS, fileName string) (image.Image, error) {
 	data, err := fs.ReadFile(resources, fileName)
 	if err != nil {
-		return nil, baseerr.NewFsPackageError("トゥーンテクスチャの読み込みに失敗しました: "+fileName, nil)
+		return nil, baseerr.NewFsPackageError("トゥーンテクスチャの読み込みに失敗しました: "+fileName, err)
 	}
 	open := func() (io.ReadCloser, error) {
 		return io.NopCloser(bytes.NewReader(data)), nil
@@ -357,7 +357,7 @@ func loadImageFromFile(path string) (image.Image, error) {
 	open := func() (io.ReadCloser, error) {
 		file, err := os.Open(path)
 		if err != nil {
-			return nil, baseerr.NewOsPackageError("テクスチャファイルの読み込みに失敗しました: "+baseName, nil)
+			return nil, baseerr.NewOsPackageError("テクスチャファイルの読み込みに失敗しました: "+baseName, err)
 		}
 		return file, nil
 	}

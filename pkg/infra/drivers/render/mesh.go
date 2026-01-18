@@ -16,9 +16,9 @@ import (
 
 // ライト定数。
 const (
-	LIGHT_DIFFUSE  float32 = 0
-	LIGHT_SPECULAR float32 = 154.0 / 255.0
-	LIGHT_AMBIENT  float32 = 154.0 / 255.0
+	LightDiffuse  float32 = 0
+	LightSpecular float32 = 154.0 / 255.0
+	LightAmbient  float32 = 154.0 / 255.0
 )
 
 // MeshDelta は材質モーフ差分を描画用に変換した値を表す。
@@ -58,10 +58,12 @@ func NewMeshDelta(materialDelta *delta.MaterialMorphDelta) *MeshDelta {
 	}
 }
 
+// vec3ToMgl はmmath.Vec3をmgl32.Vec3へ変換する。
 func vec3ToMgl(v mmath.Vec3) mgl32.Vec3 {
 	return mgl32.Vec3{float32(v.X), float32(v.Y), float32(v.Z)}
 }
 
+// vec4ToMgl はmmath.Vec4をmgl32.Vec4へ変換する。
 func vec4ToMgl(v mmath.Vec4) mgl32.Vec4 {
 	return mgl32.Vec4{float32(v.X), float32(v.Y), float32(v.Z), float32(v.W)}
 }
@@ -141,13 +143,13 @@ func (mr *MeshRenderer) drawModel(
 	gl.Uniform3fv(emissiveUniform, 1, &meshDelta.Emissive[0])
 
 	lightDiffuseUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.ShaderLightDiffuse))
-	gl.Uniform3f(lightDiffuseUniform, LIGHT_DIFFUSE, LIGHT_DIFFUSE, LIGHT_DIFFUSE)
+	gl.Uniform3f(lightDiffuseUniform, LightDiffuse, LightDiffuse, LightDiffuse)
 
 	lightSpecularUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.ShaderLightSpecular))
-	gl.Uniform3f(lightSpecularUniform, LIGHT_SPECULAR, LIGHT_SPECULAR, LIGHT_SPECULAR)
+	gl.Uniform3f(lightSpecularUniform, LightSpecular, LightSpecular, LightSpecular)
 
 	lightAmbientUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.ShaderLightAmbient))
-	gl.Uniform3f(lightAmbientUniform, LIGHT_AMBIENT, LIGHT_AMBIENT, LIGHT_AMBIENT)
+	gl.Uniform3f(lightAmbientUniform, LightAmbient, LightAmbient, LightAmbient)
 
 	useTextureUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.ShaderUseTexture))
 	hasTexture := (mr.material.texture != nil)

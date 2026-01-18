@@ -45,8 +45,8 @@ func (m *IntermediateMsaaBuffer) init() {
 	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, m.msaaDepthBuffer)
 
 	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
-		m.initErr = graphics_api.NewFramebufferIncomplete("middleMsaa multisample FBO is not complete", nil)
-		logging.DefaultLogger().Warn("middleMsaa multisample FBO is not complete")
+		m.initErr = graphics_api.NewFramebufferIncomplete("中間MSAAのマルチサンプルFBOが不完全です", nil)
+		logging.DefaultLogger().Warn("中間MSAAのマルチサンプルFBOが不完全です")
 	}
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 
@@ -66,8 +66,8 @@ func (m *IntermediateMsaaBuffer) init() {
 	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, m.intermediateDepthTexture, 0)
 
 	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
-		m.initErr = graphics_api.NewFramebufferIncomplete("middleMsaa intermediate FBO is not complete", nil)
-		logging.DefaultLogger().Warn("middleMsaa intermediate FBO is not complete")
+		m.initErr = graphics_api.NewFramebufferIncomplete("中間MSAAの中間FBOが不完全です", nil)
+		logging.DefaultLogger().Warn("中間MSAAの中間FBOが不完全です")
 	}
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 }

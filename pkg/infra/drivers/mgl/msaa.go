@@ -50,8 +50,8 @@ func (m *MsaaBuffer) init() {
 	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, m.depthBuffer)
 
 	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
-		m.initErr = graphics_api.NewFramebufferIncomplete("MSAA framebuffer is not complete", nil)
-		logging.DefaultLogger().Warn("MSAA framebuffer is not complete")
+		m.initErr = graphics_api.NewFramebufferIncomplete("MSAAのフレームバッファが不完全です", nil)
+		logging.DefaultLogger().Warn("MSAAのフレームバッファが不完全です")
 	}
 
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
@@ -70,8 +70,8 @@ func (m *MsaaBuffer) init() {
 	gl.ReadBuffer(gl.NONE)
 
 	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
-		m.initErr = graphics_api.NewFramebufferIncomplete("resolve framebuffer is not complete", nil)
-		logging.DefaultLogger().Warn("Resolve framebuffer is not complete")
+		m.initErr = graphics_api.NewFramebufferIncomplete("MSAA解決用フレームバッファが不完全です", nil)
+		logging.DefaultLogger().Warn("MSAA解決用フレームバッファが不完全です")
 	}
 
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
@@ -94,7 +94,7 @@ func (m *MsaaBuffer) ReadDepthAt(x, y, width, height int) float32 {
 
 	gl.BindFramebuffer(gl.FRAMEBUFFER, m.resolveFBO)
 	if status := gl.CheckFramebufferStatus(gl.FRAMEBUFFER); status != gl.FRAMEBUFFER_COMPLETE {
-		logging.DefaultLogger().Warn("Framebuffer is not complete: %v", status)
+		logging.DefaultLogger().Warn("フレームバッファが不完全です: %v", status)
 	}
 
 	var depth float32
@@ -179,7 +179,7 @@ func (m *MsaaBuffer) Resize(width, height int) {
 	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, m.depthBuffer)
 
 	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
-		logging.DefaultLogger().Warn("Resized MSAA framebuffer is not complete")
+		logging.DefaultLogger().Warn("リサイズ後のMSAAフレームバッファが不完全です")
 	}
 
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
@@ -196,7 +196,7 @@ func (m *MsaaBuffer) Resize(width, height int) {
 	gl.ReadBuffer(gl.NONE)
 
 	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
-		logging.DefaultLogger().Warn("Resized resolve framebuffer is not complete")
+		logging.DefaultLogger().Warn("リサイズ後のMSAA解決用フレームバッファが不完全です")
 	}
 
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)

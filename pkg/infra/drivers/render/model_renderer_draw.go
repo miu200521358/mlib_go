@@ -27,6 +27,7 @@ type ModelDrawer struct {
 	normalBufferHandle *mgl.VertexBufferHandle
 	normalIbo          *mgl.IndexBuffer
 	normalVertices     []float32
+	normalIndexCount   int
 
 	boneLineBufferHandle *mgl.VertexBufferHandle
 	boneLineIbo          *mgl.IndexBuffer
@@ -40,6 +41,7 @@ type ModelDrawer struct {
 
 	selectedVertexBufferHandle *mgl.VertexBufferHandle
 	selectedVertexIbo          *mgl.IndexBuffer
+	selectedVertexCount        int
 
 	cursorPositionBufferHandle *mgl.VertexBufferHandle
 
@@ -104,7 +106,7 @@ func (mr *ModelRenderer) drawNormal(windowIndex int, shader graphics_api.IShader
 
 	gl.DrawElements(
 		gl.LINES,
-		int32(len(mr.normalVertices)),
+		int32(mr.normalIndexCount),
 		gl.UNSIGNED_INT,
 		nil,
 	)
@@ -247,16 +249,22 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	thresholdUniform := gl.GetUniformLocation(program, gl.Str(mgl.ShaderCursorThreshold))
 	gl.Uniform1f(thresholdUniform, shader.Camera().FieldOfView)
 
+	const maxCursorPositions = 30
 	cursorPositionsUniform := gl.GetUniformLocation(program, gl.Str(mgl.ShaderCursorPositions))
+	var cursorValues [maxCursorPositions * 3]float32
+	srcCursorPositions := cursorPositions
 	if removeCursorPositions != nil {
-		gl.Uniform3fv(cursorPositionsUniform, int32(len(removeCursorPositions)/3), &removeCursorPositions[0])
-	} else {
-		gl.Uniform3fv(cursorPositionsUniform, int32(len(cursorPositions)/3), &cursorPositions[0])
+		srcCursorPositions = removeCursorPositions
 	}
+	if len(srcCursorPositions) > len(cursorValues) {
+		srcCursorPositions = srcCursorPositions[:len(cursorValues)]
+	}
+	copy(cursorValues[:], srcCursorPositions)
+	gl.Uniform3fv(cursorPositionsUniform, maxCursorPositions, &cursorValues[0])
 
 	gl.DrawElements(
 		gl.POINTS,
-		int32(len(mr.vertices)),
+		int32(mr.selectedVertexCount),
 		gl.UNSIGNED_INT,
 		nil,
 	)

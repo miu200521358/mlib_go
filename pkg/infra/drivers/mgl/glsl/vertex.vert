@@ -209,8 +209,8 @@ mat4 inverse(mat4 m) {
 
 float distanceToVectors(vec3 point) {
     float minDistance = 1000000.0;
-    for(int i = 0; i < 100; i++) {
-        vec3 cursorPosition = cursorPositions[i-1];
+    for(int i = 0; i < 30; i++) {
+        vec3 cursorPosition = cursorPositions[i];
         if (cursorPosition.x == 0 && cursorPosition.y == 0 && cursorPosition.z == 0) {
             continue;
         }

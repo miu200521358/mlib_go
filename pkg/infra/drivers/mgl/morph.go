@@ -5,7 +5,7 @@ package mgl
 
 import "github.com/miu200521358/mlib_go/pkg/domain/delta"
 
-// newVertexMorphDeltasGl は頂点モーフ変形情報をOpenGL用に変換
+// newVertexMorphDeltaGl は頂点モーフ差分をOpenGL用に変換する。
 func newVertexMorphDeltaGl(md *delta.VertexMorphDelta) []float32 {
 	if md == nil {
 		return nil

@@ -89,7 +89,7 @@ func (m *OverrideRenderer) initFBOAndTexture() {
 	status := gl.CheckFramebufferStatus(gl.FRAMEBUFFER)
 	if status != gl.FRAMEBUFFER_COMPLETE {
 		m.initErr = graphics_api.NewFramebufferIncomplete(
-			"Override framebuffer is not complete: "+getFrameBufferStatusString(status),
+			"オーバーライド用フレームバッファが不完全です: "+getFrameBufferStatusString(status),
 			nil,
 		)
 		logging.DefaultLogger().Warn("オーバーライドFBOの初期化に失敗しました: %v", m.initErr)
@@ -146,6 +146,10 @@ func (m *OverrideRenderer) Unbind() {
 
 // Resolve は共有テクスチャを用いて半透明合成を行う。
 func (m *OverrideRenderer) Resolve() {
+	if m.sharedTextureID == nil || *m.sharedTextureID == 0 {
+		logging.DefaultLogger().Warn("共有テクスチャが未設定のためオーバーライド合成をスキップします")
+		return
+	}
 	// 合成描画
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)

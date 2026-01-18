@@ -8,6 +8,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/mgl"
 )
 
+// newVertexMorphDeltasGl は頂点モーフ差分をOpenGL向けの配列へ変換する。
 func newVertexMorphDeltasGl(mds *delta.VertexMorphDeltas) ([]int, [][]float32) {
 	vertices := make([][]float32, 0)
 	indexes := make([]int, 0)
@@ -19,6 +20,7 @@ func newVertexMorphDeltasGl(mds *delta.VertexMorphDeltas) ([]int, [][]float32) {
 	return indexes, vertices
 }
 
+// newVertexMorphDeltaGl は単一の頂点モーフ差分をOpenGL向けに変換する。
 func newVertexMorphDeltaGl(md *delta.VertexMorphDelta) []float32 {
 	var p0, p1, p2 float32
 	if md.Position != nil {

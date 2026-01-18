@@ -34,6 +34,7 @@ type ModelRenderer struct {
 	meshes []*MeshRenderer
 }
 
+// NewModelRendererEmpty は空のModelRendererを生成する。
 func NewModelRendererEmpty() *ModelRenderer {
 	return &ModelRenderer{
 		ModelDrawer: &ModelDrawer{},
@@ -82,6 +83,7 @@ func NewModelRenderer(windowIndex int, modelData *model.PmxModel) *ModelRenderer
 	return mr
 }
 
+// Hash はモデルのハッシュ値を返す。
 func (mr *ModelRenderer) Hash() string {
 	return mr.hash
 }

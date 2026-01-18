@@ -320,7 +320,12 @@ func (h *VertexBufferHandle) UpdateBoneDeltas(boneIndexes []int, boneDeltas [][]
 
 	// 各ボーンごとに、対象の領域に boneDelta をコピーする
 	// ここで、各頂点の先頭から (vidx * StrideSize) の後に、さらにボーン変形用領域 vboVertexSize があると想定
-	for i, vidx := range boneIndexes {
+	limit := len(boneIndexes)
+	if len(boneDeltas) < limit {
+		limit = len(boneDeltas)
+	}
+	for i := 0; i < limit; i++ {
+		vidx := boneIndexes[i]
 		vd := boneDeltas[i]
 		// マッピングしたスライスは float32 の配列になっているので、バイト単位のオフセットではなく float 単位のオフセットで指定
 		offset := vidx*h.StrideSize + vboVertexSize
@@ -331,6 +336,9 @@ func (h *VertexBufferHandle) UpdateBoneDeltas(boneIndexes []int, boneDeltas [][]
 
 // UpdateDebugBuffer はデバッグバッファのデータを更新する。
 func (h *VertexBufferHandle) UpdateDebugBuffer(vertices []float32) {
+	if len(vertices) == 0 {
+		return
+	}
 	// 位置, 色, 透明度
 	fieldCount := 3 + 3 + 1
 	h.VBO.BufferDataWithLayout(len(vertices), fieldCount, h.FloatSize, gl.Ptr(&vertices[0]), graphics_api.BufferUsageStatic)

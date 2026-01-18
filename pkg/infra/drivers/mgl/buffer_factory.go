@@ -47,9 +47,13 @@ func (f *BufferFactory) NewDebugBuffer(ptr unsafe.Pointer, arrayCount int) *Vert
 // NewOverrideBuffer はオーバーライド用バッファを生成する。
 func (f *BufferFactory) NewOverrideBuffer(overrideVertices []float32) *VertexBufferHandle {
 	builder := NewVertexBufferBuilder()
+	var ptr unsafe.Pointer
+	if len(overrideVertices) > 0 {
+		ptr = unsafe.Pointer(&overrideVertices[0])
+	}
 	return builder.
 		AddOverrideAttributes().
-		SetData(unsafe.Pointer(&overrideVertices[0]), len(overrideVertices)).
+		SetData(ptr, len(overrideVertices)).
 		Build()
 }
 
@@ -70,8 +74,12 @@ func (f *BufferFactory) NewIndexBuffer(ptr unsafe.Pointer, arrayCount int) *Inde
 // NewFloorBuffer は床表示用バッファを生成する。
 func (f *BufferFactory) NewFloorBuffer(floorVertices []float32) *VertexBufferHandle {
 	builder := NewVertexBufferBuilder()
+	var ptr unsafe.Pointer
+	if len(floorVertices) > 0 {
+		ptr = unsafe.Pointer(&floorVertices[0])
+	}
 	return builder.
 		AddPositionColorAttributes().
-		SetData(unsafe.Pointer(&floorVertices[0]), len(floorVertices)).
+		SetData(ptr, len(floorVertices)).
 		Build()
 }
