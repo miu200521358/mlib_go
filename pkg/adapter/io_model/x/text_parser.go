@@ -546,6 +546,9 @@ func (p *textParser) parseMeshFace() ([]*model.Face, error) {
 	if err != nil {
 		return nil, err
 	}
+	if count < 3 {
+		return nil, fmt.Errorf("Meshの面頂点数が不足しています")
+	}
 	if _, err := p.expect(tokSemicolon); err != nil {
 		return nil, err
 	}

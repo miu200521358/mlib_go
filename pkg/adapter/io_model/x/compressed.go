@@ -66,6 +66,9 @@ func decompressMSZip(data []byte) ([]byte, error) {
 		copy(out[outPos:], decoded)
 		outPos += len(decoded)
 	}
+	if outPos != int(finalSize) {
+		return nil, fmt.Errorf("X圧縮データの展開サイズが不足しています")
+	}
 	return out[:outPos], nil
 }
 

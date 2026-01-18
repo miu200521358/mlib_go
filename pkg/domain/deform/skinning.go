@@ -55,11 +55,11 @@ func ApplySkinning(
 
 // RecomputeSdef はSDEFの再計算結果を返す。
 func RecomputeSdef(bone0Global, bone1Global, vertexPos mmath.Vec3) (mmath.Vec3, mmath.Vec3, mmath.Vec3) {
-	if isInvalidVec3(bone0Global) || isInvalidVec3(bone1Global) {
-		c := vertexPos
-		r0 := bone0Global.Added(c).MuledScalar(0.5)
-		r1 := bone1Global.Added(c).MuledScalar(0.5)
-		return c, r0, r1
+	if isInvalidVec3(bone0Global) {
+		bone0Global = vertexPos
+	}
+	if isInvalidVec3(bone1Global) {
+		bone1Global = vertexPos
 	}
 	c := mmath.IntersectLinePoint(bone0Global, bone1Global, vertexPos)
 	if isInvalidVec3(c) {
