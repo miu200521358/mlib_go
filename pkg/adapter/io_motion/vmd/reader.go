@@ -33,17 +33,18 @@ func (v *vmdReader) Read(motionData *motion.VmdMotion) error {
 	if err := v.readMorphFrames(motionData); err != nil {
 		return err
 	}
+	// Camera/Light/Shadow/IK の読込エラーは仕様上無視する。
 	if err := v.readCameraFrames(motionData); err != nil {
-		return err
+		return nil
 	}
 	if err := v.readLightFrames(motionData); err != nil {
-		return err
+		return nil
 	}
 	if err := v.readShadowFrames(motionData); err != nil {
-		return err
+		return nil
 	}
 	if err := v.readIkFrames(motionData); err != nil {
-		return err
+		return nil
 	}
 	return nil
 }
