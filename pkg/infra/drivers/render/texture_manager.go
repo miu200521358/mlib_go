@@ -118,6 +118,7 @@ func (tm *TextureManager) LoadAllTextures(windowIndex int, textures *model.Textu
 	if tm == nil || textures == nil {
 		return nil
 	}
+	var loadErr error
 	// インデックスで参照できるようにスライスを確保する
 	tm.textures = make([]*textureGl, textures.Len())
 
@@ -127,6 +128,9 @@ func (tm *TextureManager) LoadAllTextures(windowIndex int, textures *model.Textu
 		}
 		texGl, err := tm.loadTextureGl(windowIndex, texture, modelPath)
 		if err != nil {
+			if loadErr == nil {
+				loadErr = err
+			}
 			logging.DefaultLogger().Warn("テクスチャ読み込みに失敗しました: %v", err)
 			continue
 		}
@@ -138,7 +142,7 @@ func (tm *TextureManager) LoadAllTextures(windowIndex int, textures *model.Textu
 		tm.textures[idx] = texGl
 	}
 
-	return nil
+	return loadErr
 }
 
 // Texture はインデックスに対応するテクスチャを返す。

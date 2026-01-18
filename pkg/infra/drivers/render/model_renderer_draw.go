@@ -89,6 +89,10 @@ func (md *ModelDrawer) delete() {
 	if md.cursorPositionBufferHandle != nil {
 		md.cursorPositionBufferHandle.Delete()
 	}
+	if md.ssbo != 0 {
+		gl.DeleteBuffers(1, &md.ssbo)
+		md.ssbo = 0
+	}
 }
 
 // drawNormal 描画処理：法線表示
@@ -182,6 +186,9 @@ func (mr *ModelRenderer) drawCursorLine(shader graphics_api.IShader, cursorPosit
 	// モデルの前面に描画するため深度テストを一時無効化
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.ALWAYS)
+	if mr.cursorPositionBufferHandle == nil {
+		return
+	}
 
 	vertexCount := len(cursorPositions) / 3
 	if limit := mr.effectiveCursorPositionLimit(); limit < vertexCount {

@@ -21,6 +21,7 @@ type OverrideRenderer struct {
 
 	fbo     uint32
 	texture uint32
+	depthRenderbuffer uint32
 
 	// VertexBufferHandle を活用したフルスクリーンクアッド用バッファ
 	quadBuffer *VertexBufferHandle
@@ -77,11 +78,10 @@ func (m *OverrideRenderer) initFBOAndTexture() {
 	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, m.texture, 0)
 
 	// 深度レンダーバッファの作成と添付
-	var depthRenderbuffer uint32
-	gl.GenRenderbuffers(1, &depthRenderbuffer)
-	gl.BindRenderbuffer(gl.RENDERBUFFER, depthRenderbuffer)
+	gl.GenRenderbuffers(1, &m.depthRenderbuffer)
+	gl.BindRenderbuffer(gl.RENDERBUFFER, m.depthRenderbuffer)
 	gl.RenderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, int32(m.width), int32(m.height))
-	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthRenderbuffer)
+	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, m.depthRenderbuffer)
 	// レンダーバッファのバインド解除
 	gl.BindRenderbuffer(gl.RENDERBUFFER, 0)
 
@@ -186,6 +186,10 @@ func (m *OverrideRenderer) Resize(width, height int) {
 	if m.texture != 0 {
 		gl.DeleteTextures(1, &m.texture)
 	}
+	if m.depthRenderbuffer != 0 {
+		gl.DeleteRenderbuffers(1, &m.depthRenderbuffer)
+		m.depthRenderbuffer = 0
+	}
 	m.initFBOAndTexture()
 
 	// サブウィンドウの場合は共有テクスチャも更新
@@ -201,6 +205,10 @@ func (m *OverrideRenderer) Delete() {
 	}
 	if m.texture != 0 {
 		gl.DeleteTextures(1, &m.texture)
+	}
+	if m.depthRenderbuffer != 0 {
+		gl.DeleteRenderbuffers(1, &m.depthRenderbuffer)
+		m.depthRenderbuffer = 0
 	}
 	if m.quadBuffer != nil {
 		m.quadBuffer.Delete()

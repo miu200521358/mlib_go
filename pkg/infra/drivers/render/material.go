@@ -29,7 +29,9 @@ func newMaterialGL(m *model.Material, prevVerticesCount int, tm *TextureManager)
 
 	// スフィアは無効かテクスチャが無い場合は作らない
 	var sphereTexGl *textureGl
-	if m.SphereMode != model.SPHERE_MODE_INVALID && m.SphereTextureIndex != -1 {
+	if m.SphereMode != model.SPHERE_MODE_INVALID &&
+		m.SphereTextureIndex != -1 &&
+		m.SphereTextureIndex != m.TextureIndex {
 		sphereTexGl = tm.Texture(m.SphereTextureIndex)
 	}
 

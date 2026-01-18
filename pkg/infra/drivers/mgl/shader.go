@@ -251,10 +251,6 @@ func (s *Shader) Cleanup() {
 		s.overrideRenderer.Delete()
 	}
 
-	for _, program := range s.programs {
-		gl.DeleteProgram(program)
-	}
-
 	if s.boneTextureId != 0 {
 		gl.DeleteTextures(1, &s.boneTextureId)
 	}
