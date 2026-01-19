@@ -1,3 +1,4 @@
+// 指示: miu200521358
 package graphics_api
 
 import baseerr "github.com/miu200521358/mlib_go/pkg/shared/base/err"

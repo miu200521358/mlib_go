@@ -10,8 +10,12 @@ replace github.com/miu200521358/dds => ../dds
 
 require (
 	github.com/ftrvxmtrx/tga v0.0.0-20150524081124-bd8e8d5be13a
+	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240118000515-a250818d05e3
 	github.com/miu200521358/dds v0.0.1
+	github.com/miu200521358/walk v0.0.6
+	github.com/miu200521358/win v0.0.2
 	github.com/tiendc/go-deepcopy v1.7.2
+	golang.org/x/sys v0.36.0
 	golang.org/x/text v0.33.0
 	gonum.org/v1/gonum v0.16.0
 )

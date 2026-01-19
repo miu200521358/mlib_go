@@ -562,5 +562,33 @@
     {
         "id": "剛体表示の使い方メッセージ",
         "translation": "・Turning ON rigid body display will show the model's rigid bodies\n・In front display mode, rigid bodies are shown over the model\n・In embedded display mode, only the parts of the rigid bodies sticking out from the model are shown\n・While rigid bodies are displayed, clicking on a rigid body will show its name and group."
+    },
+    {
+        "id": "表示名",
+        "translation": "Display Name"
+    },
+    {
+        "id": "閉じる",
+        "translation": "Close"
+    },
+    {
+        "id": "保存失敗",
+        "translation": "Save Failed"
+    },
+    {
+        "id": "&ログ保存",
+        "translation": "&Save Log"
+    },
+    {
+        "id": "ログ保存",
+        "translation": "Save Log"
+    },
+    {
+        "id": "&モーション冗長ログ表示",
+        "translation": "&Motion Verbose Log"
+    },
+    {
+        "id": "&物理冗長ログ表示",
+        "translation": "&Physics Verbose Log"
     }
 ]

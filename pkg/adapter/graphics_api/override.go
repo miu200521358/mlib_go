@@ -1,3 +1,4 @@
+// 指示: miu200521358
 package graphics_api
 
 // IOverrideRenderer はオーバーライド描画の抽象。

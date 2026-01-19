@@ -1,3 +1,4 @@
+// 指示: miu200521358
 package graphics_api
 
 // IFloorRenderer は床描画の抽象。
