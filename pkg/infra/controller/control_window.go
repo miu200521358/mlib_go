@@ -181,8 +181,8 @@ func NewControlWindow(shared *state.SharedState, appConfig *config.AppConfig,
 }
 
 // Run はメインウィンドウを起動する。
-func (cw *ControlWindow) Run() {
-	cw.MainWindow.Run()
+func (cw *ControlWindow) Run() int {
+	return cw.MainWindow.Run()
 }
 
 // Dispose はウィンドウを破棄する。
@@ -213,9 +213,20 @@ func (cw *ControlWindow) Position() (int, int) {
 	return x, y
 }
 
+// GetPos はウィンドウ位置を返す。
+func (cw *ControlWindow) GetPos() (int, int) {
+	return cw.X(), cw.Y()
+}
+
 // SetPosition はウィンドウ位置を設定する。
 func (cw *ControlWindow) SetPosition(x, y int) {
 	cw.SetPos(x, y)
+}
+
+// SetPos はウィンドウ位置を設定する。
+func (cw *ControlWindow) SetPos(x, y int) {
+	cw.SetX(x)
+	cw.SetY(y)
 }
 
 // SetPlaying は再生状態を設定する。
