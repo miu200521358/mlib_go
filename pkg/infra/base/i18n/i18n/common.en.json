@@ -244,8 +244,24 @@
         "translation": "An unexpected error has occurred. The app will now close.\nIf the issue persists, please contact us through the community.\n    App Name: {{.AppName}}, App Version: {{.AppVersion}}"
     },
     {
-        "id": "コミュニティ報告",
-        "translation": "Copy the error and report it in the community"
+        "id": "エラーをコピー",
+        "translation": "Copy error"
+    },
+    {
+        "id": "エラーをダウンロード",
+        "translation": "Download error"
+    },
+    {
+        "id": "コミュニティで報告",
+        "translation": "Report to the community"
+    },
+    {
+        "id": "テキストファイル",
+        "translation": "Text files"
+    },
+    {
+        "id": "すべてのファイル",
+        "translation": "All files"
     },
     {
         "id": "アプリを終了",
