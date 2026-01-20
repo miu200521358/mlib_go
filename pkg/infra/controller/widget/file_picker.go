@@ -142,8 +142,8 @@ func NewVmdSaveFilePicker(title string, tooltip string, onPathChanged func(*cont
 }
 
 // newFilePicker はFilePickerを生成する。
-func newFilePicker(historyKey string, title string, tooltip string,	onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string),
-filterExtensions []filterExtension, repository io_common.IFileReader) *FilePicker {
+func newFilePicker(historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string),
+	filterExtensions []filterExtension, repository io_common.IFileReader) *FilePicker {
 	picker := &FilePicker{
 		title:            title,
 		tooltip:          tooltip,
@@ -184,46 +184,81 @@ func (fp *FilePicker) SetEnabled(enabled bool) {
 
 // Widgets はUI構成を返す。
 func (fp *FilePicker) Widgets() declarative.Composite {
+	titleWidgets := []declarative.Widget{
+		declarative.TextLabel{
+			Text:        fp.title,
+			ToolTipText: fp.tooltip,
+		},
+	}
+
+	if fp.historyKey != "" {
+		titleWidgets = append(titleWidgets, declarative.Composite{
+			Layout: declarative.HBox{},
+			Children: []declarative.Widget{
+				declarative.TextLabel{
+					Text:        "  (",
+					ToolTipText: fp.tooltip,
+				},
+				declarative.LineEdit{
+					ReadOnly: true,
+					Background: declarative.SolidColorBrush{
+						Color: controller.ColorTabBackground,
+					},
+					Text:        i18n.T("未設定"),
+					ToolTipText: fp.tooltip,
+					AssignTo:    &fp.nameEdit,
+				},
+				declarative.TextLabel{
+					Text:        ") ",
+					ToolTipText: fp.tooltip,
+				},
+			},
+		})
+	}
+
+	inputWidgets := []declarative.Widget{
+		declarative.LineEdit{
+			AssignTo:    &fp.pathEdit,
+			ToolTipText: fp.tooltip,
+			OnTextChanged: func() {
+				fp.handlePathChanged(fp.pathEdit.Text())
+			},
+		},
+		declarative.PushButton{
+			AssignTo:    &fp.openPushButton,
+			Text:        i18n.T("開く"),
+			ToolTipText: fp.tooltip,
+			OnClicked: func() {
+				fp.onOpenClicked()
+			},
+			MinSize: declarative.Size{Width: 70, Height: 20},
+			MaxSize: declarative.Size{Width: 70, Height: 20},
+		},
+	}
+
+	if fp.historyKey != "" {
+		inputWidgets = append(inputWidgets, declarative.PushButton{
+			AssignTo:    &fp.historyPushButton,
+			Text:        i18n.T("履歴"),
+			ToolTipText: fp.tooltip,
+			OnClicked: func() {
+				fp.openHistoryDialog()
+			},
+			MinSize: declarative.Size{Width: 70, Height: 20},
+			MaxSize: declarative.Size{Width: 70, Height: 20},
+		})
+	}
+
 	return declarative.Composite{
-		Layout: declarative.HBox{},
+		Layout: declarative.VBox{},
 		Children: []declarative.Widget{
-			declarative.TextLabel{
-				Text:        fp.title,
-				ToolTipText: fp.tooltip,
+			declarative.Composite{
+				Layout:   declarative.HBox{},
+				Children: titleWidgets,
 			},
-			declarative.LineEdit{
-				AssignTo:    &fp.pathEdit,
-				ToolTipText: fp.tooltip,
-				OnTextChanged: func() {
-					fp.handlePathChanged(fp.pathEdit.Text())
-				},
-				StretchFactor: 8,
-			},
-			declarative.LineEdit{
-				AssignTo:    &fp.nameEdit,
-				ReadOnly:    true,
-				ToolTipText: i18n.T("表示名"),
-				StretchFactor: 2,
-			},
-			declarative.PushButton{
-				AssignTo: &fp.openPushButton,
-				Text:     i18n.T("開く"),
-				OnClicked: func() {
-					fp.onOpenClicked()
-				},
-				ToolTipText: fp.tooltip,
-				MinSize:     declarative.Size{Width: 60, Height: 20},
-				MaxSize:     declarative.Size{Width: 60, Height: 20},
-			},
-			declarative.PushButton{
-				AssignTo: &fp.historyPushButton,
-				Text:     i18n.T("履歴"),
-				OnClicked: func() {
-					fp.openHistoryDialog()
-				},
-				ToolTipText: i18n.T("履歴"),
-				MinSize:     declarative.Size{Width: 60, Height: 20},
-				MaxSize:     declarative.Size{Width: 60, Height: 20},
+			declarative.Composite{
+				Layout:   declarative.HBox{},
+				Children: inputWidgets,
 			},
 		},
 	}

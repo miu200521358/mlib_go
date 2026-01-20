@@ -109,18 +109,6 @@ func NewControlWindow(shared *state.SharedState, appConfig *config.AppConfig,
 
 	var consoleContainer *walk.Composite
 
-	// // ToolTip追加の失敗を避けるため、生成時だけ抑止する。
-	// prevEnv, hasEnv := os.LookupEnv("Env")
-	// if setErr := os.Setenv("Env", "debug"); setErr == nil {
-	// 	defer func() {
-	// 		if hasEnv {
-	// 			_ = os.Setenv("Env", prevEnv)
-	// 		} else {
-	// 			_ = os.Unsetenv("Env")
-	// 		}
-	// 	}()
-	// }
-
 	if err := (declarative.MainWindow{
 		AssignTo: &cw.MainWindow,
 		Title:    cw.appTitle(),
