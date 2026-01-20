@@ -401,27 +401,40 @@ func (fp *FilePicker) openHistoryDialog() {
 	if err := (declarative.Dialog{
 		AssignTo: &dlg,
 		Title:    i18n.T("履歴"),
-		MinSize:  declarative.Size{Width: 400, Height: 300},
-		Layout:   declarative.VBox{MarginsZero: true, SpacingZero: false},
+		MinSize:  declarative.Size{Width: 800, Height: 400},
+		Layout:   declarative.VBox{},
 		Children: []declarative.Widget{
 			declarative.ListBox{
 				AssignTo: &lb,
 				Model:    values,
-				OnCurrentIndexChanged: func() {
+				MinSize:  declarative.Size{Width: 800, Height: 400},
+				OnItemActivated: func() {
 					idx := lb.CurrentIndex()
 					if idx < 0 || idx >= len(values) {
 						return
 					}
 					push.SetEnabled(true)
 					fp.handlePathChanged(values[idx])
-				},
-			},
-			declarative.PushButton{
-				AssignTo: &push,
-				Text:     i18n.T("閉じる"),
-				Enabled:  true,
-				OnClicked: func() {
 					dlg.Accept()
+				},
+			}, declarative.Composite{
+				Layout: declarative.HBox{},
+				Children: []declarative.Widget{
+
+					declarative.PushButton{
+						AssignTo: &push,
+						Text:     "OK",
+						Enabled:  true,
+						OnClicked: func() {
+							dlg.Accept()
+						},
+					},
+					declarative.PushButton{
+						Text: "Cancel",
+						OnClicked: func() {
+							dlg.Cancel()
+						},
+					},
 				},
 			},
 		},

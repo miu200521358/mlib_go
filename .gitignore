@@ -39,3 +39,4 @@ cmd/log_*.txt
 bin/
 .gocache/
 .gomodcache/
+cmd/__debug_bin.*
