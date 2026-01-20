@@ -170,6 +170,8 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 	vw.loadModelRenderers()
 	vw.loadMotions()
 
+	vw.renderFloor()
+
 	for i, renderer := range vw.modelRenderers {
 		if renderer == nil || renderer.Model == nil {
 			continue
@@ -188,8 +190,6 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 
 		renderer.Render(vw.shader, vw.list.shared, vmdDeltas, nil)
 	}
-
-	vw.renderFloor()
 
 	if len(vw.list.windowList) > 1 && vw.list.shared.IsShowOverride() && vw.windowIndex != 0 {
 		vw.shader.OverrideRenderer().Unbind()
@@ -243,11 +243,12 @@ func (vw *ViewerWindow) loadModelRenderers() {
 			}
 			continue
 		}
-		if existing == nil || existing.Hash() != modelData.Hash() {
+		if existing == nil || existing.Hash() != modelData.Hash() || existing.Model != modelData {
 			if existing != nil {
 				existing.Delete()
 			}
 			vw.modelRenderers[i] = render.NewModelRenderer(vw.windowIndex, modelData)
+			vw.vmdDeltas[i] = nil
 		}
 	}
 }
