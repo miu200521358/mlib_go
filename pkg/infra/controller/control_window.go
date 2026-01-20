@@ -6,7 +6,10 @@ package controller
 
 import (
 	"fmt"
+	"os"
 
+	"github.com/miu200521358/mlib_go/pkg/domain/model"
+	"github.com/miu200521358/mlib_go/pkg/domain/motion"
 	infraconfig "github.com/miu200521358/mlib_go/pkg/infra/base/config"
 	"github.com/miu200521358/mlib_go/pkg/infra/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/infra/base/logging"
@@ -15,8 +18,6 @@ import (
 	sharedlogging "github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	sharedtime "github.com/miu200521358/mlib_go/pkg/shared/contracts/time"
 	"github.com/miu200521358/mlib_go/pkg/shared/state"
-	"github.com/miu200521358/mlib_go/pkg/domain/model"
-	"github.com/miu200521358/mlib_go/pkg/domain/motion"
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
 )
@@ -54,36 +55,36 @@ type ControlWindow struct {
 
 	leftButtonPressed bool
 
-	enabledFrameDropAction      *walk.Action
-	enabledPhysicsAction        *walk.Action
-	physicsResetAction          *walk.Action
-	showNormalAction            *walk.Action
-	showWireAction              *walk.Action
-	showOverrideUpperAction     *walk.Action
-	showOverrideLowerAction     *walk.Action
-	showOverrideNoneAction      *walk.Action
-	showSelectedVertexAction    *walk.Action
-	showBoneAllAction           *walk.Action
-	showBoneIkAction            *walk.Action
-	showBoneEffectorAction      *walk.Action
-	showBoneFixedAction         *walk.Action
-	showBoneRotateAction        *walk.Action
-	showBoneTranslateAction     *walk.Action
-	showBoneVisibleAction       *walk.Action
-	showRigidBodyFrontAction    *walk.Action
-	showRigidBodyBackAction     *walk.Action
-	showJointAction             *walk.Action
-	showInfoAction              *walk.Action
-	limitFps30Action            *walk.Action
-	limitFps60Action            *walk.Action
-	limitFpsUnLimitAction       *walk.Action
-	cameraSyncAction            *walk.Action
-	logLevelDebugAction         *walk.Action
-	logLevelVerboseAction       *walk.Action
-	logLevelIkVerboseAction     *walk.Action
+	enabledFrameDropAction       *walk.Action
+	enabledPhysicsAction         *walk.Action
+	physicsResetAction           *walk.Action
+	showNormalAction             *walk.Action
+	showWireAction               *walk.Action
+	showOverrideUpperAction      *walk.Action
+	showOverrideLowerAction      *walk.Action
+	showOverrideNoneAction       *walk.Action
+	showSelectedVertexAction     *walk.Action
+	showBoneAllAction            *walk.Action
+	showBoneIkAction             *walk.Action
+	showBoneEffectorAction       *walk.Action
+	showBoneFixedAction          *walk.Action
+	showBoneRotateAction         *walk.Action
+	showBoneTranslateAction      *walk.Action
+	showBoneVisibleAction        *walk.Action
+	showRigidBodyFrontAction     *walk.Action
+	showRigidBodyBackAction      *walk.Action
+	showJointAction              *walk.Action
+	showInfoAction               *walk.Action
+	limitFps30Action             *walk.Action
+	limitFps60Action             *walk.Action
+	limitFpsUnLimitAction        *walk.Action
+	cameraSyncAction             *walk.Action
+	logLevelDebugAction          *walk.Action
+	logLevelVerboseAction        *walk.Action
+	logLevelIkVerboseAction      *walk.Action
 	logLevelPhysicsVerboseAction *walk.Action
-	logLevelViewerVerboseAction *walk.Action
-	linkWindowAction            *walk.Action
+	logLevelViewerVerboseAction  *walk.Action
+	linkWindowAction             *walk.Action
 
 	verboseSinks map[sharedlogging.VerboseIndex]sharedlogging.IVerboseSink
 }
@@ -109,6 +110,18 @@ func NewControlWindow(shared *state.SharedState, appConfig *config.AppConfig,
 
 	var consoleContainer *walk.Composite
 
+	// ToolTip追加の失敗を避けるため、生成時だけ抑止する。
+	prevEnv, hasEnv := os.LookupEnv("Env")
+	if setErr := os.Setenv("Env", "debug"); setErr == nil {
+		defer func() {
+			if hasEnv {
+				_ = os.Setenv("Env", prevEnv)
+			} else {
+				_ = os.Unsetenv("Env")
+			}
+		}()
+	}
+
 	if err := (declarative.MainWindow{
 		AssignTo: &cw.MainWindow,
 		Title:    cw.appTitle(),
@@ -125,8 +138,8 @@ func NewControlWindow(shared *state.SharedState, appConfig *config.AppConfig,
 		Children: []declarative.Widget{
 			declarative.TabWidget{AssignTo: &cw.tabWidget, Pages: tabPages},
 			declarative.Composite{
-				AssignTo:     &consoleContainer,
-				Layout:       declarative.VBox{MarginsZero: true, SpacingZero: true},
+				AssignTo:      &consoleContainer,
+				Layout:        declarative.VBox{MarginsZero: true, SpacingZero: true},
 				StretchFactor: 1,
 			},
 		},
