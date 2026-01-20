@@ -420,7 +420,6 @@ func (fp *FilePicker) openHistoryDialog() {
 			}, declarative.Composite{
 				Layout: declarative.HBox{},
 				Children: []declarative.Widget{
-
 					declarative.PushButton{
 						AssignTo: &push,
 						Text:     "OK",
