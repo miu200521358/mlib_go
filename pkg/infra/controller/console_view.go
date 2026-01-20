@@ -30,9 +30,9 @@ const (
 	// ConsoleViewClass はウィジェットクラス名。
 	ConsoleViewClass = "ConsoleView Class"
 	// TEM_APPENDTEXT はコンソールへの追記メッセージ。
-	TEM_APPENDTEXT   = win.WM_USER + 6
+	TEM_APPENDTEXT = win.WM_USER + 6
 	// MaxLines は表示上限行数。
-	MaxLines         = 10000 // 最大行数
+	MaxLines = 10000 // 最大行数
 )
 
 // NewConsoleView はConsoleViewを生成する。

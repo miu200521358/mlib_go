@@ -7,8 +7,8 @@ package widget
 import (
 	"time"
 
-	"github.com/miu200521358/mlib_go/pkg/infra/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/infra/controller"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
 	sharedtime "github.com/miu200521358/mlib_go/pkg/shared/contracts/time"
 	"github.com/miu200521358/mlib_go/pkg/shared/state"
 	"github.com/miu200521358/walk/pkg/declarative"
@@ -22,6 +22,7 @@ type MotionPlayer struct {
 	frameEdit             *walk.NumberEdit
 	frameSlider           *walk.Slider
 	playButton            *walk.PushButton
+	translator            i18n.II18n
 	playingText           string
 	stoppedText           string
 	onEnabledInPlaying    func(playing bool)
@@ -31,10 +32,11 @@ type MotionPlayer struct {
 }
 
 // NewMotionPlayer はMotionPlayerを生成する。
-func NewMotionPlayer() *MotionPlayer {
+func NewMotionPlayer(translator i18n.II18n) *MotionPlayer {
 	player := new(MotionPlayer)
-	player.playingText = i18n.T("一時停止")
-	player.stoppedText = i18n.T("再生")
+	player.translator = translator
+	player.playingText = player.t("一時停止")
+	player.stoppedText = player.t("再生")
 	player.startPlayingResetType = func() state.PhysicsResetType {
 		return state.PHYSICS_RESET_TYPE_START_FRAME
 	}
@@ -52,14 +54,22 @@ func (mp *MotionPlayer) SetWindow(window *controller.ControlWindow) {
 	mp.window = window
 }
 
+// t は翻訳済み文言を返す。
+func (mp *MotionPlayer) t(key string) string {
+	if mp == nil || mp.translator == nil || !mp.translator.IsReady() {
+		return "●●" + key + "●●"
+	}
+	return mp.translator.T(key)
+}
+
 // Widgets はUI構成を返す。
 func (mp *MotionPlayer) Widgets() declarative.Composite {
 	return declarative.Composite{
 		Layout: declarative.HBox{},
 		Children: []declarative.Widget{
 			declarative.TextLabel{
-				Text:        i18n.T("再生"),
-				ToolTipText: i18n.T("再生ウィジェットの使い方メッセージ"),
+				Text:        mp.t("再生"),
+				ToolTipText: mp.t("再生ウィジェットの使い方メッセージ"),
 			},
 			declarative.NumberEdit{
 				AssignTo:           &mp.frameEdit,
@@ -77,7 +87,7 @@ func (mp *MotionPlayer) Widgets() declarative.Composite {
 					mp.window.SetFrame(sharedtime.Frame(mp.frameEdit.Value()))
 					mp.frameSlider.ChangeValue(int(mp.frameEdit.Value()))
 				},
-				ToolTipText:            i18n.T("再生キーフレ説明"),
+				ToolTipText:            mp.t("再生キーフレ説明"),
 				StretchFactor:          3,
 				ChangedBackgroundColor: walk.ColorWhite,
 			},
@@ -93,7 +103,7 @@ func (mp *MotionPlayer) Widgets() declarative.Composite {
 					mp.window.SetFrame(sharedtime.Frame(mp.frameSlider.Value()))
 					mp.frameEdit.ChangeValue(float64(mp.frameSlider.Value()))
 				},
-				ToolTipText:   i18n.T("再生スライダー説明"),
+				ToolTipText:   mp.t("再生スライダー説明"),
 				Value:         0,
 				StretchFactor: 20,
 			},
@@ -109,7 +119,7 @@ func (mp *MotionPlayer) Widgets() declarative.Composite {
 					}
 					mp.SetPlaying(playing)
 				},
-				ToolTipText:   i18n.T("再生ボタン説明"),
+				ToolTipText:   mp.t("再生ボタン説明"),
 				StretchFactor: 2,
 			},
 		},

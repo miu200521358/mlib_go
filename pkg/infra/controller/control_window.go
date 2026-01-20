@@ -6,15 +6,15 @@ package controller
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
-	infraconfig "github.com/miu200521358/mlib_go/pkg/infra/base/config"
-	"github.com/miu200521358/mlib_go/pkg/infra/base/i18n"
-	"github.com/miu200521358/mlib_go/pkg/infra/base/logging"
 	"github.com/miu200521358/mlib_go/pkg/infra/file/mfile"
+	"github.com/miu200521358/mlib_go/pkg/shared/base"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
-	sharedlogging "github.com/miu200521358/mlib_go/pkg/shared/base/logging"
+	sharedi18n "github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	sharedtime "github.com/miu200521358/mlib_go/pkg/shared/contracts/time"
 	"github.com/miu200521358/mlib_go/pkg/shared/state"
 	"github.com/miu200521358/walk/pkg/declarative"
@@ -33,6 +33,17 @@ const (
 	FPS_LIMIT_UNLIMITED FpsLimit = -1
 )
 
+const (
+	// langJa は日本語の言語コード。
+	langJa sharedi18n.LangCode = "ja"
+	// langEn は英語の言語コード。
+	langEn sharedi18n.LangCode = "en"
+	// langZh は中国語の言語コード。
+	langZh sharedi18n.LangCode = "zh"
+	// langKo は韓国語の言語コード。
+	langKo sharedi18n.LangCode = "ko"
+)
+
 // ControlWindow はコントローラーウィンドウを表す。
 type ControlWindow struct {
 	*walk.MainWindow
@@ -40,6 +51,8 @@ type ControlWindow struct {
 	shared     *state.SharedState
 	appConfig  *config.AppConfig
 	userConfig config.IUserConfig
+	translator sharedi18n.II18n
+	logger     logging.ILogger
 
 	tabWidget   *walk.TabWidget
 	consoleView *ConsoleView
@@ -85,19 +98,37 @@ type ControlWindow struct {
 	logLevelViewerVerboseAction  *walk.Action
 	linkWindowAction             *walk.Action
 
-	verboseSinks map[sharedlogging.VerboseIndex]sharedlogging.IVerboseSink
+	verboseSinks map[logging.VerboseIndex]logging.IVerboseSink
 }
 
 // NewControlWindow はコントローラーウィンドウを生成する。
-func NewControlWindow(shared *state.SharedState, appConfig *config.AppConfig,
+func NewControlWindow(shared *state.SharedState, baseServices base.IBaseServices,
 	helpMenuItems []declarative.MenuItem, tabPages []declarative.TabPage,
 	width, height, positionX, positionY, viewerCount int,
 ) (*ControlWindow, error) {
+	var appConfig *config.AppConfig
+	var userConfig config.IUserConfig
+	var translator sharedi18n.II18n
+	var logger logging.ILogger
+	if baseServices != nil {
+		if cfg := baseServices.Config(); cfg != nil {
+			appConfig = cfg.AppConfig()
+			userConfig = cfg.UserConfig()
+		}
+		translator = baseServices.I18n()
+		logger = baseServices.Logger()
+	}
+	if logger == nil {
+		logger = logging.DefaultLogger()
+	}
+
 	cw := &ControlWindow{
 		shared:       shared,
 		appConfig:    appConfig,
-		userConfig:   infraconfig.NewUserConfigStore(),
-		verboseSinks: map[sharedlogging.VerboseIndex]sharedlogging.IVerboseSink{},
+		userConfig:   userConfig,
+		translator:   translator,
+		logger:       logger,
+		verboseSinks: map[logging.VerboseIndex]logging.IVerboseSink{},
 		viewerCount:  viewerCount,
 	}
 
@@ -119,8 +150,8 @@ func NewControlWindow(shared *state.SharedState, appConfig *config.AppConfig,
 		},
 		MenuItems: []declarative.MenuItem{
 			cw.buildViewerMenu(),
-			declarative.Menu{Text: i18n.T("&コントローラーウィンドウ"), Items: controllerItems},
-			declarative.Menu{Text: i18n.T("&言語"), Items: cw.buildLanguageMenu()},
+			declarative.Menu{Text: cw.t("&コントローラーウィンドウ"), Items: controllerItems},
+			declarative.Menu{Text: cw.t("&言語"), Items: cw.buildLanguageMenu()},
 		},
 		Children: []declarative.Widget{
 			declarative.TabWidget{AssignTo: &cw.tabWidget, Pages: tabPages},
@@ -163,7 +194,7 @@ func NewControlWindow(shared *state.SharedState, appConfig *config.AppConfig,
 			return nil, err
 		} else {
 			cw.consoleView = cv
-			logging.SetConsoleSink(cv)
+			cw.setConsoleSink(cv)
 		}
 		if pb, err := NewProgressBar(consoleContainer); err != nil {
 			return nil, err
@@ -189,6 +220,47 @@ func (cw *ControlWindow) Run() int {
 func (cw *ControlWindow) Dispose() {
 	cw.Close()
 	cw.closeVerboseSinks()
+}
+
+// infoLineLogger はタイトル付き区切り線ログのI/F。
+type infoLineLogger interface {
+	InfoLineTitle(title, msg string, params ...any)
+}
+
+// t は翻訳済み文言を返す。
+func (cw *ControlWindow) t(key string) string {
+	if cw == nil || cw.translator == nil || !cw.translator.IsReady() {
+		return "●●" + key + "●●"
+	}
+	return cw.translator.T(key)
+}
+
+// loggerOrDefault は利用可能なロガーを返す。
+func (cw *ControlWindow) loggerOrDefault() logging.ILogger {
+	if cw == nil || cw.logger == nil {
+		return logging.DefaultLogger()
+	}
+	return cw.logger
+}
+
+// setConsoleSink はメッセージ欄の出力先を設定する。
+func (cw *ControlWindow) setConsoleSink(writer io.Writer) {
+	logger := cw.loggerOrDefault()
+	if consoleLogger, ok := logger.(logging.IConsoleLogger); ok {
+		consoleLogger.SetConsoleSink(writer)
+		return
+	}
+	logging.SetConsoleSink(writer)
+}
+
+// infoLineTitle は区切り線付きタイトルログを出力する。
+func (cw *ControlWindow) infoLineTitle(title, msg string) {
+	logger := cw.loggerOrDefault()
+	if titled, ok := logger.(infoLineLogger); ok {
+		titled.InfoLineTitle(title, msg)
+		return
+	}
+	logger.Info("%s %s", title, msg)
 }
 
 // OnClose は閉じる処理を行う。
@@ -512,8 +584,8 @@ func (cw *ControlWindow) onClosing(canceled *bool) {
 	}
 	if result := walk.MsgBox(
 		cw,
-		i18n.T("終了確認"),
-		i18n.T("終了確認メッセージ"),
+		cw.t("終了確認"),
+		cw.t("終了確認メッセージ"),
 		walk.MsgBoxIconQuestion|walk.MsgBoxOKCancel,
 	); result == walk.DlgCmdOK {
 		cw.shared.SetClosed(true)
@@ -572,47 +644,47 @@ func (cw *ControlWindow) onRestore() {
 // buildViewerMenu はビューワーメニューを構築する。
 func (cw *ControlWindow) buildViewerMenu() declarative.Menu {
 	return declarative.Menu{
-		Text: i18n.T("&ビューワー"),
+		Text: cw.t("&ビューワー"),
 		Items: []declarative.MenuItem{
-			declarative.Action{Text: i18n.T("&フレームドロップON"), Checkable: true, OnTriggered: cw.TriggerEnabledFrameDrop, AssignTo: &cw.enabledFrameDropAction},
-			declarative.Menu{Text: i18n.T("&fps制限"), Items: []declarative.MenuItem{
-				declarative.Action{Text: i18n.T("&30fps制限"), Checkable: true, OnTriggered: cw.TriggerFps30Limit, AssignTo: &cw.limitFps30Action},
-				declarative.Action{Text: i18n.T("&60fps制限"), Checkable: true, OnTriggered: cw.TriggerFps60Limit, AssignTo: &cw.limitFps60Action},
-				declarative.Action{Text: i18n.T("&fps無制限"), Checkable: true, OnTriggered: cw.TriggerUnLimitFps, AssignTo: &cw.limitFpsUnLimitAction},
+			declarative.Action{Text: cw.t("&フレームドロップON"), Checkable: true, OnTriggered: cw.TriggerEnabledFrameDrop, AssignTo: &cw.enabledFrameDropAction},
+			declarative.Menu{Text: cw.t("&fps制限"), Items: []declarative.MenuItem{
+				declarative.Action{Text: cw.t("&30fps制限"), Checkable: true, OnTriggered: cw.TriggerFps30Limit, AssignTo: &cw.limitFps30Action},
+				declarative.Action{Text: cw.t("&60fps制限"), Checkable: true, OnTriggered: cw.TriggerFps60Limit, AssignTo: &cw.limitFps60Action},
+				declarative.Action{Text: cw.t("&fps無制限"), Checkable: true, OnTriggered: cw.TriggerUnLimitFps, AssignTo: &cw.limitFpsUnLimitAction},
 			}},
-			declarative.Action{Text: i18n.T("&情報表示"), Checkable: true, OnTriggered: cw.TriggerShowInfo, AssignTo: &cw.showInfoAction},
+			declarative.Action{Text: cw.t("&情報表示"), Checkable: true, OnTriggered: cw.TriggerShowInfo, AssignTo: &cw.showInfoAction},
 			declarative.Separator{},
-			declarative.Action{Text: i18n.T("&物理ON/OFF"), Checkable: true, OnTriggered: cw.TriggerEnabledPhysics, AssignTo: &cw.enabledPhysicsAction},
-			declarative.Action{Text: i18n.T("&物理リセット"), OnTriggered: cw.TriggerPhysicsReset, AssignTo: &cw.physicsResetAction},
+			declarative.Action{Text: cw.t("&物理ON/OFF"), Checkable: true, OnTriggered: cw.TriggerEnabledPhysics, AssignTo: &cw.enabledPhysicsAction},
+			declarative.Action{Text: cw.t("&物理リセット"), OnTriggered: cw.TriggerPhysicsReset, AssignTo: &cw.physicsResetAction},
 			declarative.Separator{},
-			declarative.Action{Text: i18n.T("&法線表示"), Checkable: true, OnTriggered: cw.TriggerShowNormal, AssignTo: &cw.showNormalAction},
-			declarative.Action{Text: i18n.T("&ワイヤーフレーム表示"), Checkable: true, OnTriggered: cw.TriggerShowWire, AssignTo: &cw.showWireAction},
-			declarative.Action{Text: i18n.T("&カメラ同期"), Checkable: true, OnTriggered: cw.TriggerCameraSync, AssignTo: &cw.cameraSyncAction},
-			declarative.Menu{Text: i18n.T("&サブビューワーオーバーレイ"), Items: []declarative.MenuItem{
-				declarative.Action{Text: i18n.T("&上半身合わせ"), Checkable: true, OnTriggered: cw.TriggerShowOverrideUpper, AssignTo: &cw.showOverrideUpperAction},
-				declarative.Action{Text: i18n.T("&下半身合わせ"), Checkable: true, OnTriggered: cw.TriggerShowOverrideLower, AssignTo: &cw.showOverrideLowerAction},
-				declarative.Action{Text: i18n.T("&カメラ合わせなし"), Checkable: true, OnTriggered: cw.TriggerShowOverrideNone, AssignTo: &cw.showOverrideNoneAction},
-				declarative.Action{Text: i18n.T("&サブビューワーオーバーレイの使い方"), OnTriggered: cw.showOverrideHelp},
+			declarative.Action{Text: cw.t("&法線表示"), Checkable: true, OnTriggered: cw.TriggerShowNormal, AssignTo: &cw.showNormalAction},
+			declarative.Action{Text: cw.t("&ワイヤーフレーム表示"), Checkable: true, OnTriggered: cw.TriggerShowWire, AssignTo: &cw.showWireAction},
+			declarative.Action{Text: cw.t("&カメラ同期"), Checkable: true, OnTriggered: cw.TriggerCameraSync, AssignTo: &cw.cameraSyncAction},
+			declarative.Menu{Text: cw.t("&サブビューワーオーバーレイ"), Items: []declarative.MenuItem{
+				declarative.Action{Text: cw.t("&上半身合わせ"), Checkable: true, OnTriggered: cw.TriggerShowOverrideUpper, AssignTo: &cw.showOverrideUpperAction},
+				declarative.Action{Text: cw.t("&下半身合わせ"), Checkable: true, OnTriggered: cw.TriggerShowOverrideLower, AssignTo: &cw.showOverrideLowerAction},
+				declarative.Action{Text: cw.t("&カメラ合わせなし"), Checkable: true, OnTriggered: cw.TriggerShowOverrideNone, AssignTo: &cw.showOverrideNoneAction},
+				declarative.Action{Text: cw.t("&サブビューワーオーバーレイの使い方"), OnTriggered: cw.showOverrideHelp},
 			}},
-			declarative.Action{Text: i18n.T("&選択頂点表示"), Checkable: true, OnTriggered: cw.TriggerShowSelectedVertex, AssignTo: &cw.showSelectedVertexAction},
-			declarative.Menu{Text: i18n.T("&ボーン表示"), Items: []declarative.MenuItem{
-				declarative.Action{Text: i18n.T("&全ボーン"), Checkable: true, OnTriggered: cw.TriggerShowBoneAll, AssignTo: &cw.showBoneAllAction},
-				declarative.Action{Text: i18n.T("&IKボーン"), Checkable: true, OnTriggered: cw.TriggerShowBoneIk, AssignTo: &cw.showBoneIkAction},
-				declarative.Action{Text: i18n.T("&付与親ボーン"), Checkable: true, OnTriggered: cw.TriggerShowBoneEffector, AssignTo: &cw.showBoneEffectorAction},
-				declarative.Action{Text: i18n.T("&軸制限ボーン"), Checkable: true, OnTriggered: cw.TriggerShowBoneFixed, AssignTo: &cw.showBoneFixedAction},
-				declarative.Action{Text: i18n.T("&回転ボーン"), Checkable: true, OnTriggered: cw.TriggerShowBoneRotate, AssignTo: &cw.showBoneRotateAction},
-				declarative.Action{Text: i18n.T("&移動ボーン"), Checkable: true, OnTriggered: cw.TriggerShowBoneTranslate, AssignTo: &cw.showBoneTranslateAction},
-				declarative.Action{Text: i18n.T("&表示ボーン"), Checkable: true, OnTriggered: cw.TriggerShowBoneVisible, AssignTo: &cw.showBoneVisibleAction},
-				declarative.Action{Text: i18n.T("&ボーン表示の使い方"), OnTriggered: cw.showBoneHelp},
+			declarative.Action{Text: cw.t("&選択頂点表示"), Checkable: true, OnTriggered: cw.TriggerShowSelectedVertex, AssignTo: &cw.showSelectedVertexAction},
+			declarative.Menu{Text: cw.t("&ボーン表示"), Items: []declarative.MenuItem{
+				declarative.Action{Text: cw.t("&全ボーン"), Checkable: true, OnTriggered: cw.TriggerShowBoneAll, AssignTo: &cw.showBoneAllAction},
+				declarative.Action{Text: cw.t("&IKボーン"), Checkable: true, OnTriggered: cw.TriggerShowBoneIk, AssignTo: &cw.showBoneIkAction},
+				declarative.Action{Text: cw.t("&付与親ボーン"), Checkable: true, OnTriggered: cw.TriggerShowBoneEffector, AssignTo: &cw.showBoneEffectorAction},
+				declarative.Action{Text: cw.t("&軸制限ボーン"), Checkable: true, OnTriggered: cw.TriggerShowBoneFixed, AssignTo: &cw.showBoneFixedAction},
+				declarative.Action{Text: cw.t("&回転ボーン"), Checkable: true, OnTriggered: cw.TriggerShowBoneRotate, AssignTo: &cw.showBoneRotateAction},
+				declarative.Action{Text: cw.t("&移動ボーン"), Checkable: true, OnTriggered: cw.TriggerShowBoneTranslate, AssignTo: &cw.showBoneTranslateAction},
+				declarative.Action{Text: cw.t("&表示ボーン"), Checkable: true, OnTriggered: cw.TriggerShowBoneVisible, AssignTo: &cw.showBoneVisibleAction},
+				declarative.Action{Text: cw.t("&ボーン表示の使い方"), OnTriggered: cw.showBoneHelp},
 			}},
-			declarative.Menu{Text: i18n.T("&剛体表示"), Items: []declarative.MenuItem{
-				declarative.Action{Text: i18n.T("&前面表示"), Checkable: true, OnTriggered: cw.TriggerShowRigidBodyFront, AssignTo: &cw.showRigidBodyFrontAction},
-				declarative.Action{Text: i18n.T("&埋め込み表示"), Checkable: true, OnTriggered: cw.TriggerShowRigidBodyBack, AssignTo: &cw.showRigidBodyBackAction},
-				declarative.Action{Text: i18n.T("&剛体表示の使い方"), OnTriggered: cw.showRigidBodyHelp},
+			declarative.Menu{Text: cw.t("&剛体表示"), Items: []declarative.MenuItem{
+				declarative.Action{Text: cw.t("&前面表示"), Checkable: true, OnTriggered: cw.TriggerShowRigidBodyFront, AssignTo: &cw.showRigidBodyFrontAction},
+				declarative.Action{Text: cw.t("&埋め込み表示"), Checkable: true, OnTriggered: cw.TriggerShowRigidBodyBack, AssignTo: &cw.showRigidBodyBackAction},
+				declarative.Action{Text: cw.t("&剛体表示の使い方"), OnTriggered: cw.showRigidBodyHelp},
 			}},
-			declarative.Action{Text: i18n.T("&ジョイント表示"), Checkable: true, OnTriggered: cw.TriggerShowJoint, AssignTo: &cw.showJointAction},
+			declarative.Action{Text: cw.t("&ジョイント表示"), Checkable: true, OnTriggered: cw.TriggerShowJoint, AssignTo: &cw.showJointAction},
 			declarative.Separator{},
-			declarative.Action{Text: i18n.T("&ビューワーの使い方"), OnTriggered: cw.showViewerHelp},
+			declarative.Action{Text: cw.t("&ビューワーの使い方"), OnTriggered: cw.showViewerHelp},
 		},
 	}
 }
@@ -620,20 +692,20 @@ func (cw *ControlWindow) buildViewerMenu() declarative.Menu {
 // buildControllerMenuItems はコントローラーメニュー項目を構築する。
 func (cw *ControlWindow) buildControllerMenuItems() []declarative.MenuItem {
 	items := []declarative.MenuItem{
-		declarative.Action{Text: i18n.T("&使い方"), OnTriggered: cw.showControllerHelp},
+		declarative.Action{Text: cw.t("&使い方"), OnTriggered: cw.showControllerHelp},
 		declarative.Separator{},
-		declarative.Action{Text: i18n.T("&画面移動連動"), Checkable: true, OnTriggered: cw.triggerWindowLinkage, AssignTo: &cw.linkWindowAction},
+		declarative.Action{Text: cw.t("&画面移動連動"), Checkable: true, OnTriggered: cw.triggerWindowLinkage, AssignTo: &cw.linkWindowAction},
 		declarative.Separator{},
-		declarative.Action{Text: i18n.T("&デバッグログ表示"), Checkable: true, OnTriggered: cw.triggerLogLevelDebug, AssignTo: &cw.logLevelDebugAction},
-		declarative.Action{Text: i18n.T("&ログ保存"), OnTriggered: cw.triggerSaveLog},
+		declarative.Action{Text: cw.t("&デバッグログ表示"), Checkable: true, OnTriggered: cw.triggerLogLevelDebug, AssignTo: &cw.logLevelDebugAction},
+		declarative.Action{Text: cw.t("&ログ保存"), OnTriggered: cw.triggerSaveLog},
 	}
 
 	if cw.appConfig != nil && cw.appConfig.IsDev() {
 		items = append(items,
-			declarative.Action{Text: i18n.T("&モーション冗長ログ表示"), Checkable: true, OnTriggered: cw.triggerLogLevelVerbose, AssignTo: &cw.logLevelVerboseAction},
-			declarative.Action{Text: i18n.T("&IK冗長ログ表示"), Checkable: true, OnTriggered: cw.triggerLogLevelIkVerbose, AssignTo: &cw.logLevelIkVerboseAction},
-			declarative.Action{Text: i18n.T("&物理冗長ログ表示"), Checkable: true, OnTriggered: cw.triggerLogLevelPhysicsVerbose, AssignTo: &cw.logLevelPhysicsVerboseAction},
-			declarative.Action{Text: i18n.T("&ビューワー冗長ログ表示"), Checkable: true, OnTriggered: cw.triggerLogLevelViewerVerbose, AssignTo: &cw.logLevelViewerVerboseAction},
+			declarative.Action{Text: cw.t("&モーション冗長ログ表示"), Checkable: true, OnTriggered: cw.triggerLogLevelVerbose, AssignTo: &cw.logLevelVerboseAction},
+			declarative.Action{Text: cw.t("&IK冗長ログ表示"), Checkable: true, OnTriggered: cw.triggerLogLevelIkVerbose, AssignTo: &cw.logLevelIkVerboseAction},
+			declarative.Action{Text: cw.t("&物理冗長ログ表示"), Checkable: true, OnTriggered: cw.triggerLogLevelPhysicsVerbose, AssignTo: &cw.logLevelPhysicsVerboseAction},
+			declarative.Action{Text: cw.t("&ビューワー冗長ログ表示"), Checkable: true, OnTriggered: cw.triggerLogLevelViewerVerbose, AssignTo: &cw.logLevelViewerVerboseAction},
 		)
 	}
 	return items
@@ -642,21 +714,24 @@ func (cw *ControlWindow) buildControllerMenuItems() []declarative.MenuItem {
 // buildLanguageMenu は言語メニュー項目を構築する。
 func (cw *ControlWindow) buildLanguageMenu() []declarative.MenuItem {
 	return []declarative.MenuItem{
-		declarative.Action{Text: "日本語", OnTriggered: func() { cw.onChangeLanguage(i18n.LANG_JA) }},
-		declarative.Action{Text: "English", OnTriggered: func() { cw.onChangeLanguage(i18n.LANG_EN) }},
-		declarative.Action{Text: "中文", OnTriggered: func() { cw.onChangeLanguage(i18n.LANG_ZH) }},
-		declarative.Action{Text: "한국어", OnTriggered: func() { cw.onChangeLanguage(i18n.LANG_KO) }},
+		declarative.Action{Text: "日本語", OnTriggered: func() { cw.onChangeLanguage(langJa) }},
+		declarative.Action{Text: "English", OnTriggered: func() { cw.onChangeLanguage(langEn) }},
+		declarative.Action{Text: "中文", OnTriggered: func() { cw.onChangeLanguage(langZh) }},
+		declarative.Action{Text: "한국어", OnTriggered: func() { cw.onChangeLanguage(langKo) }},
 	}
 }
 
 // onChangeLanguage は言語変更を行う。
-func (cw *ControlWindow) onChangeLanguage(lang i18n.LangCode) {
-	if result := walk.MsgBox(cw, i18n.T("言語変更"), i18n.T("言語変更メッセージ"), walk.MsgBoxIconQuestion|walk.MsgBoxOKCancel); result != walk.DlgCmdOK {
+func (cw *ControlWindow) onChangeLanguage(lang sharedi18n.LangCode) {
+	if result := walk.MsgBox(cw, cw.t("言語変更"), cw.t("言語変更メッセージ"), walk.MsgBoxIconQuestion|walk.MsgBoxOKCancel); result != walk.DlgCmdOK {
 		return
 	}
-	if _, err := i18n.SetLang(lang); err != nil {
-		logging.DefaultLogger().Error("言語設定の保存に失敗しました: %s", err.Error())
-		walk.MsgBox(cw, i18n.T("言語変更"), err.Error(), walk.MsgBoxIconError)
+	if cw.translator == nil {
+		return
+	}
+	if _, err := cw.translator.SetLang(lang); err != nil {
+		cw.loggerOrDefault().Error("言語設定の保存に失敗しました: %s", err.Error())
+		walk.MsgBox(cw, cw.t("言語変更"), err.Error(), walk.MsgBoxIconError)
 		return
 	}
 	cw.shared.SetClosed(true)
@@ -802,38 +877,38 @@ func (cw *ControlWindow) triggerLogLevelDebug() {
 	enabled := cw.actionChecked(cw.logLevelDebugAction)
 	cw.resetVerboseActions()
 	cw.updateActionChecked(cw.logLevelDebugAction, enabled)
-	level := sharedlogging.LOG_LEVEL_INFO
+	level := logging.LOG_LEVEL_INFO
 	if enabled {
-		level = sharedlogging.LOG_LEVEL_DEBUG
+		level = logging.LOG_LEVEL_DEBUG
 	}
-	logging.DefaultLogger().SetLevel(level)
+	cw.loggerOrDefault().SetLevel(level)
 }
 
 // triggerLogLevelVerbose はモーション冗長ログを切り替える。
 func (cw *ControlWindow) triggerLogLevelVerbose() {
 	enabled := cw.actionChecked(cw.logLevelVerboseAction)
-	cw.setVerbose(sharedlogging.VERBOSE_INDEX_MOTION, enabled, "motion")
+	cw.setVerbose(logging.VERBOSE_INDEX_MOTION, enabled, "motion")
 	cw.updateActionChecked(cw.logLevelVerboseAction, enabled)
 }
 
 // triggerLogLevelIkVerbose はIK冗長ログを切り替える。
 func (cw *ControlWindow) triggerLogLevelIkVerbose() {
 	enabled := cw.actionChecked(cw.logLevelIkVerboseAction)
-	cw.setVerbose(sharedlogging.VERBOSE_INDEX_IK, enabled, "ik")
+	cw.setVerbose(logging.VERBOSE_INDEX_IK, enabled, "ik")
 	cw.updateActionChecked(cw.logLevelIkVerboseAction, enabled)
 }
 
 // triggerLogLevelPhysicsVerbose は物理冗長ログを切り替える。
 func (cw *ControlWindow) triggerLogLevelPhysicsVerbose() {
 	enabled := cw.actionChecked(cw.logLevelPhysicsVerboseAction)
-	cw.setVerbose(sharedlogging.VERBOSE_INDEX_PHYSICS, enabled, "physics")
+	cw.setVerbose(logging.VERBOSE_INDEX_PHYSICS, enabled, "physics")
 	cw.updateActionChecked(cw.logLevelPhysicsVerboseAction, enabled)
 }
 
 // triggerLogLevelViewerVerbose はビューワー冗長ログを切り替える。
 func (cw *ControlWindow) triggerLogLevelViewerVerbose() {
 	enabled := cw.actionChecked(cw.logLevelViewerVerboseAction)
-	cw.setVerbose(sharedlogging.VERBOSE_INDEX_VIEWER, enabled, "viewer")
+	cw.setVerbose(logging.VERBOSE_INDEX_VIEWER, enabled, "viewer")
 	cw.updateActionChecked(cw.logLevelViewerVerboseAction, enabled)
 }
 
@@ -845,38 +920,38 @@ func (cw *ControlWindow) triggerWindowLinkage() {
 // triggerSaveLog はログ保存を行う。
 func (cw *ControlWindow) triggerSaveLog() {
 	text := logging.ConsoleText()
-	path, err := mfile.SaveConsoleSnapshot("console", text)
+	path, err := mfile.SaveConsoleSnapshot(cw.userConfig, "console", text)
 	if err != nil {
-		logging.DefaultLogger().Error("ログ保存に失敗しました: %s", err.Error())
-		walk.MsgBox(cw, i18n.T("ログ保存"), err.Error(), walk.MsgBoxIconError)
+		cw.loggerOrDefault().Error("ログ保存に失敗しました: %s", err.Error())
+		walk.MsgBox(cw, cw.t("ログ保存"), err.Error(), walk.MsgBoxIconError)
 		return
 	}
-	logging.DefaultLogger().Info("ログを保存しました: %s", path)
+	cw.loggerOrDefault().Info("ログを保存しました: %s", path)
 }
 
 // showControllerHelp はコントローラーの使い方を表示する。
 func (cw *ControlWindow) showControllerHelp() {
-	logging.DefaultLogger().InfoLineTitle(i18n.T("コントローラーウィンドウの使い方"), i18n.T("コントローラーウィンドウの使い方メッセージ"))
+	cw.infoLineTitle(cw.t("コントローラーウィンドウの使い方"), cw.t("コントローラーウィンドウの使い方メッセージ"))
 }
 
 // showOverrideHelp はオーバーレイの使い方を表示する。
 func (cw *ControlWindow) showOverrideHelp() {
-	logging.DefaultLogger().InfoLineTitle(i18n.T("&サブビューワーオーバーレイの使い方"), i18n.T("サブビューワーオーバーレイの使い方メッセージ"))
+	cw.infoLineTitle(cw.t("&サブビューワーオーバーレイの使い方"), cw.t("サブビューワーオーバーレイの使い方メッセージ"))
 }
 
 // showBoneHelp はボーン表示の使い方を表示する。
 func (cw *ControlWindow) showBoneHelp() {
-	logging.DefaultLogger().InfoLineTitle(i18n.T("&ボーン表示の使い方"), i18n.T("ボーン表示の使い方メッセージ"))
+	cw.infoLineTitle(cw.t("&ボーン表示の使い方"), cw.t("ボーン表示の使い方メッセージ"))
 }
 
 // showRigidBodyHelp は剛体表示の使い方を表示する。
 func (cw *ControlWindow) showRigidBodyHelp() {
-	logging.DefaultLogger().InfoLineTitle(i18n.T("&剛体表示の使い方"), i18n.T("剛体表示の使い方メッセージ"))
+	cw.infoLineTitle(cw.t("&剛体表示の使い方"), cw.t("剛体表示の使い方メッセージ"))
 }
 
 // showViewerHelp はビューワーの使い方を表示する。
 func (cw *ControlWindow) showViewerHelp() {
-	logging.DefaultLogger().InfoLineTitle(i18n.T("&ビューワーの使い方"), i18n.T("ビューワーの使い方メッセージ"))
+	cw.infoLineTitle(cw.t("&ビューワーの使い方"), cw.t("ビューワーの使い方メッセージ"))
 }
 
 // updateFpsMenu はFPS制限メニューの状態を更新する。
@@ -1001,7 +1076,7 @@ func (cw *ControlWindow) updateActionChecked(action *walk.Action, enabled bool) 
 }
 
 // setVerbose は冗長ログ設定を切り替える。
-func (cw *ControlWindow) setVerbose(index sharedlogging.VerboseIndex, enabled bool, label string) {
+func (cw *ControlWindow) setVerbose(index logging.VerboseIndex, enabled bool, label string) {
 	cw.resetVerboseActions()
 	if enabled {
 		cw.enableVerbose(index, label)
@@ -1015,20 +1090,20 @@ func (cw *ControlWindow) resetVerboseActions() {
 	cw.updateActionChecked(cw.logLevelIkVerboseAction, false)
 	cw.updateActionChecked(cw.logLevelPhysicsVerboseAction, false)
 	cw.updateActionChecked(cw.logLevelViewerVerboseAction, false)
-	logging.DefaultLogger().SetLevel(sharedlogging.LOG_LEVEL_INFO)
-	cw.disableVerbose(sharedlogging.VERBOSE_INDEX_MOTION)
-	cw.disableVerbose(sharedlogging.VERBOSE_INDEX_IK)
-	cw.disableVerbose(sharedlogging.VERBOSE_INDEX_PHYSICS)
-	cw.disableVerbose(sharedlogging.VERBOSE_INDEX_VIEWER)
+	cw.loggerOrDefault().SetLevel(logging.LOG_LEVEL_INFO)
+	cw.disableVerbose(logging.VERBOSE_INDEX_MOTION)
+	cw.disableVerbose(logging.VERBOSE_INDEX_IK)
+	cw.disableVerbose(logging.VERBOSE_INDEX_PHYSICS)
+	cw.disableVerbose(logging.VERBOSE_INDEX_VIEWER)
 }
 
 // enableVerbose は冗長ログを有効化する。
-func (cw *ControlWindow) enableVerbose(index sharedlogging.VerboseIndex, label string) {
-	logger := logging.DefaultLogger()
-	logger.SetLevel(sharedlogging.LOG_LEVEL_VERBOSE)
+func (cw *ControlWindow) enableVerbose(index logging.VerboseIndex, label string) {
+	logger := cw.loggerOrDefault()
+	logger.SetLevel(logging.LOG_LEVEL_VERBOSE)
 	logger.EnableVerbose(index)
 	if _, ok := cw.verboseSinks[index]; !ok {
-		_, sink, err := mfile.OpenVerboseLogStream(label)
+		_, sink, err := mfile.OpenVerboseLogStream(cw.userConfig, label)
 		if err != nil {
 			logger.Error("冗長ログの開始に失敗しました: %s", err.Error())
 			return
@@ -1039,8 +1114,8 @@ func (cw *ControlWindow) enableVerbose(index sharedlogging.VerboseIndex, label s
 }
 
 // disableVerbose は冗長ログを無効化する。
-func (cw *ControlWindow) disableVerbose(index sharedlogging.VerboseIndex) {
-	logger := logging.DefaultLogger()
+func (cw *ControlWindow) disableVerbose(index logging.VerboseIndex) {
+	logger := cw.loggerOrDefault()
 	logger.DisableVerbose(index)
 	if sink, ok := cw.verboseSinks[index]; ok && sink != nil {
 		_ = sink.Close()

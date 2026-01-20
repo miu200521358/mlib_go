@@ -18,8 +18,11 @@ import (
 	infraconfig "github.com/miu200521358/mlib_go/pkg/infra/base/config"
 	infraerr "github.com/miu200521358/mlib_go/pkg/infra/base/err"
 	"github.com/miu200521358/mlib_go/pkg/infra/base/i18n"
+	infralogging "github.com/miu200521358/mlib_go/pkg/infra/base/logging"
 	"github.com/miu200521358/mlib_go/pkg/infra/controller"
 	"github.com/miu200521358/mlib_go/pkg/infra/viewer"
+	"github.com/miu200521358/mlib_go/pkg/shared/base"
+	sharedlogging "github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"github.com/miu200521358/mlib_go/pkg/shared/state"
 )
 
@@ -52,6 +55,15 @@ func main() {
 		infraerr.ShowFatalErrorDialog(appConfig, err)
 		return
 	}
+	logger := infralogging.NewLogger(i18n.Default())
+	infralogging.SetDefaultLogger(logger)
+	sharedlogging.SetDefaultLogger(logger)
+	configStore := infraconfig.NewConfigStore(appConfig, userConfig)
+	baseServices := &base.BaseServices{
+		ConfigStore:   configStore,
+		I18nService:   i18n.Default(),
+		LoggerService: logger,
+	}
 
 	shared := state.NewSharedState(viewerCount)
 	sharedState, ok := shared.(*state.SharedState)
@@ -63,7 +75,7 @@ func main() {
 	widths, heights, positionXs, positionYs := app.GetCenterSizeAndWidth(appConfig, viewerCount)
 
 	var controlWindow *controller.ControlWindow
-	viewerManager := viewer.NewViewerManager(sharedState, appConfig)
+	viewerManager := viewer.NewViewerManager(sharedState, baseServices)
 
 	go func() {
 		defer app.SafeExecute(appConfig, func() {
@@ -73,9 +85,9 @@ func main() {
 
 			controlWindow, err = controller.NewControlWindow(
 				sharedState,
-				appConfig,
-				ui.NewMenuItems(),
-				[]declarative.TabPage{ui.NewTabPage(widgets)},
+				baseServices,
+				ui.NewMenuItems(baseServices.I18n(), baseServices.Logger()),
+				[]declarative.TabPage{ui.NewTabPage(widgets, baseServices)},
 				widths[0], heights[0], positionXs[0], positionYs[0], viewerCount,
 			)
 			if err != nil {

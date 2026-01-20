@@ -11,7 +11,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/graphics_api"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/infra/base/logging"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"gonum.org/v1/gonum/spatial/r3"
 )
 

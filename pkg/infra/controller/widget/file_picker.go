@@ -13,10 +13,9 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_model/pmx"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_motion"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_motion/vmd"
-	infraconfig "github.com/miu200521358/mlib_go/pkg/infra/base/config"
-	"github.com/miu200521358/mlib_go/pkg/infra/base/i18n"
-	"github.com/miu200521358/mlib_go/pkg/infra/base/logging"
 	"github.com/miu200521358/mlib_go/pkg/infra/controller"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
 )
@@ -35,6 +34,7 @@ type FilePicker struct {
 	initialDirPath    string
 	filterExtensions  []filterExtension
 	repository        io_common.IFileReader
+	translator        i18n.II18n
 	userConfig        io_commonUserConfig
 	pathEdit          *walk.LineEdit
 	nameEdit          *walk.LineEdit
@@ -52,8 +52,10 @@ type io_commonUserConfig interface {
 }
 
 // NewPmxLoadFilePicker はPMX読み込み用のFilePickerを生成する。
-func NewPmxLoadFilePicker(historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
+func NewPmxLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
 	return newFilePicker(
+		userConfig,
+		translator,
 		historyKey,
 		title,
 		tooltip,
@@ -67,8 +69,10 @@ func NewPmxLoadFilePicker(historyKey string, title string, tooltip string, onPat
 }
 
 // NewPmxXLoadFilePicker はPMX/X読み込み用のFilePickerを生成する。
-func NewPmxXLoadFilePicker(historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
+func NewPmxXLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
 	return newFilePicker(
+		userConfig,
+		translator,
 		historyKey,
 		title,
 		tooltip,
@@ -82,8 +86,10 @@ func NewPmxXLoadFilePicker(historyKey string, title string, tooltip string, onPa
 }
 
 // NewVmdVpdLoadFilePicker はVMD/VPD読み込み用のFilePickerを生成する。
-func NewVmdVpdLoadFilePicker(historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
+func NewVmdVpdLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
 	return newFilePicker(
+		userConfig,
+		translator,
 		historyKey,
 		title,
 		tooltip,
@@ -97,8 +103,10 @@ func NewVmdVpdLoadFilePicker(historyKey string, title string, tooltip string, on
 }
 
 // NewVmdLoadFilePicker はVMD読み込み用のFilePickerを生成する。
-func NewVmdLoadFilePicker(historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
+func NewVmdLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
 	return newFilePicker(
+		userConfig,
+		translator,
 		historyKey,
 		title,
 		tooltip,
@@ -112,8 +120,10 @@ func NewVmdLoadFilePicker(historyKey string, title string, tooltip string, onPat
 }
 
 // NewPmxSaveFilePicker はPMX保存用のFilePickerを生成する。
-func NewPmxSaveFilePicker(title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
+func NewPmxSaveFilePicker(userConfig io_commonUserConfig, translator i18n.II18n, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
 	return newFilePicker(
+		userConfig,
+		translator,
 		"",
 		title,
 		tooltip,
@@ -127,8 +137,10 @@ func NewPmxSaveFilePicker(title string, tooltip string, onPathChanged func(*cont
 }
 
 // NewVmdSaveFilePicker はVMD保存用のFilePickerを生成する。
-func NewVmdSaveFilePicker(title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
+func NewVmdSaveFilePicker(userConfig io_commonUserConfig, translator i18n.II18n, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
 	return newFilePicker(
+		userConfig,
+		translator,
 		"",
 		title,
 		tooltip,
@@ -142,8 +154,8 @@ func NewVmdSaveFilePicker(title string, tooltip string, onPathChanged func(*cont
 }
 
 // newFilePicker はFilePickerを生成する。
-func newFilePicker(historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string),
-	filterExtensions []filterExtension, repository io_common.IFileReader) *FilePicker {
+func newFilePicker(userConfig io_commonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string,
+	onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string), filterExtensions []filterExtension, repository io_common.IFileReader) *FilePicker {
 	picker := &FilePicker{
 		title:            title,
 		tooltip:          tooltip,
@@ -151,7 +163,8 @@ func newFilePicker(historyKey string, title string, tooltip string, onPathChange
 		filterExtensions: filterExtensions,
 		repository:       repository,
 		onPathChanged:    onPathChanged,
-		userConfig:       infraconfig.NewUserConfigStore(),
+		userConfig:       userConfig,
+		translator:       translator,
 	}
 	return picker
 }
@@ -159,6 +172,14 @@ func newFilePicker(historyKey string, title string, tooltip string, onPathChange
 // SetWindow はウィンドウ参照を設定する。
 func (fp *FilePicker) SetWindow(window *controller.ControlWindow) {
 	fp.window = window
+}
+
+// t は翻訳済み文言を返す。
+func (fp *FilePicker) t(key string) string {
+	if fp == nil || fp.translator == nil || !fp.translator.IsReady() {
+		return "●●" + key + "●●"
+	}
+	return fp.translator.T(key)
 }
 
 // SetEnabledInPlaying は再生中の有効状態を設定する。
@@ -204,7 +225,7 @@ func (fp *FilePicker) Widgets() declarative.Composite {
 					Background: declarative.SolidColorBrush{
 						Color: controller.ColorTabBackground,
 					},
-					Text:        i18n.T("未設定"),
+					Text:        fp.t("未設定"),
 					ToolTipText: fp.tooltip,
 					AssignTo:    &fp.nameEdit,
 				},
@@ -226,7 +247,7 @@ func (fp *FilePicker) Widgets() declarative.Composite {
 		},
 		declarative.PushButton{
 			AssignTo:    &fp.openPushButton,
-			Text:        i18n.T("開く"),
+			Text:        fp.t("開く"),
 			ToolTipText: fp.tooltip,
 			OnClicked: func() {
 				fp.onOpenClicked()
@@ -239,7 +260,7 @@ func (fp *FilePicker) Widgets() declarative.Composite {
 	if fp.historyKey != "" {
 		inputWidgets = append(inputWidgets, declarative.PushButton{
 			AssignTo:    &fp.historyPushButton,
-			Text:        i18n.T("履歴"),
+			Text:        fp.t("履歴"),
 			ToolTipText: fp.tooltip,
 			OnClicked: func() {
 				fp.openHistoryDialog()
@@ -282,7 +303,7 @@ func (fp *FilePicker) showOpenDialog() {
 	fd.InitialDirPath = fp.resolveInitialDir()
 	ok, err := fd.ShowOpen(fp.window)
 	if err != nil {
-		walk.MsgBox(fp.window, i18n.T("読み込み失敗"), err.Error(), walk.MsgBoxIconError)
+		walk.MsgBox(fp.window, fp.t("読み込み失敗"), err.Error(), walk.MsgBoxIconError)
 		return
 	}
 	if !ok {
@@ -300,7 +321,7 @@ func (fp *FilePicker) showSaveDialog() {
 	fd.InitialDirPath = fp.resolveInitialDir()
 	ok, err := fd.ShowSave(fp.window)
 	if err != nil {
-		walk.MsgBox(fp.window, i18n.T("保存失敗"), err.Error(), walk.MsgBoxIconError)
+		walk.MsgBox(fp.window, fp.t("保存失敗"), err.Error(), walk.MsgBoxIconError)
 		return
 	}
 	if !ok {
@@ -400,7 +421,7 @@ func (fp *FilePicker) openHistoryDialog() {
 	push := new(walk.PushButton)
 	if err := (declarative.Dialog{
 		AssignTo: &dlg,
-		Title:    i18n.T("履歴"),
+		Title:    fp.t("履歴"),
 		MinSize:  declarative.Size{Width: 800, Height: 400},
 		Layout:   declarative.VBox{},
 		Children: []declarative.Widget{

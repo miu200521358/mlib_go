@@ -25,7 +25,7 @@ import (
 	"github.com/miu200521358/dds/pkg/dds"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
-	"github.com/miu200521358/mlib_go/pkg/infra/base/logging"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	baseerr "github.com/miu200521358/mlib_go/pkg/shared/base/err"
 	"golang.org/x/image/bmp"
 	_ "golang.org/x/image/riff"

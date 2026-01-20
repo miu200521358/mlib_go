@@ -6,8 +6,7 @@ import (
 	"time"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
-	"github.com/miu200521358/mlib_go/pkg/infra/base/logging"
-	sharedlogging "github.com/miu200521358/mlib_go/pkg/shared/base/logging"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 )
 
 // DebugBoneHover はデバッグカーソル下のボーン情報を保持する。
@@ -43,17 +42,17 @@ func (mp *BoneHighlighter) CheckAndClearExpiredHighlight() {
 
 	// 2秒経過をチェック
 	if time.Since(mp.debugBoneHoverStartTime) >= 2*time.Second {
-		logging.DefaultLogger().Verbose(sharedlogging.VERBOSE_INDEX_VIEWER, "ハイライト自動クリア: 2秒経過しました")
+		logging.DefaultLogger().Verbose(logging.VERBOSE_INDEX_VIEWER, "ハイライト自動クリア: 2秒経過しました")
 		mp.clearDebugBoneHover()
 	}
 }
 
 // UpdateDebugHoverByBones は複数ボーンによるハイライト情報を更新する。
 func (mp *BoneHighlighter) UpdateDebugHoverByBones(closestBones []*DebugBoneHover, enable bool) {
-	logging.DefaultLogger().Verbose(sharedlogging.VERBOSE_INDEX_VIEWER, "複数ボーンハイライト開始: enable=%v, bone数=%d", enable, len(closestBones))
+	logging.DefaultLogger().Verbose(logging.VERBOSE_INDEX_VIEWER, "複数ボーンハイライト開始: enable=%v, bone数=%d", enable, len(closestBones))
 
 	if !enable || len(closestBones) == 0 {
-		logging.DefaultLogger().Verbose(sharedlogging.VERBOSE_INDEX_VIEWER, "複数ボーンハイライト無効またはbonesが空 - クリア")
+		logging.DefaultLogger().Verbose(logging.VERBOSE_INDEX_VIEWER, "複数ボーンハイライト無効またはbonesが空 - クリア")
 		mp.clearDebugBoneHover()
 		return
 	}
@@ -67,7 +66,7 @@ func (mp *BoneHighlighter) UpdateDebugHoverByBones(closestBones []*DebugBoneHove
 			boneNames = append(boneNames, bone.Bone.Name())
 		}
 	}
-	logging.DefaultLogger().Verbose(sharedlogging.VERBOSE_INDEX_VIEWER, "複数ボーンハイライト設定完了: %d個のボーン [%s]", len(closestBones), strings.Join(boneNames, ", "))
+	logging.DefaultLogger().Verbose(logging.VERBOSE_INDEX_VIEWER, "複数ボーンハイライト設定完了: %d個のボーン [%s]", len(closestBones), strings.Join(boneNames, ", "))
 }
 
 // CheckAndClearBoneExpiredHighlight は2秒経過したボーンハイライトを自動的にクリアする。
@@ -79,7 +78,7 @@ func (mp *BoneHighlighter) CheckAndClearBoneExpiredHighlight() {
 
 	// 2秒経過をチェック
 	if time.Since(mp.debugBoneHoverStartTime) >= 2*time.Second {
-		logging.DefaultLogger().Verbose(sharedlogging.VERBOSE_INDEX_VIEWER, "ボーンハイライト自動クリア: 2秒経過しました")
+		logging.DefaultLogger().Verbose(logging.VERBOSE_INDEX_VIEWER, "ボーンハイライト自動クリア: 2秒経過しました")
 		mp.clearDebugBoneHover()
 	}
 }

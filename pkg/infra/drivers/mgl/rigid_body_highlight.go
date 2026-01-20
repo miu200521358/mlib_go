@@ -7,8 +7,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/adapter/graphics_api"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
-	"github.com/miu200521358/mlib_go/pkg/infra/base/logging"
-	sharedlogging "github.com/miu200521358/mlib_go/pkg/shared/base/logging"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 )
 
 // DebugRigidBodyHover はデバッグカーソル下の剛体情報を保持する。
@@ -36,7 +35,7 @@ func (mp *RigidBodyHighlighter) DebugHoverInfo() *DebugRigidBodyHover {
 
 // UpdateDebugHoverByRigidBody は剛体ハイライト情報を更新する。
 func (mp *RigidBodyHighlighter) UpdateDebugHoverByRigidBody(modelIndex int, rb *model.RigidBody, enable bool) {
-	logging.DefaultLogger().Verbose(sharedlogging.VERBOSE_INDEX_PHYSICS, "剛体ハイライト更新: enable=%v, rigidBody=%v", enable, rb != nil)
+	logging.DefaultLogger().Verbose(logging.VERBOSE_INDEX_PHYSICS, "剛体ハイライト更新: enable=%v, rigidBody=%v", enable, rb != nil)
 	if !enable || rb == nil {
 		mp.clearDebugHover()
 		return
@@ -50,7 +49,7 @@ func (mp *RigidBodyHighlighter) DrawDebugHighlight(shader graphics_api.IShader, 
 	if mp.debugHover == nil {
 		return
 	}
-	logging.DefaultLogger().Verbose(sharedlogging.VERBOSE_INDEX_PHYSICS, "剛体ハイライト描画は未実装のためスキップします")
+		logging.DefaultLogger().Verbose(logging.VERBOSE_INDEX_PHYSICS, "剛体ハイライト描画は未実装のためスキップします")
 }
 
 // CheckAndClearHighlightOnDebugChange は剛体デバッグ状態変更時にハイライトをクリアする。
@@ -69,7 +68,7 @@ func (mp *RigidBodyHighlighter) CheckAndClearExpiredHighlight() {
 		return
 	}
 	if time.Since(mp.debugHoverStartTime) >= 2*time.Second {
-		logging.DefaultLogger().Verbose(sharedlogging.VERBOSE_INDEX_PHYSICS, "剛体ハイライト自動クリア: 2秒経過しました")
+		logging.DefaultLogger().Verbose(logging.VERBOSE_INDEX_PHYSICS, "剛体ハイライト自動クリア: 2秒経過しました")
 		mp.clearDebugHover()
 	}
 }

@@ -4,6 +4,7 @@ package logging
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"runtime"
@@ -16,11 +17,6 @@ import (
 )
 
 const maxConsoleLines = 10000
-
-// ILogSink はログ出力先I/F。
-type ILogSink interface {
-	Write(p []byte) (int, error)
-}
 
 // Logger はinfraログ実装。
 type Logger struct {
@@ -62,10 +58,11 @@ func SetDefaultLogger(logger *Logger) {
 		return
 	}
 	defaultLogger = logger
+	logging.SetDefaultLogger(logger)
 }
 
 // SetConsoleSink はコンソール出力先を設定する。
-func SetConsoleSink(writer ILogSink) {
+func SetConsoleSink(writer io.Writer) {
 	defaultLogger.SetConsoleSink(writer)
 }
 
@@ -255,7 +252,7 @@ func (l *Logger) Memory(prefix string) {
 }
 
 // SetConsoleSink はコンソール出力先を設定する。
-func (l *Logger) SetConsoleSink(writer ILogSink) {
+func (l *Logger) SetConsoleSink(writer io.Writer) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	l.consoleSink.sink = writer
@@ -350,7 +347,7 @@ func (b *messageBuffer) appendText(text string) {
 // logSink はログ出力とバッファ更新を担当する。
 type logSink struct {
 	mu     sync.Mutex
-	sink   ILogSink
+	sink   io.Writer
 	buffer *messageBuffer
 }
 

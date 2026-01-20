@@ -7,7 +7,7 @@ package mgl
 import (
 	"github.com/go-gl/gl/v4.3-core/gl"
 	"github.com/miu200521358/mlib_go/pkg/adapter/graphics_api"
-	"github.com/miu200521358/mlib_go/pkg/infra/base/logging"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 )
 
 // IntermediateMsaaBuffer は中間FBOを使ったMSAA実装。

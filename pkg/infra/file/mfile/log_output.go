@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/miu200521358/mlib_go/pkg/infra/base/config"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
 	baseerr "github.com/miu200521358/mlib_go/pkg/shared/base/err"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 )
@@ -52,11 +52,15 @@ func (s *verboseFileSink) Close() error {
 }
 
 // OpenVerboseLogStream は冗長ログのストリームを生成する。
-func OpenVerboseLogStream(label string) (string, logging.IVerboseSink, error) {
-	dir, err := logDir()
-	if err != nil {
-		return "", nil, err
+func OpenVerboseLogStream(userConfig config.IUserConfig, label string) (string, logging.IVerboseSink, error) {
+	if userConfig == nil {
+		return "", nil, newLogStreamOpenFailed("ユーザー設定が初期化されていません", nil)
 	}
+	root, err := userConfig.AppRootDir()
+	if err != nil {
+		return "", nil, newLogStreamOpenFailed("アプリルートの取得に失敗しました", err)
+	}
+	dir := filepath.Join(root, "logs")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return "", nil, newLogStreamOpenFailed("ログディレクトリの作成に失敗しました", baseerr.NewOsPackageError("os.MkdirAllに失敗しました", err))
 	}
@@ -69,11 +73,15 @@ func OpenVerboseLogStream(label string) (string, logging.IVerboseSink, error) {
 }
 
 // SaveConsoleSnapshot はメッセージ欄の全文を保存する。
-func SaveConsoleSnapshot(label string, text string) (string, error) {
-	dir, err := logDir()
-	if err != nil {
-		return "", err
+func SaveConsoleSnapshot(userConfig config.IUserConfig, label string, text string) (string, error) {
+	if userConfig == nil {
+		return "", newConsoleSnapshotSaveFailed("ユーザー設定が初期化されていません", nil)
 	}
+	root, err := userConfig.AppRootDir()
+	if err != nil {
+		return "", newConsoleSnapshotSaveFailed("アプリルートの取得に失敗しました", err)
+	}
+	dir := filepath.Join(root, "logs")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return "", newConsoleSnapshotSaveFailed("ログディレクトリの作成に失敗しました", baseerr.NewOsPackageError("os.MkdirAllに失敗しました", err))
 	}
@@ -82,14 +90,6 @@ func SaveConsoleSnapshot(label string, text string) (string, error) {
 		return "", newConsoleSnapshotSaveFailed("ログスナップショットの保存に失敗しました", baseerr.NewOsPackageError("os.WriteFileに失敗しました", err))
 	}
 	return path, nil
-}
-
-func logDir() (string, error) {
-	root, err := config.AppRootDir()
-	if err != nil {
-		return "", newLogStreamOpenFailed("アプリルートの取得に失敗しました", err)
-	}
-	return filepath.Join(root, "logs"), nil
 }
 
 func logFileName(label string) string {

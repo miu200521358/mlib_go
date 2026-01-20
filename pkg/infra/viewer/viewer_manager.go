@@ -7,6 +7,7 @@ package viewer
 import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 
+	"github.com/miu200521358/mlib_go/pkg/shared/base"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
 	sharedtime "github.com/miu200521358/mlib_go/pkg/shared/contracts/time"
 	"github.com/miu200521358/mlib_go/pkg/shared/state"
@@ -24,7 +25,13 @@ type ViewerManager struct {
 }
 
 // NewViewerManager はViewerManagerを生成する。
-func NewViewerManager(shared *state.SharedState, appConfig *config.AppConfig) *ViewerManager {
+func NewViewerManager(shared *state.SharedState, baseServices base.IBaseServices) *ViewerManager {
+	var appConfig *config.AppConfig
+	if baseServices != nil {
+		if cfg := baseServices.Config(); cfg != nil {
+			appConfig = cfg.AppConfig()
+		}
+	}
 	return &ViewerManager{
 		shared:     shared,
 		appConfig:  appConfig,

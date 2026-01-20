@@ -12,7 +12,7 @@ import (
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.3-core/gl"
-	"github.com/miu200521358/mlib_go/pkg/infra/base/logging"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/basicfont"
 	"golang.org/x/image/font/opentype"

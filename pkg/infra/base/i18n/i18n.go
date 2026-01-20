@@ -117,6 +117,13 @@ func T(key string) string {
 	return defaultI18n.T(key)
 }
 
+// Default は既定のi18nインスタンスを返す。
+func Default() i18n.II18n {
+	defaultMu.Lock()
+	defer defaultMu.Unlock()
+	return defaultI18n
+}
+
 // TWithLang は指定言語でメッセージを取得する。
 func TWithLang(lang LangCode, key string) string {
 	defaultMu.Lock()

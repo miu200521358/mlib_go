@@ -10,8 +10,8 @@ import (
 	"sort"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
-	"github.com/miu200521358/mlib_go/pkg/infra/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/infra/controller"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
 )
@@ -23,17 +23,27 @@ type MaterialTableView struct {
 	Materials           *model.PmxModel
 	MaterialModel       *MaterialModel
 	tooltip             string
+	translator          i18n.II18n
 	prevSelectedIndexes []int
 	changeFunc          func(cw *controller.ControlWindow, indexes []int)
 }
 
 // NewMaterialTableView はMaterialTableViewを生成する。
-func NewMaterialTableView(tooltip string, changeFunc func(cw *controller.ControlWindow, indexes []int)) *MaterialTableView {
+func NewMaterialTableView(translator i18n.II18n, tooltip string, changeFunc func(cw *controller.ControlWindow, indexes []int)) *MaterialTableView {
 	m := new(MaterialTableView)
 	m.tooltip = tooltip
 	m.changeFunc = changeFunc
 	m.MaterialModel = new(MaterialModel)
+	m.translator = translator
 	return m
+}
+
+// t は翻訳済み文言を返す。
+func (lb *MaterialTableView) t(key string) string {
+	if lb == nil || lb.translator == nil || !lb.translator.IsReady() {
+		return "●●" + key + "●●"
+	}
+	return lb.translator.T(key)
 }
 
 // Widgets はUI構成を返す。
@@ -51,14 +61,14 @@ func (lb *MaterialTableView) Widgets() declarative.Composite {
 				Columns: []declarative.TableViewColumn{
 					{Title: "#", Width: 50},
 					{Title: "No.", Width: 50},
-					{Title: i18n.T("日本語名称"), Width: 150},
-					{Title: i18n.T("英語名称"), Width: 150},
-					{Title: i18n.T("有効テクスチャ"), Width: 50},
-					{Title: i18n.T("テクスチャ"), Width: 150},
-					{Title: i18n.T("有効Toon"), Width: 50},
+					{Title: lb.t("日本語名称"), Width: 150},
+					{Title: lb.t("英語名称"), Width: 150},
+					{Title: lb.t("有効テクスチャ"), Width: 50},
+					{Title: lb.t("テクスチャ"), Width: 150},
+					{Title: lb.t("有効Toon"), Width: 50},
 					{Title: "Toon", Width: 150},
-					{Title: i18n.T("有効スフィア"), Width: 50},
-					{Title: i18n.T("スフィア"), Width: 150},
+					{Title: lb.t("有効スフィア"), Width: 50},
+					{Title: lb.t("スフィア"), Width: 150},
 				},
 				StyleCell: func(style *walk.CellStyle) {
 					m := lb.MaterialModel.Records[style.Row()]

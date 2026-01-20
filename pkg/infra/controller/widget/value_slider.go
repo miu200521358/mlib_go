@@ -7,8 +7,8 @@ package widget
 import (
 	"math"
 
-	"github.com/miu200521358/mlib_go/pkg/infra/base/logging"
 	"github.com/miu200521358/mlib_go/pkg/infra/controller"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
 )
