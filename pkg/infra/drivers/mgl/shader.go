@@ -44,7 +44,7 @@ func NewShaderFactory(windowIndex int) *ShaderFactory {
 // CreateShader はOpenGLシェーダーを生成する。
 func (f *ShaderFactory) CreateShader(width, height int) (graphics_api.IShader, error) {
 	cam := graphics_api.NewDefaultCamera(width, height)
-	lightPos := mmath.Vec3{r3.Vec{X: -0.5, Y: -1.0, Z: 0.5}}
+	lightPos := mmath.Vec3{Vec: r3.Vec{X: -0.5, Y: -1.0, Z: 0.5}}
 	lightDir := lightPos.Normalized()
 
 	msaa := NewMsaaBuffer(width, height)
@@ -53,14 +53,14 @@ func (f *ShaderFactory) CreateShader(width, height int) (graphics_api.IShader, e
 	}
 
 	shader := &Shader{
-		width:         width,
-		height:        height,
-		lightPosition: &lightPos,
+		width:          width,
+		height:         height,
+		lightPosition:  &lightPos,
 		lightDirection: &lightDir,
-		msaa:          msaa,
-		floorRenderer: NewFloorRenderer(),
-		programs:      make(map[graphics_api.ProgramType]uint32),
-		shaderLoader:  NewShaderSourceLoader(),
+		msaa:           msaa,
+		floorRenderer:  NewFloorRenderer(),
+		programs:       make(map[graphics_api.ProgramType]uint32),
+		shaderLoader:   NewShaderSourceLoader(),
 	}
 
 	shader.camera.Store(cam)
