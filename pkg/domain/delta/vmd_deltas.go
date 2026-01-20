@@ -3,12 +3,12 @@ package delta
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
-	sharedtime "github.com/miu200521358/mlib_go/pkg/shared/contracts/time"
+	"github.com/miu200521358/mlib_go/pkg/shared/contracts/mtime"
 )
 
 // VmdDeltas はボーン/モーフの差分をまとめる。
 type VmdDeltas struct {
-	frame      sharedtime.Frame
+	frame      mtime.Frame
 	modelHash  string
 	motionHash string
 	Bones      *BoneDeltas
@@ -16,7 +16,7 @@ type VmdDeltas struct {
 }
 
 // NewVmdDeltas はVmdDeltasを生成する。
-func NewVmdDeltas(frame sharedtime.Frame, bones *model.BoneCollection, modelHash, motionHash string) *VmdDeltas {
+func NewVmdDeltas(frame mtime.Frame, bones *model.BoneCollection, modelHash, motionHash string) *VmdDeltas {
 	return &VmdDeltas{
 		frame:      frame,
 		modelHash:  modelHash,
@@ -27,7 +27,7 @@ func NewVmdDeltas(frame sharedtime.Frame, bones *model.BoneCollection, modelHash
 }
 
 // Frame はフレーム番号を返す。
-func (v *VmdDeltas) Frame() sharedtime.Frame {
+func (v *VmdDeltas) Frame() mtime.Frame {
 	if v == nil {
 		return 0
 	}
@@ -35,7 +35,7 @@ func (v *VmdDeltas) Frame() sharedtime.Frame {
 }
 
 // SetFrame はフレーム番号を設定する。
-func (v *VmdDeltas) SetFrame(frame sharedtime.Frame) {
+func (v *VmdDeltas) SetFrame(frame mtime.Frame) {
 	if v == nil {
 		return
 	}

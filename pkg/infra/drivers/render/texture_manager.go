@@ -26,7 +26,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
-	baseerr "github.com/miu200521358/mlib_go/pkg/shared/base/err"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 	"golang.org/x/image/bmp"
 	_ "golang.org/x/image/riff"
 	_ "golang.org/x/image/tiff"
@@ -199,7 +199,7 @@ func (tm *TextureManager) LoadToonTextures(windowIndex int) error {
 		}
 		image := convertToNRGBA(img)
 		if image == nil {
-			return baseerr.NewImagePackageError("トゥーンテクスチャの変換に失敗しました: "+filePath, nil)
+			return merr.NewImagePackageError("トゥーンテクスチャの変換に失敗しました: "+filePath, nil)
 		}
 
 		toonGl.bind()
@@ -251,7 +251,7 @@ func (tm *TextureManager) Delete() {
 // loadTextureGl は単一テクスチャをOpenGL向けにロードする。
 func (tm *TextureManager) loadTextureGl(windowIndex int, texture *model.Texture, modelPath string) (*textureGl, error) {
 	if texture == nil || texture.Name() == "" {
-		return nil, baseerr.NewImagePackageError("テクスチャ名が不正です", nil)
+		return nil, merr.NewImagePackageError("テクスチャ名が不正です", nil)
 	}
 
 	texGl := &textureGl{
@@ -269,7 +269,7 @@ func (tm *TextureManager) loadTextureGl(windowIndex int, texture *model.Texture,
 	}
 	image := convertToNRGBA(img)
 	if image == nil {
-		return texGl, baseerr.NewImagePackageError("テクスチャの変換に失敗しました: "+texture.Name(), nil)
+		return texGl, merr.NewImagePackageError("テクスチャの変換に失敗しました: "+texture.Name(), nil)
 	}
 
 	texGl.IsGeneratedMipmap =
@@ -348,7 +348,7 @@ var errUnsupportedImageFormat = errors.New("unsupported image format")
 func loadImageFromResources(resources embed.FS, fileName string) (image.Image, error) {
 	data, err := fs.ReadFile(resources, fileName)
 	if err != nil {
-		return nil, baseerr.NewFsPackageError("トゥーンテクスチャの読み込みに失敗しました: "+fileName, err)
+		return nil, merr.NewFsPackageError("トゥーンテクスチャの読み込みに失敗しました: "+fileName, err)
 	}
 	open := func() (io.ReadCloser, error) {
 		return io.NopCloser(bytes.NewReader(data)), nil
@@ -362,7 +362,7 @@ func loadImageFromFile(path string) (image.Image, error) {
 	open := func() (io.ReadCloser, error) {
 		file, err := os.Open(path)
 		if err != nil {
-			return nil, baseerr.NewOsPackageError("テクスチャファイルの読み込みに失敗しました: "+baseName, err)
+			return nil, merr.NewOsPackageError("テクスチャファイルの読み込みに失敗しました: "+baseName, err)
 		}
 		return file, nil
 	}
@@ -373,7 +373,7 @@ func loadImageFromFile(path string) (image.Image, error) {
 func loadImage(path string, displayName string, open imageOpenFunc) (image.Image, error) {
 	candidates := imageExtensionCandidates(path)
 	if len(candidates) == 0 {
-		return nil, baseerr.NewImagePackageError("未対応の画像形式です: "+displayName, nil)
+		return nil, merr.NewImagePackageError("未対応の画像形式です: "+displayName, nil)
 	}
 	var lastErr error
 	for _, ext := range candidates {
@@ -399,7 +399,7 @@ func loadImage(path string, displayName string, open imageOpenFunc) (image.Image
 		if lastErr == nil {
 			lastErr = err
 		}
-		return nil, baseerr.NewImagePackageError("テクスチャのデコードに失敗しました: "+displayName, lastErr)
+		return nil, merr.NewImagePackageError("テクスチャのデコードに失敗しました: "+displayName, lastErr)
 	}
 	return img, nil
 }

@@ -13,9 +13,9 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/infra/file/mfile"
 	"github.com/miu200521358/mlib_go/pkg/shared/base"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
-	sharedi18n "github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
-	sharedtime "github.com/miu200521358/mlib_go/pkg/shared/contracts/time"
+	"github.com/miu200521358/mlib_go/pkg/shared/contracts/mtime"
 	"github.com/miu200521358/mlib_go/pkg/shared/state"
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
@@ -35,13 +35,13 @@ const (
 
 const (
 	// langJa は日本語の言語コード。
-	langJa sharedi18n.LangCode = "ja"
+	langJa i18n.LangCode = "ja"
 	// langEn は英語の言語コード。
-	langEn sharedi18n.LangCode = "en"
+	langEn i18n.LangCode = "en"
 	// langZh は中国語の言語コード。
-	langZh sharedi18n.LangCode = "zh"
+	langZh i18n.LangCode = "zh"
 	// langKo は韓国語の言語コード。
-	langKo sharedi18n.LangCode = "ko"
+	langKo i18n.LangCode = "ko"
 )
 
 // ControlWindow はコントローラーウィンドウを表す。
@@ -51,7 +51,7 @@ type ControlWindow struct {
 	shared     *state.SharedState
 	appConfig  *config.AppConfig
 	userConfig config.IUserConfig
-	translator sharedi18n.II18n
+	translator i18n.II18n
 	logger     logging.ILogger
 
 	tabWidget   *walk.TabWidget
@@ -108,7 +108,7 @@ func NewControlWindow(shared *state.SharedState, baseServices base.IBaseServices
 ) (*ControlWindow, error) {
 	var appConfig *config.AppConfig
 	var userConfig config.IUserConfig
-	var translator sharedi18n.II18n
+	var translator i18n.II18n
 	var logger logging.ILogger
 	if baseServices != nil {
 		if cfg := baseServices.Config(); cfg != nil {
@@ -316,22 +316,22 @@ func (cw *ControlWindow) Playing() bool {
 }
 
 // SetFrame は現在フレームを設定する。
-func (cw *ControlWindow) SetFrame(frame sharedtime.Frame) {
+func (cw *ControlWindow) SetFrame(frame mtime.Frame) {
 	cw.shared.SetFrame(frame)
 }
 
 // Frame は現在フレームを返す。
-func (cw *ControlWindow) Frame() sharedtime.Frame {
+func (cw *ControlWindow) Frame() mtime.Frame {
 	return cw.shared.Frame()
 }
 
 // SetMaxFrame は最大フレームを設定する。
-func (cw *ControlWindow) SetMaxFrame(frame sharedtime.Frame) {
+func (cw *ControlWindow) SetMaxFrame(frame mtime.Frame) {
 	cw.shared.SetMaxFrame(frame)
 }
 
 // MaxFrame は最大フレームを返す。
-func (cw *ControlWindow) MaxFrame() sharedtime.Frame {
+func (cw *ControlWindow) MaxFrame() mtime.Frame {
 	return cw.shared.MaxFrame()
 }
 
@@ -386,14 +386,14 @@ func (cw *ControlWindow) SetSaveDeltaIndex(windowIndex int, index int) {
 
 // SetFpsLimit はFPS制限を設定する。
 func (cw *ControlWindow) SetFpsLimit(limit FpsLimit) {
-	interval := sharedtime.Seconds(-1)
+	interval := mtime.Seconds(-1)
 	switch limit {
 	case FPS_LIMIT_30:
-		interval = sharedtime.FpsToSpf(sharedtime.Fps(30))
+		interval = mtime.FpsToSpf(mtime.Fps(30))
 	case FPS_LIMIT_60:
-		interval = sharedtime.FpsToSpf(sharedtime.Fps(60))
+		interval = mtime.FpsToSpf(mtime.Fps(60))
 	case FPS_LIMIT_UNLIMITED:
-		interval = sharedtime.Seconds(-1)
+		interval = mtime.Seconds(-1)
 	}
 	cw.shared.SetFrameInterval(interval)
 	cw.shared.SetFpsLimitTriggered(true)
@@ -722,7 +722,7 @@ func (cw *ControlWindow) buildLanguageMenu() []declarative.MenuItem {
 }
 
 // onChangeLanguage は言語変更を行う。
-func (cw *ControlWindow) onChangeLanguage(lang sharedi18n.LangCode) {
+func (cw *ControlWindow) onChangeLanguage(lang i18n.LangCode) {
 	if result := walk.MsgBox(cw, cw.t("言語変更"), cw.t("言語変更メッセージ"), walk.MsgBoxIconQuestion|walk.MsgBoxOKCancel); result != walk.DlgCmdOK {
 		return
 	}

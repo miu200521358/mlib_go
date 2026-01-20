@@ -4,7 +4,7 @@ package model
 import (
 	"testing"
 
-	modelerrors "github.com/miu200521358/mlib_go/pkg/domain/model/errors"
+	"github.com/miu200521358/mlib_go/pkg/domain/model/merrors"
 )
 
 func newBone(name string, layer int) *Bone {
@@ -29,7 +29,7 @@ func TestBoneCollectionAppendGetContains(t *testing.T) {
 	if _, err := bones.Get(0); err != nil {
 		t.Fatalf("Get error: %v", err)
 	}
-	if _, err := bones.Get(5); err == nil || !modelerrors.IsIndexOutOfRangeError(err) {
+	if _, err := bones.Get(5); err == nil || !merrors.IsIndexOutOfRangeError(err) {
 		t.Fatalf("Get out of range should return IndexOutOfRangeError")
 	}
 	if bones.Contains(5) {
@@ -39,7 +39,7 @@ func TestBoneCollectionAppendGetContains(t *testing.T) {
 	if len(bones.indexToPos) > 0 {
 		bones.indexToPos[0] = -1
 	}
-	if _, err := bones.Get(0); err == nil || !modelerrors.IsIndexOutOfRangeError(err) {
+	if _, err := bones.Get(0); err == nil || !merrors.IsIndexOutOfRangeError(err) {
 		t.Fatalf("Get missing map should return IndexOutOfRangeError")
 	}
 	if bones.Contains(0) {
@@ -161,7 +161,7 @@ func TestBoneCollectionRemoveUpdateRename(t *testing.T) {
 		t.Fatalf("Remove should reindex remaining bones")
 	}
 
-	if _, err := bones.Update(0, newBone("x", 0)); err == nil || !modelerrors.IsNameMismatchError(err) {
+	if _, err := bones.Update(0, newBone("x", 0)); err == nil || !merrors.IsNameMismatchError(err) {
 		t.Fatalf("Update mismatch should return NameMismatchError")
 	}
 
@@ -174,7 +174,7 @@ func TestBoneCollectionRemoveUpdateRename(t *testing.T) {
 	}
 
 	bones.Append(newBone("b", 0))
-	if _, err := bones.Rename(0, "b"); err == nil || !modelerrors.IsNameConflictError(err) {
+	if _, err := bones.Rename(0, "b"); err == nil || !merrors.IsNameConflictError(err) {
 		t.Fatalf("Rename conflict should return NameConflictError")
 	}
 
@@ -183,7 +183,7 @@ func TestBoneCollectionRemoveUpdateRename(t *testing.T) {
 		t.Fatalf("Rename should succeed")
 	}
 
-	if _, err := bones.GetByName("a"); err == nil || !modelerrors.IsNameNotFoundError(err) {
+	if _, err := bones.GetByName("a"); err == nil || !merrors.IsNameNotFoundError(err) {
 		t.Fatalf("GetByName should be updated after rename")
 	}
 }
@@ -194,7 +194,7 @@ func TestBoneCollectionRemoveInvalidMap(t *testing.T) {
 	if len(bones.indexToPos) > 0 {
 		bones.indexToPos[0] = -1
 	}
-	if _, err := bones.Remove(0); err == nil || !modelerrors.IsIndexOutOfRangeError(err) {
+	if _, err := bones.Remove(0); err == nil || !merrors.IsIndexOutOfRangeError(err) {
 		t.Fatalf("Remove missing map should return IndexOutOfRangeError")
 	}
 }

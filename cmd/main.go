@@ -15,14 +15,14 @@ import (
 
 	"github.com/miu200521358/mlib_go/cmd/ui"
 	"github.com/miu200521358/mlib_go/pkg/infra/app"
-	infraconfig "github.com/miu200521358/mlib_go/pkg/infra/base/config"
-	infraerr "github.com/miu200521358/mlib_go/pkg/infra/base/err"
+	"github.com/miu200521358/mlib_go/pkg/infra/base/config"
+	"github.com/miu200521358/mlib_go/pkg/infra/base/err"
 	"github.com/miu200521358/mlib_go/pkg/infra/base/i18n"
-	infralogging "github.com/miu200521358/mlib_go/pkg/infra/base/logging"
+	"github.com/miu200521358/mlib_go/pkg/infra/base/mlogging"
 	"github.com/miu200521358/mlib_go/pkg/infra/controller"
 	"github.com/miu200521358/mlib_go/pkg/infra/viewer"
 	"github.com/miu200521358/mlib_go/pkg/shared/base"
-	sharedlogging "github.com/miu200521358/mlib_go/pkg/shared/base/logging"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"github.com/miu200521358/mlib_go/pkg/shared/state"
 )
 
@@ -45,20 +45,20 @@ var appI18nFiles embed.FS
 func main() {
 	viewerCount := 2
 
-	appConfig, err := infraconfig.LoadAppConfig(appFiles)
-	if err != nil {
-		infraerr.ShowFatalErrorDialog(nil, err)
+	appConfig, loadErr := config.LoadAppConfig(appFiles)
+	if loadErr != nil {
+		err.ShowFatalErrorDialog(nil, loadErr)
 		return
 	}
-	userConfig := infraconfig.NewUserConfigStore()
-	if err := i18n.InitI18n(appI18nFiles, userConfig); err != nil {
-		infraerr.ShowFatalErrorDialog(appConfig, err)
+	userConfig := config.NewUserConfigStore()
+	if initErr := i18n.InitI18n(appI18nFiles, userConfig); initErr != nil {
+		err.ShowFatalErrorDialog(appConfig, initErr)
 		return
 	}
-	logger := infralogging.NewLogger(i18n.Default())
-	infralogging.SetDefaultLogger(logger)
-	sharedlogging.SetDefaultLogger(logger)
-	configStore := infraconfig.NewConfigStore(appConfig, userConfig)
+	logger := mlogging.NewLogger(i18n.Default())
+	mlogging.SetDefaultLogger(logger)
+	logging.SetDefaultLogger(logger)
+	configStore := config.NewConfigStore(appConfig, userConfig)
 	baseServices := &base.BaseServices{
 		ConfigStore:   configStore,
 		I18nService:   i18n.Default(),
@@ -68,13 +68,16 @@ func main() {
 	shared := state.NewSharedState(viewerCount)
 	sharedState, ok := shared.(*state.SharedState)
 	if !ok {
-		infraerr.ShowFatalErrorDialog(appConfig, fmt.Errorf("共有状態の初期化に失敗しました"))
+		err.ShowFatalErrorDialog(appConfig, fmt.Errorf("共有状態の初期化に失敗しました"))
 		return
 	}
 
 	widths, heights, positionXs, positionYs := app.GetCenterSizeAndWidth(appConfig, viewerCount)
 
-	var controlWindow *controller.ControlWindow
+	var (
+		controlWindow    *controller.ControlWindow
+		controlWindowErr error
+	)
 	viewerManager := viewer.NewViewerManager(sharedState, baseServices)
 
 	go func() {
@@ -83,15 +86,15 @@ func main() {
 				Position: &walk.Point{X: positionXs[0], Y: positionYs[0]},
 			}
 
-			controlWindow, err = controller.NewControlWindow(
+			controlWindow, controlWindowErr = controller.NewControlWindow(
 				sharedState,
 				baseServices,
 				ui.NewMenuItems(baseServices.I18n(), baseServices.Logger()),
 				[]declarative.TabPage{ui.NewTabPage(widgets, baseServices)},
 				widths[0], heights[0], positionXs[0], positionYs[0], viewerCount,
 			)
-			if err != nil {
-				infraerr.ShowFatalErrorDialog(appConfig, err)
+			if controlWindowErr != nil {
+				err.ShowFatalErrorDialog(appConfig, controlWindowErr)
 				return
 			}
 
@@ -101,19 +104,19 @@ func main() {
 		})
 	}()
 
-	if err := glfw.Init(); err != nil {
-		infraerr.ShowFatalErrorDialog(appConfig, fmt.Errorf("GLFWの初期化に失敗しました: %w", err))
+	if glfwErr := glfw.Init(); glfwErr != nil {
+		err.ShowFatalErrorDialog(appConfig, fmt.Errorf("GLFWの初期化に失敗しました: %w", glfwErr))
 		return
 	}
 
 	defer app.SafeExecute(appConfig, func() {
 		for n := 0; n < viewerCount; n++ {
 			idx := n + 1
-			if err := viewerManager.AddWindow(
+			if addWindowErr := viewerManager.AddWindow(
 				fmt.Sprintf("Viewer%d", idx),
 				widths[idx], heights[idx], positionXs[idx], positionYs[idx],
-			); err != nil {
-				infraerr.ShowFatalErrorDialog(appConfig, err)
+			); addWindowErr != nil {
+				err.ShowFatalErrorDialog(appConfig, addWindowErr)
 				return
 			}
 		}

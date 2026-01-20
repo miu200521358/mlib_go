@@ -4,13 +4,13 @@ package delta
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
-	sharedtime "github.com/miu200521358/mlib_go/pkg/shared/contracts/time"
+	"github.com/miu200521358/mlib_go/pkg/shared/contracts/mtime"
 )
 
 // JointDelta はジョイント差分を表す。
 type JointDelta struct {
 	Joint                     *model.Joint
-	Frame                     sharedtime.Frame
+	Frame                     mtime.Frame
 	TranslationLimitMin       mmath.Vec3
 	TranslationLimitMax       mmath.Vec3
 	RotationLimitMin          mmath.Vec3
@@ -20,7 +20,7 @@ type JointDelta struct {
 }
 
 // NewJointDelta はJointDeltaを生成する。
-func NewJointDelta(joint *model.Joint, frame sharedtime.Frame) *JointDelta {
+func NewJointDelta(joint *model.Joint, frame mtime.Frame) *JointDelta {
 	if joint == nil {
 		return nil
 	}
@@ -40,7 +40,7 @@ func NewJointDelta(joint *model.Joint, frame sharedtime.Frame) *JointDelta {
 // NewJointDeltaByValue は値を指定してJointDeltaを生成する。
 func NewJointDeltaByValue(
 	joint *model.Joint,
-	frame sharedtime.Frame,
+	frame mtime.Frame,
 	translationMin, translationMax mmath.Vec3,
 	rotationMin, rotationMax mmath.Vec3,
 	springTrans, springRot mmath.Vec3,

@@ -4,19 +4,19 @@ package delta
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
-	sharedtime "github.com/miu200521358/mlib_go/pkg/shared/contracts/time"
+	"github.com/miu200521358/mlib_go/pkg/shared/contracts/mtime"
 )
 
 // RigidBodyDelta は剛体差分を表す。
 type RigidBodyDelta struct {
 	RigidBody *model.RigidBody
-	Frame     sharedtime.Frame
+	Frame     mtime.Frame
 	Size      mmath.Vec3
 	Mass      float64
 }
 
 // NewRigidBodyDelta はRigidBodyDeltaを生成する。
-func NewRigidBodyDelta(rigidBody *model.RigidBody, frame sharedtime.Frame) *RigidBodyDelta {
+func NewRigidBodyDelta(rigidBody *model.RigidBody, frame mtime.Frame) *RigidBodyDelta {
 	if rigidBody == nil {
 		return nil
 	}
@@ -31,7 +31,7 @@ func NewRigidBodyDelta(rigidBody *model.RigidBody, frame sharedtime.Frame) *Rigi
 // NewRigidBodyDeltaByValue は値を指定してRigidBodyDeltaを生成する。
 func NewRigidBodyDeltaByValue(
 	rigidBody *model.RigidBody,
-	frame sharedtime.Frame,
+	frame mtime.Frame,
 	size mmath.Vec3,
 	mass float64,
 ) *RigidBodyDelta {

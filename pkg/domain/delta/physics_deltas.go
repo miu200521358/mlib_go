@@ -4,12 +4,12 @@ package delta
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/model/collection"
-	sharedtime "github.com/miu200521358/mlib_go/pkg/shared/contracts/time"
+	"github.com/miu200521358/mlib_go/pkg/shared/contracts/mtime"
 )
 
 // PhysicsDeltas は物理差分をまとめる。
 type PhysicsDeltas struct {
-	frame       sharedtime.Frame
+	frame       mtime.Frame
 	modelHash   string
 	motionHash  string
 	RigidBodies *RigidBodyDeltas
@@ -18,7 +18,7 @@ type PhysicsDeltas struct {
 
 // NewPhysicsDeltas はPhysicsDeltasを生成する。
 func NewPhysicsDeltas(
-	frame sharedtime.Frame,
+	frame mtime.Frame,
 	rigidBodies *collection.NamedCollection[*model.RigidBody],
 	joints *collection.NamedCollection[*model.Joint],
 	modelHash, motionHash string,
@@ -33,7 +33,7 @@ func NewPhysicsDeltas(
 }
 
 // Frame はフレーム番号を返す。
-func (p *PhysicsDeltas) Frame() sharedtime.Frame {
+func (p *PhysicsDeltas) Frame() mtime.Frame {
 	if p == nil {
 		return 0
 	}
@@ -41,7 +41,7 @@ func (p *PhysicsDeltas) Frame() sharedtime.Frame {
 }
 
 // SetFrame はフレーム番号を設定する。
-func (p *PhysicsDeltas) SetFrame(frame sharedtime.Frame) {
+func (p *PhysicsDeltas) SetFrame(frame mtime.Frame) {
 	if p == nil {
 		return
 	}

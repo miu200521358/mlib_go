@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	pmxio "github.com/miu200521358/mlib_go/pkg/adapter/io_model/pmx"
-	vmdio "github.com/miu200521358/mlib_go/pkg/adapter/io_motion/vmd"
+	"github.com/miu200521358/mlib_go/pkg/adapter/io_model/pmx"
+	"github.com/miu200521358/mlib_go/pkg/adapter/io_motion/vmd"
 	"github.com/miu200521358/mlib_go/pkg/domain/deform"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
@@ -94,7 +94,7 @@ func convertWindowsPathToWsl(path string) string {
 
 // loadVmd はVMDを読み込んで返す。
 func loadVmd(path string) (*motion.VmdMotion, error) {
-	repo := vmdio.NewVmdRepository()
+	repo := vmd.NewVmdRepository()
 	data, err := repo.Load(path)
 	if err != nil {
 		return nil, err
@@ -108,7 +108,7 @@ func loadVmd(path string) (*motion.VmdMotion, error) {
 
 // loadPmx はPMXを読み込んで返す。
 func loadPmx(path string) (*model.PmxModel, error) {
-	repo := pmxio.NewPmxRepository()
+	repo := pmx.NewPmxRepository()
 	data, err := repo.Load(path)
 	if err != nil {
 		return nil, err

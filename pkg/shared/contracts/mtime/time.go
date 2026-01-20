@@ -1,5 +1,5 @@
 // 指示: miu200521358
-package time
+package mtime
 
 // Frame はフレーム番号の型。
 type Frame float32

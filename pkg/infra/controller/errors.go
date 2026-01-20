@@ -5,7 +5,7 @@
 package controller
 
 import (
-	baseerr "github.com/miu200521358/mlib_go/pkg/shared/base/err"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 )
 
 const (
@@ -16,15 +16,15 @@ const (
 
 // NewControllerWindowInitFailed はコントローラー初期化失敗エラーを生成する。
 func NewControllerWindowInitFailed(message string, cause error) error {
-	return baseerr.NewCommonError(controllerWindowInitFailedErrorID, baseerr.ErrorKindInternal, message, cause)
+	return merr.NewCommonError(controllerWindowInitFailedErrorID, merr.ErrorKindInternal, message, cause)
 }
 
 // NewConsoleViewInitFailed はコンソール初期化失敗エラーを生成する。
 func NewConsoleViewInitFailed(message string, cause error) error {
-	return baseerr.NewCommonError(consoleViewInitFailedErrorID, baseerr.ErrorKindInternal, message, cause)
+	return merr.NewCommonError(consoleViewInitFailedErrorID, merr.ErrorKindInternal, message, cause)
 }
 
 // NewProgressBarInitFailed は進捗バー初期化失敗エラーを生成する。
 func NewProgressBarInitFailed(message string, cause error) error {
-	return baseerr.NewCommonError(progressBarInitFailedErrorID, baseerr.ErrorKindInternal, message, cause)
+	return merr.NewCommonError(progressBarInitFailedErrorID, merr.ErrorKindInternal, message, cause)
 }

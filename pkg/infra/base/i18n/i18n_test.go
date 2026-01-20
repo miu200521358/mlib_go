@@ -8,7 +8,7 @@ import (
 	"testing/fstest"
 
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
-	baseerr "github.com/miu200521358/mlib_go/pkg/shared/base/err"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
 )
 
@@ -250,12 +250,12 @@ func TestLoadMessagesAndLookup(t *testing.T) {
 	}
 	if _, err := loadMessages(fsys, "missing.json"); err == nil {
 		t.Errorf("loadMessages missing should error")
-	} else if ce, ok := err.(*baseerr.CommonError); !ok || ce.ErrorID() != baseerr.FsPackageErrorID {
+	} else if ce, ok := err.(*merr.CommonError); !ok || ce.ErrorID() != merr.FsPackageErrorID {
 		t.Errorf("loadMessages missing error ID: err=%v", err)
 	}
 	if _, err := loadMessages(fsys, "bad.json"); err == nil {
 		t.Errorf("loadMessages bad json should error")
-	} else if ce, ok := err.(*baseerr.CommonError); !ok || ce.ErrorID() != baseerr.JsonPackageErrorID {
+	} else if ce, ok := err.(*merr.CommonError); !ok || ce.ErrorID() != merr.JsonPackageErrorID {
 		t.Errorf("loadMessages bad json error ID: err=%v", err)
 	}
 	ok, err := loadMessages(fsys, "ok.json")

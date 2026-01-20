@@ -6,7 +6,7 @@ import (
 	"slices"
 	"sort"
 
-	baseerr "github.com/miu200521358/mlib_go/pkg/shared/base/err"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 )
 
 type Number interface {
@@ -21,7 +21,7 @@ const (
 
 // newMathCalculateXFailed はCalculateX失敗エラーを生成する。
 func newMathCalculateXFailed() error {
-	return baseerr.NewCommonError(mathCalculateXFailedErrorID, baseerr.ErrorKindInternal, "CalculateXに失敗しました", nil)
+	return merr.NewCommonError(mathCalculateXFailedErrorID, merr.ErrorKindInternal, "CalculateXに失敗しました", nil)
 }
 
 // Sum は合計を返す。

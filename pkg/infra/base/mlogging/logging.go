@@ -1,5 +1,5 @@
 // 指示: miu200521358
-package logging
+package mlogging
 
 import (
 	"bytes"

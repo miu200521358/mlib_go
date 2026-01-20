@@ -4,7 +4,7 @@ package mmath
 import (
 	"math"
 
-	baseerr "github.com/miu200521358/mlib_go/pkg/shared/base/err"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 	"gonum.org/v1/gonum/diff/fd"
 	"gonum.org/v1/gonum/optimize"
 )
@@ -27,7 +27,7 @@ const (
 
 // newMathCurveFitFailed は曲線フィット失敗エラーを生成する。
 func newMathCurveFitFailed(cause error) error {
-	return baseerr.NewCommonError(mathCurveFitFailedErrorID, baseerr.ErrorKindInternal, "曲線フィットに失敗しました", cause)
+	return merr.NewCommonError(mathCurveFitFailedErrorID, merr.ErrorKindInternal, "曲線フィットに失敗しました", cause)
 }
 
 // NewCurve は曲線を生成する。

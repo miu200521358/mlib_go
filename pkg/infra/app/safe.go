@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"runtime/debug"
 
-	baseerr "github.com/miu200521358/mlib_go/pkg/infra/base/err"
+	"github.com/miu200521358/mlib_go/pkg/infra/base/err"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
 )
 
@@ -24,7 +24,7 @@ func SafeExecute(appConfig *config.AppConfig, f func()) {
 				errMsg = fmt.Sprintf("%v", r)
 			}
 			runErr := fmt.Errorf("panic: %s\n%s", errMsg, string(stackTrace))
-			baseerr.ShowFatalErrorDialog(appConfig, runErr)
+			err.ShowFatalErrorDialog(appConfig, runErr)
 		}
 	}()
 

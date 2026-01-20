@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/model/collection"
-	modelerrors "github.com/miu200521358/mlib_go/pkg/domain/model/errors"
+	"github.com/miu200521358/mlib_go/pkg/domain/model/merrors"
 	"github.com/miu200521358/mlib_go/pkg/shared/hashable"
 	"github.com/tiendc/go-deepcopy"
 )
@@ -111,7 +111,7 @@ func (m *PmxModel) UpdateHash() {
 func (m *PmxModel) Copy() (PmxModel, error) {
 	var copied PmxModel
 	if err := deepcopy.Copy(&copied, m); err != nil {
-		return PmxModel{}, modelerrors.NewModelCopyFailed(err)
+		return PmxModel{}, merrors.NewModelCopyFailed(err)
 	}
 	copied.UpdateRandomHash()
 	return copied, nil

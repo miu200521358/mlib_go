@@ -5,7 +5,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/miu200521358/mlib_go/pkg/shared/contracts/time"
+	"github.com/miu200521358/mlib_go/pkg/shared/contracts/mtime"
 	"github.com/miu200521358/mlib_go/pkg/shared/hashable"
 )
 
@@ -77,9 +77,9 @@ type StateFlagSet uint64
 
 // PlaybackState は再生状態。
 type PlaybackState struct {
-	Frame         time.Frame
-	MaxFrame      time.Frame
-	FrameInterval time.Seconds
+	Frame         mtime.Frame
+	MaxFrame      mtime.Frame
+	FrameInterval mtime.Seconds
 	Playing       bool
 }
 
@@ -118,12 +118,12 @@ type ISharedState interface {
 	IsShowOverride() bool
 	Playback() PlaybackState
 	SetPlayback(p PlaybackState)
-	Frame() time.Frame
-	SetFrame(frame time.Frame)
-	MaxFrame() time.Frame
-	SetMaxFrame(maxFrame time.Frame)
-	FrameInterval() time.Seconds
-	SetFrameInterval(spf time.Seconds)
+	Frame() mtime.Frame
+	SetFrame(frame mtime.Frame)
+	MaxFrame() mtime.Frame
+	SetMaxFrame(maxFrame mtime.Frame)
+	FrameInterval() mtime.Seconds
+	SetFrameInterval(spf mtime.Seconds)
 	ControlWindowPosition() WindowPosition
 	SetControlWindowPosition(pos WindowPosition)
 	ControlWindowHandle() WindowHandle
@@ -242,9 +242,9 @@ func NewSharedState(viewerCount int) ISharedState {
 		windMotions:         make([]atomic.Value, viewerCount),
 	}
 
-	ss.frameValue.Store(time.Frame(0))
-	ss.maxFrameValue.Store(time.Frame(1))
-	ss.frameIntervalValue.Store(time.Seconds(-1))
+	ss.frameValue.Store(mtime.Frame(0))
+	ss.maxFrameValue.Store(mtime.Frame(1))
+	ss.frameIntervalValue.Store(mtime.Seconds(-1))
 	ss.controlWindowPosition.Store(WindowPosition{})
 	ss.focusedWindowHandle.Store(int32(0))
 	ss.controlWindowHandle.Store(int32(0))
@@ -348,32 +348,32 @@ func (ss *SharedState) SetPlayback(p PlaybackState) {
 }
 
 // Frame は現在フレームを返す。
-func (ss *SharedState) Frame() time.Frame {
-	return ss.frameValue.Load().(time.Frame)
+func (ss *SharedState) Frame() mtime.Frame {
+	return ss.frameValue.Load().(mtime.Frame)
 }
 
 // SetFrame は現在フレームを設定する。
-func (ss *SharedState) SetFrame(frame time.Frame) {
+func (ss *SharedState) SetFrame(frame mtime.Frame) {
 	ss.frameValue.Store(frame)
 }
 
 // MaxFrame は最大フレームを返す。
-func (ss *SharedState) MaxFrame() time.Frame {
-	return ss.maxFrameValue.Load().(time.Frame)
+func (ss *SharedState) MaxFrame() mtime.Frame {
+	return ss.maxFrameValue.Load().(mtime.Frame)
 }
 
 // SetMaxFrame は最大フレームを設定する。
-func (ss *SharedState) SetMaxFrame(maxFrame time.Frame) {
+func (ss *SharedState) SetMaxFrame(maxFrame mtime.Frame) {
 	ss.maxFrameValue.Store(maxFrame)
 }
 
 // FrameInterval はフレーム間隔を返す。
-func (ss *SharedState) FrameInterval() time.Seconds {
-	return ss.frameIntervalValue.Load().(time.Seconds)
+func (ss *SharedState) FrameInterval() mtime.Seconds {
+	return ss.frameIntervalValue.Load().(mtime.Seconds)
 }
 
 // SetFrameInterval はフレーム間隔を設定する。
-func (ss *SharedState) SetFrameInterval(spf time.Seconds) {
+func (ss *SharedState) SetFrameInterval(spf mtime.Seconds) {
 	ss.frameIntervalValue.Store(spf)
 }
 
@@ -921,10 +921,10 @@ func cloneIntSlice(src []int) []int {
 
 type defaultMotion struct {
 	*hashable.HashableBase
-	Gravity      float32
-	MaxSubSteps  int
+	Gravity       float32
+	MaxSubSteps   int
 	FixedTimeStep int
-	WindEnabled  bool
+	WindEnabled   bool
 	WindDirection [3]float32
 }
 
@@ -937,11 +937,11 @@ func (m *defaultMotion) GetHashParts() string {
 func newDefaultPhysicsWorldMotion() IStateMotion {
 	base := hashable.NewHashableBase("", "")
 	m := &defaultMotion{
-		HashableBase: base,
-		Gravity:      -9.8,
-		MaxSubSteps:  2,
+		HashableBase:  base,
+		Gravity:       -9.8,
+		MaxSubSteps:   2,
 		FixedTimeStep: 60,
-		WindEnabled:  false,
+		WindEnabled:   false,
 		WindDirection: [3]float32{0, 0, 0},
 	}
 	m.SetHashPartsFunc(m.GetHashParts)
@@ -952,8 +952,8 @@ func newDefaultPhysicsWorldMotion() IStateMotion {
 func newDefaultWindMotion() IStateMotion {
 	base := hashable.NewHashableBase("", "")
 	m := &defaultMotion{
-		HashableBase: base,
-		WindEnabled:  false,
+		HashableBase:  base,
+		WindEnabled:   false,
 		WindDirection: [3]float32{0, 0, 0},
 	}
 	m.SetHashPartsFunc(m.GetHashParts)

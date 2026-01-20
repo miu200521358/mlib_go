@@ -4,13 +4,13 @@ package delta
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
-	sharedtime "github.com/miu200521358/mlib_go/pkg/shared/contracts/time"
+	"github.com/miu200521358/mlib_go/pkg/shared/contracts/mtime"
 )
 
 // BoneDelta は1ボーンの差分と派生行列を保持する。
 type BoneDelta struct {
 	Bone                *model.Bone
-	Frame               sharedtime.Frame
+	Frame               mtime.Frame
 	globalIkOffMatrix   mmath.Mat4
 	globalMatrix        mmath.Mat4
 	localMatrix         mmath.Mat4
@@ -54,7 +54,7 @@ type BoneDelta struct {
 }
 
 // NewBoneDelta はBoneDeltaを生成する。
-func NewBoneDelta(bone *model.Bone, frame sharedtime.Frame) *BoneDelta {
+func NewBoneDelta(bone *model.Bone, frame mtime.Frame) *BoneDelta {
 	return &BoneDelta{Bone: bone, Frame: frame}
 }
 
@@ -149,7 +149,7 @@ func (d *BoneDelta) SetGlobalPosition(pos mmath.Vec3) {
 // NewBoneDeltaByGlobalMatrix はグローバル行列をもとにボーン差分を生成する。
 func NewBoneDeltaByGlobalMatrix(
 	bone *model.Bone,
-	frame sharedtime.Frame,
+	frame mtime.Frame,
 	globalMatrix mmath.Mat4,
 	parent *BoneDelta,
 ) *BoneDelta {

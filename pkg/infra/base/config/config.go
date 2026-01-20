@@ -15,7 +15,7 @@ import (
 	"sync"
 
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
-	baseerr "github.com/miu200521358/mlib_go/pkg/shared/base/err"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 )
 
 var (
@@ -26,7 +26,7 @@ var (
 	appRootDirFn     = func() (string, error) {
 		exePath, err := osExecutable()
 		if err != nil {
-			return "", newAppRootDirResolveFailed(baseerr.NewOsPackageError("os.Executableに失敗しました", err))
+			return "", newAppRootDirResolveFailed(merr.NewOsPackageError("os.Executableに失敗しました", err))
 		}
 		return filepath.Dir(exePath), nil
 	}
@@ -41,7 +41,7 @@ const (
 
 // newInternalError は内部エラーとして共通委譲エラーを生成する。
 func newInternalError(id string, message string, cause error) error {
-	return baseerr.NewCommonError(id, baseerr.ErrorKindInternal, message, cause)
+	return merr.NewCommonError(id, merr.ErrorKindInternal, message, cause)
 }
 
 // newAppConfigLoadFailed はアプリ設定の読込失敗エラーを生成する。
@@ -302,7 +302,7 @@ func (u *UserConfigStore) saveStringSlice(key string, values []string, limit int
 	configMap[key] = merged
 	data, err := json.Marshal(configMap)
 	if err != nil {
-		cause := baseerr.NewJsonPackageError("user_config.jsonの保存用JSON生成に失敗しました", err)
+		cause := merr.NewJsonPackageError("user_config.jsonの保存用JSON生成に失敗しました", err)
 		return newUserConfigSaveFailed("user_config.jsonの保存に失敗しました", cause)
 	}
 
@@ -312,7 +312,7 @@ func (u *UserConfigStore) saveStringSlice(key string, values []string, limit int
 	}
 	path := filepath.Join(root, config.UserConfigFileName)
 	if err := writeFile(path, data, 0644); err != nil {
-		cause := baseerr.NewOsPackageError("user_config.jsonの書き込みに失敗しました: "+path, err)
+		cause := merr.NewOsPackageError("user_config.jsonの書き込みに失敗しました: "+path, err)
 		return newUserConfigSaveFailed("user_config.jsonの保存に失敗しました", cause)
 	}
 	return nil
@@ -328,7 +328,7 @@ func loadUserConfig() (map[string]any, error) {
 	data, err := readFile(path)
 	if err != nil {
 		if !errors.Is(err, os.ErrNotExist) {
-			return map[string]any{}, baseerr.NewOsPackageError("user_config.jsonの読込に失敗しました: "+path, err)
+			return map[string]any{}, merr.NewOsPackageError("user_config.jsonの読込に失敗しました: "+path, err)
 		}
 		path = filepath.Join(root, config.UserConfigLegacyFileName)
 		data, err = readFile(path)
@@ -336,13 +336,13 @@ func loadUserConfig() (map[string]any, error) {
 			if errors.Is(err, os.ErrNotExist) {
 				return map[string]any{}, nil
 			}
-			return map[string]any{}, baseerr.NewOsPackageError("history.jsonの読込に失敗しました: "+path, err)
+			return map[string]any{}, merr.NewOsPackageError("history.jsonの読込に失敗しました: "+path, err)
 		}
 	}
 
 	configMap := make(map[string]any)
 	if err := json.Unmarshal(data, &configMap); err != nil {
-		return map[string]any{}, baseerr.NewJsonPackageError("設定JSONの解析に失敗しました: "+path, err)
+		return map[string]any{}, merr.NewJsonPackageError("設定JSONの解析に失敗しました: "+path, err)
 	}
 	return configMap, nil
 }
@@ -351,7 +351,7 @@ func loadUserConfig() (map[string]any, error) {
 func AppRootDir() (string, error) {
 	root, err := appRootDirFn()
 	if err != nil {
-		if ce, ok := err.(*baseerr.CommonError); ok && ce.ErrorID() == appRootDirResolveFailedErrorID {
+		if ce, ok := err.(*merr.CommonError); ok && ce.ErrorID() == appRootDirResolveFailedErrorID {
 			return "", err
 		}
 		return "", newAppRootDirResolveFailed(err)
@@ -377,12 +377,12 @@ func LoadAppConfig(appFiles embed.FS) (*config.AppConfig, error) {
 func loadAppConfigFS(appFiles fs.FS) (*config.AppConfig, error) {
 	data, err := fs.ReadFile(appFiles, config.AppConfigFilePath)
 	if err != nil {
-		cause := baseerr.NewFsPackageError("app_config.jsonの読込に失敗しました: "+config.AppConfigFilePath, err)
+		cause := merr.NewFsPackageError("app_config.jsonの読込に失敗しました: "+config.AppConfigFilePath, err)
 		return nil, newAppConfigLoadFailed("app_config.jsonの読込に失敗しました", cause)
 	}
 	var cfg config.AppConfig
 	if err := json.Unmarshal(data, &cfg); err != nil {
-		cause := baseerr.NewJsonPackageError("app_config.jsonの解析に失敗しました: "+config.AppConfigFilePath, err)
+		cause := merr.NewJsonPackageError("app_config.jsonの解析に失敗しました: "+config.AppConfigFilePath, err)
 		return nil, newAppConfigLoadFailed("app_config.jsonの解析に失敗しました", cause)
 	}
 
@@ -394,11 +394,11 @@ func loadAppConfigFS(appFiles fs.FS) (*config.AppConfig, error) {
 	if iconPath != "" {
 		iconBytes, err := fs.ReadFile(appFiles, iconPath)
 		if err != nil {
-			cause := baseerr.NewFsPackageError("アプリアイコンの読込に失敗しました: "+iconPath, err)
+			cause := merr.NewFsPackageError("アプリアイコンの読込に失敗しました: "+iconPath, err)
 			return nil, newAppConfigLoadFailed("アプリアイコンの読込に失敗しました", cause)
 		}
 		if _, err := png.Decode(bytes.NewReader(iconBytes)); err != nil {
-			cause := baseerr.NewImagePackageError("アプリアイコンのデコードに失敗しました: "+iconPath, err)
+			cause := merr.NewImagePackageError("アプリアイコンのデコードに失敗しました: "+iconPath, err)
 			return nil, newAppConfigLoadFailed("アプリアイコンのデコードに失敗しました", cause)
 		}
 	}

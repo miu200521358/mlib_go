@@ -2,7 +2,7 @@
 package collection
 
 import (
-	modelerrors "github.com/miu200521358/mlib_go/pkg/domain/model/errors"
+	"github.com/miu200521358/mlib_go/pkg/domain/model/merrors"
 )
 
 // IndexedCollection は index ベースの参照を提供する。
@@ -29,7 +29,7 @@ func (c *IndexedCollection[T]) Values() []T {
 func (c *IndexedCollection[T]) Get(index int) (T, error) {
 	var zero T
 	if index < 0 || index >= len(c.values) {
-		return zero, modelerrors.NewIndexOutOfRangeError(index, len(c.values))
+		return zero, merrors.NewIndexOutOfRangeError(index, len(c.values))
 	}
 	return c.values[index], nil
 }
@@ -63,7 +63,7 @@ func (c *IndexedCollection[T]) AppendRaw(value T) int {
 // Insert は insertIndex に挿入し、以降の要素を再インデックスする。
 func (c *IndexedCollection[T]) Insert(value T, insertIndex int) (int, ReindexResult, error) {
 	if insertIndex < 0 || insertIndex > len(c.values) {
-		return 0, ReindexResult{}, modelerrors.NewIndexOutOfRangeError(insertIndex, len(c.values))
+		return 0, ReindexResult{}, merrors.NewIndexOutOfRangeError(insertIndex, len(c.values))
 	}
 	if insertIndex == len(c.values) {
 		idx, res := c.Append(value)
@@ -109,7 +109,7 @@ func (c *IndexedCollection[T]) Insert(value T, insertIndex int) (int, ReindexRes
 // Remove は要素を削除し、残りを再インデックスする。
 func (c *IndexedCollection[T]) Remove(index int) (ReindexResult, error) {
 	if index < 0 || index >= len(c.values) {
-		return ReindexResult{}, modelerrors.NewIndexOutOfRangeError(index, len(c.values))
+		return ReindexResult{}, merrors.NewIndexOutOfRangeError(index, len(c.values))
 	}
 
 	oldLen := len(c.values)
@@ -155,7 +155,7 @@ func (c *IndexedCollection[T]) Remove(index int) (ReindexResult, error) {
 // Update は index を変えずに要素を置き換える。
 func (c *IndexedCollection[T]) Update(index int, value T) (ReindexResult, error) {
 	if index < 0 || index >= len(c.values) {
-		return ReindexResult{}, modelerrors.NewIndexOutOfRangeError(index, len(c.values))
+		return ReindexResult{}, merrors.NewIndexOutOfRangeError(index, len(c.values))
 	}
 	value.SetIndex(index)
 	c.values[index] = value

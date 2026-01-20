@@ -9,7 +9,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/infra/controller"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
-	sharedtime "github.com/miu200521358/mlib_go/pkg/shared/contracts/time"
+	"github.com/miu200521358/mlib_go/pkg/shared/contracts/mtime"
 	"github.com/miu200521358/mlib_go/pkg/shared/state"
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
@@ -84,7 +84,7 @@ func (mp *MotionPlayer) Widgets() declarative.Composite {
 					if mp.window == nil || mp.window.Playing() {
 						return
 					}
-					mp.window.SetFrame(sharedtime.Frame(mp.frameEdit.Value()))
+					mp.window.SetFrame(mtime.Frame(mp.frameEdit.Value()))
 					mp.frameSlider.ChangeValue(int(mp.frameEdit.Value()))
 				},
 				ToolTipText:            mp.t("再生キーフレ説明"),
@@ -100,7 +100,7 @@ func (mp *MotionPlayer) Widgets() declarative.Composite {
 					if mp.window == nil || mp.window.Playing() {
 						return
 					}
-					mp.window.SetFrame(sharedtime.Frame(mp.frameSlider.Value()))
+					mp.window.SetFrame(mtime.Frame(mp.frameSlider.Value()))
 					mp.frameEdit.ChangeValue(float64(mp.frameSlider.Value()))
 				},
 				ToolTipText:   mp.t("再生スライダー説明"),
@@ -127,7 +127,7 @@ func (mp *MotionPlayer) Widgets() declarative.Composite {
 }
 
 // Reset は最大フレームを反映して再生UIを初期化する。
-func (mp *MotionPlayer) Reset(maxFrame sharedtime.Frame) {
+func (mp *MotionPlayer) Reset(maxFrame mtime.Frame) {
 	mp.ChangeValue(0)
 	mp.frameEdit.SetRange(0, float64(maxFrame))
 	mp.frameSlider.SetRange(0, int(maxFrame))
@@ -138,13 +138,13 @@ func (mp *MotionPlayer) Reset(maxFrame sharedtime.Frame) {
 }
 
 // SetValue は表示値を設定する。
-func (mp *MotionPlayer) SetValue(frame sharedtime.Frame) {
+func (mp *MotionPlayer) SetValue(frame mtime.Frame) {
 	mp.frameEdit.SetValue(float64(frame))
 	mp.frameSlider.SetValue(int(frame))
 }
 
 // ChangeValue は表示値を変更する。
-func (mp *MotionPlayer) ChangeValue(frame sharedtime.Frame) {
+func (mp *MotionPlayer) ChangeValue(frame mtime.Frame) {
 	mp.frameEdit.ChangeValue(float64(frame))
 	mp.frameSlider.ChangeValue(int(frame))
 }
@@ -244,7 +244,7 @@ func (mp *MotionPlayer) syncWhilePlaying() {
 	ticker := time.NewTicker(time.Second / 60)
 	defer ticker.Stop()
 
-	var prevFrame sharedtime.Frame
+	var prevFrame mtime.Frame
 	for range ticker.C {
 		currentFrame := mp.window.Frame()
 		if currentFrame != prevFrame {

@@ -1,10 +1,10 @@
 // 指示: miu200521358
 package motion
 
-import sharedtime "github.com/miu200521358/mlib_go/pkg/shared/contracts/time"
+import "github.com/miu200521358/mlib_go/pkg/shared/contracts/mtime"
 
 // Frame はモーションのフレーム番号を表す。
-type Frame = sharedtime.Frame
+type Frame = mtime.Frame
 
 // IBaseFrame はフレームの共通インターフェース。
 type IBaseFrame interface {

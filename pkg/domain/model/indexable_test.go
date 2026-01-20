@@ -4,7 +4,7 @@ package model
 import (
 	"testing"
 
-	modelcollection "github.com/miu200521358/mlib_go/pkg/domain/model/collection"
+	"github.com/miu200521358/mlib_go/pkg/domain/model/collection"
 )
 
 func TestIsValidNil(t *testing.T) {
@@ -49,16 +49,16 @@ func TestIsValidNil(t *testing.T) {
 func TestIndexableMethods(t *testing.T) {
 	cases := []struct {
 		name string
-		new  func() modelcollection.IIndexable
+		new  func() collection.IIndexable
 	}{
-		{"Vertex", func() modelcollection.IIndexable { return &Vertex{} }},
-		{"Face", func() modelcollection.IIndexable { return &Face{} }},
-		{"Material", func() modelcollection.IIndexable { return &Material{} }},
-		{"Bone", func() modelcollection.IIndexable { return &Bone{} }},
-		{"Morph", func() modelcollection.IIndexable { return &Morph{} }},
-		{"DisplaySlot", func() modelcollection.IIndexable { return &DisplaySlot{} }},
-		{"RigidBody", func() modelcollection.IIndexable { return &RigidBody{} }},
-		{"Joint", func() modelcollection.IIndexable { return &Joint{} }},
+		{"Vertex", func() collection.IIndexable { return &Vertex{} }},
+		{"Face", func() collection.IIndexable { return &Face{} }},
+		{"Material", func() collection.IIndexable { return &Material{} }},
+		{"Bone", func() collection.IIndexable { return &Bone{} }},
+		{"Morph", func() collection.IIndexable { return &Morph{} }},
+		{"DisplaySlot", func() collection.IIndexable { return &DisplaySlot{} }},
+		{"RigidBody", func() collection.IIndexable { return &RigidBody{} }},
+		{"Joint", func() collection.IIndexable { return &Joint{} }},
 	}
 
 	for _, tc := range cases {
@@ -80,15 +80,15 @@ func TestIndexableMethods(t *testing.T) {
 func TestNameableMethods(t *testing.T) {
 	cases := []struct {
 		name string
-		new  func() modelcollection.INameable
+		new  func() collection.INameable
 	}{
-		{"Texture", func() modelcollection.INameable { return NewTexture() }},
-		{"Material", func() modelcollection.INameable { return &Material{} }},
-		{"Bone", func() modelcollection.INameable { return &Bone{} }},
-		{"Morph", func() modelcollection.INameable { return &Morph{} }},
-		{"DisplaySlot", func() modelcollection.INameable { return &DisplaySlot{} }},
-		{"RigidBody", func() modelcollection.INameable { return &RigidBody{} }},
-		{"Joint", func() modelcollection.INameable { return &Joint{} }},
+		{"Texture", func() collection.INameable { return NewTexture() }},
+		{"Material", func() collection.INameable { return &Material{} }},
+		{"Bone", func() collection.INameable { return &Bone{} }},
+		{"Morph", func() collection.INameable { return &Morph{} }},
+		{"DisplaySlot", func() collection.INameable { return &DisplaySlot{} }},
+		{"RigidBody", func() collection.INameable { return &RigidBody{} }},
+		{"Joint", func() collection.INameable { return &Joint{} }},
 	}
 
 	for _, tc := range cases {

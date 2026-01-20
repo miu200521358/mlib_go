@@ -11,7 +11,7 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 
-	baseerr "github.com/miu200521358/mlib_go/pkg/shared/base/err"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 )
 
 // ReadImage は画像ファイルを読み込む。
@@ -24,12 +24,12 @@ func ReadImage(path string) (image.Image, error) {
 		if os.IsNotExist(err) {
 			return nil, newFileNotFound("画像が存在しません: "+path, nil)
 		}
-		return nil, newFileReadFailed("画像ファイルを開けません: "+path, baseerr.NewOsPackageError("os.Openに失敗しました", err))
+		return nil, newFileReadFailed("画像ファイルを開けません: "+path, merr.NewOsPackageError("os.Openに失敗しました", err))
 	}
 	defer file.Close()
 	img, _, err := image.Decode(file)
 	if err != nil {
-		return nil, newImageDecodeFailed("画像のデコードに失敗しました: "+path, baseerr.NewImagePackageError("image.Decodeに失敗しました", err))
+		return nil, newImageDecodeFailed("画像のデコードに失敗しました: "+path, merr.NewImagePackageError("image.Decodeに失敗しました", err))
 	}
 	return img, nil
 }
@@ -44,12 +44,12 @@ func ReadImageFromFS(resources fs.FS, fileName string) (image.Image, error) {
 		if os.IsNotExist(err) {
 			return nil, newFileNotFound("画像が存在しません: "+fileName, nil)
 		}
-		return nil, newFileReadFailed("画像ファイルを開けません: "+fileName, baseerr.NewFsPackageError("fs.Openに失敗しました", err))
+		return nil, newFileReadFailed("画像ファイルを開けません: "+fileName, merr.NewFsPackageError("fs.Openに失敗しました", err))
 	}
 	defer file.Close()
 	img, _, err := image.Decode(file)
 	if err != nil {
-		return nil, newImageDecodeFailed("画像のデコードに失敗しました: "+fileName, baseerr.NewImagePackageError("image.Decodeに失敗しました", err))
+		return nil, newImageDecodeFailed("画像のデコードに失敗しました: "+fileName, merr.NewImagePackageError("image.Decodeに失敗しました", err))
 	}
 	return img, nil
 }

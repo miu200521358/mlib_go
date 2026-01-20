@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
-	baseerr "github.com/miu200521358/mlib_go/pkg/shared/base/err"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 )
 
 func withTempRoot(t *testing.T) string {
@@ -149,7 +149,7 @@ func TestUserConfigSetGet(t *testing.T) {
 
 	if err := store.Set("bad", 1.23); err == nil {
 		t.Errorf("Set unsupported type should error")
-	} else if ce, ok := err.(*baseerr.CommonError); !ok || ce.ErrorID() != configValueTypeNotSupportedErrorID {
+	} else if ce, ok := err.(*merr.CommonError); !ok || ce.ErrorID() != configValueTypeNotSupportedErrorID {
 		t.Errorf("Set unsupported type ErrorID: err=%v", err)
 	}
 }
@@ -183,7 +183,7 @@ func TestUserConfigLoadAllVariants(t *testing.T) {
 	_, _, err = store.GetAll("history")
 	if err == nil {
 		t.Fatalf("GetAll non-string expected error")
-	} else if ce, ok := err.(*baseerr.CommonError); !ok || ce.ErrorID() != configValueTypeNotSupportedErrorID {
+	} else if ce, ok := err.(*merr.CommonError); !ok || ce.ErrorID() != configValueTypeNotSupportedErrorID {
 		t.Fatalf("GetAll non-string ErrorID: err=%v", err)
 	}
 
@@ -193,7 +193,7 @@ func TestUserConfigLoadAllVariants(t *testing.T) {
 	_, _, err = store.GetAll("history")
 	if err == nil {
 		t.Fatalf("GetAll non-slice expected error")
-	} else if ce, ok := err.(*baseerr.CommonError); !ok || ce.ErrorID() != configValueTypeNotSupportedErrorID {
+	} else if ce, ok := err.(*merr.CommonError); !ok || ce.ErrorID() != configValueTypeNotSupportedErrorID {
 		t.Fatalf("GetAll non-slice ErrorID: err=%v", err)
 	}
 
@@ -276,7 +276,7 @@ func TestSaveStringSliceErrors(t *testing.T) {
 	})
 	if err := store.SetStringSlice("list", []string{"a"}, 1); err == nil {
 		t.Errorf("SetStringSlice marshal error expected")
-	} else if ce, ok := err.(*baseerr.CommonError); !ok || ce.ErrorID() != userConfigSaveFailedErrorID {
+	} else if ce, ok := err.(*merr.CommonError); !ok || ce.ErrorID() != userConfigSaveFailedErrorID {
 		t.Errorf("SetStringSlice marshal ErrorID: err=%v", err)
 	}
 
@@ -288,7 +288,7 @@ func TestSaveStringSliceErrors(t *testing.T) {
 	})
 	if err := store.SetStringSlice("list", []string{"a"}, 1); err == nil {
 		t.Errorf("SetStringSlice write error expected")
-	} else if ce, ok := err.(*baseerr.CommonError); !ok || ce.ErrorID() != userConfigSaveFailedErrorID {
+	} else if ce, ok := err.(*merr.CommonError); !ok || ce.ErrorID() != userConfigSaveFailedErrorID {
 		t.Errorf("SetStringSlice write ErrorID: err=%v", err)
 	}
 
@@ -299,7 +299,7 @@ func TestSaveStringSliceErrors(t *testing.T) {
 	t.Cleanup(func() { appRootDirFn = prev })
 	if err := store.SetStringSlice("list", []string{"a"}, 1); err == nil {
 		t.Errorf("SetStringSlice AppRootDir error expected")
-	} else if ce, ok := err.(*baseerr.CommonError); !ok || ce.ErrorID() != userConfigSaveFailedErrorID {
+	} else if ce, ok := err.(*merr.CommonError); !ok || ce.ErrorID() != userConfigSaveFailedErrorID {
 		t.Errorf("SetStringSlice AppRootDir ErrorID: err=%v", err)
 	}
 }
@@ -328,7 +328,7 @@ func TestLoadUserConfigInvalidJSON(t *testing.T) {
 	store := &UserConfigStore{}
 	if _, err := store.GetStringSlice("missing"); err == nil {
 		t.Fatalf("GetStringSlice expected error")
-	} else if ce, ok := err.(*baseerr.CommonError); !ok || ce.ErrorID() != baseerr.JsonPackageErrorID {
+	} else if ce, ok := err.(*merr.CommonError); !ok || ce.ErrorID() != merr.JsonPackageErrorID {
 		t.Fatalf("GetStringSlice ErrorID: err=%v", err)
 	}
 }
@@ -343,7 +343,7 @@ func TestLoadUserConfigInvalidJSONError(t *testing.T) {
 	}
 	if _, err := loadUserConfig(); err == nil {
 		t.Fatalf("loadUserConfig expected error")
-	} else if ce, ok := err.(*baseerr.CommonError); !ok || ce.ErrorID() != baseerr.JsonPackageErrorID {
+	} else if ce, ok := err.(*merr.CommonError); !ok || ce.ErrorID() != merr.JsonPackageErrorID {
 		t.Fatalf("loadUserConfig ErrorID: err=%v", err)
 	}
 }
@@ -356,7 +356,7 @@ func TestLoadUserConfigReadError(t *testing.T) {
 	})
 	if _, err := loadUserConfig(); err == nil {
 		t.Fatalf("loadUserConfig expected error")
-	} else if ce, ok := err.(*baseerr.CommonError); !ok || ce.ErrorID() != baseerr.OsPackageErrorID {
+	} else if ce, ok := err.(*merr.CommonError); !ok || ce.ErrorID() != merr.OsPackageErrorID {
 		t.Fatalf("loadUserConfig ErrorID: err=%v", err)
 	}
 }
@@ -371,7 +371,7 @@ func TestLoadUserConfigAppRootDirError(t *testing.T) {
 
 	if _, err := loadUserConfig(); err == nil {
 		t.Errorf("loadUserConfig expected error")
-	} else if ce, ok := err.(*baseerr.CommonError); !ok || ce.ErrorID() != appRootDirResolveFailedErrorID {
+	} else if ce, ok := err.(*merr.CommonError); !ok || ce.ErrorID() != appRootDirResolveFailedErrorID {
 		t.Errorf("loadUserConfig ErrorID: err=%v", err)
 	}
 }

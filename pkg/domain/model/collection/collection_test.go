@@ -5,7 +5,7 @@ import (
 	"sort"
 	"testing"
 
-	modelerrors "github.com/miu200521358/mlib_go/pkg/domain/model/errors"
+	"github.com/miu200521358/mlib_go/pkg/domain/model/merrors"
 )
 
 type testItem struct {
@@ -129,11 +129,11 @@ func TestIndexedCollectionAppendInsertRemoveUpdateContainsGet(t *testing.T) {
 	}
 
 	_, _, err = c.Insert(newItem("bad", 0, true), -1)
-	if err == nil || !modelerrors.IsIndexOutOfRangeError(err) {
+	if err == nil || !merrors.IsIndexOutOfRangeError(err) {
 		t.Fatalf("Insert negative should return IndexOutOfRangeError")
 	}
 	_, _, err = c.Insert(newItem("bad", 0, true), c.Len()+1)
-	if err == nil || !modelerrors.IsIndexOutOfRangeError(err) {
+	if err == nil || !merrors.IsIndexOutOfRangeError(err) {
 		t.Fatalf("Insert overflow should return IndexOutOfRangeError")
 	}
 
@@ -151,7 +151,7 @@ func TestIndexedCollectionAppendInsertRemoveUpdateContainsGet(t *testing.T) {
 		t.Fatalf("Remove NewToOld = %v", got)
 	}
 
-	if _, err := c.Remove(999); err == nil || !modelerrors.IsIndexOutOfRangeError(err) {
+	if _, err := c.Remove(999); err == nil || !merrors.IsIndexOutOfRangeError(err) {
 		t.Fatalf("Remove out of range should return IndexOutOfRangeError")
 	}
 
@@ -163,7 +163,7 @@ func TestIndexedCollectionAppendInsertRemoveUpdateContainsGet(t *testing.T) {
 	if updRes.Changed || upd.Index() != 0 {
 		t.Fatalf("Update result = %+v index=%d", updRes, upd.Index())
 	}
-	if _, err := c.Update(999, upd); err == nil || !modelerrors.IsIndexOutOfRangeError(err) {
+	if _, err := c.Update(999, upd); err == nil || !merrors.IsIndexOutOfRangeError(err) {
 		t.Fatalf("Update out of range should return IndexOutOfRangeError")
 	}
 
@@ -176,7 +176,7 @@ func TestIndexedCollectionAppendInsertRemoveUpdateContainsGet(t *testing.T) {
 		t.Fatalf("Contains should be false for out of range")
 	}
 
-	if _, err := c.Get(999); err == nil || !modelerrors.IsIndexOutOfRangeError(err) {
+	if _, err := c.Get(999); err == nil || !merrors.IsIndexOutOfRangeError(err) {
 		t.Fatalf("Get out of range should return IndexOutOfRangeError")
 	}
 }
@@ -213,7 +213,7 @@ func TestNamedCollectionBehavior(t *testing.T) {
 		t.Fatalf("GetByName after remove should return next")
 	}
 
-	if _, err := c.Update(0, newItem("x", 0, true)); err == nil || !modelerrors.IsNameMismatchError(err) {
+	if _, err := c.Update(0, newItem("x", 0, true)); err == nil || !merrors.IsNameMismatchError(err) {
 		t.Fatalf("Update mismatch should return NameMismatchError")
 	}
 
@@ -234,17 +234,17 @@ func TestNamedCollectionBehavior(t *testing.T) {
 		t.Fatalf("Rename idempotent error: %v", err)
 	}
 
-	if _, err := c.Rename(0, "a"); err == nil || !modelerrors.IsNameConflictError(err) {
+	if _, err := c.Rename(0, "a"); err == nil || !merrors.IsNameConflictError(err) {
 		t.Fatalf("Rename back should return NameConflictError")
 	}
 
 	dup := newItem("dup", 0, true)
 	c.Append(dup)
-	if _, err := c.Rename(0, "dup"); err == nil || !modelerrors.IsNameConflictError(err) {
+	if _, err := c.Rename(0, "dup"); err == nil || !merrors.IsNameConflictError(err) {
 		t.Fatalf("Rename conflict should return NameConflictError")
 	}
 
-	if _, err := c.GetByName("missing"); err == nil || !modelerrors.IsNameNotFoundError(err) {
+	if _, err := c.GetByName("missing"); err == nil || !merrors.IsNameNotFoundError(err) {
 		t.Fatalf("GetByName missing should return NameNotFoundError")
 	}
 }

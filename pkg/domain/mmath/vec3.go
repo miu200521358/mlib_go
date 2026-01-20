@@ -8,7 +8,7 @@ import (
 	"math"
 	"sort"
 
-	baseerr "github.com/miu200521358/mlib_go/pkg/shared/base/err"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 	"gonum.org/v1/gonum/spatial/r3"
 )
 
@@ -22,7 +22,7 @@ const (
 
 // newMathIntersectLinePlaneFailed は交点計算失敗エラーを生成する。
 func newMathIntersectLinePlaneFailed() error {
-	return baseerr.NewCommonError(mathIntersectLinePlaneFailedErrorID, baseerr.ErrorKindInternal, "平面との交点計算に失敗しました", nil)
+	return merr.NewCommonError(mathIntersectLinePlaneFailedErrorID, merr.ErrorKindInternal, "平面との交点計算に失敗しました", nil)
 }
 
 var (

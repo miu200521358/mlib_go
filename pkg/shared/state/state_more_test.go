@@ -5,7 +5,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/miu200521358/mlib_go/pkg/shared/contracts/time"
+	"github.com/miu200521358/mlib_go/pkg/shared/contracts/mtime"
 	"github.com/miu200521358/mlib_go/pkg/shared/hashable"
 )
 
@@ -320,7 +320,7 @@ func TestSharedStateHelpers(t *testing.T) {
 	}
 
 	ss := NewSharedState(1)
-	ss.SetFrame(time.Frame(5))
+	ss.SetFrame(mtime.Frame(5))
 	if ss.Frame() != 5 {
 		t.Errorf("Frame mismatch")
 	}

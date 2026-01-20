@@ -2,7 +2,7 @@
 package collection
 
 import (
-	modelerrors "github.com/miu200521358/mlib_go/pkg/domain/model/errors"
+	"github.com/miu200521358/mlib_go/pkg/domain/model/merrors"
 )
 
 // NamedCollection は name と index の参照を提供する。
@@ -39,7 +39,7 @@ func (c *NamedCollection[T]) GetByName(name string) (T, error) {
 	var zero T
 	idx, ok := c.nameIndex.GetByName(name)
 	if !ok {
-		return zero, modelerrors.NewNameNotFoundError(name)
+		return zero, merrors.NewNameNotFoundError(name)
 	}
 	return c.Get(idx)
 }
@@ -92,7 +92,7 @@ func (c *NamedCollection[T]) Update(index int, value T) (ReindexResult, error) {
 		return ReindexResult{}, err
 	}
 	if existing.Name() != value.Name() {
-		return ReindexResult{}, modelerrors.NewNameMismatchError(index, existing.Name(), value.Name())
+		return ReindexResult{}, merrors.NewNameMismatchError(index, existing.Name(), value.Name())
 	}
 	return c.indexed.Update(index, value)
 }
@@ -108,7 +108,7 @@ func (c *NamedCollection[T]) Rename(index int, newName string) (bool, error) {
 		return false, nil
 	}
 	if idx, ok := c.nameIndex.GetByName(newName); ok && idx != index {
-		return false, modelerrors.NewNameConflictError(newName)
+		return false, merrors.NewNameConflictError(newName)
 	}
 	value.SetName(newName)
 	c.nameIndex.Rebuild(c.indexed.values)

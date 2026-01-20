@@ -5,11 +5,11 @@ ID,Kind,Layer,Module,ErrorName,Summary,Remedy,SourcePaths
 92203,Internal,domain,22,NameConflictError,名称が既存要素と衝突,,-
 92204,Internal,domain,22,NameMismatchError,名称が一致しない,,-
 90001,Internal,domain,00,InvariantViolationError,不変条件違反/NaNなどプログラム的異常,,-
-99001,External,shared,99,OsPackageError,osパッケージでエラーが発生,,mlib_go_t4/pkg/shared/base/err/err.go
-99002,External,shared,99,JsonPackageError,jsonパッケージでエラーが発生,,mlib_go_t4/pkg/shared/base/err/err.go
-99003,External,shared,99,ImagePackageError,imageパッケージでエラーが発生,,mlib_go_t4/pkg/shared/base/err/err.go
-99004,External,shared,99,FsPackageError,io/fsパッケージでエラーが発生,,mlib_go_t4/pkg/shared/base/err/err.go
-99005,External,shared,99,DeepcopyPackageError,go-deepcopyパッケージでエラーが発生,,mlib_go_t4/pkg/shared/base/err/err.go
+99001,External,shared,99,OsPackageError,osパッケージでエラーが発生,,mlib_go_t4/pkg/shared/base/merr/err.go
+99002,External,shared,99,JsonPackageError,jsonパッケージでエラーが発生,,mlib_go_t4/pkg/shared/base/merr/err.go
+99003,External,shared,99,ImagePackageError,imageパッケージでエラーが発生,,mlib_go_t4/pkg/shared/base/merr/err.go
+99004,External,shared,99,FsPackageError,io/fsパッケージでエラーが発生,,mlib_go_t4/pkg/shared/base/merr/err.go
+99005,External,shared,99,DeepcopyPackageError,go-deepcopyパッケージでエラーが発生,,mlib_go_t4/pkg/shared/base/merr/err.go
 13001,Validate,usecase,39,PrerequisiteMissingError,前提不足で処理開始できない,前提を満たしてから再実行する,-
 14101,Validate,adapter,41,IoFileNotFound,入力ファイルが存在しない,パスを確認して再指定する,-
 14102,Validate,adapter,41,IoExtInvalid,拡張子が不正,拡張子を対応形式に修正する,-

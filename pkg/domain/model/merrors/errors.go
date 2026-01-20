@@ -1,8 +1,8 @@
 // 指示: miu200521358
-package errors
+package merrors
 
 import (
-	stdErrors "errors"
+	"errors"
 	"fmt"
 )
 
@@ -25,7 +25,7 @@ func (e *IndexOutOfRangeError) Error() string {
 // IsIndexOutOfRangeError は err が IndexOutOfRangeError か判定する。
 func IsIndexOutOfRangeError(err error) bool {
 	var target *IndexOutOfRangeError
-	return stdErrors.As(err, &target)
+	return errors.As(err, &target)
 }
 
 // NameNotFoundError は名前未検出エラーを表す。
@@ -46,7 +46,7 @@ func (e *NameNotFoundError) Error() string {
 // IsNameNotFoundError は err が NameNotFoundError か判定する。
 func IsNameNotFoundError(err error) bool {
 	var target *NameNotFoundError
-	return stdErrors.As(err, &target)
+	return errors.As(err, &target)
 }
 
 // NameConflictError は名前衝突エラーを表す。
@@ -67,7 +67,7 @@ func (e *NameConflictError) Error() string {
 // IsNameConflictError は err が NameConflictError か判定する。
 func IsNameConflictError(err error) bool {
 	var target *NameConflictError
-	return stdErrors.As(err, &target)
+	return errors.As(err, &target)
 }
 
 // NameMismatchError は更新時の名前不一致エラーを表す。
@@ -90,7 +90,7 @@ func (e *NameMismatchError) Error() string {
 // IsNameMismatchError は err が NameMismatchError か判定する。
 func IsNameMismatchError(err error) bool {
 	var target *NameMismatchError
-	return stdErrors.As(err, &target)
+	return errors.As(err, &target)
 }
 
 // ModelCopyFailed はモデルコピー失敗を表す。
@@ -122,5 +122,5 @@ func (e *ModelCopyFailed) Unwrap() error {
 // IsModelCopyFailed は err が ModelCopyFailed か判定する。
 func IsModelCopyFailed(err error) bool {
 	var target *ModelCopyFailed
-	return stdErrors.As(err, &target)
+	return errors.As(err, &target)
 }

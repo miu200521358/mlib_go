@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"math"
 
-	baseerr "github.com/miu200521358/mlib_go/pkg/shared/base/err"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 	"gonum.org/v1/gonum/num/quat"
 	"gonum.org/v1/gonum/spatial/r3"
 )
@@ -32,7 +32,7 @@ const (
 
 // newMathQuaternionLogFailed はQuaternion.Log失敗エラーを生成する。
 func newMathQuaternionLogFailed() error {
-	return baseerr.NewCommonError(mathQuaternionLogFailedErrorID, baseerr.ErrorKindInternal, "Quaternion.Logに失敗しました", nil)
+	return merr.NewCommonError(mathQuaternionLogFailedErrorID, merr.ErrorKindInternal, "Quaternion.Logに失敗しました", nil)
 }
 
 // NewQuaternion はクォータニオンを生成する。

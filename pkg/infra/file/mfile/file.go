@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
-	baseerr "github.com/miu200521358/mlib_go/pkg/shared/base/err"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 )
 
 // ExistsFile はファイルが存在するか判定する。
@@ -21,7 +21,7 @@ func ExistsFile(path string) (bool, error) {
 		if os.IsNotExist(err) {
 			return false, nil
 		}
-		return false, newFileReadFailed("ファイル確認に失敗しました", baseerr.NewOsPackageError("os.Statに失敗しました", err))
+		return false, newFileReadFailed("ファイル確認に失敗しました", merr.NewOsPackageError("os.Statに失敗しました", err))
 	}
 	return info != nil && !info.IsDir(), nil
 }
@@ -36,19 +36,19 @@ func ReadText(path string) (string, error) {
 		if os.IsNotExist(err) {
 			return "", newFileNotFound("ファイルが存在しません: "+path, nil)
 		}
-		return "", newFileReadFailed("ファイル確認に失敗しました", baseerr.NewOsPackageError("os.Statに失敗しました", err))
+		return "", newFileReadFailed("ファイル確認に失敗しました", merr.NewOsPackageError("os.Statに失敗しました", err))
 	}
 	if info.IsDir() {
 		return "", newFileNotFound("ファイルが存在しません: "+path, nil)
 	}
 	file, err := os.Open(path)
 	if err != nil {
-		return "", newFileReadFailed("ファイルを開けません: "+path, baseerr.NewOsPackageError("os.Openに失敗しました", err))
+		return "", newFileReadFailed("ファイルを開けません: "+path, merr.NewOsPackageError("os.Openに失敗しました", err))
 	}
 	defer file.Close()
 	content, err := io.ReadAll(file)
 	if err != nil {
-		return "", newFileReadFailed("ファイル読込に失敗しました: "+path, baseerr.NewOsPackageError("io.ReadAllに失敗しました", err))
+		return "", newFileReadFailed("ファイル読込に失敗しました: "+path, merr.NewOsPackageError("io.ReadAllに失敗しました", err))
 	}
 	return string(content), nil
 }

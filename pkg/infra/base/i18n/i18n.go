@@ -8,7 +8,7 @@ import (
 	"sync"
 
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
-	baseerr "github.com/miu200521358/mlib_go/pkg/shared/base/err"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
 )
 
@@ -220,11 +220,11 @@ func normalizeLang(lang LangCode) LangCode {
 func loadMessages(files fs.FS, path string) (map[string]string, error) {
 	data, err := fs.ReadFile(files, path)
 	if err != nil {
-		return nil, baseerr.NewFsPackageError("i18nメッセージ読込に失敗しました: "+path, err)
+		return nil, merr.NewFsPackageError("i18nメッセージ読込に失敗しました: "+path, err)
 	}
 	var entries []messageEntry
 	if err := json.Unmarshal(data, &entries); err != nil {
-		return nil, baseerr.NewJsonPackageError("i18nメッセージ解析に失敗しました: "+path, err)
+		return nil, merr.NewJsonPackageError("i18nメッセージ解析に失敗しました: "+path, err)
 	}
 	out := make(map[string]string, len(entries))
 	for _, e := range entries {

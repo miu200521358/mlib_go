@@ -8,7 +8,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/model/collection"
-	sharedtime "github.com/miu200521358/mlib_go/pkg/shared/contracts/time"
+	"github.com/miu200521358/mlib_go/pkg/shared/contracts/mtime"
 )
 
 // newTestBone はテスト用ボーンを生成する。
@@ -74,7 +74,7 @@ func TestNewBoneDeltaByGlobalMatrix(t *testing.T) {
 	child.Position = vec3(12, 0, 0)
 	global := child.Position.ToMat4()
 
-	delta := NewBoneDeltaByGlobalMatrix(child, sharedtime.Frame(1), global, parentDelta)
+	delta := NewBoneDeltaByGlobalMatrix(child, mtime.Frame(1), global, parentDelta)
 	if delta == nil {
 		t.Fatalf("expected delta")
 	}
@@ -254,7 +254,7 @@ func TestJointDeltasLookup(t *testing.T) {
 	joint.SetName("j")
 	joints.Append(joint)
 	deltas := NewJointDeltas(joints)
-	delta := NewJointDelta(joint, sharedtime.Frame(1))
+	delta := NewJointDelta(joint, mtime.Frame(1))
 	deltas.Update(delta)
 	if deltas.GetByName("j") == nil {
 		t.Fatalf("expected joint delta")

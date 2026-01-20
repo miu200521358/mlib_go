@@ -7,14 +7,14 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/miu200521358/mlib_go/pkg/shared/base/err"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 )
 
 // BaseError はカスタムエラーの基底。
 type BaseError struct {
 	msg        string
 	stackTrace string
-	ErrorKind  err.ErrorKind
+	ErrorKind  merr.ErrorKind
 	ErrorID    string
 }
 
@@ -56,7 +56,7 @@ func NewTerminateError(reason string) *TerminateError {
 		BaseError: &BaseError{
 			msg:        fmt.Sprintf("terminate error: %s", reason),
 			stackTrace: captureStackTrace(),
-			ErrorKind:  err.ErrorKindExternal,
+			ErrorKind:  merr.ErrorKindExternal,
 			ErrorID:    TerminateErrorID,
 		},
 		Reason: reason,

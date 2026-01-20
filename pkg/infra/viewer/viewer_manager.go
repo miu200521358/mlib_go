@@ -9,12 +9,12 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/shared/base"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
-	sharedtime "github.com/miu200521358/mlib_go/pkg/shared/contracts/time"
+	"github.com/miu200521358/mlib_go/pkg/shared/contracts/mtime"
 	"github.com/miu200521358/mlib_go/pkg/shared/state"
 )
 
 const (
-	defaultFps = sharedtime.DefaultFps
+	defaultFps = mtime.DefaultFps
 )
 
 // ViewerManager はビューワー全体を管理する。
@@ -151,9 +151,9 @@ func (vl *ViewerManager) processFrame(elapsed float64) bool {
 	if vl.shared.HasFlag(state.STATE_FLAG_PLAYING) {
 		spf := vl.shared.FrameInterval()
 		if spf <= 0 {
-			spf = sharedtime.FpsToSpf(defaultFps)
+			spf = mtime.FpsToSpf(defaultFps)
 		}
-		deltaFrame := sharedtime.Frame(float32(elapsed) / float32(spf))
+		deltaFrame := mtime.Frame(float32(elapsed) / float32(spf))
 		if deltaFrame > 0 {
 			frame += deltaFrame
 			if maxFrame > 0 && frame > maxFrame {

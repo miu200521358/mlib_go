@@ -15,7 +15,7 @@ import (
 	"testing/fstest"
 
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
-	baseerr "github.com/miu200521358/mlib_go/pkg/shared/base/err"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 )
 
 func removeFile(t *testing.T, path string) {
@@ -27,7 +27,7 @@ func removeFile(t *testing.T, path string) {
 
 func assertCommonErrorID(t *testing.T, err error, id string) {
 	t.Helper()
-	ce, ok := err.(*baseerr.CommonError)
+	ce, ok := err.(*merr.CommonError)
 	if !ok {
 		t.Fatalf("error type mismatch: %T", err)
 	}

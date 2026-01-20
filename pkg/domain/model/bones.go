@@ -3,7 +3,7 @@ package model
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/model/collection"
-	modelerrors "github.com/miu200521358/mlib_go/pkg/domain/model/errors"
+	"github.com/miu200521358/mlib_go/pkg/domain/model/merrors"
 )
 
 // BoneCollection は Insert 特例を持つボーンコレクション。
@@ -35,14 +35,14 @@ func (c *BoneCollection) Values() []*Bone {
 // Get は index のボーンを返す。
 func (c *BoneCollection) Get(index int) (*Bone, error) {
 	if index < 0 || index >= len(c.values) {
-		return nil, modelerrors.NewIndexOutOfRangeError(index, len(c.values))
+		return nil, merrors.NewIndexOutOfRangeError(index, len(c.values))
 	}
 	if index >= len(c.indexToPos) {
-		return nil, modelerrors.NewIndexOutOfRangeError(index, len(c.values))
+		return nil, merrors.NewIndexOutOfRangeError(index, len(c.values))
 	}
 	pos := c.indexToPos[index]
 	if pos < 0 || pos >= len(c.values) {
-		return nil, modelerrors.NewIndexOutOfRangeError(index, len(c.values))
+		return nil, merrors.NewIndexOutOfRangeError(index, len(c.values))
 	}
 	return c.values[pos], nil
 }
@@ -51,7 +51,7 @@ func (c *BoneCollection) Get(index int) (*Bone, error) {
 func (c *BoneCollection) GetByName(name string) (*Bone, error) {
 	idx, ok := c.nameIndex.GetByName(name)
 	if !ok {
-		return nil, modelerrors.NewNameNotFoundError(name)
+		return nil, merrors.NewNameNotFoundError(name)
 	}
 	return c.Get(idx)
 }
@@ -156,14 +156,14 @@ func (c *BoneCollection) Insert(value *Bone, afterBoneIndex int) (int, collectio
 // Remove は index のボーンを削除し、残りを再インデックスする。
 func (c *BoneCollection) Remove(index int) (collection.ReindexResult, error) {
 	if index < 0 || index >= len(c.values) {
-		return collection.ReindexResult{}, modelerrors.NewIndexOutOfRangeError(index, len(c.values))
+		return collection.ReindexResult{}, merrors.NewIndexOutOfRangeError(index, len(c.values))
 	}
 	if index >= len(c.indexToPos) {
-		return collection.ReindexResult{}, modelerrors.NewIndexOutOfRangeError(index, len(c.values))
+		return collection.ReindexResult{}, merrors.NewIndexOutOfRangeError(index, len(c.values))
 	}
 	pos := c.indexToPos[index]
 	if pos < 0 || pos >= len(c.values) {
-		return collection.ReindexResult{}, modelerrors.NewIndexOutOfRangeError(index, len(c.values))
+		return collection.ReindexResult{}, merrors.NewIndexOutOfRangeError(index, len(c.values))
 	}
 	oldLen := len(c.values)
 	copy(c.values[pos:], c.values[pos+1:])
@@ -215,14 +215,14 @@ func (c *BoneCollection) Update(index int, value *Bone) (collection.ReindexResul
 		return collection.ReindexResult{}, err
 	}
 	if current.Name() != value.Name() {
-		return collection.ReindexResult{}, modelerrors.NewNameMismatchError(index, current.Name(), value.Name())
+		return collection.ReindexResult{}, merrors.NewNameMismatchError(index, current.Name(), value.Name())
 	}
 	if index < 0 || index >= len(c.indexToPos) {
-		return collection.ReindexResult{}, modelerrors.NewIndexOutOfRangeError(index, len(c.values))
+		return collection.ReindexResult{}, merrors.NewIndexOutOfRangeError(index, len(c.values))
 	}
 	pos := c.indexToPos[index]
 	if pos < 0 || pos >= len(c.values) {
-		return collection.ReindexResult{}, modelerrors.NewIndexOutOfRangeError(index, len(c.values))
+		return collection.ReindexResult{}, merrors.NewIndexOutOfRangeError(index, len(c.values))
 	}
 	value.SetIndex(index)
 	c.values[pos] = value
@@ -245,7 +245,7 @@ func (c *BoneCollection) Rename(index int, newName string) (bool, error) {
 		return false, nil
 	}
 	if idx, ok := c.nameIndex.GetByName(newName); ok && idx != index {
-		return false, modelerrors.NewNameConflictError(newName)
+		return false, merrors.NewNameConflictError(newName)
 	}
 	value.SetName(newName)
 	c.rebuildNameIndex()
