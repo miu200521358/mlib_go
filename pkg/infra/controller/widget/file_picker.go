@@ -411,9 +411,14 @@ func (fp *FilePicker) openHistoryDialog() {
 	}
 
 	if fp.historyDialog != nil {
-		fp.historyListBox.SetModel(values)
-		fp.historyDialog.Show()
-		return
+		if fp.historyDialog.IsDisposed() {
+			fp.historyDialog = nil
+			fp.historyListBox = nil
+		} else {
+			fp.historyListBox.SetModel(values)
+			fp.historyDialog.Show()
+			return
+		}
 	}
 
 	dlg := new(walk.Dialog)
@@ -464,6 +469,10 @@ func (fp *FilePicker) openHistoryDialog() {
 
 	fp.historyDialog = dlg
 	fp.historyListBox = lb
+	fp.historyDialog.Disposing().Attach(func() {
+		fp.historyDialog = nil
+		fp.historyListBox = nil
+	})
 	push.SetEnabled(true)
 	fp.historyDialog.Show()
 }

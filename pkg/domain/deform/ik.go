@@ -65,6 +65,10 @@ func SolveIk(input IkSolveInput) mmath.Quaternion {
 func SolveIkStep(input IkSolveStepInput) mmath.Quaternion {
 	linkAngle := input.LinkAngle
 	axis := input.LimitedAxis
+	// 回転軸が不正または角度がゼロなら、回転を適用せず現状維持する。
+	if isInvalidFloat(linkAngle) || isInvalidVec3(axis) || axis.IsZero() || linkAngle == 0 {
+		return input.LinkRotation
+	}
 
 	var ikQuat mmath.Quaternion
 	if !input.FixedAxis.IsZero() {

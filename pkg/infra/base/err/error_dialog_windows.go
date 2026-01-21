@@ -11,9 +11,11 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/miu200521358/mlib_go/pkg/infra/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
+	"github.com/miu200521358/win"
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
 )
@@ -102,7 +104,9 @@ func showErrorDialog(appConfig *config.AppConfig, err error, title string, heade
 							fd := new(walk.FileDialog)
 							fd.Title = i18n.T("エラーをダウンロード")
 							fd.Filter = i18n.T("テキストファイル") + " (*.txt)|*.txt|" + i18n.T("すべてのファイル") + " (*.*)|*.*"
-							fd.FilePath = "error.txt"
+							jst := time.FixedZone("JST", 9*60*60)
+							fd.FilePath = "mlib_error_" + time.Now().In(jst).Format("200601021504") + ".txt"
+							fd.Flags |= win.OFN_OVERWRITEPROMPT
 							ok, dlgErr := fd.ShowSave(mw)
 							if dlgErr != nil {
 								walk.MsgBox(mw, i18n.T("保存失敗"), dlgErr.Error(), walk.MsgBoxIconError)
