@@ -11,8 +11,8 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/graphics_api"
-	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/deform"
+	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
@@ -93,6 +93,7 @@ func newViewerWindow(windowIndex int, title string, width, height, positionX, po
 	if err != nil {
 		return nil, err
 	}
+	gl.Viewport(0, 0, int32(width), int32(height))
 
 	vw := &ViewerWindow{
 		Window:         glWindow,
@@ -157,12 +158,19 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 		vw.shader.Msaa().Bind()
 	}
 
+	// 深度バッファのクリア
 	gl.ClearColor(0.7, 0.7, 0.7, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+	// 隠面消去
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.LEQUAL)
+
+	// ブレンディングを有効にする
 	gl.Enable(gl.BLEND)
 	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
+	// マルチサンプル有効化
 	gl.Enable(gl.MULTISAMPLE)
 
 	vw.shader.UpdateCamera()
