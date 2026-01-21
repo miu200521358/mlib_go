@@ -6,6 +6,7 @@ package viewer
 
 import (
 	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/miu200521358/win"
 
 	"github.com/miu200521358/mlib_go/pkg/shared/base"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
@@ -123,11 +124,26 @@ func (vl *ViewerManager) handleWindowFocus() {
 	for i := len(vl.windowList) - 1; i >= 0; i-- {
 		if vl.shared.IsViewerWindowFocused(i) {
 			vl.windowList[i].Focus()
+			vl.bringControlWindowToFrontNoActivate()
 			vl.shared.KeepFocus()
 			vl.shared.SetViewerWindowFocused(i, false)
 			return
 		}
 	}
+}
+
+// bringControlWindowToFrontNoActivate はコントロールウィンドウを前面化する（フォーカスは奪わない）。
+func (vl *ViewerManager) bringControlWindowToFrontNoActivate() {
+	handle := vl.shared.ControlWindowHandle()
+	if handle == 0 {
+		return
+	}
+	win.SetWindowPos(
+		win.HWND(uintptr(handle)),
+		win.HWND_TOP,
+		0, 0, 0, 0,
+		win.SWP_NOMOVE|win.SWP_NOSIZE|win.SWP_NOACTIVATE,
+	)
 }
 
 func (vl *ViewerManager) handleVSync() {
