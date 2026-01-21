@@ -7,6 +7,7 @@ package viewer
 import (
 	"math"
 	"strings"
+	"time"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.3-core/gl"
@@ -22,11 +23,14 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/render"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"github.com/miu200521358/mlib_go/pkg/shared/state"
 )
 
 const (
 	rightAngle = 89.9
+	// boneHoverMaxScreenDistance はボーンホバー判定の最大距離（ピクセル）。
+	boneHoverMaxScreenDistance = 20.0
 )
 
 // CameraPreset はカメラ視点プリセットを表す。
@@ -55,6 +59,8 @@ type ViewerWindow struct {
 
 	tooltipRenderer *mgl.TooltipRenderer
 	boneHighlighter *mgl.BoneHighlighter
+	boneHoverActive bool
+	lastBoneHoverAt time.Time
 
 	modelRenderers []*render.ModelRenderer
 	motions        []*motion.VmdMotion
@@ -193,11 +199,13 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 
 	vw.renderFloor()
 
+	vw.updateBoneHoverExpire()
 	var debugBoneHover []*mgl.DebugBoneHover
 	if vw.boneHighlighter != nil {
 		debugBoneHover = vw.boneHighlighter.DebugBoneHoverInfo()
 	}
 
+	logger := logging.DefaultLogger()
 	for i, renderer := range vw.modelRenderers {
 		if renderer == nil || renderer.Model == nil {
 			continue
@@ -214,12 +222,13 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 		vw.vmdDeltas = ensureVmdDeltas(vw.vmdDeltas, i)
 		vw.vmdDeltas[i] = vmdDeltas
 
+		if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
+			vw.logBonePositions(i, vmdDeltas)
+		}
+
 		renderer.Render(vw.shader, vw.list.shared, vmdDeltas, debugBoneHover)
 	}
 
-	if vw.list.shared.IsAnyBoneVisible() && vw.boneHighlighter != nil {
-		vw.boneHighlighter.CheckAndClearExpiredHighlight()
-	}
 	if vw.list.shared.IsAnyBoneVisible() && vw.tooltipRenderer != nil && vw.boneHighlighter != nil {
 		if boneHover := vw.boneHighlighter.DebugBoneHoverInfo(); len(boneHover) > 0 {
 			names := make([]string, 0, len(boneHover))
@@ -397,6 +406,7 @@ func (vw *ViewerWindow) mouseCallback(_ *glfw.Window, button glfw.MouseButton, a
 				vw.selectBoneByCursor(vw.cursorX, vw.cursorY)
 			} else if vw.boneHighlighter != nil {
 				vw.boneHighlighter.UpdateDebugHoverByBones(nil, false)
+				vw.boneHoverActive = false
 			}
 		case glfw.MouseButtonMiddle:
 			vw.middleButtonPressed = false
@@ -426,10 +436,29 @@ func (vw *ViewerWindow) cursorPosCallback(_ *glfw.Window, xpos, ypos float64) {
 			vw.selectBoneByCursor(xpos, ypos)
 		} else if vw.boneHighlighter != nil {
 			vw.boneHighlighter.UpdateDebugHoverByBones(nil, false)
+			vw.boneHoverActive = false
 		}
 	}
 	vw.prevCursorPos.X = xpos
 	vw.prevCursorPos.Y = ypos
+}
+
+// updateBoneHoverExpire はボーンホバー終了後のツールチップ消去を遅延する。
+func (vw *ViewerWindow) updateBoneHoverExpire() {
+	if vw.boneHighlighter == nil {
+		return
+	}
+	if vw.boneHoverActive {
+		vw.lastBoneHoverAt = time.Now()
+		return
+	}
+	if vw.lastBoneHoverAt.IsZero() {
+		return
+	}
+	if time.Since(vw.lastBoneHoverAt) >= time.Second {
+		vw.boneHighlighter.UpdateDebugHoverByBones(nil, false)
+		vw.lastBoneHoverAt = time.Time{}
+	}
 }
 
 // selectBoneByCursor はカーソル位置に最も近いボーンを検出してハイライトを更新する。
@@ -467,61 +496,199 @@ func (vw *ViewerWindow) selectBoneByCursor(xpos, ypos float64) {
 		mgl.NewGlVec3(cam.Up),
 	)
 
-	depth := vw.shader.Msaa().ReadDepthAt(int(xpos), int(ypos), width, height)
-	world, err := mgl32.UnProject(
-		mgl32.Vec3{float32(xpos), float32(height) - float32(ypos), depth},
-		view,
-		projection,
-		0,
-		0,
-		width,
-		height,
-	)
-	if err != nil {
-		return
-	}
+	closestDistance := math.MaxFloat64
+	closestBones := make([]*mgl.DebugBoneHover, 0)
 
-	mouseWorld := mmath.NewVec3()
-	mouseWorld.X = -float64(world.X())
-	mouseWorld.Y = float64(world.Y())
-	mouseWorld.Z = float64(world.Z())
-
-	boneDistances := map[float64][]*mgl.DebugBoneHover{}
 	for modelIndex, vmdDeltas := range vw.vmdDeltas {
 		if vmdDeltas == nil || vmdDeltas.Bones == nil {
 			continue
 		}
+		info := buildBoneDebugInfo(vmdDeltas.Bones)
 		vmdDeltas.Bones.ForEach(func(_ int, boneDelta *delta.BoneDelta) bool {
 			if boneDelta == nil || boneDelta.Bone == nil {
 				return true
 			}
+			if !isBoneVisibleForHover(boneDelta.Bone, vw.list.shared, info) {
+				return true
+			}
 			bonePos := boneDelta.FilledGlobalPosition()
-			dist := mmath.Round(mouseWorld.Distance(bonePos), 0.01)
-			boneDistances[dist] = append(boneDistances[dist], &mgl.DebugBoneHover{
-				ModelIndex: modelIndex,
-				Bone:       boneDelta.Bone,
-				Distance:   dist,
-			})
+			screenX, screenY, ok := projectToScreen(bonePos, view, projection, width, height)
+			if !ok {
+				return true
+			}
+			dx := screenX - xpos
+			dy := screenY - ypos
+			dist := math.Hypot(dx, dy)
+			if dist > boneHoverMaxScreenDistance {
+				return true
+			}
+			if dist+0.01 < closestDistance {
+				closestDistance = dist
+				closestBones = closestBones[:0]
+			}
+			if math.Abs(dist-closestDistance) <= 0.01 {
+				closestBones = append(closestBones, &mgl.DebugBoneHover{
+					ModelIndex: modelIndex,
+					Bone:       boneDelta.Bone,
+					Distance:   dist,
+				})
+			}
 			return true
 		})
 	}
-	if len(boneDistances) == 0 {
-		vw.boneHighlighter.UpdateDebugHoverByBones(nil, false)
-		return
-	}
 
-	closestDistance := math.MaxFloat64
-	for dist := range boneDistances {
-		if dist < closestDistance {
-			closestDistance = dist
-		}
-	}
-	closestBones := boneDistances[closestDistance]
 	if len(closestBones) > 0 {
 		vw.boneHighlighter.UpdateDebugHoverByBones(closestBones, true)
+		vw.boneHoverActive = true
+		vw.lastBoneHoverAt = time.Now()
 	} else {
-		vw.boneHighlighter.UpdateDebugHoverByBones(nil, false)
+		vw.boneHoverActive = false
 	}
+}
+
+// boneDebugInfo はボーン可視判定用の情報を保持する。
+type boneDebugInfo struct {
+	ikTargets       map[int]struct{}
+	ikLinks         map[int]struct{}
+	effectorParents map[int]struct{}
+}
+
+// isIkTarget はIKターゲットか判定する。
+func (info boneDebugInfo) isIkTarget(index int) bool {
+	_, ok := info.ikTargets[index]
+	return ok
+}
+
+// isIkLink はIKリンクか判定する。
+func (info boneDebugInfo) isIkLink(index int) bool {
+	_, ok := info.ikLinks[index]
+	return ok
+}
+
+// isEffectorParent は付与親ボーンか判定する。
+func (info boneDebugInfo) isEffectorParent(index int) bool {
+	_, ok := info.effectorParents[index]
+	return ok
+}
+
+// buildBoneDebugInfo はIK/付与関係の判定情報を構築する。
+func buildBoneDebugInfo(bones *delta.BoneDeltas) boneDebugInfo {
+	info := boneDebugInfo{
+		ikTargets:       map[int]struct{}{},
+		ikLinks:         map[int]struct{}{},
+		effectorParents: map[int]struct{}{},
+	}
+	if bones == nil {
+		return info
+	}
+	bones.ForEach(func(_ int, delta *delta.BoneDelta) bool {
+		if delta == nil || delta.Bone == nil {
+			return true
+		}
+		bone := delta.Bone
+		if bone.Ik != nil {
+			if bone.Ik.BoneIndex >= 0 {
+				info.ikTargets[bone.Ik.BoneIndex] = struct{}{}
+			}
+			for _, link := range bone.Ik.Links {
+				if link.BoneIndex >= 0 {
+					info.ikLinks[link.BoneIndex] = struct{}{}
+				}
+			}
+		}
+		if hasBoneFlag(bone, model.BONE_FLAG_IS_EXTERNAL_ROTATION) || hasBoneFlag(bone, model.BONE_FLAG_IS_EXTERNAL_TRANSLATION) {
+			if bone.EffectIndex >= 0 {
+				info.effectorParents[bone.EffectIndex] = struct{}{}
+			}
+		}
+		return true
+	})
+	return info
+}
+
+// isBoneVisibleForHover は状態フラグに応じてホバー対象か判定する。
+func isBoneVisibleForHover(bone *model.Bone, shared *state.SharedState, info boneDebugInfo) bool {
+	if bone == nil || shared == nil {
+		return false
+	}
+	showAll := shared.HasFlag(state.STATE_FLAG_SHOW_BONE_ALL)
+	showVisible := shared.HasFlag(state.STATE_FLAG_SHOW_BONE_VISIBLE)
+	showIk := shared.HasFlag(state.STATE_FLAG_SHOW_BONE_IK)
+	showEffector := shared.HasFlag(state.STATE_FLAG_SHOW_BONE_EFFECTOR)
+	showFixed := shared.HasFlag(state.STATE_FLAG_SHOW_BONE_FIXED)
+	showRotate := shared.HasFlag(state.STATE_FLAG_SHOW_BONE_ROTATE)
+	showTranslate := shared.HasFlag(state.STATE_FLAG_SHOW_BONE_TRANSLATE)
+
+	switch {
+	case (showAll || showVisible || showIk) && hasBoneFlag(bone, model.BONE_FLAG_IS_IK):
+		return true
+	case (showAll || showVisible || showIk) && info.isIkLink(bone.Index()):
+		return true
+	case (showAll || showVisible || showIk) && info.isIkTarget(bone.Index()):
+		return true
+	case (showAll || showVisible || showEffector) &&
+		(hasBoneFlag(bone, model.BONE_FLAG_IS_EXTERNAL_ROTATION) || hasBoneFlag(bone, model.BONE_FLAG_IS_EXTERNAL_TRANSLATION)):
+		return true
+	case (showAll || showVisible || showEffector) && info.isEffectorParent(bone.Index()):
+		return true
+	case (showAll || showVisible || showFixed) && hasBoneFlag(bone, model.BONE_FLAG_HAS_FIXED_AXIS):
+		return true
+	case (showAll || showVisible || showTranslate) && hasBoneFlag(bone, model.BONE_FLAG_CAN_TRANSLATE):
+		return true
+	case (showAll || showVisible || showRotate) && hasBoneFlag(bone, model.BONE_FLAG_CAN_ROTATE):
+		return true
+	case showAll && !hasBoneFlag(bone, model.BONE_FLAG_IS_VISIBLE):
+		return true
+	default:
+		return false
+	}
+}
+
+// projectToScreen はワールド座標をスクリーン座標へ変換する。
+func projectToScreen(pos mmath.Vec3, view, projection mgl32.Mat4, width, height int) (float64, float64, bool) {
+	if width == 0 || height == 0 {
+		return 0, 0, false
+	}
+	glPos := mgl.NewGlVec3(&pos)
+	clip := projection.Mul4(view).Mul4x1(mgl32.Vec4{glPos.X(), glPos.Y(), glPos.Z(), 1})
+	if clip.W() == 0 {
+		return 0, 0, false
+	}
+	ndc := clip.Mul(1.0 / clip.W())
+	if ndc.Z() < -1.0 || ndc.Z() > 1.0 {
+		return 0, 0, false
+	}
+	screenX := (float64(ndc.X()) + 1.0) * 0.5 * float64(width)
+	screenY := (1.0 - float64(ndc.Y())) * 0.5 * float64(height)
+	if screenX < 0 || screenY < 0 || screenX > float64(width) || screenY > float64(height) {
+		return 0, 0, false
+	}
+	return screenX, screenY, true
+}
+
+// hasBoneFlag はボーンフラグの有無を判定する。
+func hasBoneFlag(bone *model.Bone, flag model.BoneFlag) bool {
+	if bone == nil {
+		return false
+	}
+	return bone.BoneFlag&flag != 0
+}
+
+// logBonePositions はボーンの3D位置を冗長ログへ出力する。
+func (vw *ViewerWindow) logBonePositions(modelIndex int, vmdDeltas *delta.VmdDeltas) {
+	if vmdDeltas == nil || vmdDeltas.Bones == nil {
+		return
+	}
+	logger := logging.DefaultLogger()
+	vmdDeltas.Bones.ForEach(func(_ int, boneDelta *delta.BoneDelta) bool {
+		if boneDelta == nil || boneDelta.Bone == nil {
+			return true
+		}
+		pos := boneDelta.FilledGlobalPosition()
+		logger.Verbose(logging.VERBOSE_INDEX_VIEWER, "ボーン位置: model=%d bone=%s index=%d pos=%s",
+			modelIndex, boneDelta.Bone.Name(), boneDelta.Bone.Index(), pos.StringByDigits(4))
+		return true
+	})
 }
 
 func (vw *ViewerWindow) updateCameraAngleByCursor(xpos, ypos float64) {

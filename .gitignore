@@ -40,3 +40,4 @@ bin/
 .gocache/
 .gomodcache/
 cmd/__debug_bin.*
+cmd/logs/
