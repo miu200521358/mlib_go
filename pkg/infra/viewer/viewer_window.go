@@ -5,10 +5,13 @@
 package viewer
 
 import (
+	"math"
+	"strings"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.3-core/gl"
 	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/graphics_api"
 	"github.com/miu200521358/mlib_go/pkg/domain/deform"
@@ -49,6 +52,9 @@ type ViewerWindow struct {
 	title       string
 	list        *ViewerManager
 	shader      graphics_api.IShader
+
+	tooltipRenderer *mgl.TooltipRenderer
+	boneHighlighter *mgl.BoneHighlighter
 
 	modelRenderers []*render.ModelRenderer
 	motions        []*motion.VmdMotion
@@ -95,15 +101,22 @@ func newViewerWindow(windowIndex int, title string, width, height, positionX, po
 	}
 	gl.Viewport(0, 0, int32(width), int32(height))
 
+	tooltipRenderer, err := mgl.NewTooltipRenderer()
+	if err != nil {
+		return nil, err
+	}
+
 	vw := &ViewerWindow{
-		Window:         glWindow,
-		windowIndex:    windowIndex,
-		title:          title,
-		list:           list,
-		shader:         shader,
-		modelRenderers: make([]*render.ModelRenderer, 0),
-		motions:        make([]*motion.VmdMotion, 0),
-		vmdDeltas:      make([]*delta.VmdDeltas, 0),
+		Window:          glWindow,
+		windowIndex:     windowIndex,
+		title:           title,
+		list:            list,
+		shader:          shader,
+		tooltipRenderer: tooltipRenderer,
+		boneHighlighter: mgl.NewBoneHighlighter(),
+		modelRenderers:  make([]*render.ModelRenderer, 0),
+		motions:         make([]*motion.VmdMotion, 0),
+		vmdDeltas:       make([]*delta.VmdDeltas, 0),
 	}
 
 	glWindow.SetCloseCallback(vw.closeCallback)
@@ -180,6 +193,11 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 
 	vw.renderFloor()
 
+	var debugBoneHover []*mgl.DebugBoneHover
+	if vw.boneHighlighter != nil {
+		debugBoneHover = vw.boneHighlighter.DebugBoneHoverInfo()
+	}
+
 	for i, renderer := range vw.modelRenderers {
 		if renderer == nil || renderer.Model == nil {
 			continue
@@ -196,7 +214,24 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 		vw.vmdDeltas = ensureVmdDeltas(vw.vmdDeltas, i)
 		vw.vmdDeltas[i] = vmdDeltas
 
-		renderer.Render(vw.shader, vw.list.shared, vmdDeltas, nil)
+		renderer.Render(vw.shader, vw.list.shared, vmdDeltas, debugBoneHover)
+	}
+
+	if vw.list.shared.IsAnyBoneVisible() && vw.boneHighlighter != nil {
+		vw.boneHighlighter.CheckAndClearExpiredHighlight()
+	}
+	if vw.list.shared.IsAnyBoneVisible() && vw.tooltipRenderer != nil && vw.boneHighlighter != nil {
+		if boneHover := vw.boneHighlighter.DebugBoneHoverInfo(); len(boneHover) > 0 {
+			names := make([]string, 0, len(boneHover))
+			for _, hover := range boneHover {
+				if hover != nil && hover.Bone != nil {
+					names = append(names, hover.Bone.Name())
+				}
+			}
+			if len(names) > 0 {
+				vw.tooltipRenderer.Render(strings.Join(names, ", "), float32(vw.cursorX), float32(vw.cursorY), w, h)
+			}
+		}
 	}
 
 	if len(vw.list.windowList) > 1 && vw.list.shared.IsShowOverride() && vw.windowIndex != 0 {
@@ -358,6 +393,11 @@ func (vw *ViewerWindow) mouseCallback(_ *glfw.Window, button glfw.MouseButton, a
 		switch button {
 		case glfw.MouseButtonLeft:
 			vw.leftButtonPressed = false
+			if vw.list.shared.IsAnyBoneVisible() {
+				vw.selectBoneByCursor(vw.cursorX, vw.cursorY)
+			} else if vw.boneHighlighter != nil {
+				vw.boneHighlighter.UpdateDebugHoverByBones(nil, false)
+			}
 		case glfw.MouseButtonMiddle:
 			vw.middleButtonPressed = false
 		case glfw.MouseButtonRight:
@@ -381,8 +421,107 @@ func (vw *ViewerWindow) cursorPosCallback(_ *glfw.Window, xpos, ypos float64) {
 	} else if vw.middleButtonPressed {
 		vw.updateCameraPositionByCursor(xpos, ypos)
 	}
+	if !vw.rightButtonPressed && !vw.middleButtonPressed {
+		if vw.list.shared.IsAnyBoneVisible() {
+			vw.selectBoneByCursor(xpos, ypos)
+		} else if vw.boneHighlighter != nil {
+			vw.boneHighlighter.UpdateDebugHoverByBones(nil, false)
+		}
+	}
 	vw.prevCursorPos.X = xpos
 	vw.prevCursorPos.Y = ypos
+}
+
+// selectBoneByCursor はカーソル位置に最も近いボーンを検出してハイライトを更新する。
+func (vw *ViewerWindow) selectBoneByCursor(xpos, ypos float64) {
+	if vw.boneHighlighter == nil || vw.shader == nil || vw.shader.Msaa() == nil {
+		return
+	}
+	if len(vw.vmdDeltas) == 0 || vw.vmdDeltas[0] == nil {
+		return
+	}
+
+	width, height := vw.GetSize()
+	if width == 0 || height == 0 {
+		return
+	}
+	if xpos < 0 || ypos < 0 || xpos > float64(width) || ypos > float64(height) {
+		return
+	}
+
+	cam := vw.shader.Camera()
+	if cam == nil || cam.Position == nil || cam.LookAtCenter == nil || cam.Up == nil {
+		return
+	}
+
+	// 描画と同じ行列でスクリーン座標→ワールド座標を復元する。
+	projection := mgl32.Perspective(
+		mgl32.DegToRad(cam.FieldOfView),
+		float32(width)/float32(height),
+		cam.NearPlane,
+		cam.FarPlane,
+	)
+	view := mgl32.LookAtV(
+		mgl.NewGlVec3(cam.Position),
+		mgl.NewGlVec3(cam.LookAtCenter),
+		mgl.NewGlVec3(cam.Up),
+	)
+
+	depth := vw.shader.Msaa().ReadDepthAt(int(xpos), int(ypos), width, height)
+	world, err := mgl32.UnProject(
+		mgl32.Vec3{float32(xpos), float32(height) - float32(ypos), depth},
+		view,
+		projection,
+		0,
+		0,
+		width,
+		height,
+	)
+	if err != nil {
+		return
+	}
+
+	mouseWorld := mmath.NewVec3()
+	mouseWorld.X = -float64(world.X())
+	mouseWorld.Y = float64(world.Y())
+	mouseWorld.Z = float64(world.Z())
+
+	boneDistances := map[float64][]*mgl.DebugBoneHover{}
+	for modelIndex, vmdDeltas := range vw.vmdDeltas {
+		if vmdDeltas == nil || vmdDeltas.Bones == nil {
+			continue
+		}
+		vmdDeltas.Bones.ForEach(func(_ int, boneDelta *delta.BoneDelta) bool {
+			if boneDelta == nil || boneDelta.Bone == nil {
+				return true
+			}
+			bonePos := boneDelta.FilledGlobalPosition()
+			dist := mmath.Round(mouseWorld.Distance(bonePos), 0.01)
+			boneDistances[dist] = append(boneDistances[dist], &mgl.DebugBoneHover{
+				ModelIndex: modelIndex,
+				Bone:       boneDelta.Bone,
+				Distance:   dist,
+			})
+			return true
+		})
+	}
+	if len(boneDistances) == 0 {
+		vw.boneHighlighter.UpdateDebugHoverByBones(nil, false)
+		return
+	}
+
+	closestDistance := math.MaxFloat64
+	for dist := range boneDistances {
+		if dist < closestDistance {
+			closestDistance = dist
+		}
+	}
+	closestBones := boneDistances[closestDistance]
+	if len(closestBones) > 0 {
+		vw.boneHighlighter.UpdateDebugHoverByBones(closestBones, true)
+	} else {
+		vw.boneHighlighter.UpdateDebugHoverByBones(nil, false)
+	}
 }
 
 func (vw *ViewerWindow) updateCameraAngleByCursor(xpos, ypos float64) {

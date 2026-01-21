@@ -15,8 +15,8 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
-	"github.com/miu200521358/mlib_go/pkg/shared/state"
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/mgl"
+	"github.com/miu200521358/mlib_go/pkg/shared/state"
 )
 
 // デバッグ表示用のボーンカラー定義
@@ -197,7 +197,38 @@ func calcTailPosition(bone *model.Bone, bones *model.BoneCollection) mmath.Vec3 
 			return tail.Position
 		}
 	}
-	return bone.Position.Added(bone.TailPosition)
+	// 末端指定が無い場合は、tail位置→子ボーン→親方向の順で補完する。
+	if !isTailBone(bone) && bone.TailPosition.Length() > 0 {
+		return bone.Position.Added(bone.TailPosition)
+	}
+	if pos, ok := findChildPosition(bone.Index(), bones); ok {
+		return pos
+	}
+	if bones != nil && bone.ParentIndex >= 0 {
+		if parent, err := bones.Get(bone.ParentIndex); err == nil && parent != nil {
+			dir := bone.Position.Subed(parent.Position)
+			if dir.Length() > 0 {
+				return bone.Position.Added(dir)
+			}
+		}
+	}
+	return bone.Position
+}
+
+// findChildPosition は親に紐づく最初の子ボーン位置を返す。
+func findChildPosition(boneIndex int, bones *model.BoneCollection) (mmath.Vec3, bool) {
+	if bones == nil {
+		return mmath.NewVec3(), false
+	}
+	for _, child := range bones.Values() {
+		if child == nil {
+			continue
+		}
+		if child.ParentIndex == boneIndex {
+			return child.Position, true
+		}
+	}
+	return mmath.NewVec3(), false
 }
 
 // createBoneMatrixes は boneDeltas から ボーン行列テクスチャ用の float32配列を生成する。
