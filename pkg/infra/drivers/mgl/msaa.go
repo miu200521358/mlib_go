@@ -7,7 +7,6 @@ package mgl
 import (
 	"github.com/go-gl/gl/v4.3-core/gl"
 	"github.com/miu200521358/mlib_go/pkg/adapter/graphics_api"
-	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 )
 
 type msaaConfig struct {
@@ -50,9 +49,8 @@ func (m *MsaaBuffer) init() {
 	gl.RenderbufferStorageMultisample(gl.RENDERBUFFER, int32(m.config.sampleCount), gl.DEPTH24_STENCIL8, int32(m.config.width), int32(m.config.height))
 	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, m.depthBuffer)
 
-	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
+	if status := gl.CheckFramebufferStatus(gl.FRAMEBUFFER); status != gl.FRAMEBUFFER_COMPLETE {
 		m.initErr = graphics_api.NewFramebufferIncomplete("MSAAのフレームバッファが不完全です", nil)
-		logging.DefaultLogger().Warn("MSAAのフレームバッファが不完全です")
 	}
 
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
@@ -70,9 +68,8 @@ func (m *MsaaBuffer) init() {
 	gl.DrawBuffer(gl.NONE)
 	gl.ReadBuffer(gl.NONE)
 
-	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
+	if status := gl.CheckFramebufferStatus(gl.FRAMEBUFFER); status != gl.FRAMEBUFFER_COMPLETE {
 		m.initErr = graphics_api.NewFramebufferIncomplete("MSAA解決用フレームバッファが不完全です", nil)
-		logging.DefaultLogger().Warn("MSAA解決用フレームバッファが不完全です")
 	}
 
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
@@ -94,9 +91,6 @@ func (m *MsaaBuffer) ReadDepthAt(x, y, width, height int) float32 {
 	)
 
 	gl.BindFramebuffer(gl.FRAMEBUFFER, m.resolveFBO)
-	if status := gl.CheckFramebufferStatus(gl.FRAMEBUFFER); status != gl.FRAMEBUFFER_COMPLETE {
-		logging.DefaultLogger().Warn("フレームバッファが不完全です: %v", status)
-	}
 
 	var depth float32
 	gl.ReadPixels(int32(x), int32(height-y), 1, 1, gl.DEPTH_COMPONENT, gl.FLOAT, gl.Ptr(&depth))
@@ -179,10 +173,6 @@ func (m *MsaaBuffer) Resize(width, height int) {
 	gl.RenderbufferStorageMultisample(gl.RENDERBUFFER, int32(m.config.sampleCount), gl.DEPTH24_STENCIL8, int32(width), int32(height))
 	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, m.depthBuffer)
 
-	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
-		logging.DefaultLogger().Warn("リサイズ後のMSAAフレームバッファが不完全です")
-	}
-
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 
 	gl.BindFramebuffer(gl.FRAMEBUFFER, m.resolveFBO)
@@ -195,10 +185,6 @@ func (m *MsaaBuffer) Resize(width, height int) {
 
 	gl.DrawBuffer(gl.NONE)
 	gl.ReadBuffer(gl.NONE)
-
-	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
-		logging.DefaultLogger().Warn("リサイズ後のMSAA解決用フレームバッファが不完全です")
-	}
 
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 }

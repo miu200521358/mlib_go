@@ -57,17 +57,12 @@ func NewMat4FromLookAt(eye, center, up Vec3) Mat4 {
 	s := f.Cross(up).Normalized()
 	u := s.Cross(f)
 
-	m := NewMat4ByValues(
+	return NewMat4ByValues(
 		s.X, s.Y, s.Z, 0,
 		u.X, u.Y, u.Z, 0,
 		-f.X, -f.Y, -f.Z, 0,
-		0, 0, 0, 1,
+		-s.Dot(eye), -u.Dot(eye), f.Dot(eye), 1,
 	)
-
-	m[12] = -s.Dot(eye)
-	m[13] = -u.Dot(eye)
-	m[14] = f.Dot(eye)
-	return m
 }
 
 // IsZero はゼロか判定する。

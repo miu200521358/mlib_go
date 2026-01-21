@@ -8,6 +8,7 @@ import (
 	"sync/atomic"
 
 	"github.com/go-gl/gl/v4.3-core/gl"
+	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/graphics_api"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
@@ -49,6 +50,7 @@ func (f *ShaderFactory) CreateShader(width, height int) (graphics_api.IShader, e
 
 	msaa := NewMsaaBuffer(width, height)
 	if err := msaaInitError(msaa); err != nil {
+		logging.DefaultLogger().Error("MSAA初期化エラー: %v", err)
 		return nil, err
 	}
 
@@ -108,13 +110,23 @@ func (s *Shader) setupProgramUniforms(program uint32) {
 
 	projection := NewGlMat4(cam.GetProjectionMatrix(s.width, s.height))
 	projectionUniform := gl.GetUniformLocation(program, gl.Str(ShaderProjectionMatrix))
+	if s.height != 0 {
+		projection = mgl32.Perspective(
+			mgl32.DegToRad(cam.FieldOfView),
+			float32(s.width)/float32(s.height),
+			cam.NearPlane,
+			cam.FarPlane,
+		)
+	}
 	gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
 
 	cameraPosition := NewGlVec3(cam.Position)
 	cameraPositionUniform := gl.GetUniformLocation(program, gl.Str(ShaderCameraPosition))
 	gl.Uniform3fv(cameraPositionUniform, 1, &cameraPosition[0])
 
-	camera := NewGlMat4(cam.GetViewMatrix())
+	lookAtCenter := NewGlVec3(cam.LookAtCenter)
+	up := NewGlVec3(cam.Up)
+	camera := mgl32.LookAtV(cameraPosition, lookAtCenter, up)
 	cameraUniform := gl.GetUniformLocation(program, gl.Str(ShaderViewMatrix))
 	gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
 
@@ -195,11 +207,21 @@ func (s *Shader) UpdateCamera() {
 		cameraPositionUniform := gl.GetUniformLocation(program, gl.Str(ShaderCameraPosition))
 		gl.Uniform3fv(cameraPositionUniform, 1, &cameraPosition[0])
 
-		viewMatrix := NewGlMat4(cam.GetViewMatrix())
+		lookAtCenter := NewGlVec3(cam.LookAtCenter)
+		up := NewGlVec3(cam.Up)
+		viewMatrix := mgl32.LookAtV(cameraPosition, lookAtCenter, up)
 		viewMatrixUniform := gl.GetUniformLocation(program, gl.Str(ShaderViewMatrix))
 		gl.UniformMatrix4fv(viewMatrixUniform, 1, false, &viewMatrix[0])
 
-		projection := NewGlMat4(cam.GetProjectionMatrix(s.width, s.height))
+		projection := mgl32.Mat4{}
+		if s.height != 0 {
+			projection = mgl32.Perspective(
+				mgl32.DegToRad(cam.FieldOfView),
+				float32(s.width)/float32(s.height),
+				cam.NearPlane,
+				cam.FarPlane,
+			)
+		}
 		projectionUniform := gl.GetUniformLocation(program, gl.Str(ShaderProjectionMatrix))
 		gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
 	}
