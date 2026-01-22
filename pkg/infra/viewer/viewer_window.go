@@ -706,40 +706,161 @@ func toMgl32Mat4(src mmath.Mat4) mgl32.Mat4 {
 
 // selectRigidBodyByCursor はカーソル位置に最も近い剛体を検出してハイライトを更新する。
 func (vw *ViewerWindow) selectRigidBodyByCursor(xpos, ypos float64) {
-	if vw.physics == nil || vw.rigidBodyHighlighter == nil {
+	if vw.rigidBodyHighlighter == nil {
 		vw.rigidBodyHoverActive = false
 		return
 	}
-	rayFrom, rayTo := vw.calculateRayFromTo(xpos, ypos)
-	if rayFrom == nil || rayTo == nil {
+	// 物理レイキャストが有効な場合は最優先で使う。
+	if vw.physics != nil {
+		rayFrom, rayTo := vw.calculateRayFromTo(xpos, ypos)
+		if rayFrom != nil && rayTo != nil {
+			hit := vw.physics.RayTest(rayFrom, rayTo, &physics_api.RaycastFilter{
+				Group: collisionAllFilterMask,
+				Mask:  collisionAllFilterMask,
+			})
+			if hit != nil && hit.ModelIndex >= 0 && hit.ModelIndex < len(vw.modelRenderers) {
+				renderer := vw.modelRenderers[hit.ModelIndex]
+				if renderer != nil && renderer.Model != nil && renderer.Model.RigidBodies != nil {
+					rigidBody, err := renderer.Model.RigidBodies.Get(hit.RigidBodyIndex)
+					if err == nil && rigidBody != nil {
+						vw.rigidBodyHighlighter.UpdateDebugHoverByRigidBody(hit.ModelIndex, rigidBody, true)
+						vw.rigidBodyHoverActive = true
+						vw.lastRigidBodyHoverAt = time.Now()
+						return
+					}
+				}
+			}
+		}
+	}
+
+	// レイキャストで拾えない剛体はスクリーン距離で拾う。
+	modelIndex, rigidBody, ok := vw.findRigidBodyByScreen(xpos, ypos)
+	if !ok {
 		vw.rigidBodyHoverActive = false
 		return
 	}
-	hit := vw.physics.RayTest(rayFrom, rayTo, &physics_api.RaycastFilter{
-		Group: collisionAllFilterMask,
-		Mask:  collisionAllFilterMask,
-	})
-	if hit == nil {
-		vw.rigidBodyHoverActive = false
-		return
-	}
-	if hit.ModelIndex < 0 || hit.ModelIndex >= len(vw.modelRenderers) {
-		vw.rigidBodyHoverActive = false
-		return
-	}
-	renderer := vw.modelRenderers[hit.ModelIndex]
-	if renderer == nil || renderer.Model == nil || renderer.Model.RigidBodies == nil {
-		vw.rigidBodyHoverActive = false
-		return
-	}
-	rigidBody, err := renderer.Model.RigidBodies.Get(hit.RigidBodyIndex)
-	if err != nil || rigidBody == nil {
-		vw.rigidBodyHoverActive = false
-		return
-	}
-	vw.rigidBodyHighlighter.UpdateDebugHoverByRigidBody(hit.ModelIndex, rigidBody, true)
+	vw.rigidBodyHighlighter.UpdateDebugHoverByRigidBody(modelIndex, rigidBody, true)
 	vw.rigidBodyHoverActive = true
 	vw.lastRigidBodyHoverAt = time.Now()
+}
+
+// findRigidBodyByScreen は画面投影による最近傍の剛体を探索する。
+func (vw *ViewerWindow) findRigidBodyByScreen(xpos, ypos float64) (int, *model.RigidBody, bool) {
+	if vw.shader == nil {
+		return -1, nil, false
+	}
+	width, height := vw.GetSize()
+	if width == 0 || height == 0 {
+		return -1, nil, false
+	}
+	cam := vw.shader.Camera()
+	if cam == nil || cam.Position == nil || cam.LookAtCenter == nil || cam.Up == nil {
+		return -1, nil, false
+	}
+
+	projection := mgl32.Perspective(
+		mgl32.DegToRad(cam.FieldOfView),
+		float32(width)/float32(height),
+		cam.NearPlane,
+		cam.FarPlane,
+	)
+	view := mgl32.LookAtV(
+		mgl.NewGlVec3(cam.Position),
+		mgl.NewGlVec3(cam.LookAtCenter),
+		mgl.NewGlVec3(cam.Up),
+	)
+
+	closestDistance := math.MaxFloat64
+	closestModelIndex := -1
+	var closestRigidBody *model.RigidBody
+
+	for modelIndex, renderer := range vw.modelRenderers {
+		if renderer == nil || renderer.Model == nil || renderer.Model.RigidBodies == nil {
+			continue
+		}
+		var boneDeltas *delta.BoneDeltas
+		if modelIndex < len(vw.vmdDeltas) && vw.vmdDeltas[modelIndex] != nil {
+			boneDeltas = vw.vmdDeltas[modelIndex].Bones
+		}
+		for _, rigidBody := range renderer.Model.RigidBodies.Values() {
+			if rigidBody == nil || !rigidBody.IsValid() {
+				continue
+			}
+			pos, ok := vw.rigidBodyWorldPosition(rigidBody, renderer.Model.Bones, boneDeltas)
+			if !ok {
+				continue
+			}
+			screenX, screenY, ok := projectToScreen(pos, view, projection, width, height)
+			if !ok {
+				continue
+			}
+			dist := math.Hypot(screenX-xpos, screenY-ypos)
+			if dist > boneHoverMaxScreenDistance {
+				continue
+			}
+			if dist < closestDistance {
+				closestDistance = dist
+				closestModelIndex = modelIndex
+				closestRigidBody = rigidBody
+			}
+		}
+	}
+
+	if closestRigidBody == nil {
+		return -1, nil, false
+	}
+	return closestModelIndex, closestRigidBody, true
+}
+
+// rigidBodyWorldPosition は剛体のワールド位置を取得する。
+func (vw *ViewerWindow) rigidBodyWorldPosition(
+	rigidBody *model.RigidBody,
+	bones *model.BoneCollection,
+	boneDeltas *delta.BoneDeltas,
+) (mmath.Vec3, bool) {
+	if rigidBody == nil {
+		return mmath.NewVec3(), false
+	}
+	if bones == nil || rigidBody.BoneIndex < 0 {
+		if isInvalidViewerVec3(rigidBody.Position) {
+			return mmath.NewVec3(), false
+		}
+		return rigidBody.Position, true
+	}
+	bone, err := bones.Get(rigidBody.BoneIndex)
+	if err != nil || bone == nil {
+		if isInvalidViewerVec3(rigidBody.Position) {
+			return mmath.NewVec3(), false
+		}
+		return rigidBody.Position, true
+	}
+	if boneDeltas == nil || !boneDeltas.Contains(bone.Index()) {
+		if isInvalidViewerVec3(rigidBody.Position) {
+			return mmath.NewVec3(), false
+		}
+		return rigidBody.Position, true
+	}
+	boneDelta := boneDeltas.Get(bone.Index())
+	if boneDelta == nil {
+		if isInvalidViewerVec3(rigidBody.Position) {
+			return mmath.NewVec3(), false
+		}
+		return rigidBody.Position, true
+	}
+
+	// ボーンのグローバル行列にローカルオフセットを掛けて剛体位置を推定する。
+	localOffset := rigidBody.Position.Subed(bone.Position)
+	pos := boneDelta.FilledGlobalMatrix().MulVec3(localOffset)
+	if isInvalidViewerVec3(pos) {
+		return mmath.NewVec3(), false
+	}
+	return pos, true
+}
+
+// isInvalidViewerVec3 はNaN/Infを含むベクトルか判定する。
+func isInvalidViewerVec3(v mmath.Vec3) bool {
+	return math.IsNaN(v.X) || math.IsNaN(v.Y) || math.IsNaN(v.Z) ||
+		math.IsInf(v.X, 0) || math.IsInf(v.Y, 0) || math.IsInf(v.Z, 0)
 }
 
 // selectJointByCursor はカーソル位置に最も近いジョイントを検出してホバー情報を更新する。
