@@ -6,6 +6,7 @@ package render
 
 import (
 	"math"
+	"sync"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.3-core/gl"
@@ -32,6 +33,49 @@ var (
 	boneColorsInvisible      = []float32{0.82, 0.82, 0.82, 1.0}
 	boneColorsHighlight      = []float32{1.0, 0.0, 0.0, 1.0}
 )
+
+// boneTextureCache はボーン行列テクスチャの初期化状態を管理する。
+type boneTextureCache struct {
+	mu     sync.Mutex
+	states map[uint32]boneTextureState
+}
+
+// boneTextureState はボーン行列テクスチャの状態を保持する。
+type boneTextureState struct {
+	width       int
+	height      int
+	initialized bool
+}
+
+// globalBoneTextureCache はボーン行列テクスチャ状態の共有キャッシュ。
+var globalBoneTextureCache = newBoneTextureCache()
+
+// newBoneTextureCache はボーン行列テクスチャ用のキャッシュを生成する。
+func newBoneTextureCache() *boneTextureCache {
+	return &boneTextureCache{
+		states: make(map[uint32]boneTextureState),
+	}
+}
+
+// needsInit はテクスチャの初期化が必要か判定し、必要なら状態を更新する。
+func (c *boneTextureCache) needsInit(textureID uint32, width, height int) bool {
+	if textureID == 0 || width <= 0 || height <= 0 {
+		return false
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	state, ok := c.states[textureID]
+	if !ok || !state.initialized || state.width != width || state.height != height {
+		c.states[textureID] = boneTextureState{
+			width:       width,
+			height:      height,
+			initialized: true,
+		}
+		return true
+	}
+	return false
+}
 
 // newBoneGl はボーン位置データをGPU頂点用に詰める。
 func newBoneGl(bone *model.Bone) []float32 {
@@ -261,6 +305,9 @@ func bindBoneMatrixes(
 	shader graphics_api.IShader,
 	program uint32,
 ) {
+	if shader == nil || width <= 0 || height <= 0 || len(paddedMatrixes) == 0 {
+		return
+	}
 	switch windowIndex {
 	case 0:
 		gl.ActiveTexture(gl.TEXTURE20)
@@ -270,21 +317,36 @@ func bindBoneMatrixes(
 		gl.ActiveTexture(gl.TEXTURE22)
 	}
 
-	gl.BindTexture(gl.TEXTURE_2D, shader.BoneTextureID())
+	textureID := shader.BoneTextureID()
+	gl.BindTexture(gl.TEXTURE_2D, textureID)
 
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, 0)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+	needsInit := globalBoneTextureCache.needsInit(textureID, width, height)
+	if needsInit {
+		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, 0)
+		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+		gl.TexImage2D(
+			gl.TEXTURE_2D,
+			0,
+			gl.RGBA32F,
+			int32(width),
+			int32(height),
+			0,
+			gl.RGBA,
+			gl.FLOAT,
+			nil,
+		)
+	}
 
-	gl.TexImage2D(
+	gl.TexSubImage2D(
 		gl.TEXTURE_2D,
 		0,
-		gl.RGBA32F,
+		0,
+		0,
 		int32(width),
 		int32(height),
-		0,
 		gl.RGBA,
 		gl.FLOAT,
 		unsafe.Pointer(&paddedMatrixes[0]),

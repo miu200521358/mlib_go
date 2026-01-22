@@ -29,6 +29,8 @@ import (
 
 const (
 	rightAngle = 89.9
+	// boneLogInterval はボーン位置ログの出力間隔。
+	boneLogInterval = time.Second
 	// boneHoverMaxScreenDistance はボーンホバー判定の最大距離（ピクセル）。
 	boneHoverMaxScreenDistance = 20.0
 	// rigidBodyHoverRadiusScale は剛体ホバー判定の範囲を少し広げる補正係数。
@@ -74,6 +76,7 @@ type ViewerWindow struct {
 	jointHoverNames      []string
 	jointHoverActive     bool
 	lastJointHoverAt     time.Time
+	lastBoneLogAt        time.Time
 
 	modelRenderers     []*render.ModelRenderer
 	motions            []*motion.VmdMotion
@@ -246,6 +249,7 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 	}
 
 	logger := logging.DefaultLogger()
+	shouldLogBones := vw.shouldLogBonePositions(logger)
 	for i, renderer := range vw.modelRenderers {
 		if renderer == nil || renderer.Model == nil {
 			continue
@@ -262,7 +266,7 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 
 		vmdDeltas := vw.vmdDeltas[i]
 
-		if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
+		if shouldLogBones {
 			vw.logBonePositions(i, vmdDeltas)
 		}
 
@@ -1253,10 +1257,25 @@ func (vw *ViewerWindow) logBonePositions(modelIndex int, vmdDeltas *delta.VmdDel
 			return true
 		}
 		pos := boneDelta.FilledGlobalPosition()
-		logger.Verbose(logging.VERBOSE_INDEX_VIEWER, "ボーン位置: model=%d bone=%s index=%d pos=%s",
-			modelIndex, boneDelta.Bone.Name(), boneDelta.Bone.Index(), pos.StringByDigits(4))
+		logger.Verbose(logging.VERBOSE_INDEX_VIEWER,
+			"ボーン位置: model=%d bone=%s index=%d pos=(%.4f, %.4f, %.4f)",
+			modelIndex, boneDelta.Bone.Name(), boneDelta.Bone.Index(), pos.X, pos.Y, pos.Z)
 		return true
 	})
+}
+
+// shouldLogBonePositions はボーン位置ログの出力可否を判定する。
+func (vw *ViewerWindow) shouldLogBonePositions(logger logging.ILogger) bool {
+	if logger == nil || !logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
+		vw.lastBoneLogAt = time.Time{}
+		return false
+	}
+	now := time.Now()
+	if vw.lastBoneLogAt.IsZero() || now.Sub(vw.lastBoneLogAt) >= boneLogInterval {
+		vw.lastBoneLogAt = now
+		return true
+	}
+	return false
 }
 
 // updateCameraAngleByCursor はカーソル移動でカメラ角度を更新する。
