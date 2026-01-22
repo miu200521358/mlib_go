@@ -5,11 +5,12 @@
 package mbullet
 
 import (
-	"github.com/go-gl/gl/v4.4-core/gl"
+	"github.com/go-gl/gl/v4.3-core/gl"
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/graphics_api"
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/mbullet/bt"
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/mgl"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 )
 
 // newConstBtMDefaultColors はデバッグ描画の色を定義する。
@@ -64,6 +65,11 @@ func (ddl *mDebugDrawLiner) drawDebugLines(shader graphics_api.IShader, isDrawRi
 
 	// シェーダープログラムの使用開始
 	program := shader.Program(graphics_api.ProgramTypePhysics)
+	if program == 0 {
+		// シェーダー未初期化時は描画しない。
+		logging.DefaultLogger().Error("物理デバッグシェーダーが未初期化のため描画をスキップしました")
+		return
+	}
 	gl.UseProgram(program)
 
 	// 深度テストの設定

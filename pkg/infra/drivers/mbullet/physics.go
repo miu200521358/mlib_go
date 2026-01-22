@@ -7,7 +7,6 @@ package mbullet
 import (
 	"math"
 
-	"github.com/miu200521358/mlib_go/pkg/adapter/physics_api"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
@@ -53,11 +52,6 @@ type PhysicsEngine struct {
 	rigidBodies map[int][]*RigidBodyValue
 	windCfg     WindConfig
 	simTimeAcc  float32
-}
-
-// init は物理エンジン生成関数を登録する。
-func init() {
-	physics_api.RegisterPhysicsFactory(NewPhysicsEngine)
 }
 
 // NewPhysicsEngine は物理エンジンのインスタンスを生成する。

@@ -14,12 +14,15 @@ import (
 	"github.com/miu200521358/walk/pkg/walk"
 
 	"github.com/miu200521358/mlib_go/cmd/ui"
+	"github.com/miu200521358/mlib_go/pkg/adapter/physics_api"
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/infra/app"
 	"github.com/miu200521358/mlib_go/pkg/infra/base/config"
 	"github.com/miu200521358/mlib_go/pkg/infra/base/err"
 	"github.com/miu200521358/mlib_go/pkg/infra/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/infra/base/mlogging"
 	"github.com/miu200521358/mlib_go/pkg/infra/controller"
+	"github.com/miu200521358/mlib_go/pkg/infra/drivers/mbullet"
 	"github.com/miu200521358/mlib_go/pkg/infra/viewer"
 	"github.com/miu200521358/mlib_go/pkg/shared/base"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
@@ -64,6 +67,9 @@ func main() {
 		I18nService:   i18n.Default(),
 		LoggerService: logger,
 	}
+	physics_api.RegisterPhysicsFactory(func(gravity *mmath.Vec3) physics_api.IPhysics {
+		return mbullet.NewPhysicsEngine(gravity)
+	})
 
 	shared := state.NewSharedState(viewerCount)
 	sharedState, ok := shared.(*state.SharedState)

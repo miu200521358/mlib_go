@@ -5591,30 +5591,26 @@ extern void _wrap_btMDebugDraw_setDefaultColors_bt_e001408c92acdfd7(uintptr_t _s
 */
 import "C"
 
-import "unsafe"
-import _ "runtime/cgo"
-import "sync"
-
+import (
+	_ "runtime/cgo"
+	"sync"
+	"unsafe"
+)
 
 type _ unsafe.Pointer
-
-
 
 var Swig_escape_always_false bool
 var Swig_escape_val interface{}
 
-
 type _swig_fnptr *byte
 type _swig_memberptr *byte
 
-
-func getSwigcptr(v interface { Swigcptr() uintptr }) uintptr {
+func getSwigcptr(v interface{ Swigcptr() uintptr }) uintptr {
 	if v == nil {
 		return 0
 	}
 	return v.Swigcptr()
 }
-
 
 type _ sync.Mutex
 
@@ -5629,13 +5625,16 @@ func cgo_panic__bt_e001408c92acdfd7(p *byte) {
 	panic(string(s))
 }
 
+type swig_gostring struct {
+	p uintptr
+	n int
+}
 
-type swig_gostring struct { p uintptr; n int }
 func swigCopyString(s string) string {
-  p := *(*swig_gostring)(unsafe.Pointer(&s))
-  r := string((*[0x7fffffff]byte)(unsafe.Pointer(p.p))[:p.n])
-  Swig_free(p.p)
-  return r
+	p := *(*swig_gostring)(unsafe.Pointer(&s))
+	r := string((*[0x7fffffff]byte)(unsafe.Pointer(p.p))[:p.n])
+	Swig_free(p.p)
+	return r
 }
 
 func Swig_free(arg1 uintptr) {
@@ -5651,6 +5650,7 @@ func Swig_malloc(arg1 int) (_swig_ret uintptr) {
 }
 
 const BT_BULLET_VERSION int = 326
+
 func BtGetVersion() (_swig_ret int) {
 	var swig_r int
 	swig_r = (int)(C._wrap_btGetVersion_bt_e001408c92acdfd7())
@@ -5664,6 +5664,7 @@ func BtIsDoublePrecision() (_swig_ret int) {
 }
 
 const BT_LARGE_FLOAT float32 = 1e18
+
 type SwigcptrBtInfMaskConverter uintptr
 
 func (p SwigcptrBtInfMaskConverter) Swigcptr() uintptr {
@@ -5822,6 +5823,7 @@ const BT_ONE float32 = 1.0
 const BT_ZERO float32 = 0.0
 const BT_TWO float32 = 2.0
 const BT_HALF float32 = 0.5
+
 func BtAtan2Fast(arg1 float32, arg2 float32) (_swig_ret float32) {
 	var swig_r float32
 	_swig_i_0 := arg1
@@ -6188,6 +6190,7 @@ func GetSAlignedFreeFunc() (_swig_ret _swig_fnptr) {
 }
 
 const BtVector3DataName string = "btVector3FloatData"
+
 type SwigcptrBtVector3 uintptr
 
 func (p SwigcptrBtVector3) Swigcptr() uintptr {
@@ -6819,7 +6822,6 @@ func (_swig_base SwigcptrBtVector4) GetM_floats() (_swig_ret *float32) {
 }
 
 func (p SwigcptrBtVector4) Operator_Sm__Se_(a ...interface{}) {
-	argc := len(a)
 	panic("No match for overloaded function call")
 }
 
@@ -7490,6 +7492,7 @@ type BtQuadWord interface {
 }
 
 const BtQuaternionDataName string = "btQuaternionFloatData"
+
 type SwigcptrBtQuaternion uintptr
 
 func (p SwigcptrBtQuaternion) Swigcptr() uintptr {
@@ -9140,6 +9143,7 @@ type BtDefaultMotionState interface {
 }
 
 type BroadphaseNativeTypes int
+
 func _swig_getBOX_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_BOX_SHAPE_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9147,6 +9151,7 @@ func _swig_getBOX_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 }
 
 var BOX_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getBOX_SHAPE_PROXYTYPE()
+
 func _swig_getTRIANGLE_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_TRIANGLE_SHAPE_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9154,6 +9159,7 @@ func _swig_getTRIANGLE_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 }
 
 var TRIANGLE_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getTRIANGLE_SHAPE_PROXYTYPE()
+
 func _swig_getTETRAHEDRAL_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_TETRAHEDRAL_SHAPE_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9161,6 +9167,7 @@ func _swig_getTETRAHEDRAL_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 }
 
 var TETRAHEDRAL_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getTETRAHEDRAL_SHAPE_PROXYTYPE()
+
 func _swig_getCONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9168,6 +9175,7 @@ func _swig_getCONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeT
 }
 
 var CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getCONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE()
+
 func _swig_getCONVEX_HULL_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_CONVEX_HULL_SHAPE_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9175,6 +9183,7 @@ func _swig_getCONVEX_HULL_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 }
 
 var CONVEX_HULL_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getCONVEX_HULL_SHAPE_PROXYTYPE()
+
 func _swig_getCONVEX_POINT_CLOUD_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_CONVEX_POINT_CLOUD_SHAPE_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9182,6 +9191,7 @@ func _swig_getCONVEX_POINT_CLOUD_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTy
 }
 
 var CONVEX_POINT_CLOUD_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getCONVEX_POINT_CLOUD_SHAPE_PROXYTYPE()
+
 func _swig_getCUSTOM_POLYHEDRAL_SHAPE_TYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_CUSTOM_POLYHEDRAL_SHAPE_TYPE_bt_e001408c92acdfd7())
@@ -9189,6 +9199,7 @@ func _swig_getCUSTOM_POLYHEDRAL_SHAPE_TYPE() (_swig_ret BroadphaseNativeTypes) {
 }
 
 var CUSTOM_POLYHEDRAL_SHAPE_TYPE BroadphaseNativeTypes = _swig_getCUSTOM_POLYHEDRAL_SHAPE_TYPE()
+
 func _swig_getIMPLICIT_CONVEX_SHAPES_START_HERE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_IMPLICIT_CONVEX_SHAPES_START_HERE_bt_e001408c92acdfd7())
@@ -9196,6 +9207,7 @@ func _swig_getIMPLICIT_CONVEX_SHAPES_START_HERE() (_swig_ret BroadphaseNativeTyp
 }
 
 var IMPLICIT_CONVEX_SHAPES_START_HERE BroadphaseNativeTypes = _swig_getIMPLICIT_CONVEX_SHAPES_START_HERE()
+
 func _swig_getSPHERE_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_SPHERE_SHAPE_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9203,6 +9215,7 @@ func _swig_getSPHERE_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 }
 
 var SPHERE_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getSPHERE_SHAPE_PROXYTYPE()
+
 func _swig_getMULTI_SPHERE_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_MULTI_SPHERE_SHAPE_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9210,6 +9223,7 @@ func _swig_getMULTI_SPHERE_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 }
 
 var MULTI_SPHERE_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getMULTI_SPHERE_SHAPE_PROXYTYPE()
+
 func _swig_getCAPSULE_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_CAPSULE_SHAPE_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9217,6 +9231,7 @@ func _swig_getCAPSULE_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 }
 
 var CAPSULE_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getCAPSULE_SHAPE_PROXYTYPE()
+
 func _swig_getCONE_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_CONE_SHAPE_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9224,6 +9239,7 @@ func _swig_getCONE_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 }
 
 var CONE_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getCONE_SHAPE_PROXYTYPE()
+
 func _swig_getCONVEX_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_CONVEX_SHAPE_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9231,6 +9247,7 @@ func _swig_getCONVEX_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 }
 
 var CONVEX_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getCONVEX_SHAPE_PROXYTYPE()
+
 func _swig_getCYLINDER_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_CYLINDER_SHAPE_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9238,6 +9255,7 @@ func _swig_getCYLINDER_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 }
 
 var CYLINDER_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getCYLINDER_SHAPE_PROXYTYPE()
+
 func _swig_getUNIFORM_SCALING_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_UNIFORM_SCALING_SHAPE_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9245,6 +9263,7 @@ func _swig_getUNIFORM_SCALING_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes
 }
 
 var UNIFORM_SCALING_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getUNIFORM_SCALING_SHAPE_PROXYTYPE()
+
 func _swig_getMINKOWSKI_SUM_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_MINKOWSKI_SUM_SHAPE_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9252,6 +9271,7 @@ func _swig_getMINKOWSKI_SUM_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) 
 }
 
 var MINKOWSKI_SUM_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getMINKOWSKI_SUM_SHAPE_PROXYTYPE()
+
 func _swig_getMINKOWSKI_DIFFERENCE_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_MINKOWSKI_DIFFERENCE_SHAPE_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9259,6 +9279,7 @@ func _swig_getMINKOWSKI_DIFFERENCE_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNative
 }
 
 var MINKOWSKI_DIFFERENCE_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getMINKOWSKI_DIFFERENCE_SHAPE_PROXYTYPE()
+
 func _swig_getBOX_2D_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_BOX_2D_SHAPE_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9266,6 +9287,7 @@ func _swig_getBOX_2D_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 }
 
 var BOX_2D_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getBOX_2D_SHAPE_PROXYTYPE()
+
 func _swig_getCONVEX_2D_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_CONVEX_2D_SHAPE_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9273,6 +9295,7 @@ func _swig_getCONVEX_2D_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 }
 
 var CONVEX_2D_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getCONVEX_2D_SHAPE_PROXYTYPE()
+
 func _swig_getCUSTOM_CONVEX_SHAPE_TYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_CUSTOM_CONVEX_SHAPE_TYPE_bt_e001408c92acdfd7())
@@ -9280,6 +9303,7 @@ func _swig_getCUSTOM_CONVEX_SHAPE_TYPE() (_swig_ret BroadphaseNativeTypes) {
 }
 
 var CUSTOM_CONVEX_SHAPE_TYPE BroadphaseNativeTypes = _swig_getCUSTOM_CONVEX_SHAPE_TYPE()
+
 func _swig_getCONCAVE_SHAPES_START_HERE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_CONCAVE_SHAPES_START_HERE_bt_e001408c92acdfd7())
@@ -9287,6 +9311,7 @@ func _swig_getCONCAVE_SHAPES_START_HERE() (_swig_ret BroadphaseNativeTypes) {
 }
 
 var CONCAVE_SHAPES_START_HERE BroadphaseNativeTypes = _swig_getCONCAVE_SHAPES_START_HERE()
+
 func _swig_getTRIANGLE_MESH_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_TRIANGLE_MESH_SHAPE_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9294,6 +9319,7 @@ func _swig_getTRIANGLE_MESH_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) 
 }
 
 var TRIANGLE_MESH_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getTRIANGLE_MESH_SHAPE_PROXYTYPE()
+
 func _swig_getSCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9301,6 +9327,7 @@ func _swig_getSCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNative
 }
 
 var SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getSCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE()
+
 func _swig_getFAST_CONCAVE_MESH_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_FAST_CONCAVE_MESH_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9308,6 +9335,7 @@ func _swig_getFAST_CONCAVE_MESH_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 }
 
 var FAST_CONCAVE_MESH_PROXYTYPE BroadphaseNativeTypes = _swig_getFAST_CONCAVE_MESH_PROXYTYPE()
+
 func _swig_getTERRAIN_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_TERRAIN_SHAPE_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9315,6 +9343,7 @@ func _swig_getTERRAIN_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 }
 
 var TERRAIN_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getTERRAIN_SHAPE_PROXYTYPE()
+
 func _swig_getGIMPACT_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_GIMPACT_SHAPE_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9322,6 +9351,7 @@ func _swig_getGIMPACT_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 }
 
 var GIMPACT_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getGIMPACT_SHAPE_PROXYTYPE()
+
 func _swig_getMULTIMATERIAL_TRIANGLE_MESH_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_MULTIMATERIAL_TRIANGLE_MESH_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9329,6 +9359,7 @@ func _swig_getMULTIMATERIAL_TRIANGLE_MESH_PROXYTYPE() (_swig_ret BroadphaseNativ
 }
 
 var MULTIMATERIAL_TRIANGLE_MESH_PROXYTYPE BroadphaseNativeTypes = _swig_getMULTIMATERIAL_TRIANGLE_MESH_PROXYTYPE()
+
 func _swig_getEMPTY_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_EMPTY_SHAPE_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9336,6 +9367,7 @@ func _swig_getEMPTY_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 }
 
 var EMPTY_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getEMPTY_SHAPE_PROXYTYPE()
+
 func _swig_getSTATIC_PLANE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_STATIC_PLANE_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9343,6 +9375,7 @@ func _swig_getSTATIC_PLANE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 }
 
 var STATIC_PLANE_PROXYTYPE BroadphaseNativeTypes = _swig_getSTATIC_PLANE_PROXYTYPE()
+
 func _swig_getCUSTOM_CONCAVE_SHAPE_TYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_CUSTOM_CONCAVE_SHAPE_TYPE_bt_e001408c92acdfd7())
@@ -9350,6 +9383,7 @@ func _swig_getCUSTOM_CONCAVE_SHAPE_TYPE() (_swig_ret BroadphaseNativeTypes) {
 }
 
 var CUSTOM_CONCAVE_SHAPE_TYPE BroadphaseNativeTypes = _swig_getCUSTOM_CONCAVE_SHAPE_TYPE()
+
 func _swig_getSDF_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_SDF_SHAPE_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9357,6 +9391,7 @@ func _swig_getSDF_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 }
 
 var SDF_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getSDF_SHAPE_PROXYTYPE()
+
 func _swig_getCONCAVE_SHAPES_END_HERE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_CONCAVE_SHAPES_END_HERE_bt_e001408c92acdfd7())
@@ -9364,6 +9399,7 @@ func _swig_getCONCAVE_SHAPES_END_HERE() (_swig_ret BroadphaseNativeTypes) {
 }
 
 var CONCAVE_SHAPES_END_HERE BroadphaseNativeTypes = _swig_getCONCAVE_SHAPES_END_HERE()
+
 func _swig_getCOMPOUND_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_COMPOUND_SHAPE_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9371,6 +9407,7 @@ func _swig_getCOMPOUND_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 }
 
 var COMPOUND_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getCOMPOUND_SHAPE_PROXYTYPE()
+
 func _swig_getSOFTBODY_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_SOFTBODY_SHAPE_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9378,6 +9415,7 @@ func _swig_getSOFTBODY_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 }
 
 var SOFTBODY_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getSOFTBODY_SHAPE_PROXYTYPE()
+
 func _swig_getHFFLUID_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_HFFLUID_SHAPE_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9385,6 +9423,7 @@ func _swig_getHFFLUID_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 }
 
 var HFFLUID_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getHFFLUID_SHAPE_PROXYTYPE()
+
 func _swig_getHFFLUID_BUOYANT_CONVEX_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_HFFLUID_BUOYANT_CONVEX_SHAPE_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9392,6 +9431,7 @@ func _swig_getHFFLUID_BUOYANT_CONVEX_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNati
 }
 
 var HFFLUID_BUOYANT_CONVEX_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getHFFLUID_BUOYANT_CONVEX_SHAPE_PROXYTYPE()
+
 func _swig_getINVALID_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_INVALID_SHAPE_PROXYTYPE_bt_e001408c92acdfd7())
@@ -9399,6 +9439,7 @@ func _swig_getINVALID_SHAPE_PROXYTYPE() (_swig_ret BroadphaseNativeTypes) {
 }
 
 var INVALID_SHAPE_PROXYTYPE BroadphaseNativeTypes = _swig_getINVALID_SHAPE_PROXYTYPE()
+
 func _swig_getMAX_BROADPHASE_COLLISION_TYPES() (_swig_ret BroadphaseNativeTypes) {
 	var swig_r BroadphaseNativeTypes
 	swig_r = (BroadphaseNativeTypes)(C._wrap_MAX_BROADPHASE_COLLISION_TYPES_bt_e001408c92acdfd7())
@@ -9406,6 +9447,7 @@ func _swig_getMAX_BROADPHASE_COLLISION_TYPES() (_swig_ret BroadphaseNativeTypes)
 }
 
 var MAX_BROADPHASE_COLLISION_TYPES BroadphaseNativeTypes = _swig_getMAX_BROADPHASE_COLLISION_TYPES()
+
 type SwigcptrBtBroadphaseProxy uintptr
 
 func (p SwigcptrBtBroadphaseProxy) Swigcptr() uintptr {
@@ -9416,6 +9458,7 @@ func (p SwigcptrBtBroadphaseProxy) SwigIsBtBroadphaseProxy() {
 }
 
 type BtBroadphaseProxyCollisionFilterGroups int
+
 func _swig_getbtBroadphaseProxy_DefaultFilter_btBroadphaseProxy() (_swig_ret BtBroadphaseProxyCollisionFilterGroups) {
 	var swig_r BtBroadphaseProxyCollisionFilterGroups
 	swig_r = (BtBroadphaseProxyCollisionFilterGroups)(C._wrap_DefaultFilter_btBroadphaseProxy_bt_e001408c92acdfd7())
@@ -9423,6 +9466,7 @@ func _swig_getbtBroadphaseProxy_DefaultFilter_btBroadphaseProxy() (_swig_ret BtB
 }
 
 var BtBroadphaseProxyDefaultFilter BtBroadphaseProxyCollisionFilterGroups = _swig_getbtBroadphaseProxy_DefaultFilter_btBroadphaseProxy()
+
 func _swig_getbtBroadphaseProxy_StaticFilter_btBroadphaseProxy() (_swig_ret BtBroadphaseProxyCollisionFilterGroups) {
 	var swig_r BtBroadphaseProxyCollisionFilterGroups
 	swig_r = (BtBroadphaseProxyCollisionFilterGroups)(C._wrap_StaticFilter_btBroadphaseProxy_bt_e001408c92acdfd7())
@@ -9430,6 +9474,7 @@ func _swig_getbtBroadphaseProxy_StaticFilter_btBroadphaseProxy() (_swig_ret BtBr
 }
 
 var BtBroadphaseProxyStaticFilter BtBroadphaseProxyCollisionFilterGroups = _swig_getbtBroadphaseProxy_StaticFilter_btBroadphaseProxy()
+
 func _swig_getbtBroadphaseProxy_KinematicFilter_btBroadphaseProxy() (_swig_ret BtBroadphaseProxyCollisionFilterGroups) {
 	var swig_r BtBroadphaseProxyCollisionFilterGroups
 	swig_r = (BtBroadphaseProxyCollisionFilterGroups)(C._wrap_KinematicFilter_btBroadphaseProxy_bt_e001408c92acdfd7())
@@ -9437,6 +9482,7 @@ func _swig_getbtBroadphaseProxy_KinematicFilter_btBroadphaseProxy() (_swig_ret B
 }
 
 var BtBroadphaseProxyKinematicFilter BtBroadphaseProxyCollisionFilterGroups = _swig_getbtBroadphaseProxy_KinematicFilter_btBroadphaseProxy()
+
 func _swig_getbtBroadphaseProxy_DebrisFilter_btBroadphaseProxy() (_swig_ret BtBroadphaseProxyCollisionFilterGroups) {
 	var swig_r BtBroadphaseProxyCollisionFilterGroups
 	swig_r = (BtBroadphaseProxyCollisionFilterGroups)(C._wrap_DebrisFilter_btBroadphaseProxy_bt_e001408c92acdfd7())
@@ -9444,6 +9490,7 @@ func _swig_getbtBroadphaseProxy_DebrisFilter_btBroadphaseProxy() (_swig_ret BtBr
 }
 
 var BtBroadphaseProxyDebrisFilter BtBroadphaseProxyCollisionFilterGroups = _swig_getbtBroadphaseProxy_DebrisFilter_btBroadphaseProxy()
+
 func _swig_getbtBroadphaseProxy_SensorTrigger_btBroadphaseProxy() (_swig_ret BtBroadphaseProxyCollisionFilterGroups) {
 	var swig_r BtBroadphaseProxyCollisionFilterGroups
 	swig_r = (BtBroadphaseProxyCollisionFilterGroups)(C._wrap_SensorTrigger_btBroadphaseProxy_bt_e001408c92acdfd7())
@@ -9451,6 +9498,7 @@ func _swig_getbtBroadphaseProxy_SensorTrigger_btBroadphaseProxy() (_swig_ret BtB
 }
 
 var BtBroadphaseProxySensorTrigger BtBroadphaseProxyCollisionFilterGroups = _swig_getbtBroadphaseProxy_SensorTrigger_btBroadphaseProxy()
+
 func _swig_getbtBroadphaseProxy_CharacterFilter_btBroadphaseProxy() (_swig_ret BtBroadphaseProxyCollisionFilterGroups) {
 	var swig_r BtBroadphaseProxyCollisionFilterGroups
 	swig_r = (BtBroadphaseProxyCollisionFilterGroups)(C._wrap_CharacterFilter_btBroadphaseProxy_bt_e001408c92acdfd7())
@@ -9458,6 +9506,7 @@ func _swig_getbtBroadphaseProxy_CharacterFilter_btBroadphaseProxy() (_swig_ret B
 }
 
 var BtBroadphaseProxyCharacterFilter BtBroadphaseProxyCollisionFilterGroups = _swig_getbtBroadphaseProxy_CharacterFilter_btBroadphaseProxy()
+
 func _swig_getbtBroadphaseProxy_AllFilter_btBroadphaseProxy() (_swig_ret BtBroadphaseProxyCollisionFilterGroups) {
 	var swig_r BtBroadphaseProxyCollisionFilterGroups
 	swig_r = (BtBroadphaseProxyCollisionFilterGroups)(C._wrap_AllFilter_btBroadphaseProxy_bt_e001408c92acdfd7())
@@ -9465,6 +9514,7 @@ func _swig_getbtBroadphaseProxy_AllFilter_btBroadphaseProxy() (_swig_ret BtBroad
 }
 
 var BtBroadphaseProxyAllFilter BtBroadphaseProxyCollisionFilterGroups = _swig_getbtBroadphaseProxy_AllFilter_btBroadphaseProxy()
+
 func (arg1 SwigcptrBtBroadphaseProxy) SetM_clientObject(arg2 uintptr) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
@@ -9908,7 +9958,7 @@ func (arg1 SwigcptrBtCollisionShape) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btCollisionShape_getName_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -9993,7 +10043,7 @@ func (arg1 SwigcptrBtCollisionShape) Serialize(arg2 uintptr, arg3 BtSerializer) 
 	swig_r_p := C._wrap_btCollisionShape_serialize_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -10062,7 +10112,7 @@ func (arg1 SwigcptrBtCollisionShapeData) GetM_name() (_swig_ret string) {
 	swig_r_p := C._wrap_btCollisionShapeData_m_name_get_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -10094,7 +10144,7 @@ func (arg1 SwigcptrBtCollisionShapeData) GetM_padding() (_swig_ret string) {
 	swig_r_p := C._wrap_btCollisionShapeData_m_padding_get_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -10125,6 +10175,7 @@ func BtBulletCollisionProbe() {
 }
 
 const MAX_PREFERRED_PENETRATION_DIRECTIONS int = 10
+
 type SwigcptrBtConvexShape uintptr
 
 func (p SwigcptrBtConvexShape) Swigcptr() uintptr {
@@ -10349,7 +10400,7 @@ func (_swig_base SwigcptrBtConvexShape) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btConvexShape_getName_bt_e001408c92acdfd7(C.uintptr_t(_swig_base))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -10411,7 +10462,7 @@ func (_swig_base SwigcptrBtConvexShape) Serialize(arg1 uintptr, arg2 BtSerialize
 	swig_r_p := C._wrap_btConvexShape_serialize_bt_e001408c92acdfd7(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -10587,6 +10638,7 @@ func BtTransformAabb(a ...interface{}) {
 }
 
 const USE_BANCHLESS int = 1
+
 func TestQuantizedAabbAgainstQuantizedAabb(arg1 *uint16, arg2 *uint16, arg3 *uint16, arg4 *uint16) (_swig_ret uint) {
 	var swig_r uint
 	_swig_i_0 := arg1
@@ -10772,7 +10824,7 @@ func (arg1 SwigcptrBtConvexInternalShape) Serialize(arg2 uintptr, arg3 BtSeriali
 	swig_r_p := C._wrap_btConvexInternalShape_serialize_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -10915,7 +10967,7 @@ func (_swig_base SwigcptrBtConvexInternalShape) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btConvexInternalShape_getName_bt_e001408c92acdfd7(C.uintptr_t(_swig_base))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -11301,7 +11353,7 @@ func (_swig_base SwigcptrBtConvexInternalAabbCachingShape) Serialize(arg1 uintpt
 	swig_r_p := C._wrap_btConvexInternalAabbCachingShape_serialize_bt_e001408c92acdfd7(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -11444,7 +11496,7 @@ func (_swig_base SwigcptrBtConvexInternalAabbCachingShape) GetName() (_swig_ret 
 	swig_r_p := C._wrap_btConvexInternalAabbCachingShape_getName_bt_e001408c92acdfd7(C.uintptr_t(_swig_base))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -11651,7 +11703,7 @@ func (arg1 SwigcptrBtSphereShape) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btSphereShape_getName_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -11790,7 +11842,7 @@ func (_swig_base SwigcptrBtSphereShape) Serialize(arg1 uintptr, arg2 BtSerialize
 	swig_r_p := C._wrap_btSphereShape_serialize_bt_e001408c92acdfd7(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -12309,7 +12361,7 @@ func (_swig_base SwigcptrBtPolyhedralConvexShape) Serialize(arg1 uintptr, arg2 B
 	swig_r_p := C._wrap_btPolyhedralConvexShape_serialize_bt_e001408c92acdfd7(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -12432,7 +12484,7 @@ func (_swig_base SwigcptrBtPolyhedralConvexShape) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btPolyhedralConvexShape_getName_bt_e001408c92acdfd7(C.uintptr_t(_swig_base))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -12847,7 +12899,7 @@ func (_swig_base SwigcptrBtPolyhedralConvexAabbCachingShape) Serialize(arg1 uint
 	swig_r_p := C._wrap_btPolyhedralConvexAabbCachingShape_serialize_bt_e001408c92acdfd7(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -12970,7 +13022,7 @@ func (_swig_base SwigcptrBtPolyhedralConvexAabbCachingShape) GetName() (_swig_re
 	swig_r_p := C._wrap_btPolyhedralConvexAabbCachingShape_getName_bt_e001408c92acdfd7(C.uintptr_t(_swig_base))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -13125,6 +13177,7 @@ type BtPolyhedralConvexAabbCachingShape interface {
 
 const BT_USE_PLACEMENT_NEW int = 1
 const TEST_INTERNAL_OBJECTS int = 1
+
 type SwigcptrBtFace uintptr
 
 func (p SwigcptrBtFace) Swigcptr() uintptr {
@@ -13847,7 +13900,6 @@ func (_swig_base SwigcptrGrahamVector3) GetM_floats() (_swig_ret *float32) {
 }
 
 func (p SwigcptrGrahamVector3) Operator_Sm__Se_(a ...interface{}) {
-	argc := len(a)
 	panic("No match for overloaded function call")
 }
 
@@ -14434,7 +14486,7 @@ func (arg1 SwigcptrBtBoxShape) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btBoxShape_getName_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -14598,7 +14650,7 @@ func (_swig_base SwigcptrBtBoxShape) Serialize(arg1 uintptr, arg2 BtSerializer) 
 	swig_r_p := C._wrap_btBoxShape_serialize_bt_e001408c92acdfd7(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -14934,7 +14986,7 @@ func (arg1 SwigcptrBtCapsuleShape) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btCapsuleShape_getName_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -14987,7 +15039,7 @@ func (arg1 SwigcptrBtCapsuleShape) Serialize(arg2 uintptr, arg3 BtSerializer) (_
 	swig_r_p := C._wrap_btCapsuleShape_serialize_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -15377,7 +15429,7 @@ func (arg1 SwigcptrBtCapsuleShapeX) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btCapsuleShapeX_getName_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -15460,7 +15512,7 @@ func (_swig_base SwigcptrBtCapsuleShapeX) Serialize(arg1 uintptr, arg2 BtSeriali
 	swig_r_p := C._wrap_btCapsuleShapeX_serialize_bt_e001408c92acdfd7(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -15853,7 +15905,7 @@ func (arg1 SwigcptrBtCapsuleShapeZ) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btCapsuleShapeZ_getName_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -15936,7 +15988,7 @@ func (_swig_base SwigcptrBtCapsuleShapeZ) Serialize(arg1 uintptr, arg2 BtSeriali
 	swig_r_p := C._wrap_btCapsuleShapeZ_serialize_bt_e001408c92acdfd7(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -16356,7 +16408,7 @@ func (arg1 SwigcptrBtCapsuleShapeData) GetM_padding() (_swig_ret string) {
 	swig_r_p := C._wrap_btCapsuleShapeData_m_padding_get_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -16389,6 +16441,7 @@ const DISABLE_DEACTIVATION int = 4
 const DISABLE_SIMULATION int = 5
 const FIXED_BASE_MULTI_BODY int = 6
 const BtCollisionObjectDataName string = "btCollisionObjectFloatData"
+
 type SwigcptrBtCollisionObject uintptr
 
 func (p SwigcptrBtCollisionObject) Swigcptr() uintptr {
@@ -16399,6 +16452,7 @@ func (p SwigcptrBtCollisionObject) SwigIsBtCollisionObject() {
 }
 
 type BtCollisionObjectCollisionFlags int
+
 func _swig_getbtCollisionObject_CF_DYNAMIC_OBJECT_btCollisionObject() (_swig_ret BtCollisionObjectCollisionFlags) {
 	var swig_r BtCollisionObjectCollisionFlags
 	swig_r = (BtCollisionObjectCollisionFlags)(C._wrap_CF_DYNAMIC_OBJECT_btCollisionObject_bt_e001408c92acdfd7())
@@ -16406,6 +16460,7 @@ func _swig_getbtCollisionObject_CF_DYNAMIC_OBJECT_btCollisionObject() (_swig_ret
 }
 
 var BtCollisionObjectCF_DYNAMIC_OBJECT BtCollisionObjectCollisionFlags = _swig_getbtCollisionObject_CF_DYNAMIC_OBJECT_btCollisionObject()
+
 func _swig_getbtCollisionObject_CF_STATIC_OBJECT_btCollisionObject() (_swig_ret BtCollisionObjectCollisionFlags) {
 	var swig_r BtCollisionObjectCollisionFlags
 	swig_r = (BtCollisionObjectCollisionFlags)(C._wrap_CF_STATIC_OBJECT_btCollisionObject_bt_e001408c92acdfd7())
@@ -16413,6 +16468,7 @@ func _swig_getbtCollisionObject_CF_STATIC_OBJECT_btCollisionObject() (_swig_ret 
 }
 
 var BtCollisionObjectCF_STATIC_OBJECT BtCollisionObjectCollisionFlags = _swig_getbtCollisionObject_CF_STATIC_OBJECT_btCollisionObject()
+
 func _swig_getbtCollisionObject_CF_KINEMATIC_OBJECT_btCollisionObject() (_swig_ret BtCollisionObjectCollisionFlags) {
 	var swig_r BtCollisionObjectCollisionFlags
 	swig_r = (BtCollisionObjectCollisionFlags)(C._wrap_CF_KINEMATIC_OBJECT_btCollisionObject_bt_e001408c92acdfd7())
@@ -16420,6 +16476,7 @@ func _swig_getbtCollisionObject_CF_KINEMATIC_OBJECT_btCollisionObject() (_swig_r
 }
 
 var BtCollisionObjectCF_KINEMATIC_OBJECT BtCollisionObjectCollisionFlags = _swig_getbtCollisionObject_CF_KINEMATIC_OBJECT_btCollisionObject()
+
 func _swig_getbtCollisionObject_CF_NO_CONTACT_RESPONSE_btCollisionObject() (_swig_ret BtCollisionObjectCollisionFlags) {
 	var swig_r BtCollisionObjectCollisionFlags
 	swig_r = (BtCollisionObjectCollisionFlags)(C._wrap_CF_NO_CONTACT_RESPONSE_btCollisionObject_bt_e001408c92acdfd7())
@@ -16427,6 +16484,7 @@ func _swig_getbtCollisionObject_CF_NO_CONTACT_RESPONSE_btCollisionObject() (_swi
 }
 
 var BtCollisionObjectCF_NO_CONTACT_RESPONSE BtCollisionObjectCollisionFlags = _swig_getbtCollisionObject_CF_NO_CONTACT_RESPONSE_btCollisionObject()
+
 func _swig_getbtCollisionObject_CF_CUSTOM_MATERIAL_CALLBACK_btCollisionObject() (_swig_ret BtCollisionObjectCollisionFlags) {
 	var swig_r BtCollisionObjectCollisionFlags
 	swig_r = (BtCollisionObjectCollisionFlags)(C._wrap_CF_CUSTOM_MATERIAL_CALLBACK_btCollisionObject_bt_e001408c92acdfd7())
@@ -16434,6 +16492,7 @@ func _swig_getbtCollisionObject_CF_CUSTOM_MATERIAL_CALLBACK_btCollisionObject() 
 }
 
 var BtCollisionObjectCF_CUSTOM_MATERIAL_CALLBACK BtCollisionObjectCollisionFlags = _swig_getbtCollisionObject_CF_CUSTOM_MATERIAL_CALLBACK_btCollisionObject()
+
 func _swig_getbtCollisionObject_CF_CHARACTER_OBJECT_btCollisionObject() (_swig_ret BtCollisionObjectCollisionFlags) {
 	var swig_r BtCollisionObjectCollisionFlags
 	swig_r = (BtCollisionObjectCollisionFlags)(C._wrap_CF_CHARACTER_OBJECT_btCollisionObject_bt_e001408c92acdfd7())
@@ -16441,6 +16500,7 @@ func _swig_getbtCollisionObject_CF_CHARACTER_OBJECT_btCollisionObject() (_swig_r
 }
 
 var BtCollisionObjectCF_CHARACTER_OBJECT BtCollisionObjectCollisionFlags = _swig_getbtCollisionObject_CF_CHARACTER_OBJECT_btCollisionObject()
+
 func _swig_getbtCollisionObject_CF_DISABLE_VISUALIZE_OBJECT_btCollisionObject() (_swig_ret BtCollisionObjectCollisionFlags) {
 	var swig_r BtCollisionObjectCollisionFlags
 	swig_r = (BtCollisionObjectCollisionFlags)(C._wrap_CF_DISABLE_VISUALIZE_OBJECT_btCollisionObject_bt_e001408c92acdfd7())
@@ -16448,6 +16508,7 @@ func _swig_getbtCollisionObject_CF_DISABLE_VISUALIZE_OBJECT_btCollisionObject() 
 }
 
 var BtCollisionObjectCF_DISABLE_VISUALIZE_OBJECT BtCollisionObjectCollisionFlags = _swig_getbtCollisionObject_CF_DISABLE_VISUALIZE_OBJECT_btCollisionObject()
+
 func _swig_getbtCollisionObject_CF_DISABLE_SPU_COLLISION_PROCESSING_btCollisionObject() (_swig_ret BtCollisionObjectCollisionFlags) {
 	var swig_r BtCollisionObjectCollisionFlags
 	swig_r = (BtCollisionObjectCollisionFlags)(C._wrap_CF_DISABLE_SPU_COLLISION_PROCESSING_btCollisionObject_bt_e001408c92acdfd7())
@@ -16455,6 +16516,7 @@ func _swig_getbtCollisionObject_CF_DISABLE_SPU_COLLISION_PROCESSING_btCollisionO
 }
 
 var BtCollisionObjectCF_DISABLE_SPU_COLLISION_PROCESSING BtCollisionObjectCollisionFlags = _swig_getbtCollisionObject_CF_DISABLE_SPU_COLLISION_PROCESSING_btCollisionObject()
+
 func _swig_getbtCollisionObject_CF_HAS_CONTACT_STIFFNESS_DAMPING_btCollisionObject() (_swig_ret BtCollisionObjectCollisionFlags) {
 	var swig_r BtCollisionObjectCollisionFlags
 	swig_r = (BtCollisionObjectCollisionFlags)(C._wrap_CF_HAS_CONTACT_STIFFNESS_DAMPING_btCollisionObject_bt_e001408c92acdfd7())
@@ -16462,6 +16524,7 @@ func _swig_getbtCollisionObject_CF_HAS_CONTACT_STIFFNESS_DAMPING_btCollisionObje
 }
 
 var BtCollisionObjectCF_HAS_CONTACT_STIFFNESS_DAMPING BtCollisionObjectCollisionFlags = _swig_getbtCollisionObject_CF_HAS_CONTACT_STIFFNESS_DAMPING_btCollisionObject()
+
 func _swig_getbtCollisionObject_CF_HAS_CUSTOM_DEBUG_RENDERING_COLOR_btCollisionObject() (_swig_ret BtCollisionObjectCollisionFlags) {
 	var swig_r BtCollisionObjectCollisionFlags
 	swig_r = (BtCollisionObjectCollisionFlags)(C._wrap_CF_HAS_CUSTOM_DEBUG_RENDERING_COLOR_btCollisionObject_bt_e001408c92acdfd7())
@@ -16469,6 +16532,7 @@ func _swig_getbtCollisionObject_CF_HAS_CUSTOM_DEBUG_RENDERING_COLOR_btCollisionO
 }
 
 var BtCollisionObjectCF_HAS_CUSTOM_DEBUG_RENDERING_COLOR BtCollisionObjectCollisionFlags = _swig_getbtCollisionObject_CF_HAS_CUSTOM_DEBUG_RENDERING_COLOR_btCollisionObject()
+
 func _swig_getbtCollisionObject_CF_HAS_FRICTION_ANCHOR_btCollisionObject() (_swig_ret BtCollisionObjectCollisionFlags) {
 	var swig_r BtCollisionObjectCollisionFlags
 	swig_r = (BtCollisionObjectCollisionFlags)(C._wrap_CF_HAS_FRICTION_ANCHOR_btCollisionObject_bt_e001408c92acdfd7())
@@ -16476,6 +16540,7 @@ func _swig_getbtCollisionObject_CF_HAS_FRICTION_ANCHOR_btCollisionObject() (_swi
 }
 
 var BtCollisionObjectCF_HAS_FRICTION_ANCHOR BtCollisionObjectCollisionFlags = _swig_getbtCollisionObject_CF_HAS_FRICTION_ANCHOR_btCollisionObject()
+
 func _swig_getbtCollisionObject_CF_HAS_COLLISION_SOUND_TRIGGER_btCollisionObject() (_swig_ret BtCollisionObjectCollisionFlags) {
 	var swig_r BtCollisionObjectCollisionFlags
 	swig_r = (BtCollisionObjectCollisionFlags)(C._wrap_CF_HAS_COLLISION_SOUND_TRIGGER_btCollisionObject_bt_e001408c92acdfd7())
@@ -16483,7 +16548,9 @@ func _swig_getbtCollisionObject_CF_HAS_COLLISION_SOUND_TRIGGER_btCollisionObject
 }
 
 var BtCollisionObjectCF_HAS_COLLISION_SOUND_TRIGGER BtCollisionObjectCollisionFlags = _swig_getbtCollisionObject_CF_HAS_COLLISION_SOUND_TRIGGER_btCollisionObject()
+
 type BtCollisionObjectCollisionObjectTypes int
+
 func _swig_getbtCollisionObject_CO_COLLISION_OBJECT_btCollisionObject() (_swig_ret BtCollisionObjectCollisionObjectTypes) {
 	var swig_r BtCollisionObjectCollisionObjectTypes
 	swig_r = (BtCollisionObjectCollisionObjectTypes)(C._wrap_CO_COLLISION_OBJECT_btCollisionObject_bt_e001408c92acdfd7())
@@ -16491,6 +16558,7 @@ func _swig_getbtCollisionObject_CO_COLLISION_OBJECT_btCollisionObject() (_swig_r
 }
 
 var BtCollisionObjectCO_COLLISION_OBJECT BtCollisionObjectCollisionObjectTypes = _swig_getbtCollisionObject_CO_COLLISION_OBJECT_btCollisionObject()
+
 func _swig_getbtCollisionObject_CO_RIGID_BODY_btCollisionObject() (_swig_ret BtCollisionObjectCollisionObjectTypes) {
 	var swig_r BtCollisionObjectCollisionObjectTypes
 	swig_r = (BtCollisionObjectCollisionObjectTypes)(C._wrap_CO_RIGID_BODY_btCollisionObject_bt_e001408c92acdfd7())
@@ -16498,6 +16566,7 @@ func _swig_getbtCollisionObject_CO_RIGID_BODY_btCollisionObject() (_swig_ret BtC
 }
 
 var BtCollisionObjectCO_RIGID_BODY BtCollisionObjectCollisionObjectTypes = _swig_getbtCollisionObject_CO_RIGID_BODY_btCollisionObject()
+
 func _swig_getbtCollisionObject_CO_GHOST_OBJECT_btCollisionObject() (_swig_ret BtCollisionObjectCollisionObjectTypes) {
 	var swig_r BtCollisionObjectCollisionObjectTypes
 	swig_r = (BtCollisionObjectCollisionObjectTypes)(C._wrap_CO_GHOST_OBJECT_btCollisionObject_bt_e001408c92acdfd7())
@@ -16505,6 +16574,7 @@ func _swig_getbtCollisionObject_CO_GHOST_OBJECT_btCollisionObject() (_swig_ret B
 }
 
 var BtCollisionObjectCO_GHOST_OBJECT BtCollisionObjectCollisionObjectTypes = _swig_getbtCollisionObject_CO_GHOST_OBJECT_btCollisionObject()
+
 func _swig_getbtCollisionObject_CO_SOFT_BODY_btCollisionObject() (_swig_ret BtCollisionObjectCollisionObjectTypes) {
 	var swig_r BtCollisionObjectCollisionObjectTypes
 	swig_r = (BtCollisionObjectCollisionObjectTypes)(C._wrap_CO_SOFT_BODY_btCollisionObject_bt_e001408c92acdfd7())
@@ -16512,6 +16582,7 @@ func _swig_getbtCollisionObject_CO_SOFT_BODY_btCollisionObject() (_swig_ret BtCo
 }
 
 var BtCollisionObjectCO_SOFT_BODY BtCollisionObjectCollisionObjectTypes = _swig_getbtCollisionObject_CO_SOFT_BODY_btCollisionObject()
+
 func _swig_getbtCollisionObject_CO_HF_FLUID_btCollisionObject() (_swig_ret BtCollisionObjectCollisionObjectTypes) {
 	var swig_r BtCollisionObjectCollisionObjectTypes
 	swig_r = (BtCollisionObjectCollisionObjectTypes)(C._wrap_CO_HF_FLUID_btCollisionObject_bt_e001408c92acdfd7())
@@ -16519,6 +16590,7 @@ func _swig_getbtCollisionObject_CO_HF_FLUID_btCollisionObject() (_swig_ret BtCol
 }
 
 var BtCollisionObjectCO_HF_FLUID BtCollisionObjectCollisionObjectTypes = _swig_getbtCollisionObject_CO_HF_FLUID_btCollisionObject()
+
 func _swig_getbtCollisionObject_CO_USER_TYPE_btCollisionObject() (_swig_ret BtCollisionObjectCollisionObjectTypes) {
 	var swig_r BtCollisionObjectCollisionObjectTypes
 	swig_r = (BtCollisionObjectCollisionObjectTypes)(C._wrap_CO_USER_TYPE_btCollisionObject_bt_e001408c92acdfd7())
@@ -16526,6 +16598,7 @@ func _swig_getbtCollisionObject_CO_USER_TYPE_btCollisionObject() (_swig_ret BtCo
 }
 
 var BtCollisionObjectCO_USER_TYPE BtCollisionObjectCollisionObjectTypes = _swig_getbtCollisionObject_CO_USER_TYPE_btCollisionObject()
+
 func _swig_getbtCollisionObject_CO_FEATHERSTONE_LINK_btCollisionObject() (_swig_ret BtCollisionObjectCollisionObjectTypes) {
 	var swig_r BtCollisionObjectCollisionObjectTypes
 	swig_r = (BtCollisionObjectCollisionObjectTypes)(C._wrap_CO_FEATHERSTONE_LINK_btCollisionObject_bt_e001408c92acdfd7())
@@ -16533,7 +16606,9 @@ func _swig_getbtCollisionObject_CO_FEATHERSTONE_LINK_btCollisionObject() (_swig_
 }
 
 var BtCollisionObjectCO_FEATHERSTONE_LINK BtCollisionObjectCollisionObjectTypes = _swig_getbtCollisionObject_CO_FEATHERSTONE_LINK_btCollisionObject()
+
 type BtCollisionObjectAnisotropicFrictionFlags int
+
 func _swig_getbtCollisionObject_CF_ANISOTROPIC_FRICTION_DISABLED_btCollisionObject() (_swig_ret BtCollisionObjectAnisotropicFrictionFlags) {
 	var swig_r BtCollisionObjectAnisotropicFrictionFlags
 	swig_r = (BtCollisionObjectAnisotropicFrictionFlags)(C._wrap_CF_ANISOTROPIC_FRICTION_DISABLED_btCollisionObject_bt_e001408c92acdfd7())
@@ -16541,6 +16616,7 @@ func _swig_getbtCollisionObject_CF_ANISOTROPIC_FRICTION_DISABLED_btCollisionObje
 }
 
 var BtCollisionObjectCF_ANISOTROPIC_FRICTION_DISABLED BtCollisionObjectAnisotropicFrictionFlags = _swig_getbtCollisionObject_CF_ANISOTROPIC_FRICTION_DISABLED_btCollisionObject()
+
 func _swig_getbtCollisionObject_CF_ANISOTROPIC_FRICTION_btCollisionObject() (_swig_ret BtCollisionObjectAnisotropicFrictionFlags) {
 	var swig_r BtCollisionObjectAnisotropicFrictionFlags
 	swig_r = (BtCollisionObjectAnisotropicFrictionFlags)(C._wrap_CF_ANISOTROPIC_FRICTION_btCollisionObject_bt_e001408c92acdfd7())
@@ -16548,6 +16624,7 @@ func _swig_getbtCollisionObject_CF_ANISOTROPIC_FRICTION_btCollisionObject() (_sw
 }
 
 var BtCollisionObjectCF_ANISOTROPIC_FRICTION BtCollisionObjectAnisotropicFrictionFlags = _swig_getbtCollisionObject_CF_ANISOTROPIC_FRICTION_btCollisionObject()
+
 func _swig_getbtCollisionObject_CF_ANISOTROPIC_ROLLING_FRICTION_btCollisionObject() (_swig_ret BtCollisionObjectAnisotropicFrictionFlags) {
 	var swig_r BtCollisionObjectAnisotropicFrictionFlags
 	swig_r = (BtCollisionObjectAnisotropicFrictionFlags)(C._wrap_CF_ANISOTROPIC_ROLLING_FRICTION_btCollisionObject_bt_e001408c92acdfd7())
@@ -16555,6 +16632,7 @@ func _swig_getbtCollisionObject_CF_ANISOTROPIC_ROLLING_FRICTION_btCollisionObjec
 }
 
 var BtCollisionObjectCF_ANISOTROPIC_ROLLING_FRICTION BtCollisionObjectAnisotropicFrictionFlags = _swig_getbtCollisionObject_CF_ANISOTROPIC_ROLLING_FRICTION_btCollisionObject()
+
 func (arg1 SwigcptrBtCollisionObject) MergesSimulationIslands() (_swig_ret bool) {
 	var swig_r bool
 	_swig_i_0 := arg1
@@ -17208,7 +17286,7 @@ func (arg1 SwigcptrBtCollisionObject) Serialize(arg2 uintptr, arg3 BtSerializer)
 	swig_r_p := C._wrap_btCollisionObject_serialize_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -17364,7 +17442,7 @@ func (arg1 SwigcptrBtCollisionObjectDoubleData) GetM_name() (_swig_ret string) {
 	swig_r_p := C._wrap_btCollisionObjectDoubleData_m_name_get_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -17830,7 +17908,7 @@ func (arg1 SwigcptrBtCollisionObjectFloatData) GetM_name() (_swig_ret string) {
 	swig_r_p := C._wrap_btCollisionObjectFloatData_m_name_get_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -18256,7 +18334,9 @@ func GetGDisableDeactivation() (_swig_ret bool) {
 }
 
 const BtRigidBodyDataName string = "btRigidBodyFloatData"
+
 type BtRigidBodyFlags int
+
 func _swig_getBT_DISABLE_WORLD_GRAVITY() (_swig_ret BtRigidBodyFlags) {
 	var swig_r BtRigidBodyFlags
 	swig_r = (BtRigidBodyFlags)(C._wrap_BT_DISABLE_WORLD_GRAVITY_bt_e001408c92acdfd7())
@@ -18264,6 +18344,7 @@ func _swig_getBT_DISABLE_WORLD_GRAVITY() (_swig_ret BtRigidBodyFlags) {
 }
 
 var BT_DISABLE_WORLD_GRAVITY BtRigidBodyFlags = _swig_getBT_DISABLE_WORLD_GRAVITY()
+
 func _swig_getBT_ENABLE_GYROSCOPIC_FORCE_EXPLICIT() (_swig_ret BtRigidBodyFlags) {
 	var swig_r BtRigidBodyFlags
 	swig_r = (BtRigidBodyFlags)(C._wrap_BT_ENABLE_GYROSCOPIC_FORCE_EXPLICIT_bt_e001408c92acdfd7())
@@ -18271,6 +18352,7 @@ func _swig_getBT_ENABLE_GYROSCOPIC_FORCE_EXPLICIT() (_swig_ret BtRigidBodyFlags)
 }
 
 var BT_ENABLE_GYROSCOPIC_FORCE_EXPLICIT BtRigidBodyFlags = _swig_getBT_ENABLE_GYROSCOPIC_FORCE_EXPLICIT()
+
 func _swig_getBT_ENABLE_GYROSCOPIC_FORCE_IMPLICIT_WORLD() (_swig_ret BtRigidBodyFlags) {
 	var swig_r BtRigidBodyFlags
 	swig_r = (BtRigidBodyFlags)(C._wrap_BT_ENABLE_GYROSCOPIC_FORCE_IMPLICIT_WORLD_bt_e001408c92acdfd7())
@@ -18278,6 +18360,7 @@ func _swig_getBT_ENABLE_GYROSCOPIC_FORCE_IMPLICIT_WORLD() (_swig_ret BtRigidBody
 }
 
 var BT_ENABLE_GYROSCOPIC_FORCE_IMPLICIT_WORLD BtRigidBodyFlags = _swig_getBT_ENABLE_GYROSCOPIC_FORCE_IMPLICIT_WORLD()
+
 func _swig_getBT_ENABLE_GYROSCOPIC_FORCE_IMPLICIT_BODY() (_swig_ret BtRigidBodyFlags) {
 	var swig_r BtRigidBodyFlags
 	swig_r = (BtRigidBodyFlags)(C._wrap_BT_ENABLE_GYROSCOPIC_FORCE_IMPLICIT_BODY_bt_e001408c92acdfd7())
@@ -18285,6 +18368,7 @@ func _swig_getBT_ENABLE_GYROSCOPIC_FORCE_IMPLICIT_BODY() (_swig_ret BtRigidBodyF
 }
 
 var BT_ENABLE_GYROSCOPIC_FORCE_IMPLICIT_BODY BtRigidBodyFlags = _swig_getBT_ENABLE_GYROSCOPIC_FORCE_IMPLICIT_BODY()
+
 func _swig_getBT_ENABLE_GYROPSCOPIC_FORCE() (_swig_ret BtRigidBodyFlags) {
 	var swig_r BtRigidBodyFlags
 	swig_r = (BtRigidBodyFlags)(C._wrap_BT_ENABLE_GYROPSCOPIC_FORCE_bt_e001408c92acdfd7())
@@ -18292,6 +18376,7 @@ func _swig_getBT_ENABLE_GYROPSCOPIC_FORCE() (_swig_ret BtRigidBodyFlags) {
 }
 
 var BT_ENABLE_GYROPSCOPIC_FORCE BtRigidBodyFlags = _swig_getBT_ENABLE_GYROPSCOPIC_FORCE()
+
 type SwigcptrBtRigidBody uintptr
 
 func (p SwigcptrBtRigidBody) Swigcptr() uintptr {
@@ -18971,7 +19056,7 @@ func (arg1 SwigcptrBtRigidBody) Serialize(arg2 uintptr, arg3 BtSerializer) (_swi
 	swig_r_p := C._wrap_btRigidBody_serialize_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -20310,7 +20395,7 @@ func (arg1 SwigcptrBtRigidBodyDoubleData) GetM_padding() (_swig_ret string) {
 	swig_r_p := C._wrap_btRigidBodyDoubleData_m_padding_get_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -21397,6 +21482,7 @@ func (arg1 SwigcptrBtSolverConstraint) GetM_solverBodyIdB() (_swig_ret int) {
 }
 
 type BtSolverConstraintBtSolverConstraintType int
+
 func _swig_getbtSolverConstraint_BT_SOLVER_CONTACT_1D_btSolverConstraint() (_swig_ret BtSolverConstraintBtSolverConstraintType) {
 	var swig_r BtSolverConstraintBtSolverConstraintType
 	swig_r = (BtSolverConstraintBtSolverConstraintType)(C._wrap_BT_SOLVER_CONTACT_1D_btSolverConstraint_bt_e001408c92acdfd7())
@@ -21404,6 +21490,7 @@ func _swig_getbtSolverConstraint_BT_SOLVER_CONTACT_1D_btSolverConstraint() (_swi
 }
 
 var BtSolverConstraintBT_SOLVER_CONTACT_1D BtSolverConstraintBtSolverConstraintType = _swig_getbtSolverConstraint_BT_SOLVER_CONTACT_1D_btSolverConstraint()
+
 func _swig_getbtSolverConstraint_BT_SOLVER_FRICTION_1D_btSolverConstraint() (_swig_ret BtSolverConstraintBtSolverConstraintType) {
 	var swig_r BtSolverConstraintBtSolverConstraintType
 	swig_r = (BtSolverConstraintBtSolverConstraintType)(C._wrap_BT_SOLVER_FRICTION_1D_btSolverConstraint_bt_e001408c92acdfd7())
@@ -21411,6 +21498,7 @@ func _swig_getbtSolverConstraint_BT_SOLVER_FRICTION_1D_btSolverConstraint() (_sw
 }
 
 var BtSolverConstraintBT_SOLVER_FRICTION_1D BtSolverConstraintBtSolverConstraintType = _swig_getbtSolverConstraint_BT_SOLVER_FRICTION_1D_btSolverConstraint()
+
 func NewBtSolverConstraint() (_swig_ret BtSolverConstraint) {
 	var swig_r BtSolverConstraint
 	swig_r = (BtSolverConstraint)(SwigcptrBtSolverConstraint(C._wrap_new_btSolverConstraint_bt_e001408c92acdfd7()))
@@ -21466,7 +21554,9 @@ type BtSolverConstraint interface {
 }
 
 const BtTypedConstraintDataName string = "btTypedConstraintFloatData"
+
 type BtTypedConstraintType int
+
 func _swig_getPOINT2POINT_CONSTRAINT_TYPE() (_swig_ret BtTypedConstraintType) {
 	var swig_r BtTypedConstraintType
 	swig_r = (BtTypedConstraintType)(C._wrap_POINT2POINT_CONSTRAINT_TYPE_bt_e001408c92acdfd7())
@@ -21474,6 +21564,7 @@ func _swig_getPOINT2POINT_CONSTRAINT_TYPE() (_swig_ret BtTypedConstraintType) {
 }
 
 var POINT2POINT_CONSTRAINT_TYPE BtTypedConstraintType = _swig_getPOINT2POINT_CONSTRAINT_TYPE()
+
 func _swig_getHINGE_CONSTRAINT_TYPE() (_swig_ret BtTypedConstraintType) {
 	var swig_r BtTypedConstraintType
 	swig_r = (BtTypedConstraintType)(C._wrap_HINGE_CONSTRAINT_TYPE_bt_e001408c92acdfd7())
@@ -21481,6 +21572,7 @@ func _swig_getHINGE_CONSTRAINT_TYPE() (_swig_ret BtTypedConstraintType) {
 }
 
 var HINGE_CONSTRAINT_TYPE BtTypedConstraintType = _swig_getHINGE_CONSTRAINT_TYPE()
+
 func _swig_getCONETWIST_CONSTRAINT_TYPE() (_swig_ret BtTypedConstraintType) {
 	var swig_r BtTypedConstraintType
 	swig_r = (BtTypedConstraintType)(C._wrap_CONETWIST_CONSTRAINT_TYPE_bt_e001408c92acdfd7())
@@ -21488,6 +21580,7 @@ func _swig_getCONETWIST_CONSTRAINT_TYPE() (_swig_ret BtTypedConstraintType) {
 }
 
 var CONETWIST_CONSTRAINT_TYPE BtTypedConstraintType = _swig_getCONETWIST_CONSTRAINT_TYPE()
+
 func _swig_getD6_CONSTRAINT_TYPE() (_swig_ret BtTypedConstraintType) {
 	var swig_r BtTypedConstraintType
 	swig_r = (BtTypedConstraintType)(C._wrap_D6_CONSTRAINT_TYPE_bt_e001408c92acdfd7())
@@ -21495,6 +21588,7 @@ func _swig_getD6_CONSTRAINT_TYPE() (_swig_ret BtTypedConstraintType) {
 }
 
 var D6_CONSTRAINT_TYPE BtTypedConstraintType = _swig_getD6_CONSTRAINT_TYPE()
+
 func _swig_getSLIDER_CONSTRAINT_TYPE() (_swig_ret BtTypedConstraintType) {
 	var swig_r BtTypedConstraintType
 	swig_r = (BtTypedConstraintType)(C._wrap_SLIDER_CONSTRAINT_TYPE_bt_e001408c92acdfd7())
@@ -21502,6 +21596,7 @@ func _swig_getSLIDER_CONSTRAINT_TYPE() (_swig_ret BtTypedConstraintType) {
 }
 
 var SLIDER_CONSTRAINT_TYPE BtTypedConstraintType = _swig_getSLIDER_CONSTRAINT_TYPE()
+
 func _swig_getCONTACT_CONSTRAINT_TYPE() (_swig_ret BtTypedConstraintType) {
 	var swig_r BtTypedConstraintType
 	swig_r = (BtTypedConstraintType)(C._wrap_CONTACT_CONSTRAINT_TYPE_bt_e001408c92acdfd7())
@@ -21509,6 +21604,7 @@ func _swig_getCONTACT_CONSTRAINT_TYPE() (_swig_ret BtTypedConstraintType) {
 }
 
 var CONTACT_CONSTRAINT_TYPE BtTypedConstraintType = _swig_getCONTACT_CONSTRAINT_TYPE()
+
 func _swig_getD6_SPRING_CONSTRAINT_TYPE() (_swig_ret BtTypedConstraintType) {
 	var swig_r BtTypedConstraintType
 	swig_r = (BtTypedConstraintType)(C._wrap_D6_SPRING_CONSTRAINT_TYPE_bt_e001408c92acdfd7())
@@ -21516,6 +21612,7 @@ func _swig_getD6_SPRING_CONSTRAINT_TYPE() (_swig_ret BtTypedConstraintType) {
 }
 
 var D6_SPRING_CONSTRAINT_TYPE BtTypedConstraintType = _swig_getD6_SPRING_CONSTRAINT_TYPE()
+
 func _swig_getGEAR_CONSTRAINT_TYPE() (_swig_ret BtTypedConstraintType) {
 	var swig_r BtTypedConstraintType
 	swig_r = (BtTypedConstraintType)(C._wrap_GEAR_CONSTRAINT_TYPE_bt_e001408c92acdfd7())
@@ -21523,6 +21620,7 @@ func _swig_getGEAR_CONSTRAINT_TYPE() (_swig_ret BtTypedConstraintType) {
 }
 
 var GEAR_CONSTRAINT_TYPE BtTypedConstraintType = _swig_getGEAR_CONSTRAINT_TYPE()
+
 func _swig_getFIXED_CONSTRAINT_TYPE() (_swig_ret BtTypedConstraintType) {
 	var swig_r BtTypedConstraintType
 	swig_r = (BtTypedConstraintType)(C._wrap_FIXED_CONSTRAINT_TYPE_bt_e001408c92acdfd7())
@@ -21530,6 +21628,7 @@ func _swig_getFIXED_CONSTRAINT_TYPE() (_swig_ret BtTypedConstraintType) {
 }
 
 var FIXED_CONSTRAINT_TYPE BtTypedConstraintType = _swig_getFIXED_CONSTRAINT_TYPE()
+
 func _swig_getD6_SPRING_2_CONSTRAINT_TYPE() (_swig_ret BtTypedConstraintType) {
 	var swig_r BtTypedConstraintType
 	swig_r = (BtTypedConstraintType)(C._wrap_D6_SPRING_2_CONSTRAINT_TYPE_bt_e001408c92acdfd7())
@@ -21537,6 +21636,7 @@ func _swig_getD6_SPRING_2_CONSTRAINT_TYPE() (_swig_ret BtTypedConstraintType) {
 }
 
 var D6_SPRING_2_CONSTRAINT_TYPE BtTypedConstraintType = _swig_getD6_SPRING_2_CONSTRAINT_TYPE()
+
 func _swig_getMAX_CONSTRAINT_TYPE() (_swig_ret BtTypedConstraintType) {
 	var swig_r BtTypedConstraintType
 	swig_r = (BtTypedConstraintType)(C._wrap_MAX_CONSTRAINT_TYPE_bt_e001408c92acdfd7())
@@ -21544,7 +21644,9 @@ func _swig_getMAX_CONSTRAINT_TYPE() (_swig_ret BtTypedConstraintType) {
 }
 
 var MAX_CONSTRAINT_TYPE BtTypedConstraintType = _swig_getMAX_CONSTRAINT_TYPE()
+
 type BtConstraintParams int
+
 func _swig_getBT_CONSTRAINT_ERP() (_swig_ret BtConstraintParams) {
 	var swig_r BtConstraintParams
 	swig_r = (BtConstraintParams)(C._wrap_BT_CONSTRAINT_ERP_bt_e001408c92acdfd7())
@@ -21552,6 +21654,7 @@ func _swig_getBT_CONSTRAINT_ERP() (_swig_ret BtConstraintParams) {
 }
 
 var BT_CONSTRAINT_ERP BtConstraintParams = _swig_getBT_CONSTRAINT_ERP()
+
 func _swig_getBT_CONSTRAINT_STOP_ERP() (_swig_ret BtConstraintParams) {
 	var swig_r BtConstraintParams
 	swig_r = (BtConstraintParams)(C._wrap_BT_CONSTRAINT_STOP_ERP_bt_e001408c92acdfd7())
@@ -21559,6 +21662,7 @@ func _swig_getBT_CONSTRAINT_STOP_ERP() (_swig_ret BtConstraintParams) {
 }
 
 var BT_CONSTRAINT_STOP_ERP BtConstraintParams = _swig_getBT_CONSTRAINT_STOP_ERP()
+
 func _swig_getBT_CONSTRAINT_CFM() (_swig_ret BtConstraintParams) {
 	var swig_r BtConstraintParams
 	swig_r = (BtConstraintParams)(C._wrap_BT_CONSTRAINT_CFM_bt_e001408c92acdfd7())
@@ -21566,6 +21670,7 @@ func _swig_getBT_CONSTRAINT_CFM() (_swig_ret BtConstraintParams) {
 }
 
 var BT_CONSTRAINT_CFM BtConstraintParams = _swig_getBT_CONSTRAINT_CFM()
+
 func _swig_getBT_CONSTRAINT_STOP_CFM() (_swig_ret BtConstraintParams) {
 	var swig_r BtConstraintParams
 	swig_r = (BtConstraintParams)(C._wrap_BT_CONSTRAINT_STOP_CFM_bt_e001408c92acdfd7())
@@ -21573,6 +21678,7 @@ func _swig_getBT_CONSTRAINT_STOP_CFM() (_swig_ret BtConstraintParams) {
 }
 
 var BT_CONSTRAINT_STOP_CFM BtConstraintParams = _swig_getBT_CONSTRAINT_STOP_CFM()
+
 type SwigcptrBtJointFeedback uintptr
 
 func (p SwigcptrBtJointFeedback) Swigcptr() uintptr {
@@ -22002,7 +22108,7 @@ func (arg1 SwigcptrBtTypedConstraint) Serialize(arg2 uintptr, arg3 BtSerializer)
 	swig_r_p := C._wrap_btTypedConstraint_serialize_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -22133,7 +22239,7 @@ func (arg1 SwigcptrBtTypedConstraintFloatData) GetM_name() (_swig_ret string) {
 	swig_r_p := C._wrap_btTypedConstraintFloatData_m_name_get_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -22359,7 +22465,7 @@ func (arg1 SwigcptrBtTypedConstraintData) GetM_name() (_swig_ret string) {
 	swig_r_p := C._wrap_btTypedConstraintData_m_name_get_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -22585,7 +22691,7 @@ func (arg1 SwigcptrBtTypedConstraintDoubleData) GetM_name() (_swig_ret string) {
 	swig_r_p := C._wrap_btTypedConstraintDoubleData_m_name_get_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -22734,7 +22840,7 @@ func (arg1 SwigcptrBtTypedConstraintDoubleData) GetPadding() (_swig_ret string) 
 	swig_r_p := C._wrap_btTypedConstraintDoubleData_padding_get_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -23212,7 +23318,7 @@ func GetSBulletDNAstr() (_swig_ret string) {
 	swig_r_p := C._wrap_sBulletDNAstr_get_bt_e001408c92acdfd7()
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -23240,7 +23346,7 @@ func GetSBulletDNAstr64() (_swig_ret string) {
 	swig_r_p := C._wrap_sBulletDNAstr64_get_bt_e001408c92acdfd7()
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -23366,6 +23472,7 @@ type BtChunk interface {
 }
 
 type BtSerializationFlags int
+
 func _swig_getBT_SERIALIZE_NO_BVH() (_swig_ret BtSerializationFlags) {
 	var swig_r BtSerializationFlags
 	swig_r = (BtSerializationFlags)(C._wrap_BT_SERIALIZE_NO_BVH_bt_e001408c92acdfd7())
@@ -23373,6 +23480,7 @@ func _swig_getBT_SERIALIZE_NO_BVH() (_swig_ret BtSerializationFlags) {
 }
 
 var BT_SERIALIZE_NO_BVH BtSerializationFlags = _swig_getBT_SERIALIZE_NO_BVH()
+
 func _swig_getBT_SERIALIZE_NO_TRIANGLEINFOMAP() (_swig_ret BtSerializationFlags) {
 	var swig_r BtSerializationFlags
 	swig_r = (BtSerializationFlags)(C._wrap_BT_SERIALIZE_NO_TRIANGLEINFOMAP_bt_e001408c92acdfd7())
@@ -23380,6 +23488,7 @@ func _swig_getBT_SERIALIZE_NO_TRIANGLEINFOMAP() (_swig_ret BtSerializationFlags)
 }
 
 var BT_SERIALIZE_NO_TRIANGLEINFOMAP BtSerializationFlags = _swig_getBT_SERIALIZE_NO_TRIANGLEINFOMAP()
+
 func _swig_getBT_SERIALIZE_NO_DUPLICATE_ASSERT() (_swig_ret BtSerializationFlags) {
 	var swig_r BtSerializationFlags
 	swig_r = (BtSerializationFlags)(C._wrap_BT_SERIALIZE_NO_DUPLICATE_ASSERT_bt_e001408c92acdfd7())
@@ -23387,6 +23496,7 @@ func _swig_getBT_SERIALIZE_NO_DUPLICATE_ASSERT() (_swig_ret BtSerializationFlags
 }
 
 var BT_SERIALIZE_NO_DUPLICATE_ASSERT BtSerializationFlags = _swig_getBT_SERIALIZE_NO_DUPLICATE_ASSERT()
+
 func _swig_getBT_SERIALIZE_CONTACT_MANIFOLDS() (_swig_ret BtSerializationFlags) {
 	var swig_r BtSerializationFlags
 	swig_r = (BtSerializationFlags)(C._wrap_BT_SERIALIZE_CONTACT_MANIFOLDS_bt_e001408c92acdfd7())
@@ -23394,6 +23504,7 @@ func _swig_getBT_SERIALIZE_CONTACT_MANIFOLDS() (_swig_ret BtSerializationFlags) 
 }
 
 var BT_SERIALIZE_CONTACT_MANIFOLDS BtSerializationFlags = _swig_getBT_SERIALIZE_CONTACT_MANIFOLDS()
+
 type SwigcptrBtSerializer uintptr
 
 func (p SwigcptrBtSerializer) Swigcptr() uintptr {
@@ -23476,7 +23587,7 @@ func (arg1 SwigcptrBtSerializer) FindNameForPointer(arg2 uintptr) (_swig_ret str
 	swig_r_p := C._wrap_btSerializer_findNameForPointer_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -23548,6 +23659,7 @@ type BtSerializer interface {
 }
 
 const BT_HEADER_LENGTH int = 12
+
 type SwigcptrBtPointerUid uintptr
 
 func (p SwigcptrBtPointerUid) Swigcptr() uintptr {
@@ -23881,7 +23993,7 @@ func BtDefaultSerializerGetMemoryDna() (_swig_ret string) {
 	swig_r_p := C._wrap_btDefaultSerializer_getMemoryDna_bt_e001408c92acdfd7()
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -23964,7 +24076,7 @@ func (arg1 SwigcptrBtDefaultSerializer) FindNameForPointer(arg2 uintptr) (_swig_
 	swig_r_p := C._wrap_btDefaultSerializer_findNameForPointer_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -24097,6 +24209,7 @@ const DBVT_ENABLE_BENCHMARK int = 0
 const DBVT_SELECT_IMPL int = 0
 const DBVT_MERGE_IMPL int = 0
 const DBVT_INT0_IMPL int = 0
+
 type SwigcptrBtDbvtAabbMm uintptr
 
 func (p SwigcptrBtDbvtAabbMm) Swigcptr() uintptr {
@@ -24540,6 +24653,7 @@ func _swig_getbtDbvt_SIMPLE_STACKSIZE_btDbvt() (_swig_ret int) {
 }
 
 var BtDbvtSIMPLE_STACKSIZE int = _swig_getbtDbvt_SIMPLE_STACKSIZE_btDbvt()
+
 func _swig_getbtDbvt_DOUBLE_STACKSIZE_btDbvt() (_swig_ret int) {
 	var swig_r int
 	swig_r = (int)(C._wrap_DOUBLE_STACKSIZE_btDbvt_bt_e001408c92acdfd7())
@@ -24547,6 +24661,7 @@ func _swig_getbtDbvt_DOUBLE_STACKSIZE_btDbvt() (_swig_ret int) {
 }
 
 var BtDbvtDOUBLE_STACKSIZE int = _swig_getbtDbvt_DOUBLE_STACKSIZE_btDbvt()
+
 func (arg1 SwigcptrBtDbvt) SetM_root(arg2 BtDbvtNode) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
@@ -26576,6 +26691,7 @@ const DBVT_BP_PROFILE int = 0
 const DBVT_BP_PREVENTFALSEUPDATE int = 0
 const DBVT_BP_ACCURATESLEEPING int = 0
 const DBVT_BP_ENABLE_BENCHMARK int = 0
+
 func SetGDbvtMargin(arg1 float32) {
 	_swig_i_0 := arg1
 	C._wrap_gDbvtMargin_set_bt_e001408c92acdfd7(C.float(_swig_i_0))
@@ -26828,6 +26944,7 @@ func _swig_getbtDbvtBroadphase_DYNAMIC_SET_btDbvtBroadphase() (_swig_ret int) {
 }
 
 var BtDbvtBroadphaseDYNAMIC_SET int = _swig_getbtDbvtBroadphase_DYNAMIC_SET_btDbvtBroadphase()
+
 func _swig_getbtDbvtBroadphase_FIXED_SET_btDbvtBroadphase() (_swig_ret int) {
 	var swig_r int
 	swig_r = (int)(C._wrap_FIXED_SET_btDbvtBroadphase_bt_e001408c92acdfd7())
@@ -26835,6 +26952,7 @@ func _swig_getbtDbvtBroadphase_FIXED_SET_btDbvtBroadphase() (_swig_ret int) {
 }
 
 var BtDbvtBroadphaseFIXED_SET int = _swig_getbtDbvtBroadphase_FIXED_SET_btDbvtBroadphase()
+
 func _swig_getbtDbvtBroadphase_STAGECOUNT_btDbvtBroadphase() (_swig_ret int) {
 	var swig_r int
 	swig_r = (int)(C._wrap_STAGECOUNT_btDbvtBroadphase_bt_e001408c92acdfd7())
@@ -26842,6 +26960,7 @@ func _swig_getbtDbvtBroadphase_STAGECOUNT_btDbvtBroadphase() (_swig_ret int) {
 }
 
 var BtDbvtBroadphaseSTAGECOUNT int = _swig_getbtDbvtBroadphase_STAGECOUNT_btDbvtBroadphase()
+
 func (arg1 SwigcptrBtDbvtBroadphase) SetM_sets(arg2 BtDbvt) {
 	_swig_i_0 := arg1
 	_swig_i_1 := getSwigcptr(arg2)
@@ -27551,7 +27670,7 @@ func (arg1 SwigcptrBtITaskScheduler) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btITaskScheduler_getName_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -27785,6 +27904,7 @@ func GetGThreadCounter() (_swig_ret ThreadsafeCounter) {
 }
 
 const BT_DETECT_BAD_THREAD_INDEX int = 0
+
 func BtPushThreadsAreRunning() {
 	C._wrap_btPushThreadsAreRunning_bt_e001408c92acdfd7()
 }
@@ -27858,7 +27978,7 @@ func (_swig_base SwigcptrBtTaskSchedulerSequential) GetName() (_swig_ret string)
 	swig_r_p := C._wrap_btTaskSchedulerSequential_getName_bt_e001408c92acdfd7(C.uintptr_t(_swig_base))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -28086,6 +28206,7 @@ func (p SwigcptrBtDispatcherInfo) SwigIsBtDispatcherInfo() {
 }
 
 type BtDispatcherInfoDispatchFunc int
+
 func _swig_getbtDispatcherInfo_DISPATCH_DISCRETE_btDispatcherInfo() (_swig_ret BtDispatcherInfoDispatchFunc) {
 	var swig_r BtDispatcherInfoDispatchFunc
 	swig_r = (BtDispatcherInfoDispatchFunc)(C._wrap_DISPATCH_DISCRETE_btDispatcherInfo_bt_e001408c92acdfd7())
@@ -28093,6 +28214,7 @@ func _swig_getbtDispatcherInfo_DISPATCH_DISCRETE_btDispatcherInfo() (_swig_ret B
 }
 
 var BtDispatcherInfoDISPATCH_DISCRETE BtDispatcherInfoDispatchFunc = _swig_getbtDispatcherInfo_DISPATCH_DISCRETE_btDispatcherInfo()
+
 func _swig_getbtDispatcherInfo_DISPATCH_CONTINUOUS_btDispatcherInfo() (_swig_ret BtDispatcherInfoDispatchFunc) {
 	var swig_r BtDispatcherInfoDispatchFunc
 	swig_r = (BtDispatcherInfoDispatchFunc)(C._wrap_DISPATCH_CONTINUOUS_btDispatcherInfo_bt_e001408c92acdfd7())
@@ -28100,6 +28222,7 @@ func _swig_getbtDispatcherInfo_DISPATCH_CONTINUOUS_btDispatcherInfo() (_swig_ret
 }
 
 var BtDispatcherInfoDISPATCH_CONTINUOUS BtDispatcherInfoDispatchFunc = _swig_getbtDispatcherInfo_DISPATCH_CONTINUOUS_btDispatcherInfo()
+
 func NewBtDispatcherInfo() (_swig_ret BtDispatcherInfo) {
 	var swig_r BtDispatcherInfo
 	swig_r = (BtDispatcherInfo)(SwigcptrBtDispatcherInfo(C._wrap_new_btDispatcherInfo_bt_e001408c92acdfd7()))
@@ -28312,6 +28435,7 @@ type BtDispatcherInfo interface {
 }
 
 type EbtDispatcherQueryType int
+
 func _swig_getBT_CONTACT_POINT_ALGORITHMS() (_swig_ret EbtDispatcherQueryType) {
 	var swig_r EbtDispatcherQueryType
 	swig_r = (EbtDispatcherQueryType)(C._wrap_BT_CONTACT_POINT_ALGORITHMS_bt_e001408c92acdfd7())
@@ -28319,6 +28443,7 @@ func _swig_getBT_CONTACT_POINT_ALGORITHMS() (_swig_ret EbtDispatcherQueryType) {
 }
 
 var BT_CONTACT_POINT_ALGORITHMS EbtDispatcherQueryType = _swig_getBT_CONTACT_POINT_ALGORITHMS()
+
 func _swig_getBT_CLOSEST_POINT_ALGORITHMS() (_swig_ret EbtDispatcherQueryType) {
 	var swig_r EbtDispatcherQueryType
 	swig_r = (EbtDispatcherQueryType)(C._wrap_BT_CLOSEST_POINT_ALGORITHMS_bt_e001408c92acdfd7())
@@ -28326,6 +28451,7 @@ func _swig_getBT_CLOSEST_POINT_ALGORITHMS() (_swig_ret EbtDispatcherQueryType) {
 }
 
 var BT_CLOSEST_POINT_ALGORITHMS EbtDispatcherQueryType = _swig_getBT_CLOSEST_POINT_ALGORITHMS()
+
 type SwigcptrBtDispatcher uintptr
 
 func (p SwigcptrBtDispatcher) Swigcptr() uintptr {
@@ -28593,6 +28719,7 @@ type BtConstraintRow interface {
 }
 
 type BtContactPointFlags int
+
 func _swig_getBT_CONTACT_FLAG_LATERAL_FRICTION_INITIALIZED() (_swig_ret BtContactPointFlags) {
 	var swig_r BtContactPointFlags
 	swig_r = (BtContactPointFlags)(C._wrap_BT_CONTACT_FLAG_LATERAL_FRICTION_INITIALIZED_bt_e001408c92acdfd7())
@@ -28600,6 +28727,7 @@ func _swig_getBT_CONTACT_FLAG_LATERAL_FRICTION_INITIALIZED() (_swig_ret BtContac
 }
 
 var BT_CONTACT_FLAG_LATERAL_FRICTION_INITIALIZED BtContactPointFlags = _swig_getBT_CONTACT_FLAG_LATERAL_FRICTION_INITIALIZED()
+
 func _swig_getBT_CONTACT_FLAG_HAS_CONTACT_CFM() (_swig_ret BtContactPointFlags) {
 	var swig_r BtContactPointFlags
 	swig_r = (BtContactPointFlags)(C._wrap_BT_CONTACT_FLAG_HAS_CONTACT_CFM_bt_e001408c92acdfd7())
@@ -28607,6 +28735,7 @@ func _swig_getBT_CONTACT_FLAG_HAS_CONTACT_CFM() (_swig_ret BtContactPointFlags) 
 }
 
 var BT_CONTACT_FLAG_HAS_CONTACT_CFM BtContactPointFlags = _swig_getBT_CONTACT_FLAG_HAS_CONTACT_CFM()
+
 func _swig_getBT_CONTACT_FLAG_HAS_CONTACT_ERP() (_swig_ret BtContactPointFlags) {
 	var swig_r BtContactPointFlags
 	swig_r = (BtContactPointFlags)(C._wrap_BT_CONTACT_FLAG_HAS_CONTACT_ERP_bt_e001408c92acdfd7())
@@ -28614,6 +28743,7 @@ func _swig_getBT_CONTACT_FLAG_HAS_CONTACT_ERP() (_swig_ret BtContactPointFlags) 
 }
 
 var BT_CONTACT_FLAG_HAS_CONTACT_ERP BtContactPointFlags = _swig_getBT_CONTACT_FLAG_HAS_CONTACT_ERP()
+
 func _swig_getBT_CONTACT_FLAG_CONTACT_STIFFNESS_DAMPING() (_swig_ret BtContactPointFlags) {
 	var swig_r BtContactPointFlags
 	swig_r = (BtContactPointFlags)(C._wrap_BT_CONTACT_FLAG_CONTACT_STIFFNESS_DAMPING_bt_e001408c92acdfd7())
@@ -28621,6 +28751,7 @@ func _swig_getBT_CONTACT_FLAG_CONTACT_STIFFNESS_DAMPING() (_swig_ret BtContactPo
 }
 
 var BT_CONTACT_FLAG_CONTACT_STIFFNESS_DAMPING BtContactPointFlags = _swig_getBT_CONTACT_FLAG_CONTACT_STIFFNESS_DAMPING()
+
 func _swig_getBT_CONTACT_FLAG_FRICTION_ANCHOR() (_swig_ret BtContactPointFlags) {
 	var swig_r BtContactPointFlags
 	swig_r = (BtContactPointFlags)(C._wrap_BT_CONTACT_FLAG_FRICTION_ANCHOR_bt_e001408c92acdfd7())
@@ -28628,6 +28759,7 @@ func _swig_getBT_CONTACT_FLAG_FRICTION_ANCHOR() (_swig_ret BtContactPointFlags) 
 }
 
 var BT_CONTACT_FLAG_FRICTION_ANCHOR BtContactPointFlags = _swig_getBT_CONTACT_FLAG_FRICTION_ANCHOR()
+
 type SwigcptrBtManifoldPoint uintptr
 
 func (p SwigcptrBtManifoldPoint) Swigcptr() uintptr {
@@ -29123,6 +29255,7 @@ func GetGContactBreakingThreshold() (_swig_ret float32) {
 }
 
 type BtContactManifoldTypes int
+
 func _swig_getMIN_CONTACT_MANIFOLD_TYPE() (_swig_ret BtContactManifoldTypes) {
 	var swig_r BtContactManifoldTypes
 	swig_r = (BtContactManifoldTypes)(C._wrap_MIN_CONTACT_MANIFOLD_TYPE_bt_e001408c92acdfd7())
@@ -29130,6 +29263,7 @@ func _swig_getMIN_CONTACT_MANIFOLD_TYPE() (_swig_ret BtContactManifoldTypes) {
 }
 
 var MIN_CONTACT_MANIFOLD_TYPE BtContactManifoldTypes = _swig_getMIN_CONTACT_MANIFOLD_TYPE()
+
 func _swig_getBT_PERSISTENT_MANIFOLD_TYPE() (_swig_ret BtContactManifoldTypes) {
 	var swig_r BtContactManifoldTypes
 	swig_r = (BtContactManifoldTypes)(C._wrap_BT_PERSISTENT_MANIFOLD_TYPE_bt_e001408c92acdfd7())
@@ -29137,7 +29271,9 @@ func _swig_getBT_PERSISTENT_MANIFOLD_TYPE() (_swig_ret BtContactManifoldTypes) {
 }
 
 var BT_PERSISTENT_MANIFOLD_TYPE BtContactManifoldTypes = _swig_getBT_PERSISTENT_MANIFOLD_TYPE()
+
 const MANIFOLD_CACHE_SIZE int = 4
+
 type SwigcptrBtPersistentManifold uintptr
 
 func (p SwigcptrBtPersistentManifold) Swigcptr() uintptr {
@@ -29392,7 +29528,7 @@ func (arg1 SwigcptrBtPersistentManifold) Serialize(arg2 BtPersistentManifold, ar
 	swig_r_p := C._wrap_btPersistentManifold_serialize_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2), C.uintptr_t(_swig_i_3))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -30712,6 +30848,7 @@ type BtPersistentManifoldFloatData interface {
 }
 
 const BtPersistentManifoldDataName string = "btPersistentManifoldFloatData"
+
 type SwigcptrBtDiscreteCollisionDetectorInterface uintptr
 
 func (p SwigcptrBtDiscreteCollisionDetectorInterface) Swigcptr() uintptr {
@@ -31181,6 +31318,7 @@ type BtCollisionAlgorithmCreateFunc interface {
 }
 
 const USE_DISPATCH_REGISTRY_ARRAY int = 1
+
 type SwigcptrBtCollisionDispatcher uintptr
 
 func (p SwigcptrBtCollisionDispatcher) Swigcptr() uintptr {
@@ -31191,6 +31329,7 @@ func (p SwigcptrBtCollisionDispatcher) SwigIsBtCollisionDispatcher() {
 }
 
 type BtCollisionDispatcherDispatcherFlags int
+
 func _swig_getbtCollisionDispatcher_CD_STATIC_STATIC_REPORTED_btCollisionDispatcher() (_swig_ret BtCollisionDispatcherDispatcherFlags) {
 	var swig_r BtCollisionDispatcherDispatcherFlags
 	swig_r = (BtCollisionDispatcherDispatcherFlags)(C._wrap_CD_STATIC_STATIC_REPORTED_btCollisionDispatcher_bt_e001408c92acdfd7())
@@ -31198,6 +31337,7 @@ func _swig_getbtCollisionDispatcher_CD_STATIC_STATIC_REPORTED_btCollisionDispatc
 }
 
 var BtCollisionDispatcherCD_STATIC_STATIC_REPORTED BtCollisionDispatcherDispatcherFlags = _swig_getbtCollisionDispatcher_CD_STATIC_STATIC_REPORTED_btCollisionDispatcher()
+
 func _swig_getbtCollisionDispatcher_CD_USE_RELATIVE_CONTACT_BREAKING_THRESHOLD_btCollisionDispatcher() (_swig_ret BtCollisionDispatcherDispatcherFlags) {
 	var swig_r BtCollisionDispatcherDispatcherFlags
 	swig_r = (BtCollisionDispatcherDispatcherFlags)(C._wrap_CD_USE_RELATIVE_CONTACT_BREAKING_THRESHOLD_btCollisionDispatcher_bt_e001408c92acdfd7())
@@ -31205,6 +31345,7 @@ func _swig_getbtCollisionDispatcher_CD_USE_RELATIVE_CONTACT_BREAKING_THRESHOLD_b
 }
 
 var BtCollisionDispatcherCD_USE_RELATIVE_CONTACT_BREAKING_THRESHOLD BtCollisionDispatcherDispatcherFlags = _swig_getbtCollisionDispatcher_CD_USE_RELATIVE_CONTACT_BREAKING_THRESHOLD_btCollisionDispatcher()
+
 func _swig_getbtCollisionDispatcher_CD_DISABLE_CONTACTPOOL_DYNAMIC_ALLOCATION_btCollisionDispatcher() (_swig_ret BtCollisionDispatcherDispatcherFlags) {
 	var swig_r BtCollisionDispatcherDispatcherFlags
 	swig_r = (BtCollisionDispatcherDispatcherFlags)(C._wrap_CD_DISABLE_CONTACTPOOL_DYNAMIC_ALLOCATION_btCollisionDispatcher_bt_e001408c92acdfd7())
@@ -31212,6 +31353,7 @@ func _swig_getbtCollisionDispatcher_CD_DISABLE_CONTACTPOOL_DYNAMIC_ALLOCATION_bt
 }
 
 var BtCollisionDispatcherCD_DISABLE_CONTACTPOOL_DYNAMIC_ALLOCATION BtCollisionDispatcherDispatcherFlags = _swig_getbtCollisionDispatcher_CD_DISABLE_CONTACTPOOL_DYNAMIC_ALLOCATION_btCollisionDispatcher()
+
 func (arg1 SwigcptrBtCollisionDispatcher) GetDispatcherFlags() (_swig_ret int) {
 	var swig_r int
 	_swig_i_0 := arg1
@@ -32077,6 +32219,7 @@ type BtAllHitsRayCallback interface {
 
 const VORONOI_SIMPLEX_MAX_VERTS int = 5
 const VORONOI_DEFAULT_EQUAL_VERTEX_THRESHOLD float32 = 0.0001
+
 type SwigcptrBtUsageBitfield uintptr
 
 func (p SwigcptrBtUsageBitfield) Swigcptr() uintptr {
@@ -32762,6 +32905,7 @@ type BtVoronoiSimplexSolver interface {
 }
 
 const NO_VIRTUAL_INTERFACE int = 1
+
 type SwigcptrBtGjkEpaPenetrationDepthSolver uintptr
 
 func (p SwigcptrBtGjkEpaPenetrationDepthSolver) Swigcptr() uintptr {
@@ -32861,6 +33005,7 @@ type BtInternalTriangleIndexCallback interface {
 }
 
 type PHY_ScalarType int
+
 func _swig_getPHY_FLOAT() (_swig_ret PHY_ScalarType) {
 	var swig_r PHY_ScalarType
 	swig_r = (PHY_ScalarType)(C._wrap_PHY_FLOAT_bt_e001408c92acdfd7())
@@ -32868,6 +33013,7 @@ func _swig_getPHY_FLOAT() (_swig_ret PHY_ScalarType) {
 }
 
 var PHY_FLOAT PHY_ScalarType = _swig_getPHY_FLOAT()
+
 func _swig_getPHY_DOUBLE() (_swig_ret PHY_ScalarType) {
 	var swig_r PHY_ScalarType
 	swig_r = (PHY_ScalarType)(C._wrap_PHY_DOUBLE_bt_e001408c92acdfd7())
@@ -32875,6 +33021,7 @@ func _swig_getPHY_DOUBLE() (_swig_ret PHY_ScalarType) {
 }
 
 var PHY_DOUBLE PHY_ScalarType = _swig_getPHY_DOUBLE()
+
 func _swig_getPHY_INTEGER() (_swig_ret PHY_ScalarType) {
 	var swig_r PHY_ScalarType
 	swig_r = (PHY_ScalarType)(C._wrap_PHY_INTEGER_bt_e001408c92acdfd7())
@@ -32882,6 +33029,7 @@ func _swig_getPHY_INTEGER() (_swig_ret PHY_ScalarType) {
 }
 
 var PHY_INTEGER PHY_ScalarType = _swig_getPHY_INTEGER()
+
 func _swig_getPHY_SHORT() (_swig_ret PHY_ScalarType) {
 	var swig_r PHY_ScalarType
 	swig_r = (PHY_ScalarType)(C._wrap_PHY_SHORT_bt_e001408c92acdfd7())
@@ -32889,6 +33037,7 @@ func _swig_getPHY_SHORT() (_swig_ret PHY_ScalarType) {
 }
 
 var PHY_SHORT PHY_ScalarType = _swig_getPHY_SHORT()
+
 func _swig_getPHY_FIXEDPOINT88() (_swig_ret PHY_ScalarType) {
 	var swig_r PHY_ScalarType
 	swig_r = (PHY_ScalarType)(C._wrap_PHY_FIXEDPOINT88_bt_e001408c92acdfd7())
@@ -32896,6 +33045,7 @@ func _swig_getPHY_FIXEDPOINT88() (_swig_ret PHY_ScalarType) {
 }
 
 var PHY_FIXEDPOINT88 PHY_ScalarType = _swig_getPHY_FIXEDPOINT88()
+
 func _swig_getPHY_UCHAR() (_swig_ret PHY_ScalarType) {
 	var swig_r PHY_ScalarType
 	swig_r = (PHY_ScalarType)(C._wrap_PHY_UCHAR_bt_e001408c92acdfd7())
@@ -32903,6 +33053,7 @@ func _swig_getPHY_UCHAR() (_swig_ret PHY_ScalarType) {
 }
 
 var PHY_UCHAR PHY_ScalarType = _swig_getPHY_UCHAR()
+
 type SwigcptrBtConcaveShape uintptr
 
 func (p SwigcptrBtConcaveShape) Swigcptr() uintptr {
@@ -33044,7 +33195,7 @@ func (_swig_base SwigcptrBtConcaveShape) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btConcaveShape_getName_bt_e001408c92acdfd7(C.uintptr_t(_swig_base))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -33106,7 +33257,7 @@ func (_swig_base SwigcptrBtConcaveShape) Serialize(arg1 uintptr, arg2 BtSerializ
 	swig_r_p := C._wrap_btConcaveShape_serialize_bt_e001408c92acdfd7(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -33349,7 +33500,7 @@ func (arg1 SwigcptrBtStridingMeshInterface) Serialize(arg2 uintptr, arg3 BtSeria
 	swig_r_p := C._wrap_btStridingMeshInterface_serialize_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -33451,7 +33602,7 @@ func (arg1 SwigcptrBtShortIntIndexData) GetM_pad() (_swig_ret string) {
 	swig_r_p := C._wrap_btShortIntIndexData_m_pad_get_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -33512,7 +33663,7 @@ func (arg1 SwigcptrBtShortIntIndexTripletData) GetM_pad() (_swig_ret string) {
 	swig_r_p := C._wrap_btShortIntIndexTripletData_m_pad_get_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -33799,7 +33950,7 @@ func (arg1 SwigcptrBtStridingMeshInterfaceData) GetM_padding() (_swig_ret string
 	swig_r_p := C._wrap_btStridingMeshInterfaceData_m_padding_get_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -33943,7 +34094,7 @@ func (arg1 SwigcptrBtTriangleMeshShape) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btTriangleMeshShape_getName_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -34093,7 +34244,7 @@ func (_swig_base SwigcptrBtTriangleMeshShape) Serialize(arg1 uintptr, arg2 BtSer
 	swig_r_p := C._wrap_btTriangleMeshShape_serialize_bt_e001408c92acdfd7(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -34165,6 +34316,7 @@ type BtTriangleMeshShape interface {
 const BtQuantizedBvhDataName string = "btQuantizedBvhFloatData"
 const MAX_SUBTREE_SIZE_IN_BYTES int = 2048
 const MAX_NUM_PARTS_IN_BITS int = 4
+
 type SwigcptrBtQuantizedBvhNode uintptr
 
 func (p SwigcptrBtQuantizedBvhNode) Swigcptr() uintptr {
@@ -34356,7 +34508,7 @@ func (arg1 SwigcptrBtOptimizedBvhNode) GetM_padding() (_swig_ret string) {
 	swig_r_p := C._wrap_btOptimizedBvhNode_m_padding_get_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -34532,6 +34684,7 @@ func (p SwigcptrBtQuantizedBvh) SwigIsBtQuantizedBvh() {
 }
 
 type BtQuantizedBvhBtTraversalMode int
+
 func _swig_getbtQuantizedBvh_TRAVERSAL_STACKLESS_btQuantizedBvh() (_swig_ret BtQuantizedBvhBtTraversalMode) {
 	var swig_r BtQuantizedBvhBtTraversalMode
 	swig_r = (BtQuantizedBvhBtTraversalMode)(C._wrap_TRAVERSAL_STACKLESS_btQuantizedBvh_bt_e001408c92acdfd7())
@@ -34539,6 +34692,7 @@ func _swig_getbtQuantizedBvh_TRAVERSAL_STACKLESS_btQuantizedBvh() (_swig_ret BtQ
 }
 
 var BtQuantizedBvhTRAVERSAL_STACKLESS BtQuantizedBvhBtTraversalMode = _swig_getbtQuantizedBvh_TRAVERSAL_STACKLESS_btQuantizedBvh()
+
 func _swig_getbtQuantizedBvh_TRAVERSAL_STACKLESS_CACHE_FRIENDLY_btQuantizedBvh() (_swig_ret BtQuantizedBvhBtTraversalMode) {
 	var swig_r BtQuantizedBvhBtTraversalMode
 	swig_r = (BtQuantizedBvhBtTraversalMode)(C._wrap_TRAVERSAL_STACKLESS_CACHE_FRIENDLY_btQuantizedBvh_bt_e001408c92acdfd7())
@@ -34546,6 +34700,7 @@ func _swig_getbtQuantizedBvh_TRAVERSAL_STACKLESS_CACHE_FRIENDLY_btQuantizedBvh()
 }
 
 var BtQuantizedBvhTRAVERSAL_STACKLESS_CACHE_FRIENDLY BtQuantizedBvhBtTraversalMode = _swig_getbtQuantizedBvh_TRAVERSAL_STACKLESS_CACHE_FRIENDLY_btQuantizedBvh()
+
 func _swig_getbtQuantizedBvh_TRAVERSAL_RECURSIVE_btQuantizedBvh() (_swig_ret BtQuantizedBvhBtTraversalMode) {
 	var swig_r BtQuantizedBvhBtTraversalMode
 	swig_r = (BtQuantizedBvhBtTraversalMode)(C._wrap_TRAVERSAL_RECURSIVE_btQuantizedBvh_bt_e001408c92acdfd7())
@@ -34553,6 +34708,7 @@ func _swig_getbtQuantizedBvh_TRAVERSAL_RECURSIVE_btQuantizedBvh() (_swig_ret BtQ
 }
 
 var BtQuantizedBvhTRAVERSAL_RECURSIVE BtQuantizedBvhBtTraversalMode = _swig_getbtQuantizedBvh_TRAVERSAL_RECURSIVE_btQuantizedBvh()
+
 func NewBtQuantizedBvh() (_swig_ret BtQuantizedBvh) {
 	var swig_r BtQuantizedBvh
 	swig_r = (BtQuantizedBvh)(SwigcptrBtQuantizedBvh(C._wrap_new_btQuantizedBvh_bt_e001408c92acdfd7()))
@@ -34721,7 +34877,7 @@ func (arg1 SwigcptrBtQuantizedBvh) Serialize__SWIG_1(arg2 uintptr, arg3 BtSerial
 	swig_r_p := C._wrap_btQuantizedBvh_serialize__SWIG_1_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -34952,7 +35108,7 @@ func (arg1 SwigcptrBtOptimizedBvhNodeFloatData) GetM_pad() (_swig_ret string) {
 	swig_r_p := C._wrap_btOptimizedBvhNodeFloatData_m_pad_get_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -35073,7 +35229,7 @@ func (arg1 SwigcptrBtOptimizedBvhNodeDoubleData) GetM_pad() (_swig_ret string) {
 	swig_r_p := C._wrap_btOptimizedBvhNodeDoubleData_m_pad_get_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -35777,7 +35933,7 @@ func (_swig_base SwigcptrBtOptimizedBvh) Serialize__SWIG_1(arg1 uintptr, arg2 Bt
 	swig_r_p := C._wrap_btOptimizedBvh_serialize__SWIG_1_bt_e001408c92acdfd7(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -35863,6 +36019,7 @@ const TRI_INFO_V2V0_CONVEX int = 4
 const TRI_INFO_V0V1_SWAP_NORMALB int = 8
 const TRI_INFO_V1V2_SWAP_NORMALB int = 16
 const TRI_INFO_V2V0_SWAP_NORMALB int = 32
+
 type SwigcptrBtTriangleInfo uintptr
 
 func (p SwigcptrBtTriangleInfo) Swigcptr() uintptr {
@@ -36061,7 +36218,7 @@ func (arg1 SwigcptrBtTriangleInfoMap) Serialize(arg2 uintptr, arg3 BtSerializer)
 	swig_r_p := C._wrap_btTriangleInfoMap_serialize_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -36369,7 +36526,7 @@ func (arg1 SwigcptrBtTriangleInfoMapData) GetM_padding() (_swig_ret string) {
 	swig_r_p := C._wrap_btTriangleInfoMapData_m_padding_get_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -36539,7 +36696,7 @@ func (arg1 SwigcptrBtBvhTriangleMeshShape) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btBvhTriangleMeshShape_getName_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -36640,7 +36797,7 @@ func (arg1 SwigcptrBtBvhTriangleMeshShape) Serialize(arg2 uintptr, arg3 BtSerial
 	swig_r_p := C._wrap_btBvhTriangleMeshShape_serialize_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -37050,7 +37207,7 @@ func (arg1 SwigcptrBtTriangleMeshShapeData) GetM_pad3() (_swig_ret string) {
 	swig_r_p := C._wrap_btTriangleMeshShapeData_m_pad3_get_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -37375,7 +37532,7 @@ func (arg1 SwigcptrBtHeightfieldTerrainShape) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btHeightfieldTerrainShape_getName_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -37576,7 +37733,7 @@ func (_swig_base SwigcptrBtHeightfieldTerrainShape) Serialize(arg1 uintptr, arg2
 	swig_r_p := C._wrap_btHeightfieldTerrainShape_serialize_bt_e001408c92acdfd7(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -37688,6 +37845,7 @@ func (arg1 SwigcptrBtTriangleRaycastCallback) GetM_to() (_swig_ret BtVector3) {
 }
 
 type BtTriangleRaycastCallbackEFlags int
+
 func _swig_getbtTriangleRaycastCallback_kF_None_btTriangleRaycastCallback() (_swig_ret BtTriangleRaycastCallbackEFlags) {
 	var swig_r BtTriangleRaycastCallbackEFlags
 	swig_r = (BtTriangleRaycastCallbackEFlags)(C._wrap_kF_None_btTriangleRaycastCallback_bt_e001408c92acdfd7())
@@ -37695,6 +37853,7 @@ func _swig_getbtTriangleRaycastCallback_kF_None_btTriangleRaycastCallback() (_sw
 }
 
 var BtTriangleRaycastCallbackKF_None BtTriangleRaycastCallbackEFlags = _swig_getbtTriangleRaycastCallback_kF_None_btTriangleRaycastCallback()
+
 func _swig_getbtTriangleRaycastCallback_kF_FilterBackfaces_btTriangleRaycastCallback() (_swig_ret BtTriangleRaycastCallbackEFlags) {
 	var swig_r BtTriangleRaycastCallbackEFlags
 	swig_r = (BtTriangleRaycastCallbackEFlags)(C._wrap_kF_FilterBackfaces_btTriangleRaycastCallback_bt_e001408c92acdfd7())
@@ -37702,6 +37861,7 @@ func _swig_getbtTriangleRaycastCallback_kF_FilterBackfaces_btTriangleRaycastCall
 }
 
 var BtTriangleRaycastCallbackKF_FilterBackfaces BtTriangleRaycastCallbackEFlags = _swig_getbtTriangleRaycastCallback_kF_FilterBackfaces_btTriangleRaycastCallback()
+
 func _swig_getbtTriangleRaycastCallback_kF_KeepUnflippedNormal_btTriangleRaycastCallback() (_swig_ret BtTriangleRaycastCallbackEFlags) {
 	var swig_r BtTriangleRaycastCallbackEFlags
 	swig_r = (BtTriangleRaycastCallbackEFlags)(C._wrap_kF_KeepUnflippedNormal_btTriangleRaycastCallback_bt_e001408c92acdfd7())
@@ -37709,6 +37869,7 @@ func _swig_getbtTriangleRaycastCallback_kF_KeepUnflippedNormal_btTriangleRaycast
 }
 
 var BtTriangleRaycastCallbackKF_KeepUnflippedNormal BtTriangleRaycastCallbackEFlags = _swig_getbtTriangleRaycastCallback_kF_KeepUnflippedNormal_btTriangleRaycastCallback()
+
 func _swig_getbtTriangleRaycastCallback_kF_UseSubSimplexConvexCastRaytest_btTriangleRaycastCallback() (_swig_ret BtTriangleRaycastCallbackEFlags) {
 	var swig_r BtTriangleRaycastCallbackEFlags
 	swig_r = (BtTriangleRaycastCallbackEFlags)(C._wrap_kF_UseSubSimplexConvexCastRaytest_btTriangleRaycastCallback_bt_e001408c92acdfd7())
@@ -37716,6 +37877,7 @@ func _swig_getbtTriangleRaycastCallback_kF_UseSubSimplexConvexCastRaytest_btTria
 }
 
 var BtTriangleRaycastCallbackKF_UseSubSimplexConvexCastRaytest BtTriangleRaycastCallbackEFlags = _swig_getbtTriangleRaycastCallback_kF_UseSubSimplexConvexCastRaytest_btTriangleRaycastCallback()
+
 func _swig_getbtTriangleRaycastCallback_kF_UseGjkConvexCastRaytest_btTriangleRaycastCallback() (_swig_ret BtTriangleRaycastCallbackEFlags) {
 	var swig_r BtTriangleRaycastCallbackEFlags
 	swig_r = (BtTriangleRaycastCallbackEFlags)(C._wrap_kF_UseGjkConvexCastRaytest_btTriangleRaycastCallback_bt_e001408c92acdfd7())
@@ -37723,6 +37885,7 @@ func _swig_getbtTriangleRaycastCallback_kF_UseGjkConvexCastRaytest_btTriangleRay
 }
 
 var BtTriangleRaycastCallbackKF_UseGjkConvexCastRaytest BtTriangleRaycastCallbackEFlags = _swig_getbtTriangleRaycastCallback_kF_UseGjkConvexCastRaytest_btTriangleRaycastCallback()
+
 func _swig_getbtTriangleRaycastCallback_kF_DisableHeightfieldAccelerator_btTriangleRaycastCallback() (_swig_ret BtTriangleRaycastCallbackEFlags) {
 	var swig_r BtTriangleRaycastCallbackEFlags
 	swig_r = (BtTriangleRaycastCallbackEFlags)(C._wrap_kF_DisableHeightfieldAccelerator_btTriangleRaycastCallback_bt_e001408c92acdfd7())
@@ -37730,6 +37893,7 @@ func _swig_getbtTriangleRaycastCallback_kF_DisableHeightfieldAccelerator_btTrian
 }
 
 var BtTriangleRaycastCallbackKF_DisableHeightfieldAccelerator BtTriangleRaycastCallbackEFlags = _swig_getbtTriangleRaycastCallback_kF_DisableHeightfieldAccelerator_btTriangleRaycastCallback()
+
 func _swig_getbtTriangleRaycastCallback_kF_Terminator_btTriangleRaycastCallback() (_swig_ret BtTriangleRaycastCallbackEFlags) {
 	var swig_r BtTriangleRaycastCallbackEFlags
 	swig_r = (BtTriangleRaycastCallbackEFlags)(C._wrap_kF_Terminator_btTriangleRaycastCallback_bt_e001408c92acdfd7())
@@ -37737,6 +37901,7 @@ func _swig_getbtTriangleRaycastCallback_kF_Terminator_btTriangleRaycastCallback(
 }
 
 var BtTriangleRaycastCallbackKF_Terminator BtTriangleRaycastCallbackEFlags = _swig_getbtTriangleRaycastCallback_kF_Terminator_btTriangleRaycastCallback()
+
 func (arg1 SwigcptrBtTriangleRaycastCallback) SetM_flags(arg2 uint) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
@@ -37976,6 +38141,7 @@ func (p SwigcptrBtIDebugDraw) SwigIsBtIDebugDraw() {
 }
 
 type BtIDebugDrawDebugDrawModes int
+
 func _swig_getbtIDebugDraw_DBG_NoDebug_btIDebugDraw() (_swig_ret BtIDebugDrawDebugDrawModes) {
 	var swig_r BtIDebugDrawDebugDrawModes
 	swig_r = (BtIDebugDrawDebugDrawModes)(C._wrap_DBG_NoDebug_btIDebugDraw_bt_e001408c92acdfd7())
@@ -37983,6 +38149,7 @@ func _swig_getbtIDebugDraw_DBG_NoDebug_btIDebugDraw() (_swig_ret BtIDebugDrawDeb
 }
 
 var BtIDebugDrawDBG_NoDebug BtIDebugDrawDebugDrawModes = _swig_getbtIDebugDraw_DBG_NoDebug_btIDebugDraw()
+
 func _swig_getbtIDebugDraw_DBG_DrawWireframe_btIDebugDraw() (_swig_ret BtIDebugDrawDebugDrawModes) {
 	var swig_r BtIDebugDrawDebugDrawModes
 	swig_r = (BtIDebugDrawDebugDrawModes)(C._wrap_DBG_DrawWireframe_btIDebugDraw_bt_e001408c92acdfd7())
@@ -37990,6 +38157,7 @@ func _swig_getbtIDebugDraw_DBG_DrawWireframe_btIDebugDraw() (_swig_ret BtIDebugD
 }
 
 var BtIDebugDrawDBG_DrawWireframe BtIDebugDrawDebugDrawModes = _swig_getbtIDebugDraw_DBG_DrawWireframe_btIDebugDraw()
+
 func _swig_getbtIDebugDraw_DBG_DrawAabb_btIDebugDraw() (_swig_ret BtIDebugDrawDebugDrawModes) {
 	var swig_r BtIDebugDrawDebugDrawModes
 	swig_r = (BtIDebugDrawDebugDrawModes)(C._wrap_DBG_DrawAabb_btIDebugDraw_bt_e001408c92acdfd7())
@@ -37997,6 +38165,7 @@ func _swig_getbtIDebugDraw_DBG_DrawAabb_btIDebugDraw() (_swig_ret BtIDebugDrawDe
 }
 
 var BtIDebugDrawDBG_DrawAabb BtIDebugDrawDebugDrawModes = _swig_getbtIDebugDraw_DBG_DrawAabb_btIDebugDraw()
+
 func _swig_getbtIDebugDraw_DBG_DrawFeaturesText_btIDebugDraw() (_swig_ret BtIDebugDrawDebugDrawModes) {
 	var swig_r BtIDebugDrawDebugDrawModes
 	swig_r = (BtIDebugDrawDebugDrawModes)(C._wrap_DBG_DrawFeaturesText_btIDebugDraw_bt_e001408c92acdfd7())
@@ -38004,6 +38173,7 @@ func _swig_getbtIDebugDraw_DBG_DrawFeaturesText_btIDebugDraw() (_swig_ret BtIDeb
 }
 
 var BtIDebugDrawDBG_DrawFeaturesText BtIDebugDrawDebugDrawModes = _swig_getbtIDebugDraw_DBG_DrawFeaturesText_btIDebugDraw()
+
 func _swig_getbtIDebugDraw_DBG_DrawContactPoints_btIDebugDraw() (_swig_ret BtIDebugDrawDebugDrawModes) {
 	var swig_r BtIDebugDrawDebugDrawModes
 	swig_r = (BtIDebugDrawDebugDrawModes)(C._wrap_DBG_DrawContactPoints_btIDebugDraw_bt_e001408c92acdfd7())
@@ -38011,6 +38181,7 @@ func _swig_getbtIDebugDraw_DBG_DrawContactPoints_btIDebugDraw() (_swig_ret BtIDe
 }
 
 var BtIDebugDrawDBG_DrawContactPoints BtIDebugDrawDebugDrawModes = _swig_getbtIDebugDraw_DBG_DrawContactPoints_btIDebugDraw()
+
 func _swig_getbtIDebugDraw_DBG_NoDeactivation_btIDebugDraw() (_swig_ret BtIDebugDrawDebugDrawModes) {
 	var swig_r BtIDebugDrawDebugDrawModes
 	swig_r = (BtIDebugDrawDebugDrawModes)(C._wrap_DBG_NoDeactivation_btIDebugDraw_bt_e001408c92acdfd7())
@@ -38018,6 +38189,7 @@ func _swig_getbtIDebugDraw_DBG_NoDeactivation_btIDebugDraw() (_swig_ret BtIDebug
 }
 
 var BtIDebugDrawDBG_NoDeactivation BtIDebugDrawDebugDrawModes = _swig_getbtIDebugDraw_DBG_NoDeactivation_btIDebugDraw()
+
 func _swig_getbtIDebugDraw_DBG_NoHelpText_btIDebugDraw() (_swig_ret BtIDebugDrawDebugDrawModes) {
 	var swig_r BtIDebugDrawDebugDrawModes
 	swig_r = (BtIDebugDrawDebugDrawModes)(C._wrap_DBG_NoHelpText_btIDebugDraw_bt_e001408c92acdfd7())
@@ -38025,6 +38197,7 @@ func _swig_getbtIDebugDraw_DBG_NoHelpText_btIDebugDraw() (_swig_ret BtIDebugDraw
 }
 
 var BtIDebugDrawDBG_NoHelpText BtIDebugDrawDebugDrawModes = _swig_getbtIDebugDraw_DBG_NoHelpText_btIDebugDraw()
+
 func _swig_getbtIDebugDraw_DBG_DrawText_btIDebugDraw() (_swig_ret BtIDebugDrawDebugDrawModes) {
 	var swig_r BtIDebugDrawDebugDrawModes
 	swig_r = (BtIDebugDrawDebugDrawModes)(C._wrap_DBG_DrawText_btIDebugDraw_bt_e001408c92acdfd7())
@@ -38032,6 +38205,7 @@ func _swig_getbtIDebugDraw_DBG_DrawText_btIDebugDraw() (_swig_ret BtIDebugDrawDe
 }
 
 var BtIDebugDrawDBG_DrawText BtIDebugDrawDebugDrawModes = _swig_getbtIDebugDraw_DBG_DrawText_btIDebugDraw()
+
 func _swig_getbtIDebugDraw_DBG_ProfileTimings_btIDebugDraw() (_swig_ret BtIDebugDrawDebugDrawModes) {
 	var swig_r BtIDebugDrawDebugDrawModes
 	swig_r = (BtIDebugDrawDebugDrawModes)(C._wrap_DBG_ProfileTimings_btIDebugDraw_bt_e001408c92acdfd7())
@@ -38039,6 +38213,7 @@ func _swig_getbtIDebugDraw_DBG_ProfileTimings_btIDebugDraw() (_swig_ret BtIDebug
 }
 
 var BtIDebugDrawDBG_ProfileTimings BtIDebugDrawDebugDrawModes = _swig_getbtIDebugDraw_DBG_ProfileTimings_btIDebugDraw()
+
 func _swig_getbtIDebugDraw_DBG_EnableSatComparison_btIDebugDraw() (_swig_ret BtIDebugDrawDebugDrawModes) {
 	var swig_r BtIDebugDrawDebugDrawModes
 	swig_r = (BtIDebugDrawDebugDrawModes)(C._wrap_DBG_EnableSatComparison_btIDebugDraw_bt_e001408c92acdfd7())
@@ -38046,6 +38221,7 @@ func _swig_getbtIDebugDraw_DBG_EnableSatComparison_btIDebugDraw() (_swig_ret BtI
 }
 
 var BtIDebugDrawDBG_EnableSatComparison BtIDebugDrawDebugDrawModes = _swig_getbtIDebugDraw_DBG_EnableSatComparison_btIDebugDraw()
+
 func _swig_getbtIDebugDraw_DBG_DisableBulletLCP_btIDebugDraw() (_swig_ret BtIDebugDrawDebugDrawModes) {
 	var swig_r BtIDebugDrawDebugDrawModes
 	swig_r = (BtIDebugDrawDebugDrawModes)(C._wrap_DBG_DisableBulletLCP_btIDebugDraw_bt_e001408c92acdfd7())
@@ -38053,6 +38229,7 @@ func _swig_getbtIDebugDraw_DBG_DisableBulletLCP_btIDebugDraw() (_swig_ret BtIDeb
 }
 
 var BtIDebugDrawDBG_DisableBulletLCP BtIDebugDrawDebugDrawModes = _swig_getbtIDebugDraw_DBG_DisableBulletLCP_btIDebugDraw()
+
 func _swig_getbtIDebugDraw_DBG_EnableCCD_btIDebugDraw() (_swig_ret BtIDebugDrawDebugDrawModes) {
 	var swig_r BtIDebugDrawDebugDrawModes
 	swig_r = (BtIDebugDrawDebugDrawModes)(C._wrap_DBG_EnableCCD_btIDebugDraw_bt_e001408c92acdfd7())
@@ -38060,6 +38237,7 @@ func _swig_getbtIDebugDraw_DBG_EnableCCD_btIDebugDraw() (_swig_ret BtIDebugDrawD
 }
 
 var BtIDebugDrawDBG_EnableCCD BtIDebugDrawDebugDrawModes = _swig_getbtIDebugDraw_DBG_EnableCCD_btIDebugDraw()
+
 func _swig_getbtIDebugDraw_DBG_DrawConstraints_btIDebugDraw() (_swig_ret BtIDebugDrawDebugDrawModes) {
 	var swig_r BtIDebugDrawDebugDrawModes
 	swig_r = (BtIDebugDrawDebugDrawModes)(C._wrap_DBG_DrawConstraints_btIDebugDraw_bt_e001408c92acdfd7())
@@ -38067,6 +38245,7 @@ func _swig_getbtIDebugDraw_DBG_DrawConstraints_btIDebugDraw() (_swig_ret BtIDebu
 }
 
 var BtIDebugDrawDBG_DrawConstraints BtIDebugDrawDebugDrawModes = _swig_getbtIDebugDraw_DBG_DrawConstraints_btIDebugDraw()
+
 func _swig_getbtIDebugDraw_DBG_DrawConstraintLimits_btIDebugDraw() (_swig_ret BtIDebugDrawDebugDrawModes) {
 	var swig_r BtIDebugDrawDebugDrawModes
 	swig_r = (BtIDebugDrawDebugDrawModes)(C._wrap_DBG_DrawConstraintLimits_btIDebugDraw_bt_e001408c92acdfd7())
@@ -38074,6 +38253,7 @@ func _swig_getbtIDebugDraw_DBG_DrawConstraintLimits_btIDebugDraw() (_swig_ret Bt
 }
 
 var BtIDebugDrawDBG_DrawConstraintLimits BtIDebugDrawDebugDrawModes = _swig_getbtIDebugDraw_DBG_DrawConstraintLimits_btIDebugDraw()
+
 func _swig_getbtIDebugDraw_DBG_FastWireframe_btIDebugDraw() (_swig_ret BtIDebugDrawDebugDrawModes) {
 	var swig_r BtIDebugDrawDebugDrawModes
 	swig_r = (BtIDebugDrawDebugDrawModes)(C._wrap_DBG_FastWireframe_btIDebugDraw_bt_e001408c92acdfd7())
@@ -38081,6 +38261,7 @@ func _swig_getbtIDebugDraw_DBG_FastWireframe_btIDebugDraw() (_swig_ret BtIDebugD
 }
 
 var BtIDebugDrawDBG_FastWireframe BtIDebugDrawDebugDrawModes = _swig_getbtIDebugDraw_DBG_FastWireframe_btIDebugDraw()
+
 func _swig_getbtIDebugDraw_DBG_DrawNormals_btIDebugDraw() (_swig_ret BtIDebugDrawDebugDrawModes) {
 	var swig_r BtIDebugDrawDebugDrawModes
 	swig_r = (BtIDebugDrawDebugDrawModes)(C._wrap_DBG_DrawNormals_btIDebugDraw_bt_e001408c92acdfd7())
@@ -38088,6 +38269,7 @@ func _swig_getbtIDebugDraw_DBG_DrawNormals_btIDebugDraw() (_swig_ret BtIDebugDra
 }
 
 var BtIDebugDrawDBG_DrawNormals BtIDebugDrawDebugDrawModes = _swig_getbtIDebugDraw_DBG_DrawNormals_btIDebugDraw()
+
 func _swig_getbtIDebugDraw_DBG_DrawFrames_btIDebugDraw() (_swig_ret BtIDebugDrawDebugDrawModes) {
 	var swig_r BtIDebugDrawDebugDrawModes
 	swig_r = (BtIDebugDrawDebugDrawModes)(C._wrap_DBG_DrawFrames_btIDebugDraw_bt_e001408c92acdfd7())
@@ -38095,6 +38277,7 @@ func _swig_getbtIDebugDraw_DBG_DrawFrames_btIDebugDraw() (_swig_ret BtIDebugDraw
 }
 
 var BtIDebugDrawDBG_DrawFrames BtIDebugDrawDebugDrawModes = _swig_getbtIDebugDraw_DBG_DrawFrames_btIDebugDraw()
+
 func _swig_getbtIDebugDraw_DBG_MAX_DEBUG_DRAW_MODE_btIDebugDraw() (_swig_ret BtIDebugDrawDebugDrawModes) {
 	var swig_r BtIDebugDrawDebugDrawModes
 	swig_r = (BtIDebugDrawDebugDrawModes)(C._wrap_DBG_MAX_DEBUG_DRAW_MODE_btIDebugDraw_bt_e001408c92acdfd7())
@@ -38102,6 +38285,7 @@ func _swig_getbtIDebugDraw_DBG_MAX_DEBUG_DRAW_MODE_btIDebugDraw() (_swig_ret BtI
 }
 
 var BtIDebugDrawDBG_MAX_DEBUG_DRAW_MODE BtIDebugDrawDebugDrawModes = _swig_getbtIDebugDraw_DBG_MAX_DEBUG_DRAW_MODE_btIDebugDraw()
+
 func DeleteBtIDebugDraw(arg1 BtIDebugDraw) {
 	_swig_i_0 := getSwigcptr(arg1)
 	C._wrap_delete_btIDebugDraw_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
@@ -38489,6 +38673,7 @@ type BtIDebugDraw interface {
 }
 
 const MAX_CONVEX_CAST_ITERATIONS int = 32
+
 type SwigcptrBtConvexCast uintptr
 
 func (p SwigcptrBtConvexCast) Swigcptr() uintptr {
@@ -39459,6 +39644,7 @@ type DebugDrawcallback interface {
 }
 
 type BtSolverMode int
+
 func _swig_getSOLVER_RANDMIZE_ORDER() (_swig_ret BtSolverMode) {
 	var swig_r BtSolverMode
 	swig_r = (BtSolverMode)(C._wrap_SOLVER_RANDMIZE_ORDER_bt_e001408c92acdfd7())
@@ -39466,6 +39652,7 @@ func _swig_getSOLVER_RANDMIZE_ORDER() (_swig_ret BtSolverMode) {
 }
 
 var SOLVER_RANDMIZE_ORDER BtSolverMode = _swig_getSOLVER_RANDMIZE_ORDER()
+
 func _swig_getSOLVER_FRICTION_SEPARATE() (_swig_ret BtSolverMode) {
 	var swig_r BtSolverMode
 	swig_r = (BtSolverMode)(C._wrap_SOLVER_FRICTION_SEPARATE_bt_e001408c92acdfd7())
@@ -39473,6 +39660,7 @@ func _swig_getSOLVER_FRICTION_SEPARATE() (_swig_ret BtSolverMode) {
 }
 
 var SOLVER_FRICTION_SEPARATE BtSolverMode = _swig_getSOLVER_FRICTION_SEPARATE()
+
 func _swig_getSOLVER_USE_WARMSTARTING() (_swig_ret BtSolverMode) {
 	var swig_r BtSolverMode
 	swig_r = (BtSolverMode)(C._wrap_SOLVER_USE_WARMSTARTING_bt_e001408c92acdfd7())
@@ -39480,6 +39668,7 @@ func _swig_getSOLVER_USE_WARMSTARTING() (_swig_ret BtSolverMode) {
 }
 
 var SOLVER_USE_WARMSTARTING BtSolverMode = _swig_getSOLVER_USE_WARMSTARTING()
+
 func _swig_getSOLVER_USE_2_FRICTION_DIRECTIONS() (_swig_ret BtSolverMode) {
 	var swig_r BtSolverMode
 	swig_r = (BtSolverMode)(C._wrap_SOLVER_USE_2_FRICTION_DIRECTIONS_bt_e001408c92acdfd7())
@@ -39487,6 +39676,7 @@ func _swig_getSOLVER_USE_2_FRICTION_DIRECTIONS() (_swig_ret BtSolverMode) {
 }
 
 var SOLVER_USE_2_FRICTION_DIRECTIONS BtSolverMode = _swig_getSOLVER_USE_2_FRICTION_DIRECTIONS()
+
 func _swig_getSOLVER_ENABLE_FRICTION_DIRECTION_CACHING() (_swig_ret BtSolverMode) {
 	var swig_r BtSolverMode
 	swig_r = (BtSolverMode)(C._wrap_SOLVER_ENABLE_FRICTION_DIRECTION_CACHING_bt_e001408c92acdfd7())
@@ -39494,6 +39684,7 @@ func _swig_getSOLVER_ENABLE_FRICTION_DIRECTION_CACHING() (_swig_ret BtSolverMode
 }
 
 var SOLVER_ENABLE_FRICTION_DIRECTION_CACHING BtSolverMode = _swig_getSOLVER_ENABLE_FRICTION_DIRECTION_CACHING()
+
 func _swig_getSOLVER_DISABLE_VELOCITY_DEPENDENT_FRICTION_DIRECTION() (_swig_ret BtSolverMode) {
 	var swig_r BtSolverMode
 	swig_r = (BtSolverMode)(C._wrap_SOLVER_DISABLE_VELOCITY_DEPENDENT_FRICTION_DIRECTION_bt_e001408c92acdfd7())
@@ -39501,6 +39692,7 @@ func _swig_getSOLVER_DISABLE_VELOCITY_DEPENDENT_FRICTION_DIRECTION() (_swig_ret 
 }
 
 var SOLVER_DISABLE_VELOCITY_DEPENDENT_FRICTION_DIRECTION BtSolverMode = _swig_getSOLVER_DISABLE_VELOCITY_DEPENDENT_FRICTION_DIRECTION()
+
 func _swig_getSOLVER_CACHE_FRIENDLY() (_swig_ret BtSolverMode) {
 	var swig_r BtSolverMode
 	swig_r = (BtSolverMode)(C._wrap_SOLVER_CACHE_FRIENDLY_bt_e001408c92acdfd7())
@@ -39508,6 +39700,7 @@ func _swig_getSOLVER_CACHE_FRIENDLY() (_swig_ret BtSolverMode) {
 }
 
 var SOLVER_CACHE_FRIENDLY BtSolverMode = _swig_getSOLVER_CACHE_FRIENDLY()
+
 func _swig_getSOLVER_SIMD() (_swig_ret BtSolverMode) {
 	var swig_r BtSolverMode
 	swig_r = (BtSolverMode)(C._wrap_SOLVER_SIMD_bt_e001408c92acdfd7())
@@ -39515,6 +39708,7 @@ func _swig_getSOLVER_SIMD() (_swig_ret BtSolverMode) {
 }
 
 var SOLVER_SIMD BtSolverMode = _swig_getSOLVER_SIMD()
+
 func _swig_getSOLVER_INTERLEAVE_CONTACT_AND_FRICTION_CONSTRAINTS() (_swig_ret BtSolverMode) {
 	var swig_r BtSolverMode
 	swig_r = (BtSolverMode)(C._wrap_SOLVER_INTERLEAVE_CONTACT_AND_FRICTION_CONSTRAINTS_bt_e001408c92acdfd7())
@@ -39522,6 +39716,7 @@ func _swig_getSOLVER_INTERLEAVE_CONTACT_AND_FRICTION_CONSTRAINTS() (_swig_ret Bt
 }
 
 var SOLVER_INTERLEAVE_CONTACT_AND_FRICTION_CONSTRAINTS BtSolverMode = _swig_getSOLVER_INTERLEAVE_CONTACT_AND_FRICTION_CONSTRAINTS()
+
 func _swig_getSOLVER_ALLOW_ZERO_LENGTH_FRICTION_DIRECTIONS() (_swig_ret BtSolverMode) {
 	var swig_r BtSolverMode
 	swig_r = (BtSolverMode)(C._wrap_SOLVER_ALLOW_ZERO_LENGTH_FRICTION_DIRECTIONS_bt_e001408c92acdfd7())
@@ -39529,6 +39724,7 @@ func _swig_getSOLVER_ALLOW_ZERO_LENGTH_FRICTION_DIRECTIONS() (_swig_ret BtSolver
 }
 
 var SOLVER_ALLOW_ZERO_LENGTH_FRICTION_DIRECTIONS BtSolverMode = _swig_getSOLVER_ALLOW_ZERO_LENGTH_FRICTION_DIRECTIONS()
+
 func _swig_getSOLVER_DISABLE_IMPLICIT_CONE_FRICTION() (_swig_ret BtSolverMode) {
 	var swig_r BtSolverMode
 	swig_r = (BtSolverMode)(C._wrap_SOLVER_DISABLE_IMPLICIT_CONE_FRICTION_bt_e001408c92acdfd7())
@@ -39536,6 +39732,7 @@ func _swig_getSOLVER_DISABLE_IMPLICIT_CONE_FRICTION() (_swig_ret BtSolverMode) {
 }
 
 var SOLVER_DISABLE_IMPLICIT_CONE_FRICTION BtSolverMode = _swig_getSOLVER_DISABLE_IMPLICIT_CONE_FRICTION()
+
 func _swig_getSOLVER_USE_ARTICULATED_WARMSTARTING() (_swig_ret BtSolverMode) {
 	var swig_r BtSolverMode
 	swig_r = (BtSolverMode)(C._wrap_SOLVER_USE_ARTICULATED_WARMSTARTING_bt_e001408c92acdfd7())
@@ -39543,6 +39740,7 @@ func _swig_getSOLVER_USE_ARTICULATED_WARMSTARTING() (_swig_ret BtSolverMode) {
 }
 
 var SOLVER_USE_ARTICULATED_WARMSTARTING BtSolverMode = _swig_getSOLVER_USE_ARTICULATED_WARMSTARTING()
+
 type SwigcptrBtContactSolverInfoData uintptr
 
 func (p SwigcptrBtContactSolverInfoData) Swigcptr() uintptr {
@@ -40836,7 +41034,7 @@ func (arg1 SwigcptrBtContactSolverInfoDoubleData) GetM_padding() (_swig_ret stri
 	swig_r_p := C._wrap_btContactSolverInfoDoubleData_m_padding_get_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -41258,6 +41456,7 @@ type BtContactSolverInfoFloatData interface {
 }
 
 type BtDynamicsWorldType int
+
 func _swig_getBT_SIMPLE_DYNAMICS_WORLD() (_swig_ret BtDynamicsWorldType) {
 	var swig_r BtDynamicsWorldType
 	swig_r = (BtDynamicsWorldType)(C._wrap_BT_SIMPLE_DYNAMICS_WORLD_bt_e001408c92acdfd7())
@@ -41265,6 +41464,7 @@ func _swig_getBT_SIMPLE_DYNAMICS_WORLD() (_swig_ret BtDynamicsWorldType) {
 }
 
 var BT_SIMPLE_DYNAMICS_WORLD BtDynamicsWorldType = _swig_getBT_SIMPLE_DYNAMICS_WORLD()
+
 func _swig_getBT_DISCRETE_DYNAMICS_WORLD() (_swig_ret BtDynamicsWorldType) {
 	var swig_r BtDynamicsWorldType
 	swig_r = (BtDynamicsWorldType)(C._wrap_BT_DISCRETE_DYNAMICS_WORLD_bt_e001408c92acdfd7())
@@ -41272,6 +41472,7 @@ func _swig_getBT_DISCRETE_DYNAMICS_WORLD() (_swig_ret BtDynamicsWorldType) {
 }
 
 var BT_DISCRETE_DYNAMICS_WORLD BtDynamicsWorldType = _swig_getBT_DISCRETE_DYNAMICS_WORLD()
+
 func _swig_getBT_CONTINUOUS_DYNAMICS_WORLD() (_swig_ret BtDynamicsWorldType) {
 	var swig_r BtDynamicsWorldType
 	swig_r = (BtDynamicsWorldType)(C._wrap_BT_CONTINUOUS_DYNAMICS_WORLD_bt_e001408c92acdfd7())
@@ -41279,6 +41480,7 @@ func _swig_getBT_CONTINUOUS_DYNAMICS_WORLD() (_swig_ret BtDynamicsWorldType) {
 }
 
 var BT_CONTINUOUS_DYNAMICS_WORLD BtDynamicsWorldType = _swig_getBT_CONTINUOUS_DYNAMICS_WORLD()
+
 func _swig_getBT_SOFT_RIGID_DYNAMICS_WORLD() (_swig_ret BtDynamicsWorldType) {
 	var swig_r BtDynamicsWorldType
 	swig_r = (BtDynamicsWorldType)(C._wrap_BT_SOFT_RIGID_DYNAMICS_WORLD_bt_e001408c92acdfd7())
@@ -41286,6 +41488,7 @@ func _swig_getBT_SOFT_RIGID_DYNAMICS_WORLD() (_swig_ret BtDynamicsWorldType) {
 }
 
 var BT_SOFT_RIGID_DYNAMICS_WORLD BtDynamicsWorldType = _swig_getBT_SOFT_RIGID_DYNAMICS_WORLD()
+
 func _swig_getBT_GPU_DYNAMICS_WORLD() (_swig_ret BtDynamicsWorldType) {
 	var swig_r BtDynamicsWorldType
 	swig_r = (BtDynamicsWorldType)(C._wrap_BT_GPU_DYNAMICS_WORLD_bt_e001408c92acdfd7())
@@ -41293,6 +41496,7 @@ func _swig_getBT_GPU_DYNAMICS_WORLD() (_swig_ret BtDynamicsWorldType) {
 }
 
 var BT_GPU_DYNAMICS_WORLD BtDynamicsWorldType = _swig_getBT_GPU_DYNAMICS_WORLD()
+
 func _swig_getBT_SOFT_MULTIBODY_DYNAMICS_WORLD() (_swig_ret BtDynamicsWorldType) {
 	var swig_r BtDynamicsWorldType
 	swig_r = (BtDynamicsWorldType)(C._wrap_BT_SOFT_MULTIBODY_DYNAMICS_WORLD_bt_e001408c92acdfd7())
@@ -41300,6 +41504,7 @@ func _swig_getBT_SOFT_MULTIBODY_DYNAMICS_WORLD() (_swig_ret BtDynamicsWorldType)
 }
 
 var BT_SOFT_MULTIBODY_DYNAMICS_WORLD BtDynamicsWorldType = _swig_getBT_SOFT_MULTIBODY_DYNAMICS_WORLD()
+
 func _swig_getBT_DEFORMABLE_MULTIBODY_DYNAMICS_WORLD() (_swig_ret BtDynamicsWorldType) {
 	var swig_r BtDynamicsWorldType
 	swig_r = (BtDynamicsWorldType)(C._wrap_BT_DEFORMABLE_MULTIBODY_DYNAMICS_WORLD_bt_e001408c92acdfd7())
@@ -41307,6 +41512,7 @@ func _swig_getBT_DEFORMABLE_MULTIBODY_DYNAMICS_WORLD() (_swig_ret BtDynamicsWorl
 }
 
 var BT_DEFORMABLE_MULTIBODY_DYNAMICS_WORLD BtDynamicsWorldType = _swig_getBT_DEFORMABLE_MULTIBODY_DYNAMICS_WORLD()
+
 type SwigcptrBtDynamicsWorld uintptr
 
 func (p SwigcptrBtDynamicsWorld) Swigcptr() uintptr {
@@ -42926,6 +43132,7 @@ type BtDiscreteDynamicsWorld interface {
 
 const USE_PATH_COMPRESSION int = 1
 const STATIC_SIMULATION_ISLAND_OPTIMIZATION int = 1
+
 type SwigcptrBtElement uintptr
 
 func (p SwigcptrBtElement) Swigcptr() uintptr {
@@ -43219,6 +43426,7 @@ type BtSimulationIslandManager interface {
 }
 
 type BtConstraintSolverType int
+
 func _swig_getBT_SEQUENTIAL_IMPULSE_SOLVER() (_swig_ret BtConstraintSolverType) {
 	var swig_r BtConstraintSolverType
 	swig_r = (BtConstraintSolverType)(C._wrap_BT_SEQUENTIAL_IMPULSE_SOLVER_bt_e001408c92acdfd7())
@@ -43226,6 +43434,7 @@ func _swig_getBT_SEQUENTIAL_IMPULSE_SOLVER() (_swig_ret BtConstraintSolverType) 
 }
 
 var BT_SEQUENTIAL_IMPULSE_SOLVER BtConstraintSolverType = _swig_getBT_SEQUENTIAL_IMPULSE_SOLVER()
+
 func _swig_getBT_MLCP_SOLVER() (_swig_ret BtConstraintSolverType) {
 	var swig_r BtConstraintSolverType
 	swig_r = (BtConstraintSolverType)(C._wrap_BT_MLCP_SOLVER_bt_e001408c92acdfd7())
@@ -43233,6 +43442,7 @@ func _swig_getBT_MLCP_SOLVER() (_swig_ret BtConstraintSolverType) {
 }
 
 var BT_MLCP_SOLVER BtConstraintSolverType = _swig_getBT_MLCP_SOLVER()
+
 func _swig_getBT_NNCG_SOLVER() (_swig_ret BtConstraintSolverType) {
 	var swig_r BtConstraintSolverType
 	swig_r = (BtConstraintSolverType)(C._wrap_BT_NNCG_SOLVER_bt_e001408c92acdfd7())
@@ -43240,6 +43450,7 @@ func _swig_getBT_NNCG_SOLVER() (_swig_ret BtConstraintSolverType) {
 }
 
 var BT_NNCG_SOLVER BtConstraintSolverType = _swig_getBT_NNCG_SOLVER()
+
 func _swig_getBT_MULTIBODY_SOLVER() (_swig_ret BtConstraintSolverType) {
 	var swig_r BtConstraintSolverType
 	swig_r = (BtConstraintSolverType)(C._wrap_BT_MULTIBODY_SOLVER_bt_e001408c92acdfd7())
@@ -43247,6 +43458,7 @@ func _swig_getBT_MULTIBODY_SOLVER() (_swig_ret BtConstraintSolverType) {
 }
 
 var BT_MULTIBODY_SOLVER BtConstraintSolverType = _swig_getBT_MULTIBODY_SOLVER()
+
 func _swig_getBT_BLOCK_SOLVER() (_swig_ret BtConstraintSolverType) {
 	var swig_r BtConstraintSolverType
 	swig_r = (BtConstraintSolverType)(C._wrap_BT_BLOCK_SOLVER_bt_e001408c92acdfd7())
@@ -43254,6 +43466,7 @@ func _swig_getBT_BLOCK_SOLVER() (_swig_ret BtConstraintSolverType) {
 }
 
 var BT_BLOCK_SOLVER BtConstraintSolverType = _swig_getBT_BLOCK_SOLVER()
+
 type SwigcptrBtConstraintSolver uintptr
 
 func (p SwigcptrBtConstraintSolver) Swigcptr() uintptr {
@@ -43608,7 +43821,9 @@ type BtSequentialImpulseConstraintSolver interface {
 }
 
 const BtConeTwistConstraintDataName string = "btConeTwistConstraintData"
+
 type BtConeTwistFlags int
+
 func _swig_getBT_CONETWIST_FLAGS_LIN_CFM() (_swig_ret BtConeTwistFlags) {
 	var swig_r BtConeTwistFlags
 	swig_r = (BtConeTwistFlags)(C._wrap_BT_CONETWIST_FLAGS_LIN_CFM_bt_e001408c92acdfd7())
@@ -43616,6 +43831,7 @@ func _swig_getBT_CONETWIST_FLAGS_LIN_CFM() (_swig_ret BtConeTwistFlags) {
 }
 
 var BT_CONETWIST_FLAGS_LIN_CFM BtConeTwistFlags = _swig_getBT_CONETWIST_FLAGS_LIN_CFM()
+
 func _swig_getBT_CONETWIST_FLAGS_LIN_ERP() (_swig_ret BtConeTwistFlags) {
 	var swig_r BtConeTwistFlags
 	swig_r = (BtConeTwistFlags)(C._wrap_BT_CONETWIST_FLAGS_LIN_ERP_bt_e001408c92acdfd7())
@@ -43623,6 +43839,7 @@ func _swig_getBT_CONETWIST_FLAGS_LIN_ERP() (_swig_ret BtConeTwistFlags) {
 }
 
 var BT_CONETWIST_FLAGS_LIN_ERP BtConeTwistFlags = _swig_getBT_CONETWIST_FLAGS_LIN_ERP()
+
 func _swig_getBT_CONETWIST_FLAGS_ANG_CFM() (_swig_ret BtConeTwistFlags) {
 	var swig_r BtConeTwistFlags
 	swig_r = (BtConeTwistFlags)(C._wrap_BT_CONETWIST_FLAGS_ANG_CFM_bt_e001408c92acdfd7())
@@ -43630,6 +43847,7 @@ func _swig_getBT_CONETWIST_FLAGS_ANG_CFM() (_swig_ret BtConeTwistFlags) {
 }
 
 var BT_CONETWIST_FLAGS_ANG_CFM BtConeTwistFlags = _swig_getBT_CONETWIST_FLAGS_ANG_CFM()
+
 type SwigcptrBtConeTwistConstraint uintptr
 
 func (p SwigcptrBtConeTwistConstraint) Swigcptr() uintptr {
@@ -44117,7 +44335,7 @@ func (arg1 SwigcptrBtConeTwistConstraint) Serialize(arg2 uintptr, arg3 BtSeriali
 	swig_r_p := C._wrap_btConeTwistConstraint_serialize_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -44731,7 +44949,7 @@ func (arg1 SwigcptrBtConeTwistConstraintData) GetM_pad() (_swig_ret string) {
 	swig_r_p := C._wrap_btConeTwistConstraintData_m_pad_get_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -44774,6 +44992,7 @@ type BtConeTwistConstraintData interface {
 }
 
 const BtGeneric6DofConstraintDataName string = "btGeneric6DofConstraintData"
+
 type SwigcptrBtRotationalLimitMotor uintptr
 
 func (p SwigcptrBtRotationalLimitMotor) Swigcptr() uintptr {
@@ -45409,6 +45628,7 @@ type BtTranslationalLimitMotor interface {
 }
 
 type Bt6DofFlags int
+
 func _swig_getBT_6DOF_FLAGS_CFM_NORM() (_swig_ret Bt6DofFlags) {
 	var swig_r Bt6DofFlags
 	swig_r = (Bt6DofFlags)(C._wrap_BT_6DOF_FLAGS_CFM_NORM_bt_e001408c92acdfd7())
@@ -45416,6 +45636,7 @@ func _swig_getBT_6DOF_FLAGS_CFM_NORM() (_swig_ret Bt6DofFlags) {
 }
 
 var BT_6DOF_FLAGS_CFM_NORM Bt6DofFlags = _swig_getBT_6DOF_FLAGS_CFM_NORM()
+
 func _swig_getBT_6DOF_FLAGS_CFM_STOP() (_swig_ret Bt6DofFlags) {
 	var swig_r Bt6DofFlags
 	swig_r = (Bt6DofFlags)(C._wrap_BT_6DOF_FLAGS_CFM_STOP_bt_e001408c92acdfd7())
@@ -45423,6 +45644,7 @@ func _swig_getBT_6DOF_FLAGS_CFM_STOP() (_swig_ret Bt6DofFlags) {
 }
 
 var BT_6DOF_FLAGS_CFM_STOP Bt6DofFlags = _swig_getBT_6DOF_FLAGS_CFM_STOP()
+
 func _swig_getBT_6DOF_FLAGS_ERP_STOP() (_swig_ret Bt6DofFlags) {
 	var swig_r Bt6DofFlags
 	swig_r = (Bt6DofFlags)(C._wrap_BT_6DOF_FLAGS_ERP_STOP_bt_e001408c92acdfd7())
@@ -45430,7 +45652,9 @@ func _swig_getBT_6DOF_FLAGS_ERP_STOP() (_swig_ret Bt6DofFlags) {
 }
 
 var BT_6DOF_FLAGS_ERP_STOP Bt6DofFlags = _swig_getBT_6DOF_FLAGS_ERP_STOP()
+
 const BT_6DOF_FLAGS_AXIS_SHIFT int = 3
+
 type SwigcptrBtGeneric6DofConstraint uintptr
 
 func (p SwigcptrBtGeneric6DofConstraint) Swigcptr() uintptr {
@@ -45896,7 +46120,7 @@ func (arg1 SwigcptrBtGeneric6DofConstraint) Serialize(arg2 uintptr, arg3 BtSeria
 	swig_r_p := C._wrap_btGeneric6DofConstraint_serialize_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -47718,6 +47942,7 @@ type BtGjkEpaSolver2 interface {
 const GJK_MAX_ITERATIONS int = 128
 const EPA_MAX_VERTICES int = 128
 const EPA_MAX_ITERATIONS int = 255
+
 func _swig_getEPA_MAX_FACES() (_swig_ret int) {
 	var swig_r int
 	swig_r = (int)(C._wrap_EPA_MAX_FACES_bt_e001408c92acdfd7())
@@ -47725,6 +47950,7 @@ func _swig_getEPA_MAX_FACES() (_swig_ret int) {
 }
 
 var EPA_MAX_FACES int = _swig_getEPA_MAX_FACES()
+
 type SwigcptrMinkowskiDiff uintptr
 
 func (p SwigcptrMinkowskiDiff) Swigcptr() uintptr {
@@ -47785,20 +48011,23 @@ func (arg1 SwigcptrMinkowskiDiff) GetLs() (_swig_ret _swig_memberptr) {
 	swig_r = (_swig_memberptr)(C._wrap_MinkowskiDiff_Ls_get_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0)))
 	var swig_r_1 _swig_memberptr
 
-  {
-    type swig_out_type struct { size int; val uintptr }
-    p := (*swig_out_type)(unsafe.Pointer(swig_r))
-    if p == nil || p.val == 0 {
-      swig_r_1 = nil
-    } else {
-      m := make([]byte, p.size)
-      a := (*[1024]byte)(unsafe.Pointer(p.val))[:p.size]
-      copy(m, a)
-      Swig_free(p.val)
-      Swig_free(uintptr(unsafe.Pointer(p)))
-      swig_r_1 = &m[0]
-    }
-  }
+	{
+		type swig_out_type struct {
+			size int
+			val  uintptr
+		}
+		p := (*swig_out_type)(unsafe.Pointer(swig_r))
+		if p == nil || p.val == 0 {
+			swig_r_1 = nil
+		} else {
+			m := make([]byte, p.size)
+			a := (*[1024]byte)(unsafe.Pointer(p.val))[:p.size]
+			copy(m, a)
+			Swig_free(p.val)
+			Swig_free(uintptr(unsafe.Pointer(p)))
+			swig_r_1 = &m[0]
+		}
+	}
 
 	return swig_r_1
 }
@@ -51112,6 +51341,7 @@ func IntersectRectQuad2(arg1 *float32, arg2 *float32, arg3 *float32) (_swig_ret 
 }
 
 const M__PI float32 = 3.14159265
+
 func CullPoints2(arg1 int, arg2 *float32, arg3 int, arg4 int, arg5 *int) {
 	_swig_i_0 := arg1
 	_swig_i_1 := arg2
@@ -51206,7 +51436,7 @@ func (arg1 SwigcptrBtSdfCollisionShape) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btSdfCollisionShape_getName_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -51376,7 +51606,7 @@ func (_swig_base SwigcptrBtSdfCollisionShape) Serialize(arg1 uintptr, arg2 BtSer
 	swig_r_p := C._wrap_btSdfCollisionShape_serialize_bt_e001408c92acdfd7(C.uintptr_t(_swig_base), C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -51681,7 +51911,7 @@ func (arg1 SwigcptrBtStaticPlaneShape) GetName() (_swig_ret string) {
 	swig_r_p := C._wrap_btStaticPlaneShape_getName_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -51700,7 +51930,7 @@ func (arg1 SwigcptrBtStaticPlaneShape) Serialize(arg2 uintptr, arg3 BtSerializer
 	swig_r_p := C._wrap_btStaticPlaneShape_serialize_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -51974,7 +52204,7 @@ func (arg1 SwigcptrBtStaticPlaneShapeData) GetM_pad() (_swig_ret string) {
 	swig_r_p := C._wrap_btStaticPlaneShapeData_m_pad_get_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -52005,6 +52235,7 @@ type BtStaticPlaneShapeData interface {
 }
 
 const BtGeneric6DofSpringConstraintDataName string = "btGeneric6DofSpringConstraintData"
+
 type SwigcptrBtGeneric6DofSpringConstraint uintptr
 
 func (p SwigcptrBtGeneric6DofSpringConstraint) Swigcptr() uintptr {
@@ -52161,7 +52392,7 @@ func (arg1 SwigcptrBtGeneric6DofSpringConstraint) Serialize(arg2 uintptr, arg3 B
 	swig_r_p := C._wrap_btGeneric6DofSpringConstraint_serialize_bt_e001408c92acdfd7(C.uintptr_t(_swig_i_0), C.uintptr_t(_swig_i_1), C.uintptr_t(_swig_i_2))
 	swig_r = *(*string)(unsafe.Pointer(&swig_r_p))
 	var swig_r_1 string
- swig_r_1 = swigCopyString(swig_r) 
+	swig_r_1 = swigCopyString(swig_r)
 	return swig_r_1
 }
 
@@ -53617,592 +53848,662 @@ type BtMDebugDraw interface {
 	SwigGetBtIDebugDraw() BtIDebugDraw
 }
 
-
 type SwigcptrBtRigidBody_btRigidBodyConstructionInfo uintptr
 type BtRigidBody_btRigidBodyConstructionInfo interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtRigidBody_btRigidBodyConstructionInfo) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrGjkepa2_impl_EPA_eStatus__ uintptr
 type Gjkepa2_impl_EPA_eStatus__ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrGjkepa2_impl_EPA_eStatus__) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrGjkepa2_impl_GJK_sSimplex uintptr
 type Gjkepa2_impl_GJK_sSimplex interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrGjkepa2_impl_GJK_sSimplex) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btTypedConstraintData_Sm__Sg_ uintptr
 type BtAlignedObjectArray_Sl_btTypedConstraintData_Sm__Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btTypedConstraintData_Sm__Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrDContactGeom uintptr
 type DContactGeom interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrDContactGeom) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtDbvt_IWriter uintptr
 type BtDbvt_IWriter interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtDbvt_IWriter) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtTriangleShape uintptr
 type BtTriangleShape interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtTriangleShape) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtCollisionWorld_ConvexResultCallback uintptr
 type BtCollisionWorld_ConvexResultCallback interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtCollisionWorld_ConvexResultCallback) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btCollisionObject_Sm__Sg_ uintptr
 type BtAlignedObjectArray_Sl_btCollisionObject_Sm__Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btCollisionObject_Sm__Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrGjkepa2_impl_EPA_sList uintptr
 type Gjkepa2_impl_EPA_sList interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrGjkepa2_impl_EPA_sList) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btAlignedObjectArray_Sl_unsigned_SS_int_Sg__Sg_ uintptr
 type BtAlignedObjectArray_Sl_btAlignedObjectArray_Sl_unsigned_SS_int_Sg__Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btAlignedObjectArray_Sl_unsigned_SS_int_Sg__Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtConvexCast_CastResult uintptr
 type BtConvexCast_CastResult interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtConvexCast_CastResult) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btDbvt_sStkNN_Sg_ uintptr
 type BtAlignedObjectArray_Sl_btDbvt_sStkNN_Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btDbvt_sStkNN_Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btRigidBodyDoubleData_Sm__Sg_ uintptr
 type BtAlignedObjectArray_Sl_btRigidBodyDoubleData_Sm__Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btRigidBodyDoubleData_Sm__Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtIDebugDraw_DefaultColors uintptr
 type BtIDebugDraw_DefaultColors interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtIDebugDraw_DefaultColors) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtConvexHullInternal_Vertex uintptr
 type BtConvexHullInternal_Vertex interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtConvexHullInternal_Vertex) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btCollisionObjectDoubleData_Sm__Sg_ uintptr
 type BtAlignedObjectArray_Sl_btCollisionObjectDoubleData_Sm__Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btCollisionObjectDoubleData_Sm__Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtDbvt_sStkNPS uintptr
 type BtDbvt_sStkNPS interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtDbvt_sStkNPS) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrGjkepa2_impl_GJK_eStatus__ uintptr
 type Gjkepa2_impl_GJK_eStatus__ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrGjkepa2_impl_GJK_eStatus__) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtTypedConstraint_btConstraintInfo1 uintptr
 type BtTypedConstraint_btConstraintInfo1 interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtTypedConstraint_btConstraintInfo1) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btBroadphasePair_Sg_ uintptr
 type BtAlignedObjectArray_Sl_btBroadphasePair_Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btBroadphasePair_Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtTypedConstraint_btConstraintInfo2 uintptr
 type BtTypedConstraint_btConstraintInfo2 interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtTypedConstraint_btConstraintInfo2) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrVoid uintptr
 type Void interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrVoid) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btDynamicsWorldDoubleData_Sm__Sg_ uintptr
 type BtAlignedObjectArray_Sl_btDynamicsWorldDoubleData_Sm__Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btDynamicsWorldDoubleData_Sm__Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtDiscreteCollisionDetectorInterface_ClosestPointInput uintptr
 type BtDiscreteCollisionDetectorInterface_ClosestPointInput interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtDiscreteCollisionDetectorInterface_ClosestPointInput) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtCollisionWorld_RayResultCallback uintptr
 type BtCollisionWorld_RayResultCallback interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtCollisionWorld_RayResultCallback) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btSoftBodyDoubleData_Sm__Sg_ uintptr
 type BtAlignedObjectArray_Sl_btSoftBodyDoubleData_Sm__Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btSoftBodyDoubleData_Sm__Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtCollisionWorld_LocalConvexResult uintptr
 type BtCollisionWorld_LocalConvexResult interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtCollisionWorld_LocalConvexResult) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btAlignedObjectArray_Sl_btCell32_Sg__Sg_ uintptr
 type BtAlignedObjectArray_Sl_btAlignedObjectArray_Sl_btCell32_Sg__Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btAlignedObjectArray_Sl_btCell32_Sg__Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_GrahamVector3_Sg_ uintptr
 type BtAlignedObjectArray_Sl_GrahamVector3_Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_GrahamVector3_Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btConvexHullComputer_Edge_Sg_ uintptr
 type BtAlignedObjectArray_Sl_btConvexHullComputer_Edge_Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btConvexHullComputer_Edge_Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btTypedConstraint_Sm__Sg_ uintptr
 type BtAlignedObjectArray_Sl_btTypedConstraint_Sm__Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btTypedConstraint_Sm__Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btDbvtNode_Sm__Sg_ uintptr
 type BtAlignedObjectArray_Sl_btDbvtNode_Sm__Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btDbvtNode_Sm__Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btQuantizedBvhFloatData_Sm__Sg_ uintptr
 type BtAlignedObjectArray_Sl_btQuantizedBvhFloatData_Sm__Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btQuantizedBvhFloatData_Sm__Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrGjkepa2_impl_GJK_sSV uintptr
 type Gjkepa2_impl_GJK_sSV interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrGjkepa2_impl_GJK_sSV) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btHeightfieldTerrainShape_Range_Sg_ uintptr
 type BtAlignedObjectArray_Sl_btHeightfieldTerrainShape_Range_Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btHeightfieldTerrainShape_Range_Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btTypedConstraintDoubleData_Sm__Sg_ uintptr
 type BtAlignedObjectArray_Sl_btTypedConstraintDoubleData_Sm__Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btTypedConstraintDoubleData_Sm__Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btFace_Sg_ uintptr
 type BtAlignedObjectArray_Sl_btFace_Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btFace_Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btVector3_Sg_ uintptr
 type BtAlignedObjectArray_Sl_btVector3_Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btVector3_Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btBvhSubtreeInfo_Sg_ uintptr
 type BtAlignedObjectArray_Sl_btBvhSubtreeInfo_Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btBvhSubtreeInfo_Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtActionInterface uintptr
 type BtActionInterface interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtActionInterface) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btConvexHullInternal_Vertex_Sm__Sg_ uintptr
 type BtAlignedObjectArray_Sl_btConvexHullInternal_Vertex_Sm__Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btConvexHullInternal_Vertex_Sm__Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btQuantizedBvhDoubleData_Sm__Sg_ uintptr
 type BtAlignedObjectArray_Sl_btQuantizedBvhDoubleData_Sm__Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btQuantizedBvhDoubleData_Sm__Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btPersistentManifold_Sm__Sg_ uintptr
 type BtAlignedObjectArray_Sl_btPersistentManifold_Sm__Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btPersistentManifold_Sm__Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrStd_size_t uintptr
 type Std_size_t interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrStd_size_t) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrGjkepa2_impl_EPA_sFace uintptr
 type Gjkepa2_impl_EPA_sFace interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrGjkepa2_impl_EPA_sFace) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtDbvt_IClone uintptr
 type BtDbvt_IClone interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtDbvt_IClone) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btDbvtNode_SS_const_Sm__Sg_ uintptr
 type BtAlignedObjectArray_Sl_btDbvtNode_SS_const_Sm__Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btDbvtNode_SS_const_Sm__Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtSimulationIslandManager_IslandCallback uintptr
 type BtSimulationIslandManager_IslandCallback interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtSimulationIslandManager_IslandCallback) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btSoftBodyFloatData_Sm__Sg_ uintptr
 type BtAlignedObjectArray_Sl_btSoftBodyFloatData_Sm__Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btSoftBodyFloatData_Sm__Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btAlignedObjectArray_Sl_btDbvtNode_SS_const_Sm__Sg__Sg_ uintptr
 type BtAlignedObjectArray_Sl_btAlignedObjectArray_Sl_btDbvtNode_SS_const_Sm__Sg__Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btAlignedObjectArray_Sl_btDbvtNode_SS_const_Sm__Sg__Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtStackAlloc uintptr
 type BtStackAlloc interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtStackAlloc) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btRigidBody_Sm__Sg_ uintptr
 type BtAlignedObjectArray_Sl_btRigidBody_Sm__Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btRigidBody_Sm__Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtDbvt_ICollide uintptr
 type BtDbvt_ICollide interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtDbvt_ICollide) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btCollisionShapeData_Sm__Sg_ uintptr
 type BtAlignedObjectArray_Sl_btCollisionShapeData_Sm__Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btCollisionShapeData_Sm__Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtHeightfieldTerrainShape_Range uintptr
 type BtHeightfieldTerrainShape_Range interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtHeightfieldTerrainShape_Range) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtCollisionObjectWrapper uintptr
 type BtCollisionObjectWrapper interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtCollisionObjectWrapper) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtHashMap_Sl_btHashPtr_Sc_void_Sm__Sg_ uintptr
 type BtHashMap_Sl_btHashPtr_Sc_void_Sm__Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtHashMap_Sl_btHashPtr_Sc_void_Sm__Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_int_Sg_ uintptr
 type BtAlignedObjectArray_Sl_int_Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_int_Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrGjkepa2_impl_EPA_sHorizon uintptr
 type Gjkepa2_impl_EPA_sHorizon interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrGjkepa2_impl_EPA_sHorizon) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btAlignedObjectArray_Sl_double_Sg__Sg_ uintptr
 type BtAlignedObjectArray_Sl_btAlignedObjectArray_Sl_double_Sg__Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btAlignedObjectArray_Sl_double_Sg__Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtGjkEpaSolver2_sResults uintptr
 type BtGjkEpaSolver2_sResults interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtGjkEpaSolver2_sResults) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btDbvt_sStkNPS_Sg_ uintptr
 type BtAlignedObjectArray_Sl_btDbvt_sStkNPS_Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btDbvt_sStkNPS_Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtDiscreteCollisionDetectorInterface_Result uintptr
 type BtDiscreteCollisionDetectorInterface_Result interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtDiscreteCollisionDetectorInterface_Result) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btTypedConstraintFloatData_Sm__Sg_ uintptr
 type BtAlignedObjectArray_Sl_btTypedConstraintFloatData_Sm__Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btTypedConstraintFloatData_Sm__Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btDynamicsWorldFloatData_Sm__Sg_ uintptr
 type BtAlignedObjectArray_Sl_btDynamicsWorldFloatData_Sm__Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btDynamicsWorldFloatData_Sm__Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrStd_string uintptr
 type Std_string interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrStd_string) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtCollisionWorld_ContactResultCallback uintptr
 type BtCollisionWorld_ContactResultCallback interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtCollisionWorld_ContactResultCallback) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btRigidBodyFloatData_Sm__Sg_ uintptr
 type BtAlignedObjectArray_Sl_btRigidBodyFloatData_Sm__Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btRigidBodyFloatData_Sm__Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btSolverConstraint_Sg_ uintptr
 type BtAlignedObjectArray_Sl_btSolverConstraint_Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btSolverConstraint_Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btCollisionObjectFloatData_Sm__Sg_ uintptr
 type BtAlignedObjectArray_Sl_btCollisionObjectFloatData_Sm__Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btCollisionObjectFloatData_Sm__Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btSimplePair_Sg_ uintptr
 type BtAlignedObjectArray_Sl_btSimplePair_Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btSimplePair_Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
 
 type SwigcptrBtAlignedObjectArray_Sl_btQuantizedBvhNode_Sg_ uintptr
 type BtAlignedObjectArray_Sl_btQuantizedBvhNode_Sg_ interface {
-	Swigcptr() uintptr;
+	Swigcptr() uintptr
 }
+
 func (p SwigcptrBtAlignedObjectArray_Sl_btQuantizedBvhNode_Sg_) Swigcptr() uintptr {
 	return uintptr(p)
 }
-
-
 
 var swigDirectorTrack struct {
 	sync.Mutex
@@ -54244,5 +54545,3 @@ func swigDirectorDelete(c int) {
 	}
 	delete(swigDirectorTrack.m, c)
 }
-
-
