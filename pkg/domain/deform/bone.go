@@ -149,7 +149,6 @@ func applyBoneMatricesWithIndexes(modelData *model.PmxModel, boneDeltas *delta.B
 		}
 		updateBoneDelta(modelData, boneDeltas, d)
 		applyGlobalMatrix(boneDeltas, d)
-		boneDeltas.Update(d)
 	}
 }
 
@@ -167,7 +166,6 @@ func applyGlobalMatricesWithIndexes(modelData *model.PmxModel, boneDeltas *delta
 			updateBoneDelta(modelData, boneDeltas, d)
 		}
 		applyGlobalMatrixNoLocal(boneDeltas, d)
-		boneDeltas.Update(d)
 	}
 }
 
@@ -370,32 +368,20 @@ func collectDescendantFlags(children [][]int, start int, flags []bool, updated *
 	}
 }
 
-// appendIndexesByOrder はorderが有効なindexをoutへ詰める。
-func appendIndexesByOrder(out []int, indexes []int, order []int) []int {
-	if len(indexes) == 0 || len(order) == 0 {
+// buildRecalcIndexesByOrderFlags は変形順で再計算対象のindexを整列する。
+func buildRecalcIndexesByOrderFlags(orderByRank []int, updatedFlags []bool, out []int) []int {
+	if len(orderByRank) == 0 || len(updatedFlags) == 0 {
 		return out[:0]
 	}
 	out = out[:0]
-	for _, idx := range indexes {
-		if idx >= 0 && idx < len(order) && order[idx] >= 0 {
-			out = append(out, idx)
+	for _, boneIndex := range orderByRank {
+		if boneIndex < 0 || boneIndex >= len(updatedFlags) {
+			continue
+		}
+		if updatedFlags[boneIndex] {
+			out = append(out, boneIndex)
 		}
 	}
-	return out
-}
-
-// buildRecalcIndexesByOrder は変形順に再計算対象のindexを整列する。
-func buildRecalcIndexesByOrder(order []int, updated []int, out []int) []int {
-	if len(updated) == 0 || len(order) == 0 {
-		return out[:0]
-	}
-	out = appendIndexesByOrder(out, updated, order)
-	if len(out) < 2 {
-		return out
-	}
-	sort.Slice(out, func(i, j int) bool {
-		return order[out[i]] < order[out[j]]
-	})
 	return out
 }
 
@@ -1245,7 +1231,7 @@ type ikScratch struct {
 	globalUpdatedList  []int
 	globalQueue        []int
 	globalRecalc       []int
-	order              []int
+	orderByRank        []int
 }
 
 // newIkScratch はIK計算の作業バッファを初期化する。
@@ -1254,13 +1240,13 @@ func newIkScratch(modelData *model.PmxModel, deformBoneIndexes []int) *ikScratch
 	if modelData != nil && modelData.Bones != nil {
 		size = modelData.Bones.Len()
 	}
-	order := make([]int, size)
-	for i := range order {
-		order[i] = -1
+	orderByRank := make([]int, len(deformBoneIndexes))
+	for i := range orderByRank {
+		orderByRank[i] = -1
 	}
 	for i, idx := range deformBoneIndexes {
-		if idx >= 0 && idx < len(order) {
-			order[idx] = i
+		if idx >= 0 && idx < size {
+			orderByRank[i] = idx
 		}
 	}
 	return &ikScratch{
@@ -1271,7 +1257,7 @@ func newIkScratch(modelData *model.PmxModel, deformBoneIndexes []int) *ikScratch
 		globalUpdatedList:  make([]int, 0, size),
 		globalQueue:        make([]int, 0, size),
 		globalRecalc:       make([]int, 0, len(deformBoneIndexes)),
-		order:              order,
+		orderByRank:        orderByRank,
 	}
 }
 
@@ -1335,7 +1321,7 @@ func applyIkForBone(
 	globalUpdatedList := scratch.globalUpdatedList[:0]
 	globalQueue := scratch.globalQueue[:0]
 	globalRecalc := scratch.globalRecalc[:0]
-	order := scratch.order
+	orderByRank := scratch.orderByRank
 	for loop := 0; loop < loopCount; loop++ {
 		for linkIndex, link := range ikBone.Ik.Links {
 			linkBone, err := modelData.Bones.Get(link.BoneIndex)
@@ -1414,7 +1400,7 @@ func applyIkForBone(
 			for _, idx := range unitUpdatedList {
 				collectDescendantFlags(children, idx, globalUpdatedFlags, &globalUpdatedList, &globalQueue)
 			}
-			globalRecalc = buildRecalcIndexesByOrder(order, globalUpdatedList, globalRecalc)
+			globalRecalc = buildRecalcIndexesByOrderFlags(orderByRank, globalUpdatedFlags, globalRecalc)
 			applyGlobalMatricesWithIndexes(modelData, boneDeltas, globalRecalc)
 			resetFlagsByList(unitUpdatedFlags, unitUpdatedList)
 			unitUpdatedList = unitUpdatedList[:0]
