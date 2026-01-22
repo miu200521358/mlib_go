@@ -87,13 +87,17 @@ func skinningMatrix(deform model.IDeform, boneDeltas *delta.BoneDeltas) mmath.Ma
 			continue
 		}
 		boneDelta := boneDeltas.Get(boneIndex)
+		var weightedMat mmath.Mat4
 		if boneDelta == nil {
 			// 差分が無いボーンは単位行列として扱う。
-			mat = mat.Added(mmath.IDENT_MAT4.MuledScalar(weight))
+			weightedMat = mmath.IDENT_MAT4
+			weightedMat.MulScalar(weight)
+			mat.Add(weightedMat)
 			continue
 		}
-		boneMat := boneDelta.FilledLocalMatrix().MuledScalar(weight)
-		mat = mat.Added(boneMat)
+		weightedMat = boneDelta.FilledLocalMatrix()
+		weightedMat.MulScalar(weight)
+		mat.Add(weightedMat)
 	}
 	return mat
 }

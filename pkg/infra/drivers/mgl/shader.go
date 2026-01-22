@@ -5,6 +5,7 @@
 package mgl
 
 import (
+	"sync"
 	"sync/atomic"
 
 	"github.com/go-gl/gl/v4.3-core/gl"
@@ -30,6 +31,48 @@ type Shader struct {
 	boneTextureId    uint32
 	sharedTextureId  uint32
 	shaderLoader     *ShaderSourceLoader
+}
+
+// uniformLocationCache はユニフォーム位置のキャッシュを保持する。
+var uniformLocationCache = newUniformLocationCache()
+
+// uniformLocationCacheStore はプログラムIDごとのユニフォーム位置を保持する。
+type uniformLocationCacheStore struct {
+	mu    sync.Mutex
+	cache map[uint32]map[string]int32
+}
+
+// newUniformLocationCache はキャッシュを生成する。
+func newUniformLocationCache() *uniformLocationCacheStore {
+	return &uniformLocationCacheStore{
+		cache: make(map[uint32]map[string]int32),
+	}
+}
+
+// GetUniformLocation はユニフォーム位置をキャッシュして取得する。
+func GetUniformLocation(program uint32, name string) int32 {
+	if program == 0 || name == "" {
+		return -1
+	}
+	return uniformLocationCache.get(program, name)
+}
+
+// get はユニフォーム位置を取得する。
+func (c *uniformLocationCacheStore) get(program uint32, name string) int32 {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	locations, ok := c.cache[program]
+	if !ok {
+		locations = make(map[string]int32)
+		c.cache[program] = locations
+	}
+	if loc, exists := locations[name]; exists {
+		return loc
+	}
+	loc := gl.GetUniformLocation(program, gl.Str(name))
+	locations[name] = loc
+	return loc
 }
 
 // ShaderFactory はOpenGLシェーダーのファクトリー。
@@ -109,7 +152,7 @@ func (s *Shader) setupProgramUniforms(program uint32) {
 	cam := s.Camera()
 
 	projection := NewGlMat4(cam.GetProjectionMatrix(s.width, s.height))
-	projectionUniform := gl.GetUniformLocation(program, gl.Str(ShaderProjectionMatrix))
+	projectionUniform := GetUniformLocation(program, ShaderProjectionMatrix)
 	if s.height != 0 {
 		projection = mgl32.Perspective(
 			mgl32.DegToRad(cam.FieldOfView),
@@ -121,17 +164,17 @@ func (s *Shader) setupProgramUniforms(program uint32) {
 	gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
 
 	cameraPosition := NewGlVec3(cam.Position)
-	cameraPositionUniform := gl.GetUniformLocation(program, gl.Str(ShaderCameraPosition))
+	cameraPositionUniform := GetUniformLocation(program, ShaderCameraPosition)
 	gl.Uniform3fv(cameraPositionUniform, 1, &cameraPosition[0])
 
 	lookAtCenter := NewGlVec3(cam.LookAtCenter)
 	up := NewGlVec3(cam.Up)
 	camera := mgl32.LookAtV(cameraPosition, lookAtCenter, up)
-	cameraUniform := gl.GetUniformLocation(program, gl.Str(ShaderViewMatrix))
+	cameraUniform := GetUniformLocation(program, ShaderViewMatrix)
 	gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
 
 	lightDirection := NewGlVec3(s.lightDirection)
-	lightDirectionUniform := gl.GetUniformLocation(program, gl.Str(ShaderLightDirection))
+	lightDirectionUniform := GetUniformLocation(program, ShaderLightDirection)
 	gl.Uniform3fv(lightDirectionUniform, 1, &lightDirection[0])
 
 	gl.UseProgram(0)
@@ -204,13 +247,13 @@ func (s *Shader) UpdateCamera() {
 		gl.UseProgram(program)
 
 		cameraPosition := NewGlVec3(cam.Position)
-		cameraPositionUniform := gl.GetUniformLocation(program, gl.Str(ShaderCameraPosition))
+		cameraPositionUniform := GetUniformLocation(program, ShaderCameraPosition)
 		gl.Uniform3fv(cameraPositionUniform, 1, &cameraPosition[0])
 
 		lookAtCenter := NewGlVec3(cam.LookAtCenter)
 		up := NewGlVec3(cam.Up)
 		viewMatrix := mgl32.LookAtV(cameraPosition, lookAtCenter, up)
-		viewMatrixUniform := gl.GetUniformLocation(program, gl.Str(ShaderViewMatrix))
+		viewMatrixUniform := GetUniformLocation(program, ShaderViewMatrix)
 		gl.UniformMatrix4fv(viewMatrixUniform, 1, false, &viewMatrix[0])
 
 		projection := mgl32.Mat4{}
@@ -222,7 +265,7 @@ func (s *Shader) UpdateCamera() {
 				cam.FarPlane,
 			)
 		}
-		projectionUniform := gl.GetUniformLocation(program, gl.Str(ShaderProjectionMatrix))
+		projectionUniform := GetUniformLocation(program, ShaderProjectionMatrix)
 		gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
 	}
 

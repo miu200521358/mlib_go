@@ -119,7 +119,7 @@ func (r *TooltipRenderer) Render(text string, cursorX, cursorY float32, winWidth
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D, r.texture)
 
-	uniform := gl.GetUniformLocation(r.program, gl.Str("tooltipTexture\x00"))
+	uniform := GetUniformLocation(r.program, "tooltipTexture\x00")
 	gl.Uniform1i(uniform, 0)
 
 	gl.BindVertexArray(r.vao)

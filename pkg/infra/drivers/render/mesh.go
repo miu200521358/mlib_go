@@ -131,58 +131,58 @@ func (mr *MeshRenderer) drawModel(
 	bindBoneMatrixes(windowIndex, paddedMatrixes, width, height, shader, modelProgram)
 	defer unbindBoneMatrixes()
 
-	diffuseUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.ShaderDiffuse))
+	diffuseUniform := mgl.GetUniformLocation(modelProgram, mgl.ShaderDiffuse)
 	gl.Uniform4fv(diffuseUniform, 1, &meshDelta.Diffuse[0])
 
-	ambientUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.ShaderAmbient))
+	ambientUniform := mgl.GetUniformLocation(modelProgram, mgl.ShaderAmbient)
 	gl.Uniform3fv(ambientUniform, 1, &meshDelta.Ambient[0])
 
-	specularUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.ShaderSpecular))
+	specularUniform := mgl.GetUniformLocation(modelProgram, mgl.ShaderSpecular)
 	gl.Uniform4fv(specularUniform, 1, &meshDelta.Specular[0])
 
-	emissiveUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.ShaderEmissive))
+	emissiveUniform := mgl.GetUniformLocation(modelProgram, mgl.ShaderEmissive)
 	gl.Uniform3fv(emissiveUniform, 1, &meshDelta.Emissive[0])
 
-	lightDiffuseUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.ShaderLightDiffuse))
+	lightDiffuseUniform := mgl.GetUniformLocation(modelProgram, mgl.ShaderLightDiffuse)
 	gl.Uniform3f(lightDiffuseUniform, LightDiffuse, LightDiffuse, LightDiffuse)
 
-	lightSpecularUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.ShaderLightSpecular))
+	lightSpecularUniform := mgl.GetUniformLocation(modelProgram, mgl.ShaderLightSpecular)
 	gl.Uniform3f(lightSpecularUniform, LightSpecular, LightSpecular, LightSpecular)
 
-	lightAmbientUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.ShaderLightAmbient))
+	lightAmbientUniform := mgl.GetUniformLocation(modelProgram, mgl.ShaderLightAmbient)
 	gl.Uniform3f(lightAmbientUniform, LightAmbient, LightAmbient, LightAmbient)
 
-	useTextureUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.ShaderUseTexture))
+	useTextureUniform := mgl.GetUniformLocation(modelProgram, mgl.ShaderUseTexture)
 	hasTexture := (mr.material.texture != nil)
 	gl.Uniform1i(useTextureUniform, int32(mmath.BoolToInt(hasTexture)))
 	if hasTexture {
 		mr.material.texture.bind()
 		defer mr.material.texture.unbind()
-		texUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.ShaderTextureSampler))
+		texUniform := mgl.GetUniformLocation(modelProgram, mgl.ShaderTextureSampler)
 		gl.Uniform1i(texUniform, int32(mr.material.texture.TextureUnitNo))
 	}
 
-	useToonUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.ShaderUseToon))
+	useToonUniform := mgl.GetUniformLocation(modelProgram, mgl.ShaderUseToon)
 	hasToon := (mr.material.toonTexture != nil)
 	gl.Uniform1i(useToonUniform, int32(mmath.BoolToInt(hasToon)))
 	if hasToon {
 		mr.material.toonTexture.bind()
 		defer mr.material.toonTexture.unbind()
-		toonUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.ShaderToonSampler))
+		toonUniform := mgl.GetUniformLocation(modelProgram, mgl.ShaderToonSampler)
 		gl.Uniform1i(toonUniform, int32(mr.material.toonTexture.TextureUnitNo))
 	}
 
-	useSphereUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.ShaderUseSphere))
+	useSphereUniform := mgl.GetUniformLocation(modelProgram, mgl.ShaderUseSphere)
 	hasSphere := (mr.material.sphereTexture != nil && mr.material.sphereTexture.Initialized)
 	gl.Uniform1i(useSphereUniform, int32(mmath.BoolToInt(hasSphere)))
 	if hasSphere {
 		mr.material.sphereTexture.bind()
 		defer mr.material.sphereTexture.unbind()
-		sphereUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.ShaderSphereSampler))
+		sphereUniform := mgl.GetUniformLocation(modelProgram, mgl.ShaderSphereSampler)
 		gl.Uniform1i(sphereUniform, int32(mr.material.sphereTexture.TextureUnitNo))
 	}
 
-	sphereModeUniform := gl.GetUniformLocation(modelProgram, gl.Str(mgl.ShaderSphereMode))
+	sphereModeUniform := mgl.GetUniformLocation(modelProgram, mgl.ShaderSphereMode)
 	gl.Uniform1i(sphereModeUniform, int32(mr.material.SphereMode))
 
 	gl.DrawElements(
@@ -213,10 +213,10 @@ func (mr *MeshRenderer) drawEdge(
 	bindBoneMatrixes(windowIndex, paddedMatrixes, width, height, shader, program)
 	defer unbindBoneMatrixes()
 
-	edgeColorUniform := gl.GetUniformLocation(program, gl.Str(mgl.ShaderEdgeColor))
+	edgeColorUniform := mgl.GetUniformLocation(program, mgl.ShaderEdgeColor)
 	gl.Uniform4fv(edgeColorUniform, 1, &meshDelta.Edge[0])
 
-	edgeSizeUniform := gl.GetUniformLocation(program, gl.Str(mgl.ShaderEdgeSize))
+	edgeSizeUniform := mgl.GetUniformLocation(program, mgl.ShaderEdgeSize)
 	gl.Uniform1f(edgeSizeUniform, meshDelta.EdgeSize)
 
 	mr.elemBuffer.Bind()
@@ -254,7 +254,7 @@ func (mr *MeshRenderer) drawWire(
 	} else {
 		wireColor = mgl32.Vec4{0.2, 0.6, 0.2, 0.5}
 	}
-	colorUniform := gl.GetUniformLocation(program, gl.Str(mgl.ShaderColor))
+	colorUniform := mgl.GetUniformLocation(program, mgl.ShaderColor)
 	gl.Uniform4fv(colorUniform, 1, &wireColor[0])
 
 	gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)

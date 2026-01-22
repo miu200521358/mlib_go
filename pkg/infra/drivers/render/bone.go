@@ -290,7 +290,7 @@ func bindBoneMatrixes(
 		unsafe.Pointer(&paddedMatrixes[0]),
 	)
 
-	boneUniform := gl.GetUniformLocation(program, gl.Str(mgl.ShaderBoneMatrixTexture))
+	boneUniform := mgl.GetUniformLocation(program, mgl.ShaderBoneMatrixTexture)
 	switch windowIndex {
 	case 0:
 		gl.Uniform1i(boneUniform, 20)
@@ -300,10 +300,10 @@ func bindBoneMatrixes(
 		gl.Uniform1i(boneUniform, 22)
 	}
 
-	modelWidthUniform := gl.GetUniformLocation(program, gl.Str(mgl.ShaderBoneMatrixTextureWidth))
+	modelWidthUniform := mgl.GetUniformLocation(program, mgl.ShaderBoneMatrixTextureWidth)
 	gl.Uniform1i(modelWidthUniform, int32(width))
 
-	modelHeightUniform := gl.GetUniformLocation(program, gl.Str(mgl.ShaderBoneMatrixTextureHeight))
+	modelHeightUniform := mgl.GetUniformLocation(program, mgl.ShaderBoneMatrixTextureHeight)
 	gl.Uniform1i(modelHeightUniform, int32(height))
 }
 

@@ -20,8 +20,8 @@ type OverrideRenderer struct {
 	isMainWindow    bool
 	sharedTextureID *uint32
 
-	fbo     uint32
-	texture uint32
+	fbo               uint32
+	texture           uint32
 	depthRenderbuffer uint32
 
 	// VertexBufferHandle を活用したフルスクリーンクアッド用バッファ
@@ -160,7 +160,7 @@ func (m *OverrideRenderer) Resolve() {
 	gl.UseProgram(m.program)
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D, *m.sharedTextureID)
-	location := gl.GetUniformLocation(m.program, gl.Str("overrideTexture\x00"))
+	location := GetUniformLocation(m.program, "overrideTexture\x00")
 	gl.Uniform1i(location, 0)
 
 	m.quadBuffer.Bind()

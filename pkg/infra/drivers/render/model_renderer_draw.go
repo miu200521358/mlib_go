@@ -109,7 +109,7 @@ func (mr *ModelRenderer) drawNormal(windowIndex int, shader graphics_api.IShader
 	defer unbindBoneMatrixes()
 
 	normalColor := mgl32.Vec4{0.3, 0.3, 0.6, 0.4}
-	colorUniform := gl.GetUniformLocation(program, gl.Str(mgl.ShaderColor))
+	colorUniform := mgl.GetUniformLocation(program, mgl.ShaderColor)
 	gl.Uniform4fv(colorUniform, 1, &normalColor[0])
 
 	gl.DrawElements(
@@ -199,7 +199,7 @@ func (mr *ModelRenderer) drawCursorLine(shader graphics_api.IShader, cursorPosit
 	program := shader.Program(graphics_api.ProgramTypeCursor)
 	gl.UseProgram(program)
 
-	colorUniform := gl.GetUniformLocation(program, gl.Str(mgl.ShaderColor))
+	colorUniform := mgl.GetUniformLocation(program, mgl.ShaderColor)
 	gl.Uniform4fv(colorUniform, 1, &vertexColor[0])
 
 	mr.cursorPositionBufferHandle.Bind()
@@ -258,16 +258,16 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	defer unbindBoneMatrixes()
 
 	vertexColor := mgl32.Vec4{1.0, 0.4, 0.0, 0.7}
-	colorUniform := gl.GetUniformLocation(program, gl.Str(mgl.ShaderColor))
+	colorUniform := mgl.GetUniformLocation(program, mgl.ShaderColor)
 	gl.Uniform4fv(colorUniform, 1, &vertexColor[0])
 	gl.PointSize(5.0)
 
-	thresholdUniform := gl.GetUniformLocation(program, gl.Str(mgl.ShaderCursorThreshold))
+	thresholdUniform := mgl.GetUniformLocation(program, mgl.ShaderCursorThreshold)
 	gl.Uniform1f(thresholdUniform, shader.Camera().FieldOfView)
 
 	const maxCursorPositions = 100
 	effectiveLimit := mr.effectiveCursorPositionLimit()
-	cursorPositionsUniform := gl.GetUniformLocation(program, gl.Str(mgl.ShaderCursorPositions))
+	cursorPositionsUniform := mgl.GetUniformLocation(program, mgl.ShaderCursorPositions)
 	var cursorValues [maxCursorPositions * 3]float32
 	srcCursorPositions := cursorPositions
 	if removeCursorPositions != nil {

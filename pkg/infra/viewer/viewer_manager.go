@@ -7,6 +7,10 @@ package viewer
 import (
 	"fmt"
 	"math"
+	"os"
+	"path/filepath"
+	"runtime/pprof"
+	"strings"
 	"time"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
@@ -32,22 +36,29 @@ const (
 
 // ViewerManager はビューワー全体を管理する。
 type ViewerManager struct {
-	shared     *state.SharedState
-	appConfig  *config.AppConfig
-	windowList []*ViewerWindow
+	shared              *state.SharedState
+	appConfig           *config.AppConfig
+	userConfig          config.IUserConfig
+	windowList          []*ViewerWindow
+	viewerProfileActive bool
+	viewerProfilePath   string
+	viewerProfileFile   *os.File
 }
 
 // NewViewerManager はViewerManagerを生成する。
 func NewViewerManager(shared *state.SharedState, baseServices base.IBaseServices) *ViewerManager {
 	var appConfig *config.AppConfig
+	var userConfig config.IUserConfig
 	if baseServices != nil {
 		if cfg := baseServices.Config(); cfg != nil {
 			appConfig = cfg.AppConfig()
+			userConfig = cfg.UserConfig()
 		}
 	}
 	return &ViewerManager{
 		shared:     shared,
 		appConfig:  appConfig,
+		userConfig: userConfig,
 		windowList: make([]*ViewerWindow, 0),
 	}
 }
@@ -96,6 +107,7 @@ func (vl *ViewerManager) Run() {
 		vl.handleWindowFocus()
 		vl.handleVSync()
 		glfw.PollEvents()
+		vl.updateViewerProfile(logging.DefaultLogger())
 
 		frameTime := glfw.GetTime()
 		elapsed := frameTime - prevTime
@@ -126,7 +138,121 @@ func (vl *ViewerManager) Run() {
 	for _, vw := range vl.windowList {
 		vw.Destroy()
 	}
+	vl.stopViewerProfile(logging.DefaultLogger())
 	glfw.Terminate()
+}
+
+// updateViewerProfile はビューワー冗長ログの状態に応じてpprofを開始/終了する。
+func (vl *ViewerManager) updateViewerProfile(logger logging.ILogger) {
+	if logger == nil {
+		return
+	}
+	enabled := logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER)
+	if enabled && !vl.viewerProfileActive {
+		vl.startViewerProfile(logger)
+		return
+	}
+	if !enabled && vl.viewerProfileActive {
+		vl.stopViewerProfile(logger)
+	}
+}
+
+// startViewerProfile はCPUプロファイルの計測を開始する。
+func (vl *ViewerManager) startViewerProfile(logger logging.ILogger) {
+	if vl.viewerProfileActive {
+		return
+	}
+	file, displayPath, fullPath, err := vl.createViewerProfileFile()
+	if err != nil {
+		if logger != nil {
+			logger.Error("ビューワープロファイル開始に失敗しました: %s", sanitizeProfileError(err, fullPath, displayPath))
+		}
+		return
+	}
+	if err := pprof.StartCPUProfile(file); err != nil {
+		_ = file.Close()
+		if logger != nil {
+			logger.Error("ビューワープロファイル開始に失敗しました: %s", sanitizeProfileError(err, fullPath, displayPath))
+		}
+		return
+	}
+	vl.viewerProfileFile = file
+	vl.viewerProfilePath = displayPath
+	vl.viewerProfileActive = true
+	if logger != nil {
+		logger.Info("ビューワープロファイル開始: %s", displayPath)
+	}
+}
+
+// stopViewerProfile はCPUプロファイルの計測を終了する。
+func (vl *ViewerManager) stopViewerProfile(logger logging.ILogger) {
+	if !vl.viewerProfileActive {
+		return
+	}
+	pprof.StopCPUProfile()
+	if vl.viewerProfileFile != nil {
+		if err := vl.viewerProfileFile.Close(); err != nil && logger != nil {
+			logger.Error("ビューワープロファイル保存に失敗しました: %s", sanitizeProfileError(err, "", vl.viewerProfilePath))
+		}
+		vl.viewerProfileFile = nil
+	}
+	if logger != nil && vl.viewerProfilePath != "" {
+		logger.Info("ビューワープロファイル出力: %s", vl.viewerProfilePath)
+	}
+	vl.viewerProfileActive = false
+	vl.viewerProfilePath = ""
+}
+
+// createViewerProfileFile はpprof出力用ファイルを生成する。
+func (vl *ViewerManager) createViewerProfileFile() (*os.File, string, string, error) {
+	dir, displayDir, err := vl.resolveViewerProfileDir()
+	if err != nil {
+		return nil, "", "", err
+	}
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return nil, "", "", err
+	}
+	fileName := viewerProfileFileName()
+	fullPath := filepath.Join(dir, fileName)
+	file, err := os.Create(fullPath)
+	if err != nil {
+		return nil, "", fullPath, err
+	}
+	displayPath := filepath.Join(displayDir, fileName)
+	return file, displayPath, fullPath, nil
+}
+
+// resolveViewerProfileDir はpprofの保存先ディレクトリを決定する。
+func (vl *ViewerManager) resolveViewerProfileDir() (string, string, error) {
+	if vl.userConfig != nil {
+		root, err := vl.userConfig.AppRootDir()
+		if err == nil && root != "" {
+			return filepath.Join(root, "logs"), "logs", nil
+		}
+	}
+	return "logs", "logs", nil
+}
+
+// viewerProfileFileName はpprof出力ファイル名を生成する。
+func viewerProfileFileName() string {
+	stamp := time.Now().Format("20060102_150405")
+	return fmt.Sprintf("pprof_viewer_%s.pprof", stamp)
+}
+
+// sanitizeProfileError はパスをマスクしたエラー文言を返す。
+func sanitizeProfileError(err error, fullPath, displayPath string) string {
+	if err == nil {
+		return ""
+	}
+	text := err.Error()
+	if fullPath != "" && displayPath != "" {
+		text = strings.ReplaceAll(text, fullPath, displayPath)
+		dir := filepath.Dir(fullPath)
+		if dir != "" {
+			text = strings.ReplaceAll(text, dir, filepath.Dir(displayPath))
+		}
+	}
+	return text
 }
 
 // handleWindowLinkage はウィンドウ連動移動を処理する。
