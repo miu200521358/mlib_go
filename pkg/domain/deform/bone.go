@@ -112,6 +112,31 @@ func ApplyBoneMatrices(modelData *model.PmxModel, boneDeltas *delta.BoneDeltas) 
 	applyBoneMatricesWithIndexes(modelData, boneDeltas, indexes)
 }
 
+// ApplyBoneMatricesWithIndexes は指定インデックス順でボーン行列を合成する。
+func ApplyBoneMatricesWithIndexes(modelData *model.PmxModel, boneDeltas *delta.BoneDeltas, indexes []int) {
+	if modelData == nil || boneDeltas == nil {
+		return
+	}
+	applyBoneMatricesWithIndexes(modelData, boneDeltas, indexes)
+}
+
+// ApplyGlobalMatrices はグローバル行列のみ更新する。
+func ApplyGlobalMatrices(modelData *model.PmxModel, boneDeltas *delta.BoneDeltas) {
+	if modelData == nil || boneDeltas == nil {
+		return
+	}
+	indexes := sortedBoneIndexes(modelData, boneDeltas)
+	applyGlobalMatricesWithIndexes(modelData, boneDeltas, indexes)
+}
+
+// ApplyGlobalMatricesWithIndexes は指定インデックス順でグローバル行列のみ更新する。
+func ApplyGlobalMatricesWithIndexes(modelData *model.PmxModel, boneDeltas *delta.BoneDeltas, indexes []int) {
+	if modelData == nil || boneDeltas == nil {
+		return
+	}
+	applyGlobalMatricesWithIndexes(modelData, boneDeltas, indexes)
+}
+
 // applyBoneMatricesWithIndexes は指定インデックス順でボーン行列を合成する。
 func applyBoneMatricesWithIndexes(modelData *model.PmxModel, boneDeltas *delta.BoneDeltas, indexes []int) {
 	if modelData == nil || boneDeltas == nil {

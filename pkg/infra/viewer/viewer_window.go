@@ -15,7 +15,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/graphics_api"
-	"github.com/miu200521358/mlib_go/pkg/domain/deform"
+	"github.com/miu200521358/mlib_go/pkg/adapter/physics_api"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
@@ -31,6 +31,8 @@ const (
 	rightAngle = 89.9
 	// boneHoverMaxScreenDistance はボーンホバー判定の最大距離（ピクセル）。
 	boneHoverMaxScreenDistance = 20.0
+	// collisionAllFilterMask は全ての剛体を対象にするフィルタマスク。
+	collisionAllFilterMask = int(^uint32(0))
 )
 
 // CameraPreset はカメラ視点プリセットを表す。
@@ -56,15 +58,23 @@ type ViewerWindow struct {
 	title       string
 	list        *ViewerManager
 	shader      graphics_api.IShader
+	physics     physics_api.IPhysics
 
-	tooltipRenderer *mgl.TooltipRenderer
-	boneHighlighter *mgl.BoneHighlighter
-	boneHoverActive bool
-	lastBoneHoverAt time.Time
+	tooltipRenderer      *mgl.TooltipRenderer
+	boneHighlighter      *mgl.BoneHighlighter
+	boneHoverActive      bool
+	lastBoneHoverAt      time.Time
+	rigidBodyHighlighter *mgl.RigidBodyHighlighter
+	rigidBodyHoverActive bool
+	lastRigidBodyHoverAt time.Time
+	jointHoverNames      []string
+	jointHoverActive     bool
+	lastJointHoverAt     time.Time
 
-	modelRenderers []*render.ModelRenderer
-	motions        []*motion.VmdMotion
-	vmdDeltas      []*delta.VmdDeltas
+	modelRenderers     []*render.ModelRenderer
+	motions            []*motion.VmdMotion
+	vmdDeltas          []*delta.VmdDeltas
+	physicsModelHashes []string
 
 	leftButtonPressed   bool
 	middleButtonPressed bool
@@ -77,6 +87,7 @@ type ViewerWindow struct {
 	cursorY             float64
 }
 
+// newViewerWindow はビューワーウィンドウを生成して初期化する。
 func newViewerWindow(windowIndex int, title string, width, height, positionX, positionY int,
 	appConfig *config.AppConfig, mainWindow *glfw.Window, list *ViewerManager) (*ViewerWindow, error) {
 	glfw.WindowHint(glfw.Resizable, glfw.True)
@@ -112,17 +123,23 @@ func newViewerWindow(windowIndex int, title string, width, height, positionX, po
 		return nil, err
 	}
 
+	gravity := resolveInitialGravity(list, windowIndex)
+	physics := physics_api.NewPhysics(&gravity)
+
 	vw := &ViewerWindow{
-		Window:          glWindow,
-		windowIndex:     windowIndex,
-		title:           title,
-		list:            list,
-		shader:          shader,
-		tooltipRenderer: tooltipRenderer,
-		boneHighlighter: mgl.NewBoneHighlighter(),
-		modelRenderers:  make([]*render.ModelRenderer, 0),
-		motions:         make([]*motion.VmdMotion, 0),
-		vmdDeltas:       make([]*delta.VmdDeltas, 0),
+		Window:               glWindow,
+		windowIndex:          windowIndex,
+		title:                title,
+		list:                 list,
+		shader:               shader,
+		physics:              physics,
+		tooltipRenderer:      tooltipRenderer,
+		boneHighlighter:      mgl.NewBoneHighlighter(),
+		rigidBodyHighlighter: mgl.NewRigidBodyHighlighter(),
+		modelRenderers:       make([]*render.ModelRenderer, 0),
+		motions:              make([]*motion.VmdMotion, 0),
+		vmdDeltas:            make([]*delta.VmdDeltas, 0),
+		physicsModelHashes:   make([]string, 0),
 	}
 
 	glWindow.SetCloseCallback(vw.closeCallback)
@@ -147,6 +164,24 @@ func newViewerWindow(windowIndex int, title string, width, height, positionX, po
 	return vw, nil
 }
 
+// resolveInitialGravity は初期重力ベクトルを取得する。
+func resolveInitialGravity(list *ViewerManager, windowIndex int) mmath.Vec3 {
+	fallback := mmath.UNIT_Y_NEG_VEC3.MuledScalar(9.8)
+	if list == nil || list.shared == nil {
+		return fallback
+	}
+	raw := list.shared.PhysicsWorldMotion(windowIndex)
+	motionData, ok := raw.(*motion.VmdMotion)
+	if !ok || motionData == nil || motionData.GravityFrames == nil {
+		return fallback
+	}
+	gravityFrame := motionData.GravityFrames.Get(0)
+	if gravityFrame == nil || gravityFrame.Gravity == nil {
+		return fallback
+	}
+	return *gravityFrame.Gravity
+}
+
 // Title はタイトルを返す。
 func (vw *ViewerWindow) Title() string {
 	return vw.title
@@ -158,11 +193,13 @@ func (vw *ViewerWindow) SetTitle(title string) {
 	vw.Window.SetTitle(title)
 }
 
+// resetCameraPosition はカメラの視点をリセットして同期する。
 func (vw *ViewerWindow) resetCameraPosition(yaw, pitch float64) {
 	vw.shader.Camera().ResetPosition(yaw, pitch)
 	vw.syncCameraToOthers()
 }
 
+// render は1フレーム分の描画を行う。
 func (vw *ViewerWindow) render(frame motion.Frame) {
 	w, h := vw.GetSize()
 	if w == 0 && h == 0 {
@@ -194,12 +231,11 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 
 	vw.shader.UpdateCamera()
 
-	vw.loadModelRenderers()
-	vw.loadMotions()
-
 	vw.renderFloor()
 
 	vw.updateBoneHoverExpire()
+	vw.updateRigidBodyHoverExpire()
+	vw.updateJointHoverExpire()
 	var debugBoneHover []*mgl.DebugBoneHover
 	if vw.boneHighlighter != nil {
 		debugBoneHover = vw.boneHighlighter.DebugBoneHoverInfo()
@@ -210,6 +246,9 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 		if renderer == nil || renderer.Model == nil {
 			continue
 		}
+		if i >= len(vw.vmdDeltas) || vw.vmdDeltas[i] == nil {
+			continue
+		}
 		limit := 0
 		if vw.list.appConfig != nil {
 			limit = vw.list.appConfig.CursorPositionLimit
@@ -217,10 +256,7 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 		renderer.SetCursorPositionLimit(limit)
 		renderer.SetModelIndex(i)
 
-		motionData := motionFromSlice(vw.motions, i)
-		vmdDeltas := vw.buildVmdDeltas(frame, renderer.Model, motionData)
-		vw.vmdDeltas = ensureVmdDeltas(vw.vmdDeltas, i)
-		vw.vmdDeltas[i] = vmdDeltas
+		vmdDeltas := vw.vmdDeltas[i]
 
 		if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
 			vw.logBonePositions(i, vmdDeltas)
@@ -229,19 +265,19 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 		renderer.Render(vw.shader, vw.list.shared, vmdDeltas, debugBoneHover)
 	}
 
-	if vw.list.shared.IsAnyBoneVisible() && vw.tooltipRenderer != nil && vw.boneHighlighter != nil {
-		if boneHover := vw.boneHighlighter.DebugBoneHoverInfo(); len(boneHover) > 0 {
-			names := make([]string, 0, len(boneHover))
-			for _, hover := range boneHover {
-				if hover != nil && hover.Bone != nil {
-					names = append(names, hover.Bone.Name())
-				}
-			}
-			if len(names) > 0 {
-				vw.tooltipRenderer.Render(strings.Join(names, ", "), float32(vw.cursorX), float32(vw.cursorY), w, h)
-			}
-		}
+	drawRigidBodyFront := vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_RIGID_BODY_FRONT)
+	drawRigidBodyBack := vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_RIGID_BODY_BACK)
+	drawJoint := vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_JOINT)
+	drawRigidBody := drawRigidBodyFront || drawRigidBodyBack
+
+	if vw.physics != nil && (drawRigidBody || drawJoint) {
+		vw.physics.DrawDebugLines(vw.shader, drawRigidBody, drawJoint, drawRigidBodyFront)
 	}
+	if vw.rigidBodyHighlighter != nil {
+		vw.rigidBodyHighlighter.CheckAndClearHighlightOnDebugChange(drawRigidBody)
+	}
+
+	vw.renderTooltip(drawRigidBody, drawJoint, w, h)
 
 	if len(vw.list.windowList) > 1 && vw.list.shared.IsShowOverride() && vw.windowIndex != 0 {
 		vw.shader.OverrideRenderer().Unbind()
@@ -256,6 +292,7 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 	vw.SwapBuffers()
 }
 
+// renderFloor は床グリッドを描画する。
 func (vw *ViewerWindow) renderFloor() {
 	vw.shader.UseProgram(graphics_api.ProgramTypeFloor)
 	vw.shader.FloorRenderer().Bind()
@@ -264,6 +301,53 @@ func (vw *ViewerWindow) renderFloor() {
 	vw.shader.ResetProgram()
 }
 
+// prepareFrame は描画前にモデル/モーションを同期する。
+func (vw *ViewerWindow) prepareFrame() {
+	vw.MakeContextCurrent()
+	vw.loadModelRenderers()
+	vw.loadMotions()
+	vw.ensurePhysicsModelSlots()
+}
+
+// ensurePhysicsModelSlots は物理同期用のスロット長をモデル数に合わせる。
+func (vw *ViewerWindow) ensurePhysicsModelSlots() {
+	for len(vw.physicsModelHashes) < len(vw.modelRenderers) {
+		vw.physicsModelHashes = append(vw.physicsModelHashes, "")
+	}
+	if len(vw.physicsModelHashes) > len(vw.modelRenderers) {
+		vw.physicsModelHashes = vw.physicsModelHashes[:len(vw.modelRenderers)]
+	}
+}
+
+// syncPhysicsModel は物理エンジンにモデルを同期する。
+func (vw *ViewerWindow) syncPhysicsModel(modelIndex int, modelData *model.PmxModel, vmdDeltas *delta.VmdDeltas, physicsDeltas *delta.PhysicsDeltas) {
+	if vw.physics == nil || modelIndex < 0 {
+		return
+	}
+	if modelIndex >= len(vw.physicsModelHashes) {
+		return
+	}
+	if modelData == nil {
+		if vw.physicsModelHashes[modelIndex] != "" {
+			vw.physics.DeleteModel(modelIndex)
+			vw.physicsModelHashes[modelIndex] = ""
+		}
+		return
+	}
+	if vmdDeltas == nil || vmdDeltas.Bones == nil {
+		return
+	}
+	modelHash := modelData.Hash()
+	if vw.physicsModelHashes[modelIndex] != modelHash {
+		if vw.physicsModelHashes[modelIndex] != "" {
+			vw.physics.DeleteModel(modelIndex)
+		}
+		vw.physics.AddModelByDeltas(modelIndex, modelData, vmdDeltas.Bones, physicsDeltas)
+		vw.physicsModelHashes[modelIndex] = modelHash
+	}
+}
+
+// loadModelRenderers はモデルレンダラを共有状態から同期する。
 func (vw *ViewerWindow) loadModelRenderers() {
 	modelCount := vw.list.shared.ModelCount(vw.windowIndex)
 	motionCount := vw.list.shared.MotionCount(vw.windowIndex)
@@ -305,6 +389,7 @@ func (vw *ViewerWindow) loadModelRenderers() {
 	}
 }
 
+// loadMotions はモーションを共有状態から同期する。
 func (vw *ViewerWindow) loadMotions() {
 	motionCount := vw.list.shared.MotionCount(vw.windowIndex)
 	for i := 0; i < motionCount; i++ {
@@ -327,39 +412,12 @@ func (vw *ViewerWindow) loadMotions() {
 	}
 }
 
-func motionFromSlice(motions []*motion.VmdMotion, index int) *motion.VmdMotion {
-	if index < 0 || index >= len(motions) {
-		return nil
-	}
-	return motions[index]
-}
-
-func ensureVmdDeltas(list []*delta.VmdDeltas, index int) []*delta.VmdDeltas {
-	for index >= len(list) {
-		list = append(list, nil)
-	}
-	return list
-}
-
-func (vw *ViewerWindow) buildVmdDeltas(frame motion.Frame, modelData *model.PmxModel, motionData *motion.VmdMotion) *delta.VmdDeltas {
-	if modelData == nil {
-		return nil
-	}
-	motionHash := ""
-	if motionData != nil {
-		motionHash = motionData.Hash()
-	}
-	vmdDeltas := delta.NewVmdDeltas(frame, modelData.Bones, modelData.Hash(), motionHash)
-	boneDeltas, _ := deform.ComputeBoneDeltas(modelData, motionData, frame, nil, true, false, false)
-	vmdDeltas.Bones = boneDeltas
-	vmdDeltas.Morphs = deform.ComputeMorphDeltas(modelData, motionData, frame, nil)
-	return vmdDeltas
-}
-
+// closeCallback はウィンドウ終了時の処理を行う。
 func (vw *ViewerWindow) closeCallback(_ *glfw.Window) {
 	vw.list.shared.SetClosed(true)
 }
 
+// keyCallback はキー入力を処理する。
 func (vw *ViewerWindow) keyCallback(_ *glfw.Window, key glfw.Key, _ int, action glfw.Action, _ glfw.ModifierKey) {
 	switch action {
 	case glfw.Press:
@@ -387,6 +445,7 @@ func (vw *ViewerWindow) keyCallback(_ *glfw.Window, key glfw.Key, _ int, action 
 	}
 }
 
+// mouseCallback はマウスボタン入力を処理する。
 func (vw *ViewerWindow) mouseCallback(_ *glfw.Window, button glfw.MouseButton, action glfw.Action, _ glfw.ModifierKey) {
 	switch action {
 	case glfw.Press:
@@ -402,11 +461,18 @@ func (vw *ViewerWindow) mouseCallback(_ *glfw.Window, button glfw.MouseButton, a
 		switch button {
 		case glfw.MouseButtonLeft:
 			vw.leftButtonPressed = false
-			if vw.list.shared.IsAnyBoneVisible() {
+			drawRigidBody := vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_RIGID_BODY_FRONT) ||
+				vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_RIGID_BODY_BACK)
+			drawJoint := vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_JOINT)
+			switch {
+			case drawRigidBody:
+				vw.selectRigidBodyByCursor(vw.cursorX, vw.cursorY)
+			case drawJoint:
+				vw.selectJointByCursor(vw.cursorX, vw.cursorY)
+			case vw.list.shared.IsAnyBoneVisible():
 				vw.selectBoneByCursor(vw.cursorX, vw.cursorY)
-			} else if vw.boneHighlighter != nil {
-				vw.boneHighlighter.UpdateDebugHoverByBones(nil, false)
-				vw.boneHoverActive = false
+			default:
+				vw.clearAllHovers()
 			}
 		case glfw.MouseButtonMiddle:
 			vw.middleButtonPressed = false
@@ -416,6 +482,7 @@ func (vw *ViewerWindow) mouseCallback(_ *glfw.Window, button glfw.MouseButton, a
 	}
 }
 
+// cursorPosCallback はカーソル位置の更新を処理する。
 func (vw *ViewerWindow) cursorPosCallback(_ *glfw.Window, xpos, ypos float64) {
 	vw.cursorX = xpos
 	vw.cursorY = ypos
@@ -432,11 +499,27 @@ func (vw *ViewerWindow) cursorPosCallback(_ *glfw.Window, xpos, ypos float64) {
 		vw.updateCameraPositionByCursor(xpos, ypos)
 	}
 	if !vw.rightButtonPressed && !vw.middleButtonPressed {
-		if vw.list.shared.IsAnyBoneVisible() {
+		drawRigidBody := vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_RIGID_BODY_FRONT) ||
+			vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_RIGID_BODY_BACK)
+		drawJoint := vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_JOINT)
+		switch {
+		case drawRigidBody:
+			vw.selectRigidBodyByCursor(xpos, ypos)
+			if drawJoint {
+				if vw.rigidBodyHoverActive {
+					vw.clearJointHover()
+				} else {
+					vw.selectJointByCursor(xpos, ypos)
+				}
+			} else {
+				vw.clearJointHover()
+			}
+		case drawJoint:
+			vw.selectJointByCursor(xpos, ypos)
+		case vw.list.shared.IsAnyBoneVisible():
 			vw.selectBoneByCursor(xpos, ypos)
-		} else if vw.boneHighlighter != nil {
-			vw.boneHighlighter.UpdateDebugHoverByBones(nil, false)
-			vw.boneHoverActive = false
+		default:
+			vw.clearAllHovers()
 		}
 	}
 	vw.prevCursorPos.X = xpos
@@ -458,6 +541,267 @@ func (vw *ViewerWindow) updateBoneHoverExpire() {
 	if time.Since(vw.lastBoneHoverAt) >= time.Second {
 		vw.boneHighlighter.UpdateDebugHoverByBones(nil, false)
 		vw.lastBoneHoverAt = time.Time{}
+	}
+}
+
+// updateRigidBodyHoverExpire は剛体ホバー終了後のツールチップ消去を遅延する。
+func (vw *ViewerWindow) updateRigidBodyHoverExpire() {
+	if vw.rigidBodyHighlighter == nil {
+		return
+	}
+	if vw.rigidBodyHoverActive {
+		vw.lastRigidBodyHoverAt = time.Now()
+		return
+	}
+	if vw.lastRigidBodyHoverAt.IsZero() {
+		return
+	}
+	if time.Since(vw.lastRigidBodyHoverAt) >= time.Second {
+		vw.rigidBodyHighlighter.UpdateDebugHoverByRigidBody(0, nil, false)
+		vw.lastRigidBodyHoverAt = time.Time{}
+	}
+}
+
+// updateJointHoverExpire はジョイントホバー終了後のツールチップ消去を遅延する。
+func (vw *ViewerWindow) updateJointHoverExpire() {
+	if vw.jointHoverActive {
+		vw.lastJointHoverAt = time.Now()
+		return
+	}
+	if vw.lastJointHoverAt.IsZero() {
+		return
+	}
+	if time.Since(vw.lastJointHoverAt) >= time.Second {
+		vw.clearJointHover()
+	}
+}
+
+// renderTooltip はホバー対象に応じてツールチップを描画する。
+func (vw *ViewerWindow) renderTooltip(drawRigidBody, drawJoint bool, width, height int) {
+	if vw.tooltipRenderer == nil {
+		return
+	}
+
+	tooltipText := ""
+	if drawRigidBody && vw.rigidBodyHighlighter != nil {
+		if hover := vw.rigidBodyHighlighter.DebugHoverInfo(); hover != nil && hover.RigidBody != nil {
+			tooltipText = hover.RigidBody.Name()
+		}
+	}
+
+	if tooltipText == "" && drawJoint && len(vw.jointHoverNames) > 0 {
+		tooltipText = strings.Join(vw.jointHoverNames, ", ")
+	}
+
+	if tooltipText == "" && vw.list.shared.IsAnyBoneVisible() && vw.boneHighlighter != nil {
+		if boneHover := vw.boneHighlighter.DebugBoneHoverInfo(); len(boneHover) > 0 {
+			names := make([]string, 0, len(boneHover))
+			for _, hover := range boneHover {
+				if hover != nil && hover.Bone != nil {
+					names = append(names, hover.Bone.Name())
+				}
+			}
+			if len(names) > 0 {
+				tooltipText = strings.Join(names, ", ")
+			}
+		}
+	}
+
+	if tooltipText == "" {
+		return
+	}
+
+	vw.tooltipRenderer.Render(tooltipText, float32(vw.cursorX), float32(vw.cursorY), width, height)
+}
+
+// clearJointHover はジョイントのホバー情報をクリアする。
+func (vw *ViewerWindow) clearJointHover() {
+	vw.jointHoverNames = nil
+	vw.jointHoverActive = false
+	vw.lastJointHoverAt = time.Time{}
+}
+
+// clearAllHovers はボーン/剛体/ジョイントのホバー情報をクリアする。
+func (vw *ViewerWindow) clearAllHovers() {
+	if vw.boneHighlighter != nil {
+		vw.boneHighlighter.UpdateDebugHoverByBones(nil, false)
+	}
+	if vw.rigidBodyHighlighter != nil {
+		vw.rigidBodyHighlighter.UpdateDebugHoverByRigidBody(0, nil, false)
+	}
+	vw.boneHoverActive = false
+	vw.rigidBodyHoverActive = false
+	vw.clearJointHover()
+}
+
+// calculateRayFromTo はカーソル位置からレイを生成する。
+func (vw *ViewerWindow) calculateRayFromTo(xpos, ypos float64) (*mmath.Vec3, *mmath.Vec3) {
+	width, height := vw.GetSize()
+	if width == 0 || height == 0 {
+		return nil, nil
+	}
+	cam := vw.shader.Camera()
+	if cam == nil || cam.Position == nil || cam.LookAtCenter == nil || cam.Up == nil {
+		return nil, nil
+	}
+
+	projection := toMgl32Mat4(cam.GetProjectionMatrix(width, height))
+	view := toMgl32Mat4(cam.GetViewMatrix())
+
+	nearWorld, errNear := mgl32.UnProject(
+		mgl32.Vec3{float32(xpos), float32(height) - float32(ypos), 0.0},
+		view, projection, 0, 0, width, height,
+	)
+	farWorld, errFar := mgl32.UnProject(
+		mgl32.Vec3{float32(xpos), float32(height) - float32(ypos), 1.0},
+		view, projection, 0, 0, width, height,
+	)
+	if errNear == nil && errFar == nil {
+		rayFrom := mmath.Vec3{}
+		rayFrom.X = float64(nearWorld.X())
+		rayFrom.Y = float64(nearWorld.Y())
+		rayFrom.Z = float64(nearWorld.Z())
+		rayTo := mmath.Vec3{}
+		rayTo.X = float64(farWorld.X())
+		rayTo.Y = float64(farWorld.Y())
+		rayTo.Z = float64(farWorld.Z())
+		return &rayFrom, &rayTo
+	}
+
+	ndcX := (2.0*float64(xpos))/float64(width) - 1.0
+	ndcY := 1.0 - (2.0*float64(ypos))/float64(height)
+	aspect := float64(cam.AspectRatio)
+	fovRad := mmath.DegToRad(float64(cam.FieldOfView))
+	tanFov := math.Tan(fovRad * 0.5)
+
+	dirCam := mmath.Vec3{}
+	dirCam.X = ndcX * aspect * tanFov
+	dirCam.Y = ndcY * tanFov
+	dirCam.Z = -1.0
+	dirCam = dirCam.Normalized()
+
+	forward := cam.LookAtCenter.Subed(*cam.Position).Normalized()
+	right := forward.Cross(*cam.Up).Normalized()
+	up := right.Cross(forward).Normalized()
+
+	dirWorld := mmath.Vec3{}
+	dirWorld.X = dirCam.X*right.X + dirCam.Y*up.X + dirCam.Z*forward.X
+	dirWorld.Y = dirCam.X*right.Y + dirCam.Y*up.Y + dirCam.Z*forward.Y
+	dirWorld.Z = dirCam.X*right.Z + dirCam.Y*up.Z + dirCam.Z*forward.Z
+	dirWorld = dirWorld.Normalized()
+
+	from := cam.Position.Added(dirWorld.MuledScalar(float64(cam.NearPlane)))
+	to := cam.Position.Added(dirWorld.MuledScalar(float64(cam.FarPlane)))
+	return &from, &to
+}
+
+// toMgl32Mat4 はmmath.Mat4をmgl32.Mat4に変換する。
+func toMgl32Mat4(src mmath.Mat4) mgl32.Mat4 {
+	var dst mgl32.Mat4
+	for i := range src {
+		dst[i] = float32(src[i])
+	}
+	return dst
+}
+
+// selectRigidBodyByCursor はカーソル位置に最も近い剛体を検出してハイライトを更新する。
+func (vw *ViewerWindow) selectRigidBodyByCursor(xpos, ypos float64) {
+	if vw.physics == nil || vw.rigidBodyHighlighter == nil {
+		vw.rigidBodyHoverActive = false
+		return
+	}
+	rayFrom, rayTo := vw.calculateRayFromTo(xpos, ypos)
+	if rayFrom == nil || rayTo == nil {
+		vw.rigidBodyHoverActive = false
+		return
+	}
+	hit := vw.physics.RayTest(rayFrom, rayTo, &physics_api.RaycastFilter{
+		Group: collisionAllFilterMask,
+		Mask:  collisionAllFilterMask,
+	})
+	if hit == nil {
+		vw.rigidBodyHoverActive = false
+		return
+	}
+	if hit.ModelIndex < 0 || hit.ModelIndex >= len(vw.modelRenderers) {
+		vw.rigidBodyHoverActive = false
+		return
+	}
+	renderer := vw.modelRenderers[hit.ModelIndex]
+	if renderer == nil || renderer.Model == nil || renderer.Model.RigidBodies == nil {
+		vw.rigidBodyHoverActive = false
+		return
+	}
+	rigidBody, err := renderer.Model.RigidBodies.Get(hit.RigidBodyIndex)
+	if err != nil || rigidBody == nil {
+		vw.rigidBodyHoverActive = false
+		return
+	}
+	vw.rigidBodyHighlighter.UpdateDebugHoverByRigidBody(hit.ModelIndex, rigidBody, true)
+	vw.rigidBodyHoverActive = true
+	vw.lastRigidBodyHoverAt = time.Now()
+}
+
+// selectJointByCursor はカーソル位置に最も近いジョイントを検出してホバー情報を更新する。
+func (vw *ViewerWindow) selectJointByCursor(xpos, ypos float64) {
+	if vw.shader == nil {
+		vw.jointHoverActive = false
+		return
+	}
+	width, height := vw.GetSize()
+	if width == 0 || height == 0 {
+		return
+	}
+	cam := vw.shader.Camera()
+	if cam == nil || cam.Position == nil || cam.LookAtCenter == nil || cam.Up == nil {
+		return
+	}
+	projection := mgl32.Perspective(
+		mgl32.DegToRad(cam.FieldOfView),
+		float32(width)/float32(height),
+		cam.NearPlane,
+		cam.FarPlane,
+	)
+	view := mgl32.LookAtV(
+		mgl.NewGlVec3(cam.Position),
+		mgl.NewGlVec3(cam.LookAtCenter),
+		mgl.NewGlVec3(cam.Up),
+	)
+
+	closestDistance := math.MaxFloat64
+	closestNames := make([]string, 0)
+	for _, renderer := range vw.modelRenderers {
+		if renderer == nil || renderer.Model == nil || renderer.Model.Joints == nil {
+			continue
+		}
+		for _, joint := range renderer.Model.Joints.Values() {
+			if joint == nil {
+				continue
+			}
+			pos := joint.Param.Position
+			screenX, screenY, ok := projectToScreen(pos, view, projection, width, height)
+			if !ok {
+				continue
+			}
+			dist := math.Hypot(screenX-xpos, screenY-ypos)
+			if dist > boneHoverMaxScreenDistance {
+				continue
+			}
+			if dist+0.01 < closestDistance {
+				closestDistance = dist
+				closestNames = closestNames[:0]
+			}
+			if math.Abs(dist-closestDistance) <= 0.01 {
+				closestNames = append(closestNames, joint.Name())
+			}
+		}
+	}
+	if len(closestNames) > 0 {
+		vw.jointHoverNames = closestNames
+		vw.jointHoverActive = true
+		vw.lastJointHoverAt = time.Now()
+	} else {
+		vw.jointHoverActive = false
 	}
 }
 
@@ -691,6 +1035,7 @@ func (vw *ViewerWindow) logBonePositions(modelIndex int, vmdDeltas *delta.VmdDel
 	})
 }
 
+// updateCameraAngleByCursor はカーソル移動でカメラ角度を更新する。
 func (vw *ViewerWindow) updateCameraAngleByCursor(xpos, ypos float64) {
 	ratio := 0.1
 	if vw.shiftPressed {
@@ -705,6 +1050,7 @@ func (vw *ViewerWindow) updateCameraAngleByCursor(xpos, ypos float64) {
 	vw.resetCameraPosition(cam.Yaw+xOffset, cam.Pitch+yOffset)
 }
 
+// updateCameraPositionByCursor はカーソル移動でカメラ位置を更新する。
 func (vw *ViewerWindow) updateCameraPositionByCursor(xpos, ypos float64) {
 	ratio := 0.07
 	if vw.shiftPressed {
@@ -735,6 +1081,7 @@ func (vw *ViewerWindow) updateCameraPositionByCursor(xpos, ypos float64) {
 	vw.syncCameraToOthers()
 }
 
+// syncCameraToOthers はカメラ状態を他ウィンドウへ同期する。
 func (vw *ViewerWindow) syncCameraToOthers() {
 	if !vw.list.shared.HasFlag(state.STATE_FLAG_CAMERA_SYNC) {
 		return
@@ -764,6 +1111,7 @@ func (vw *ViewerWindow) syncCameraToOthers() {
 	}
 }
 
+// scrollCallback はホイール操作でカメラのFOVを調整する。
 func (vw *ViewerWindow) scrollCallback(_ *glfw.Window, _ float64, yoff float64) {
 	step := float32(1.0)
 	if vw.shiftPressed {
@@ -788,6 +1136,7 @@ func (vw *ViewerWindow) scrollCallback(_ *glfw.Window, _ float64, yoff float64) 
 	vw.syncCameraToOthers()
 }
 
+// focusCallback はフォーカス連動の通知を行う。
 func (vw *ViewerWindow) focusCallback(_ *glfw.Window, focused bool) {
 	if !vw.list.shared.IsFocusLinkEnabled() {
 		return
@@ -797,6 +1146,7 @@ func (vw *ViewerWindow) focusCallback(_ *glfw.Window, focused bool) {
 	}
 }
 
+// sizeCallback はオーバーレイ表示時にサイズを同期する。
 func (vw *ViewerWindow) sizeCallback(_ *glfw.Window, width, height int) {
 	if !vw.list.shared.IsShowOverride() {
 		return
@@ -809,6 +1159,7 @@ func (vw *ViewerWindow) sizeCallback(_ *glfw.Window, width, height int) {
 	}
 }
 
+// iconifyCallback は最小化/復帰状態を同期する。
 func (vw *ViewerWindow) iconifyCallback(_ *glfw.Window, iconified bool) {
 	if iconified {
 		vw.list.shared.SyncMinimize(vw.windowIndex)
