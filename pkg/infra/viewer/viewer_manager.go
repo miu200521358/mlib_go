@@ -5,6 +5,7 @@
 package viewer
 
 import (
+	"fmt"
 	"math"
 	"time"
 
@@ -87,6 +88,9 @@ func (vl *ViewerManager) InitOverlay() {
 // Run は描画ループを実行する。
 func (vl *ViewerManager) Run() {
 	prevTime := glfw.GetTime()
+	prevShowTime := prevTime
+	prevShowInfo := false
+	elapsedList := make([]float64, 0, 1200)
 	for !vl.shared.IsClosed() {
 		vl.handleWindowLinkage()
 		vl.handleWindowFocus()
@@ -95,8 +99,27 @@ func (vl *ViewerManager) Run() {
 
 		frameTime := glfw.GetTime()
 		elapsed := frameTime - prevTime
-		if vl.processFrame(elapsed) {
+		rendered, meanTimeStep := vl.processFrame(elapsed)
+		showInfo := vl.shared.HasFlag(state.STATE_FLAG_SHOW_INFO)
+		if rendered {
+			if showInfo {
+				elapsedList = append(elapsedList, elapsed)
+				currentTime := glfw.GetTime()
+				if currentTime-prevShowTime >= 1.0 {
+					vl.updateFpsDisplay(mmath.Mean(elapsedList), meanTimeStep)
+					prevShowTime = currentTime
+					elapsedList = elapsedList[:0]
+				}
+			} else if prevShowInfo {
+				vl.resetInfoDisplay()
+				elapsedList = elapsedList[:0]
+			}
 			prevTime = frameTime
+		}
+		if prevShowInfo != showInfo {
+			prevShowTime = glfw.GetTime()
+			elapsedList = elapsedList[:0]
+			prevShowInfo = showInfo
 		}
 	}
 
@@ -173,12 +196,12 @@ func (vl *ViewerManager) handleVSync() {
 }
 
 // processFrame は1フレーム分の更新と描画を実行する。
-func (vl *ViewerManager) processFrame(elapsed float64) bool {
+func (vl *ViewerManager) processFrame(elapsed float64) (bool, float32) {
 	if elapsed < 0 {
-		return false
+		return false, 0
 	}
 	if len(vl.windowList) == 0 {
-		return false
+		return false, 0
 	}
 
 	logger := logging.DefaultLogger()
@@ -223,7 +246,7 @@ func (vl *ViewerManager) processFrame(elapsed float64) bool {
 		if waitDuration >= 0.001 {
 			time.Sleep(time.Duration(waitDuration*900) * time.Millisecond)
 		}
-		return false
+		return false, 0
 	}
 
 	// 物理リセット種別をモーションと共有状態から集約する。
@@ -314,7 +337,53 @@ func (vl *ViewerManager) processFrame(elapsed float64) bool {
 		logger.Verbose(logging.VERBOSE_INDEX_PHYSICS,
 			"物理フレーム終了: frame=%v playing=%t physics=%t", frame, playing, physicsEnabled)
 	}
-	return true
+	meanTimeStep := float32(mmath.Mean(timeSteps))
+	return true, meanTimeStep
+}
+
+// updateFpsDisplay は情報表示ON時のFPS表示を更新する。
+func (vl *ViewerManager) updateFpsDisplay(meanElapsed float64, meanTimeStep float32) {
+	deformFps := 0.0
+	if meanElapsed > 0 {
+		deformFps = 1.0 / meanElapsed
+	}
+	suffix := ""
+	if vl.appConfig == nil || vl.appConfig.IsProd() {
+		suffix = formatFpsSimple(deformFps)
+	} else {
+		physicsFps := 0.0
+		if meanTimeStep > 0 {
+			physicsFps = 1.0 / float64(meanTimeStep)
+		}
+		suffix = formatFpsDetail(deformFps, physicsFps)
+	}
+
+	for _, vw := range vl.windowList {
+		if vw == nil {
+			continue
+		}
+		vw.Window.SetTitle(vw.Title() + " - " + suffix)
+	}
+}
+
+// resetInfoDisplay は情報表示OFF時にタイトルを元へ戻す。
+func (vl *ViewerManager) resetInfoDisplay() {
+	for _, vw := range vl.windowList {
+		if vw == nil {
+			continue
+		}
+		vw.Window.SetTitle(vw.Title())
+	}
+}
+
+// formatFpsSimple はFPS表示を生成する。
+func formatFpsSimple(fps float64) string {
+	return fmt.Sprintf("%.2f fps", fps)
+}
+
+// formatFpsDetail はFPS表示（詳細）を生成する。
+func formatFpsDetail(deformFps, physicsFps float64) string {
+	return fmt.Sprintf("d) %.2f / p) %.2f fps", deformFps, physicsFps)
 }
 
 // resolvePhysicsWorldMotion は物理ワールドモーションを取得する。
