@@ -250,6 +250,9 @@ func (mp *RigidBodyHighlighter) appendCircleLinesAt(
 
 // appendLine はハイライト用ラインを追加する。
 func (mp *RigidBodyHighlighter) appendLine(from, to mmath.Vec3) {
+	// OpenGL座標系に合わせてX軸を反転する。
+	from.X = -from.X
+	to.X = -to.X
 	mp.highlightVertices = append(mp.highlightVertices,
 		float32(from.X), float32(from.Y), float32(from.Z),
 		rigidBodyHighlightColorR, rigidBodyHighlightColorG, rigidBodyHighlightColorB, rigidBodyHighlightColorA,
