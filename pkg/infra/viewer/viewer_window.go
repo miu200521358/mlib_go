@@ -31,6 +31,10 @@ const (
 	rightAngle = 89.9
 	// boneHoverMaxScreenDistance はボーンホバー判定の最大距離（ピクセル）。
 	boneHoverMaxScreenDistance = 20.0
+	// rigidBodyHoverRadiusScale は剛体ホバー判定の範囲を少し広げる補正係数。
+	rigidBodyHoverRadiusScale = 1.2
+	// rigidBodyHoverMinPixelRadius は剛体ホバー判定の最小ピクセル半径。
+	rigidBodyHoverMinPixelRadius = 6.0
 	// collisionAllFilterMask は全ての剛体を対象にするフィルタマスク。
 	collisionAllFilterMask = int(^uint32(0))
 )
@@ -274,6 +278,9 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 		vw.physics.DrawDebugLines(vw.shader, drawRigidBody, drawJoint, drawRigidBodyFront)
 	}
 	if vw.rigidBodyHighlighter != nil {
+		if drawRigidBody {
+			vw.rigidBodyHighlighter.DrawDebugHighlight(vw.shader, drawRigidBodyFront)
+		}
 		vw.rigidBodyHighlighter.CheckAndClearHighlightOnDebugChange(drawRigidBody)
 	}
 
@@ -723,7 +730,12 @@ func (vw *ViewerWindow) selectRigidBodyByCursor(xpos, ypos float64) {
 				if renderer != nil && renderer.Model != nil && renderer.Model.RigidBodies != nil {
 					rigidBody, err := renderer.Model.RigidBodies.Get(hit.RigidBodyIndex)
 					if err == nil && rigidBody != nil {
-						vw.rigidBodyHighlighter.UpdateDebugHoverByRigidBody(hit.ModelIndex, rigidBody, true)
+						var boneDeltas *delta.BoneDeltas
+						if hit.ModelIndex < len(vw.vmdDeltas) && vw.vmdDeltas[hit.ModelIndex] != nil {
+							boneDeltas = vw.vmdDeltas[hit.ModelIndex].Bones
+						}
+						worldMatrix := vw.rigidBodyWorldMatrix(rigidBody, renderer.Model.Bones, boneDeltas)
+						vw.rigidBodyHighlighter.UpdateDebugHoverByRigidBodyWithMatrix(hit.ModelIndex, rigidBody, worldMatrix, true)
 						vw.rigidBodyHoverActive = true
 						vw.lastRigidBodyHoverAt = time.Now()
 						return
@@ -739,7 +751,16 @@ func (vw *ViewerWindow) selectRigidBodyByCursor(xpos, ypos float64) {
 		vw.rigidBodyHoverActive = false
 		return
 	}
-	vw.rigidBodyHighlighter.UpdateDebugHoverByRigidBody(modelIndex, rigidBody, true)
+	var boneDeltas *delta.BoneDeltas
+	if modelIndex < len(vw.vmdDeltas) && vw.vmdDeltas[modelIndex] != nil {
+		boneDeltas = vw.vmdDeltas[modelIndex].Bones
+	}
+	var bones *model.BoneCollection
+	if modelIndex < len(vw.modelRenderers) && vw.modelRenderers[modelIndex] != nil && vw.modelRenderers[modelIndex].Model != nil {
+		bones = vw.modelRenderers[modelIndex].Model.Bones
+	}
+	worldMatrix := vw.rigidBodyWorldMatrix(rigidBody, bones, boneDeltas)
+	vw.rigidBodyHighlighter.UpdateDebugHoverByRigidBodyWithMatrix(modelIndex, rigidBody, worldMatrix, true)
 	vw.rigidBodyHoverActive = true
 	vw.lastRigidBodyHoverAt = time.Now()
 }
@@ -769,6 +790,8 @@ func (vw *ViewerWindow) findRigidBodyByScreen(xpos, ypos float64) (int, *model.R
 		mgl.NewGlVec3(cam.LookAtCenter),
 		mgl.NewGlVec3(cam.Up),
 	)
+	forward := cam.LookAtCenter.Subed(*cam.Position).Normalized()
+	right := forward.Cross(*cam.Up).Normalized()
 
 	closestDistance := math.MaxFloat64
 	closestModelIndex := -1
@@ -794,8 +817,9 @@ func (vw *ViewerWindow) findRigidBodyByScreen(xpos, ypos float64) (int, *model.R
 			if !ok {
 				continue
 			}
+			pickRadius := rigidBodyScreenRadius(pos, rigidBody, right, view, projection, width, height, screenX, screenY)
 			dist := math.Hypot(screenX-xpos, screenY-ypos)
-			if dist > boneHoverMaxScreenDistance {
+			if dist > pickRadius {
 				continue
 			}
 			if dist < closestDistance {
@@ -855,6 +879,85 @@ func (vw *ViewerWindow) rigidBodyWorldPosition(
 		return mmath.NewVec3(), false
 	}
 	return pos, true
+}
+
+// rigidBodyWorldMatrix は剛体のワールド行列を推定する。
+func (vw *ViewerWindow) rigidBodyWorldMatrix(
+	rigidBody *model.RigidBody,
+	bones *model.BoneCollection,
+	boneDeltas *delta.BoneDeltas,
+) *mmath.Mat4 {
+	if rigidBody == nil {
+		return nil
+	}
+
+	localPos := rigidBody.Position
+	var boneDelta *delta.BoneDelta
+	if bones != nil && rigidBody.BoneIndex >= 0 {
+		bone, err := bones.Get(rigidBody.BoneIndex)
+		if err == nil && bone != nil {
+			localPos = rigidBody.Position.Subed(bone.Position)
+			if boneDeltas != nil && boneDeltas.Contains(bone.Index()) {
+				boneDelta = boneDeltas.Get(bone.Index())
+			}
+		}
+	}
+
+	localRot := rigidBody.Rotation.RadToQuaternion().ToMat4()
+	localRot.Translate(localPos)
+
+	if boneDelta == nil {
+		local := localRot
+		return &local
+	}
+	world := boneDelta.FilledGlobalMatrix().Muled(localRot)
+	return &world
+}
+
+// rigidBodyScreenRadius は剛体の画面上半径を推定する。
+func rigidBodyScreenRadius(
+	center mmath.Vec3,
+	rigidBody *model.RigidBody,
+	right mmath.Vec3,
+	view, projection mgl32.Mat4,
+	width, height int,
+	screenX, screenY float64,
+) float64 {
+	if rigidBody == nil || width == 0 || height == 0 {
+		return boneHoverMaxScreenDistance
+	}
+	radius := rigidBodyBaseRadius(rigidBody) * rigidBodyHoverRadiusScale
+	if radius <= 0 {
+		return boneHoverMaxScreenDistance
+	}
+	edgePos := center.Added(right.MuledScalar(radius))
+	edgeX, edgeY, ok := projectToScreen(edgePos, view, projection, width, height)
+	if !ok {
+		return boneHoverMaxScreenDistance
+	}
+	pixelRadius := math.Hypot(edgeX-screenX, edgeY-screenY)
+	if pixelRadius < rigidBodyHoverMinPixelRadius {
+		pixelRadius = rigidBodyHoverMinPixelRadius
+	}
+	return pixelRadius
+}
+
+// rigidBodyBaseRadius は剛体サイズから基準半径を計算する。
+func rigidBodyBaseRadius(rigidBody *model.RigidBody) float64 {
+	if rigidBody == nil {
+		return 0
+	}
+	size := rigidBody.Size.Absed()
+	switch rigidBody.Shape {
+	case model.SHAPE_SPHERE:
+		return size.X
+	case model.SHAPE_CAPSULE:
+		return size.X + size.Y*0.5
+	case model.SHAPE_BOX:
+		return math.Sqrt(size.X*size.X + size.Y*size.Y + size.Z*size.Z)
+	default:
+		return math.Sqrt(size.X*size.X + size.Y*size.Y + size.Z*size.Z)
+	}
 }
 
 // isInvalidViewerVec3 はNaN/Infを含むベクトルか判定する。
