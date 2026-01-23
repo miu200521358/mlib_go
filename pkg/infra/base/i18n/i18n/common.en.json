@@ -606,5 +606,13 @@
     {
         "id": "&物理冗長ログ表示",
         "translation": "&Physics Verbose Log"
+    },
+    {
+        "id": "&画面移動連動",
+        "translation": "&Link Window Movement"
+    },
+    {
+        "id": "&選択頂点表示",
+        "translation": "&Selected Vertex Display"
     }
 ]
