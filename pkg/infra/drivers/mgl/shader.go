@@ -75,6 +75,16 @@ func (c *uniformLocationCacheStore) get(program uint32, name string) int32 {
 	return loc
 }
 
+// delete は指定プログラムのユニフォーム位置キャッシュを削除する。
+func (c *uniformLocationCacheStore) delete(program uint32) {
+	if program == 0 {
+		return
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	delete(c.cache, program)
+}
+
 // ShaderFactory はOpenGLシェーダーのファクトリー。
 type ShaderFactory struct {
 	windowIndex int
@@ -94,6 +104,7 @@ func (f *ShaderFactory) CreateShader(width, height int) (graphics_api.IShader, e
 	msaa := NewMsaaBuffer(width, height)
 	if err := msaaInitError(msaa); err != nil {
 		logging.DefaultLogger().Error("MSAA初期化エラー: %v", err)
+		msaa.Delete()
 		return nil, err
 	}
 
@@ -111,6 +122,7 @@ func (f *ShaderFactory) CreateShader(width, height int) (graphics_api.IShader, e
 	shader.camera.Store(cam)
 
 	if err := shader.initializePrograms(); err != nil {
+		shader.Cleanup()
 		return nil, err
 	}
 
@@ -121,6 +133,11 @@ func (f *ShaderFactory) CreateShader(width, height int) (graphics_api.IShader, e
 		shader.programs[graphics_api.ProgramTypeOverride],
 		isMainWindow,
 	)
+	if err := overrideInitError(shader.overrideRenderer); err != nil {
+		logging.DefaultLogger().Error("オーバーライド描画の初期化エラー: %v", err)
+		shader.Cleanup()
+		return nil, err
+	}
 
 	return shader, nil
 }
@@ -294,9 +311,13 @@ func (s *Shader) OverrideRenderer() graphics_api.IOverrideRenderer {
 
 // cleanupPrograms はプログラムを削除する。
 func (s *Shader) cleanupPrograms() {
+	if s == nil || s.programs == nil {
+		return
+	}
 	for _, program := range s.programs {
 		if program != 0 {
 			gl.DeleteProgram(program)
+			uniformLocationCache.delete(program)
 		}
 	}
 }
@@ -328,6 +349,18 @@ func msaaInitError(msaa graphics_api.IMsaa) error {
 		return nil
 	}
 	typed, ok := msaa.(interface{ initError() error })
+	if !ok {
+		return nil
+	}
+	return typed.initError()
+}
+
+// overrideInitError はオーバーライド描画の初期化エラーを取得する。
+func overrideInitError(renderer graphics_api.IOverrideRenderer) error {
+	if renderer == nil {
+		return nil
+	}
+	typed, ok := renderer.(interface{ initError() error })
 	if !ok {
 		return nil
 	}

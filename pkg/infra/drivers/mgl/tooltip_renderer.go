@@ -133,6 +133,35 @@ func (r *TooltipRenderer) Render(text string, cursorX, cursorY float32, winWidth
 	gl.Enable(gl.DEPTH_TEST)
 }
 
+// Delete はツールチップ描画に使用したリソースを解放する。
+func (r *TooltipRenderer) Delete() {
+	if r == nil {
+		return
+	}
+	if r.texture != 0 {
+		gl.DeleteTextures(1, &r.texture)
+		r.texture = 0
+	}
+	if r.vbo != 0 {
+		gl.DeleteBuffers(1, &r.vbo)
+		r.vbo = 0
+	}
+	if r.vao != 0 {
+		gl.DeleteVertexArrays(1, &r.vao)
+		r.vao = 0
+	}
+	if r.program != 0 {
+		gl.DeleteProgram(r.program)
+		r.program = 0
+	}
+	if closer, ok := r.face.(interface{ Close() error }); ok {
+		_ = closer.Close()
+	}
+	if closer, ok := r.fallbackFace.(interface{ Close() error }); ok {
+		_ = closer.Close()
+	}
+}
+
 // uploadTextTexture はテキスト用テクスチャを更新する。
 func (r *TooltipRenderer) uploadTextTexture(text string) {
 	padding := 6

@@ -243,7 +243,7 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 	vw.updateBoneHoverExpire()
 	vw.updateRigidBodyHoverExpire()
 	vw.updateJointHoverExpire()
-	var debugBoneHover []*mgl.DebugBoneHover
+	var debugBoneHover []*graphics_api.DebugBoneHover
 	if vw.boneHighlighter != nil {
 		debugBoneHover = vw.boneHighlighter.DebugBoneHoverInfo()
 	}
@@ -301,6 +301,31 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 	}
 
 	vw.SwapBuffers()
+}
+
+// cleanupResources はビューワーが保持するOpenGLリソースを解放する。
+func (vw *ViewerWindow) cleanupResources() {
+	if vw == nil {
+		return
+	}
+	if vw.Window != nil {
+		vw.MakeContextCurrent()
+	}
+
+	for _, renderer := range vw.modelRenderers {
+		if renderer != nil {
+			renderer.Delete()
+		}
+	}
+	vw.modelRenderers = nil
+
+	if vw.tooltipRenderer != nil {
+		vw.tooltipRenderer.Delete()
+	}
+
+	if vw.shader != nil {
+		vw.shader.Cleanup()
+	}
 }
 
 // renderFloor は床グリッドを描画する。
@@ -1069,7 +1094,7 @@ func (vw *ViewerWindow) selectBoneByCursor(xpos, ypos float64) {
 	)
 
 	closestDistance := math.MaxFloat64
-	closestBones := make([]*mgl.DebugBoneHover, 0)
+	closestBones := make([]*graphics_api.DebugBoneHover, 0)
 
 	for modelIndex, vmdDeltas := range vw.vmdDeltas {
 		if vmdDeltas == nil || vmdDeltas.Bones == nil {
@@ -1099,7 +1124,7 @@ func (vw *ViewerWindow) selectBoneByCursor(xpos, ypos float64) {
 				closestBones = closestBones[:0]
 			}
 			if math.Abs(dist-closestDistance) <= 0.01 {
-				closestBones = append(closestBones, &mgl.DebugBoneHover{
+				closestBones = append(closestBones, &graphics_api.DebugBoneHover{
 					ModelIndex: modelIndex,
 					Bone:       boneDelta.Bone,
 					Distance:   dist,

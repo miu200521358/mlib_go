@@ -126,7 +126,7 @@ func (mr *ModelRenderer) drawNormal(windowIndex int, shader graphics_api.IShader
 }
 
 // drawBone は、ボーン表示（ラインとポイント）の描画処理を行います。
-func (mr *ModelRenderer) drawBone(windowIndex int, shader graphics_api.IShader, bones *model.BoneCollection, shared *state.SharedState, paddedMatrixes []float32, width, height int, debugBoneHover []*mgl.DebugBoneHover) {
+func (mr *ModelRenderer) drawBone(windowIndex int, shader graphics_api.IShader, bones *model.BoneCollection, shared *state.SharedState, paddedMatrixes []float32, width, height int, debugBoneHover []*graphics_api.DebugBoneHover) {
 	// モデルの前面にボーンを描画するため、深度テストの設定を変更
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.ALWAYS)
@@ -380,7 +380,7 @@ func selectedSetToSlice(selectedSet map[int]struct{}) []int {
 }
 
 // fetchBoneLineDeltas は、ボーンライン描画用のデバッグカラー情報を取得します。
-func (mr *ModelRenderer) fetchBoneLineDeltas(bones *model.BoneCollection, shared *state.SharedState, info boneDebugInfo, debugBoneHover []*mgl.DebugBoneHover) ([]int, [][]float32) {
+func (mr *ModelRenderer) fetchBoneLineDeltas(bones *model.BoneCollection, shared *state.SharedState, info boneDebugInfo, debugBoneHover []*graphics_api.DebugBoneHover) ([]int, [][]float32) {
 	indexes := make([]int, len(mr.boneLineIndexes))
 	deltas := make([][]float32, len(mr.boneLineIndexes))
 	for i, boneIndex := range mr.boneLineIndexes {
@@ -400,7 +400,7 @@ func (mr *ModelRenderer) fetchBoneLineDeltas(bones *model.BoneCollection, shared
 }
 
 // fetchBonePointDeltas は、ボーンポイント描画用のデバッグカラー情報を取得します。
-func (mr *ModelRenderer) fetchBonePointDeltas(bones *model.BoneCollection, shared *state.SharedState, info boneDebugInfo, debugBoneHover []*mgl.DebugBoneHover) ([]int, [][]float32) {
+func (mr *ModelRenderer) fetchBonePointDeltas(bones *model.BoneCollection, shared *state.SharedState, info boneDebugInfo, debugBoneHover []*graphics_api.DebugBoneHover) ([]int, [][]float32) {
 	indexes := make([]int, len(mr.bonePointIndexes))
 	deltas := make([][]float32, len(mr.bonePointIndexes))
 	for i, boneIndex := range mr.bonePointIndexes {

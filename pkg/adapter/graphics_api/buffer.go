@@ -1,7 +1,11 @@
 // 指示: miu200521358
 package graphics_api
 
-import "unsafe"
+import (
+	"unsafe"
+
+	"github.com/miu200521358/mlib_go/pkg/domain/model"
+)
 
 // BufferType はバッファ種別を表す。
 type BufferType int
@@ -77,4 +81,11 @@ type IVertexArray interface {
 	Delete()
 	// GetID は配列IDを返す。
 	GetID() uint32
+}
+
+// DebugBoneHover はデバッグカーソル下のボーン情報を保持する。
+type DebugBoneHover struct {
+	ModelIndex int         // モデルインデックス
+	Bone       *model.Bone // 検出されたボーン
+	Distance   float64     // カーソルからボーンラインまでの最短距離
 }

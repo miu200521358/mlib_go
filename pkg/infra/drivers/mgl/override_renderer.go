@@ -28,6 +28,8 @@ type OverrideRenderer struct {
 	quadBuffer *VertexBufferHandle
 
 	initErr error
+
+	warnedMissingSharedTexture bool
 }
 
 // NewOverrideRenderer は新しい OverrideRenderer を作成する。
@@ -51,6 +53,7 @@ func NewOverrideRenderer(width, height int, program uint32, isMainWindow bool) g
 // SetSharedTextureID は共有テクスチャIDを設定する。
 func (m *OverrideRenderer) SetSharedTextureID(sharedTextureID *uint32) {
 	m.sharedTextureID = sharedTextureID
+	m.warnedMissingSharedTexture = false
 }
 
 // SharedTextureIDPtr は共有テクスチャIDの参照を返す。
@@ -63,8 +66,18 @@ func (m *OverrideRenderer) TextureIDPtr() *uint32 {
 	return &m.texture
 }
 
+// initError は初期化エラーを返す。
+func (m *OverrideRenderer) initError() error {
+	if m == nil {
+		return nil
+	}
+	return m.initErr
+}
+
 // initFBOAndTexture はFBOとテクスチャを初期化する。
 func (m *OverrideRenderer) initFBOAndTexture() {
+	m.initErr = nil
+
 	// カラー用テクスチャ生成
 	gl.GenTextures(1, &m.texture)
 	gl.BindTexture(gl.TEXTURE_2D, m.texture)
@@ -148,7 +161,10 @@ func (m *OverrideRenderer) Unbind() {
 // Resolve は共有テクスチャを用いて半透明合成を行う。
 func (m *OverrideRenderer) Resolve() {
 	if m.sharedTextureID == nil || *m.sharedTextureID == 0 {
-		logging.DefaultLogger().Warn("共有テクスチャが未設定のためオーバーライド合成をスキップします")
+		if !m.warnedMissingSharedTexture {
+			logging.DefaultLogger().Warn("共有テクスチャが未設定のためオーバーライド合成をスキップします")
+			m.warnedMissingSharedTexture = true
+		}
 		return
 	}
 	// 合成描画

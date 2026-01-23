@@ -253,6 +253,7 @@ func (tm *TextureManager) loadTextureGl(windowIndex int, texture *model.Texture,
 	if texture == nil || texture.Name() == "" {
 		return nil, merr.NewImagePackageError("テクスチャ名が不正です", nil)
 	}
+	displayName := filepath.Base(texture.Name())
 
 	texGl := &textureGl{
 		Texture:     texture,
@@ -269,7 +270,7 @@ func (tm *TextureManager) loadTextureGl(windowIndex int, texture *model.Texture,
 	}
 	image := convertToNRGBA(img)
 	if image == nil {
-		return texGl, merr.NewImagePackageError("テクスチャの変換に失敗しました: "+texture.Name(), nil)
+		return texGl, merr.NewImagePackageError("テクスチャの変換に失敗しました: "+displayName, nil)
 	}
 
 	texGl.IsGeneratedMipmap =
@@ -295,7 +296,7 @@ func (tm *TextureManager) loadTextureGl(windowIndex int, texture *model.Texture,
 	if texGl.IsGeneratedMipmap {
 		gl.GenerateMipmap(gl.TEXTURE_2D)
 	} else {
-		logging.DefaultLogger().Debug("ミップマップ生成エラー: %s", texture.Name())
+		logging.DefaultLogger().Debug("ミップマップ生成エラー: %s", displayName)
 	}
 
 	texGl.unbind()

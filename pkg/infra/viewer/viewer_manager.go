@@ -138,6 +138,7 @@ func (vl *ViewerManager) Run() {
 	}
 
 	for _, vw := range vl.windowList {
+		vw.cleanupResources()
 		vw.Destroy()
 	}
 	vl.stopViewerProfile(logging.DefaultLogger())

@@ -125,7 +125,7 @@ func (mr *ModelRenderer) Delete() {
 
 // Render は、最新の変形情報 vmdDeltas とアプリケーション状態 appState に基づいてモデルを描画します。
 // 描画前にバッファの更新処理を行い、その後各描画パス（メッシュ描画、法線、ボーン、選択頂点など）を呼び出します。
-func (mr *ModelRenderer) Render(shader graphics_api.IShader, shared *state.SharedState, vmdDeltas *delta.VmdDeltas, debugBoneHover []*mgl.DebugBoneHover) {
+func (mr *ModelRenderer) Render(shader graphics_api.IShader, shared *state.SharedState, vmdDeltas *delta.VmdDeltas, debugBoneHover []*graphics_api.DebugBoneHover) {
 	mr.bufferHandle.Bind()
 	defer mr.bufferHandle.Unbind()
 
