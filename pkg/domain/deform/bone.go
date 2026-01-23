@@ -1240,15 +1240,11 @@ func newIkScratch(modelData *model.PmxModel, deformBoneIndexes []int) *ikScratch
 	if modelData != nil && modelData.Bones != nil {
 		size = modelData.Bones.Len()
 	}
-	orderByRank := make([]int, len(deformBoneIndexes))
+	orderByRank := make([]int, size)
 	for i := range orderByRank {
-		orderByRank[i] = -1
+		orderByRank[i] = i
 	}
-	for i, idx := range deformBoneIndexes {
-		if idx >= 0 && idx < size {
-			orderByRank[i] = idx
-		}
-	}
+	sortBoneIndexes(modelData, orderByRank)
 	return &ikScratch{
 		unitUpdatedFlags:   make([]bool, size),
 		unitUpdatedList:    make([]int, 0, size),
@@ -1256,7 +1252,7 @@ func newIkScratch(modelData *model.PmxModel, deformBoneIndexes []int) *ikScratch
 		globalUpdatedFlags: make([]bool, size),
 		globalUpdatedList:  make([]int, 0, size),
 		globalQueue:        make([]int, 0, size),
-		globalRecalc:       make([]int, 0, len(deformBoneIndexes)),
+		globalRecalc:       make([]int, 0, size),
 		orderByRank:        orderByRank,
 	}
 }

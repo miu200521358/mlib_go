@@ -118,8 +118,8 @@ func BuildForPhysics(
 
 // BuildAfterPhysics は物理結果を反映し、物理後変形を行う。
 func BuildAfterPhysics(
-	shared state.ISharedState,
 	core physics_api.IPhysicsCore,
+	physicsEnabled bool,
 	modelIndex int,
 	modelData *model.PmxModel,
 	motionData *motion.VmdMotion,
@@ -132,7 +132,7 @@ func BuildAfterPhysics(
 	deltas.SetFrame(frame)
 	dynamicBones := map[int]struct{}{}
 
-	if core != nil && shared != nil && shared.HasFlag(state.STATE_FLAG_PHYSICS_ENABLED) {
+	if core != nil && physicsEnabled {
 		// 動的剛体の結果をボーンへ反映する。
 		if modelData.RigidBodies != nil {
 			for _, rigidBody := range modelData.RigidBodies.Values() {

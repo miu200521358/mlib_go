@@ -37,7 +37,7 @@ var (
 // boneTextureCache はボーン行列テクスチャの初期化状態を管理する。
 type boneTextureCache struct {
 	mu     sync.Mutex
-	states map[uint32]boneTextureState
+	states map[boneTextureKey]boneTextureState
 }
 
 // boneTextureState はボーン行列テクスチャの状態を保持する。
@@ -47,27 +47,34 @@ type boneTextureState struct {
 	initialized bool
 }
 
+// boneTextureKey はボーン行列テクスチャの識別子。
+type boneTextureKey struct {
+	windowIndex int
+	textureID   uint32
+}
+
 // globalBoneTextureCache はボーン行列テクスチャ状態の共有キャッシュ。
 var globalBoneTextureCache = newBoneTextureCache()
 
 // newBoneTextureCache はボーン行列テクスチャ用のキャッシュを生成する。
 func newBoneTextureCache() *boneTextureCache {
 	return &boneTextureCache{
-		states: make(map[uint32]boneTextureState),
+		states: make(map[boneTextureKey]boneTextureState),
 	}
 }
 
 // needsInit はテクスチャの初期化が必要か判定し、必要なら状態を更新する。
-func (c *boneTextureCache) needsInit(textureID uint32, width, height int) bool {
+func (c *boneTextureCache) needsInit(windowIndex int, textureID uint32, width, height int) bool {
 	if textureID == 0 || width <= 0 || height <= 0 {
 		return false
 	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	state, ok := c.states[textureID]
+	key := boneTextureKey{windowIndex: windowIndex, textureID: textureID}
+	state, ok := c.states[key]
 	if !ok || !state.initialized || state.width != width || state.height != height {
-		c.states[textureID] = boneTextureState{
+		c.states[key] = boneTextureState{
 			width:       width,
 			height:      height,
 			initialized: true,
@@ -276,13 +283,20 @@ func findChildPosition(boneIndex int, bones *model.BoneCollection) (mmath.Vec3, 
 }
 
 // createBoneMatrixes は boneDeltas から ボーン行列テクスチャ用の float32配列を生成する。
-func createBoneMatrixes(boneDeltas *delta.BoneDeltas) ([]float32, int, int, error) {
+func createBoneMatrixes(boneDeltas *delta.BoneDeltas, scratch []float32) ([]float32, int, int, error) {
 	numBones := boneDeltas.Len()
 	texSize := int(math.Ceil(math.Sqrt(float64(numBones))))
 	width := int(math.Ceil(float64(texSize)/4) * 4 * 4)
 	height := int(math.Ceil((float64(numBones) * 4) / float64(width)))
 
-	paddedMatrixes := make([]float32, height*width*4)
+	needed := height * width * 4
+	if cap(scratch) < needed {
+		scratch = make([]float32, needed)
+	} else {
+		scratch = scratch[:needed]
+		clear(scratch)
+	}
+	paddedMatrixes := scratch
 	boneDeltas.ForEach(func(index int, d *delta.BoneDelta) bool {
 		var m mgl32.Mat4
 		if d == nil {
@@ -320,7 +334,7 @@ func bindBoneMatrixes(
 	textureID := shader.BoneTextureID()
 	gl.BindTexture(gl.TEXTURE_2D, textureID)
 
-	needsInit := globalBoneTextureCache.needsInit(textureID, width, height)
+	needsInit := globalBoneTextureCache.needsInit(windowIndex, textureID, width, height)
 	if needsInit {
 		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_LEVEL, 0)
 		gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)

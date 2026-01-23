@@ -10,8 +10,8 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/adapter/graphics_api"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
-	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/mgl"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"github.com/miu200521358/mlib_go/pkg/shared/state"
 )
 
@@ -33,6 +33,8 @@ type ModelRenderer struct {
 
 	// 各材質ごとのメッシュ描画オブジェクト
 	meshes []*MeshRenderer
+	// ボーン行列テクスチャ用の再利用バッファ
+	boneMatrixScratch []float32
 }
 
 // NewModelRendererEmpty は空のModelRendererを生成する。
@@ -130,10 +132,11 @@ func (mr *ModelRenderer) Render(shader graphics_api.IShader, shared *state.Share
 	// モーフの変更情報をもとに、頂点バッファを更新
 	mr.bufferHandle.UpdateVertexDeltas(vmdDeltas.Morphs.Vertices())
 
-	paddedMatrixes, matrixWidth, matrixHeight, err := createBoneMatrixes(vmdDeltas.Bones)
+	paddedMatrixes, matrixWidth, matrixHeight, err := createBoneMatrixes(vmdDeltas.Bones, mr.boneMatrixScratch)
 	if err != nil {
 		return
 	}
+	mr.boneMatrixScratch = paddedMatrixes
 
 	selectedMaterialIndexes := shared.SelectedMaterialIndexes(mr.windowIndex, mr.modelIndex)
 

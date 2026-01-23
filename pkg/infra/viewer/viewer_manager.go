@@ -36,13 +36,15 @@ const (
 
 // ViewerManager はビューワー全体を管理する。
 type ViewerManager struct {
-	shared              *state.SharedState
-	appConfig           *config.AppConfig
-	userConfig          config.IUserConfig
-	windowList          []*ViewerWindow
-	viewerProfileActive bool
-	viewerProfilePath   string
-	viewerProfileFile   *os.File
+	shared                *state.SharedState
+	appConfig             *config.AppConfig
+	userConfig            config.IUserConfig
+	windowList            []*ViewerWindow
+	physicsMotionsScratch []*motion.VmdMotion
+	timeStepsScratch      []float32
+	viewerProfileActive   bool
+	viewerProfilePath     string
+	viewerProfileFile     *os.File
 }
 
 // NewViewerManager はViewerManagerを生成する。
@@ -344,8 +346,23 @@ func (vl *ViewerManager) processFrame(elapsed float64) (bool, float32) {
 			frame, playing, physicsEnabled, len(vl.windowList), elapsed)
 	}
 
-	physicsWorldMotions := make([]*motion.VmdMotion, len(vl.windowList))
-	timeSteps := make([]float32, len(vl.windowList))
+	physicsWorldMotions := vl.physicsMotionsScratch
+	if cap(physicsWorldMotions) < len(vl.windowList) {
+		physicsWorldMotions = make([]*motion.VmdMotion, len(vl.windowList))
+	} else {
+		physicsWorldMotions = physicsWorldMotions[:len(vl.windowList)]
+		clear(physicsWorldMotions)
+	}
+	vl.physicsMotionsScratch = physicsWorldMotions
+
+	timeSteps := vl.timeStepsScratch
+	if cap(timeSteps) < len(vl.windowList) {
+		timeSteps = make([]float32, len(vl.windowList))
+	} else {
+		timeSteps = timeSteps[:len(vl.windowList)]
+		clear(timeSteps)
+	}
+	vl.timeStepsScratch = timeSteps
 
 	// 再生中はフレーム落ちを抑えるため、経過時間を制限する。
 	frameElapsed := float32(elapsed)
@@ -448,10 +465,23 @@ func (vl *ViewerManager) processFrame(elapsed float64) (bool, float32) {
 		if deltaFrame > 0 {
 			frame += deltaFrame
 			if maxFrame > 0 && frame > maxFrame {
-				frame = 0
-				vl.shared.SetPhysicsResetType(maxResetType(vl.shared.PhysicsResetType(), state.PHYSICS_RESET_TYPE_START_FRAME))
+				deltaSaveDone := false
+				for i := range vl.windowList {
+					if vl.shared.IsDeltaSaveEnabled(i) {
+						vl.shared.SetDeltaSaveEnabled(i, false)
+						deltaSaveDone = true
+					}
+				}
+				if deltaSaveDone {
+					frame = maxFrame
+					playing = false
+					vl.shared.DisableFlag(state.STATE_FLAG_PLAYING)
+				} else {
+					frame = 0
+					vl.shared.SetPhysicsResetType(maxResetType(vl.shared.PhysicsResetType(), state.PHYSICS_RESET_TYPE_START_FRAME))
+				}
 			}
-			if len(physicsWorldMotions) > 0 {
+			if playing && len(physicsWorldMotions) > 0 {
 				motionReset := resolveResetTypeFromMotion(physicsWorldMotions[0], motion.Frame(frame))
 				vl.shared.SetPhysicsResetType(maxResetType(vl.shared.PhysicsResetType(), motionReset))
 			}
@@ -717,8 +747,8 @@ func (vl *ViewerManager) deformWindow(
 		}
 		motionData := motionFromIndex(motions, i)
 		vw.vmdDeltas[i] = mdeform.BuildAfterPhysics(
-			vl.shared,
 			vw.physics,
+			physicsEnabled,
 			i,
 			renderer.Model,
 			motionData,
