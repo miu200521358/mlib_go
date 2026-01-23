@@ -6,6 +6,7 @@ package viewer
 
 import (
 	"fmt"
+	"image"
 	"math"
 	"os"
 	"path/filepath"
@@ -42,6 +43,7 @@ type ViewerManager struct {
 	windowList            []*ViewerWindow
 	physicsMotionsScratch []*motion.VmdMotion
 	timeStepsScratch      []float32
+	iconImage             image.Image
 	viewerProfileActive   bool
 	viewerProfilePath     string
 	viewerProfileFile     *os.File
@@ -79,6 +81,7 @@ func (vl *ViewerManager) AddWindow(title string, width, height, positionX, posit
 		positionX,
 		positionY,
 		vl.appConfig,
+		vl.iconImage,
 		mainWindow,
 		vl,
 	)
@@ -87,6 +90,11 @@ func (vl *ViewerManager) AddWindow(title string, width, height, positionX, posit
 	}
 	vl.windowList = append(vl.windowList, vw)
 	return nil
+}
+
+// SetWindowIcon はビューワーウィンドウのアイコン画像を設定する。
+func (vl *ViewerManager) SetWindowIcon(icon image.Image) {
+	vl.iconImage = icon
 }
 
 // InitOverlay はオーバーレイ合成を初期化する。

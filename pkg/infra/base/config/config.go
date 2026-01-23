@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"image"
 	"image/png"
 	"io/fs"
 	"os"
@@ -371,6 +372,31 @@ func MustAppRootDir() string {
 // LoadAppConfig は埋め込み設定を読み込む。
 func LoadAppConfig(appFiles embed.FS) (*config.AppConfig, error) {
 	return loadAppConfigFS(appFiles)
+}
+
+// LoadAppIconImage はアプリアイコン画像を読み込む。
+func LoadAppIconImage(appFiles fs.FS, appConfig *config.AppConfig) (image.Image, error) {
+	iconPath := ""
+	if appConfig != nil {
+		iconPath = appConfig.IconImagePath
+	}
+	if iconPath == "" {
+		iconPath = config.AppIconImagePath
+	}
+	if iconPath == "" {
+		return nil, nil
+	}
+	iconBytes, err := fs.ReadFile(appFiles, iconPath)
+	if err != nil {
+		cause := merr.NewFsPackageError("アプリアイコンの読込に失敗しました: "+iconPath, err)
+		return nil, newAppConfigLoadFailed("アプリアイコンの読込に失敗しました", cause)
+	}
+	iconImage, err := png.Decode(bytes.NewReader(iconBytes))
+	if err != nil {
+		cause := merr.NewImagePackageError("アプリアイコンのデコードに失敗しました: "+iconPath, err)
+		return nil, newAppConfigLoadFailed("アプリアイコンのデコードに失敗しました", cause)
+	}
+	return iconImage, nil
 }
 
 // loadAppConfigFS はFSから設定を読み込む。

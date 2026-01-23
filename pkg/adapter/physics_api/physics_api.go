@@ -8,6 +8,10 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 )
 
+const (
+	PhysicsDefaultMaxSubSteps = 3 // 物理シミュレーションのデフォルト最大サブステップ数
+)
+
 // IPhysicsCore は物理エンジンのコア契約を表す。
 type IPhysicsCore interface {
 	// StepSimulation は物理シミュレーションを1ステップ進める。

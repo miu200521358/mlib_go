@@ -4,6 +4,7 @@ package state
 import (
 	"testing"
 
+	"github.com/miu200521358/mlib_go/pkg/adapter/physics_api"
 	"github.com/miu200521358/mlib_go/pkg/shared/hashable"
 )
 
@@ -31,7 +32,7 @@ func TestNewSharedStateDefaults(t *testing.T) {
 	if !ok {
 		t.Fatalf("PhysicsWorldMotion type mismatch")
 	}
-	if phys.Gravity != -9.8 || phys.MaxSubSteps != 2 || phys.FixedTimeStep != 60 {
+	if phys.Gravity != -9.8 || phys.MaxSubSteps != physics_api.PhysicsDefaultMaxSubSteps || phys.FixedTimeStep != 60 {
 		t.Errorf("Physics defaults: got=%v", phys)
 	}
 	wind, ok := ss.WindMotion(0).(*defaultMotion)

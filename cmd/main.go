@@ -71,6 +71,18 @@ func main() {
 		return mbullet.NewPhysicsEngine(gravity)
 	})
 
+	iconImage, iconErr := config.LoadAppIconImage(appFiles, appConfig)
+	if iconErr != nil {
+		logger.Error("アプリアイコンの読込に失敗しました: %s", iconErr.Error())
+	}
+	var appIcon *walk.Icon
+	if iconImage != nil {
+		appIcon, iconErr = walk.NewIconFromImageForDPI(iconImage, 96)
+		if iconErr != nil {
+			logger.Error("アプリアイコンの生成に失敗しました: %s", iconErr.Error())
+		}
+	}
+
 	shared := state.NewSharedState(viewerCount)
 	sharedState, ok := shared.(*state.SharedState)
 	if !ok {
@@ -85,6 +97,9 @@ func main() {
 		controlWindowErr error
 	)
 	viewerManager := viewer.NewViewerManager(sharedState, baseServices)
+	if iconImage != nil {
+		viewerManager.SetWindowIcon(iconImage)
+	}
 
 	go func() {
 		defer app.SafeExecute(appConfig, func() {
@@ -102,6 +117,9 @@ func main() {
 			if controlWindowErr != nil {
 				err.ShowFatalErrorDialog(appConfig, controlWindowErr)
 				return
+			}
+			if appIcon != nil {
+				controlWindow.SetIcon(appIcon)
 			}
 
 			widgets.SetWindow(controlWindow)

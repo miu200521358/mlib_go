@@ -5,6 +5,7 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/miu200521358/mlib_go/pkg/adapter/physics_api"
 	"github.com/miu200521358/mlib_go/pkg/shared/contracts/mtime"
 	"github.com/miu200521358/mlib_go/pkg/shared/hashable"
 )
@@ -939,7 +940,7 @@ func newDefaultPhysicsWorldMotion() IStateMotion {
 	m := &defaultMotion{
 		HashableBase:  base,
 		Gravity:       -9.8,
-		MaxSubSteps:   2,
+		MaxSubSteps:   physics_api.PhysicsDefaultMaxSubSteps,
 		FixedTimeStep: 60,
 		WindEnabled:   false,
 		WindDirection: [3]float32{0, 0, 0},

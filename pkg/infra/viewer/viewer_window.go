@@ -5,6 +5,7 @@
 package viewer
 
 import (
+	"image"
 	"math"
 	"strings"
 	"time"
@@ -92,7 +93,7 @@ type ViewerWindow struct {
 
 // newViewerWindow はビューワーウィンドウを生成して初期化する。
 func newViewerWindow(windowIndex int, title string, width, height, positionX, positionY int,
-	appConfig *config.AppConfig, mainWindow *glfw.Window, list *ViewerManager) (*ViewerWindow, error) {
+	appConfig *config.AppConfig, icon image.Image, mainWindow *glfw.Window, list *ViewerManager) (*ViewerWindow, error) {
 	glfw.WindowHint(glfw.Resizable, glfw.True)
 	glfw.WindowHint(glfw.Samples, 4)
 	glfw.WindowHint(glfw.ContextVersionMajor, 4)
@@ -108,6 +109,9 @@ func newViewerWindow(windowIndex int, title string, width, height, positionX, po
 	}
 	glWindow.MakeContextCurrent()
 	glWindow.SetInputMode(glfw.StickyKeysMode, glfw.True)
+	if icon != nil {
+		glWindow.SetIcon([]image.Image{icon})
+	}
 	glfw.SwapInterval(0)
 
 	if err := gl.Init(); err != nil {
