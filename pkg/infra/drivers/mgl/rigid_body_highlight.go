@@ -10,7 +10,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/adapter/graphics_api"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
-	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"gonum.org/v1/gonum/spatial/r3"
 )
 
@@ -63,7 +62,6 @@ func (mp *RigidBodyHighlighter) UpdateDebugHoverByRigidBodyWithMatrix(
 	worldMatrix *mmath.Mat4,
 	enable bool,
 ) {
-	logging.DefaultLogger().Verbose(logging.VERBOSE_INDEX_PHYSICS, "剛体ハイライト更新: enable=%v, rigidBody=%v", enable, rb != nil)
 	if !enable || rb == nil {
 		mp.clearDebugHover()
 		return
@@ -128,7 +126,6 @@ func (mp *RigidBodyHighlighter) CheckAndClearExpiredHighlight() {
 		return
 	}
 	if time.Since(mp.debugHoverStartTime) >= 2*time.Second {
-		logging.DefaultLogger().Verbose(logging.VERBOSE_INDEX_PHYSICS, "剛体ハイライト自動クリア: 2秒経過しました")
 		mp.clearDebugHover()
 	}
 }

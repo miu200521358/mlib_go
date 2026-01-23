@@ -2,11 +2,9 @@
 package mgl
 
 import (
-	"strings"
 	"time"
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/graphics_api"
-	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 )
 
 // BoneHighlighter はボーンのデバッグハイライトを管理する。
@@ -35,31 +33,19 @@ func (mp *BoneHighlighter) CheckAndClearExpiredHighlight() {
 
 	// 2秒経過をチェック
 	if time.Since(mp.debugBoneHoverStartTime) >= 2*time.Second {
-		logging.DefaultLogger().Verbose(logging.VERBOSE_INDEX_VIEWER, "ハイライト自動クリア: 2秒経過しました")
 		mp.clearDebugBoneHover()
 	}
 }
 
 // UpdateDebugHoverByBones は複数ボーンによるハイライト情報を更新する。
 func (mp *BoneHighlighter) UpdateDebugHoverByBones(closestBones []*graphics_api.DebugBoneHover, enable bool) {
-	logging.DefaultLogger().Verbose(logging.VERBOSE_INDEX_VIEWER, "複数ボーンハイライト開始: enable=%v, bone数=%d", enable, len(closestBones))
-
 	if !enable || len(closestBones) == 0 {
-		logging.DefaultLogger().Verbose(logging.VERBOSE_INDEX_VIEWER, "複数ボーンハイライト無効またはbonesが空 - クリア")
 		mp.clearDebugBoneHover()
 		return
 	}
 
 	mp.debugBoneHover = closestBones
 	mp.debugBoneHoverStartTime = time.Now() // タイマー開始
-
-	var boneNames []string
-	for _, bone := range closestBones {
-		if bone != nil {
-			boneNames = append(boneNames, bone.Bone.Name())
-		}
-	}
-	logging.DefaultLogger().Verbose(logging.VERBOSE_INDEX_VIEWER, "複数ボーンハイライト設定完了: %d個のボーン [%s]", len(closestBones), strings.Join(boneNames, ", "))
 }
 
 // CheckAndClearBoneExpiredHighlight は2秒経過したボーンハイライトを自動的にクリアする。
@@ -71,7 +57,6 @@ func (mp *BoneHighlighter) CheckAndClearBoneExpiredHighlight() {
 
 	// 2秒経過をチェック
 	if time.Since(mp.debugBoneHoverStartTime) >= 2*time.Second {
-		logging.DefaultLogger().Verbose(logging.VERBOSE_INDEX_VIEWER, "ボーンハイライト自動クリア: 2秒経過しました")
 		mp.clearDebugBoneHover()
 	}
 }
