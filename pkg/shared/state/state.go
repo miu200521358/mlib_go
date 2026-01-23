@@ -253,7 +253,7 @@ func NewSharedState(viewerCount int) ISharedState {
 	ss.fpsLimitTriggered.Store(false)
 	ss.controlWindowMoving.Store(false)
 	ss.closed.Store(false)
-	ss.focusLinkEnabled.Store(false)
+	ss.focusLinkEnabled.Store(true)
 	ss.linkingFocus.Store(false)
 	ss.physicsResetType.Store(int32(PHYSICS_RESET_TYPE_NONE))
 

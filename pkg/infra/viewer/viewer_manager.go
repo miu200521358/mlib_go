@@ -286,10 +286,30 @@ func (vl *ViewerManager) handleWindowFocus() {
 	if !vl.shared.IsControlWindowReady() || !vl.shared.IsAllViewerWindowsReady() {
 		return
 	}
+	logger := logging.DefaultLogger()
+	verboseEnabled := false
+	if logger != nil {
+		verboseEnabled = logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER)
+	}
+	if vl.shared.IsControlWindowFocused() {
+		vl.bringViewerWindowsToFrontNoActivate()
+		vl.bringControlWindowToFrontNoActivate()
+		if verboseEnabled && logger != nil {
+			logger.Verbose(logging.VERBOSE_INDEX_VIEWER, "フォーカス連動: コントローラー操作で他ウィンドウを前面化 -> 自分を再前面化")
+		}
+		vl.shared.KeepFocus()
+		vl.shared.SetControlWindowFocused(false)
+		return
+	}
 	for i := len(vl.windowList) - 1; i >= 0; i-- {
 		if vl.shared.IsViewerWindowFocused(i) {
-			vl.windowList[i].Focus()
 			vl.bringControlWindowToFrontNoActivate()
+			vl.bringViewerWindowsToFrontNoActivateExcept(i)
+			vl.bringWindowToFrontNoActivate(vl.shared.ViewerWindowHandle(i))
+			vl.windowList[i].Focus()
+			if verboseEnabled && logger != nil {
+				logger.Verbose(logging.VERBOSE_INDEX_VIEWER, "フォーカス連動: ビューワー%d操作で他ウィンドウを前面化 -> 自分を再前面化", i)
+			}
 			vl.shared.KeepFocus()
 			vl.shared.SetViewerWindowFocused(i, false)
 			return
@@ -297,18 +317,40 @@ func (vl *ViewerManager) handleWindowFocus() {
 	}
 }
 
+// bringViewerWindowsToFrontNoActivate はビューワーウィンドウを前面化する（フォーカスは奪わない）。
+func (vl *ViewerManager) bringViewerWindowsToFrontNoActivate() {
+	for i := 0; i < len(vl.windowList); i++ {
+		handle := vl.shared.ViewerWindowHandle(i)
+		vl.bringWindowToFrontNoActivate(handle)
+	}
+}
+
+// bringViewerWindowsToFrontNoActivateExcept は指定したビューワー以外を前面化する。
+func (vl *ViewerManager) bringViewerWindowsToFrontNoActivateExcept(excludeIndex int) {
+	for i := 0; i < len(vl.windowList); i++ {
+		if i == excludeIndex {
+			continue
+		}
+		handle := vl.shared.ViewerWindowHandle(i)
+		vl.bringWindowToFrontNoActivate(handle)
+	}
+}
+
 // bringControlWindowToFrontNoActivate はコントロールウィンドウを前面化する（フォーカスは奪わない）。
 func (vl *ViewerManager) bringControlWindowToFrontNoActivate() {
-	handle := vl.shared.ControlWindowHandle()
+	vl.bringWindowToFrontNoActivate(vl.shared.ControlWindowHandle())
+}
+
+// bringWindowToFrontNoActivate はウィンドウを非アクティブのまま前面へ移動する。
+func (vl *ViewerManager) bringWindowToFrontNoActivate(handle state.WindowHandle) {
 	if handle == 0 {
 		return
 	}
-	win.SetWindowPos(
-		win.HWND(uintptr(handle)),
-		win.HWND_TOP,
-		0, 0, 0, 0,
-		win.SWP_NOMOVE|win.SWP_NOSIZE|win.SWP_NOACTIVATE,
-	)
+	hwnd := win.HWND(uintptr(handle))
+	flags := uint32(win.SWP_NOMOVE | win.SWP_NOSIZE | win.SWP_NOACTIVATE)
+	// 他アプリの前面でも可視になるよう、TOPMOSTの付け外しで前面化する。
+	win.SetWindowPos(hwnd, win.HWND_TOPMOST, 0, 0, 0, 0, flags)
+	win.SetWindowPos(hwnd, win.HWND_NOTOPMOST, 0, 0, 0, 0, flags)
 }
 
 // handleVSync はVSyncの切り替えを処理する。
