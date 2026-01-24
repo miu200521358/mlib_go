@@ -24,6 +24,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/render"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"github.com/miu200521358/mlib_go/pkg/shared/state"
 )
 
@@ -202,7 +203,26 @@ func (vw *ViewerWindow) SetTitle(title string) {
 
 // resetCameraPosition はカメラの視点をリセットして同期する。
 func (vw *ViewerWindow) resetCameraPosition(yaw, pitch float64) {
-	vw.shader.Camera().ResetPosition(yaw, pitch)
+	cam := vw.shader.Camera()
+	if cam == nil {
+		return
+	}
+	cam.ResetPosition(yaw, pitch)
+	if cam.FieldOfView == 0 {
+		cam.FieldOfView = graphics_api.FieldOfViewAngle
+	}
+	vw.syncCameraToOthers()
+}
+
+// resetCameraPositionForPreset はカメラの視点とFOVを既定値へ戻して同期する。
+func (vw *ViewerWindow) resetCameraPositionForPreset(yaw, pitch float64) {
+	cam := vw.shader.Camera()
+	if cam == nil {
+		return
+	}
+	cam.ResetPosition(yaw, pitch)
+	cam.FieldOfView = graphics_api.FieldOfViewAngle
+	vw.shader.SetCamera(cam)
 	vw.syncCameraToOthers()
 }
 
@@ -449,6 +469,29 @@ func (vw *ViewerWindow) closeCallback(_ *glfw.Window) {
 
 // keyCallback はキー入力を処理する。
 func (vw *ViewerWindow) keyCallback(_ *glfw.Window, key glfw.Key, _ int, action glfw.Action, _ glfw.ModifierKey) {
+	logger := logging.DefaultLogger()
+	verbose := logger != nil && logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER)
+	if verbose && action != glfw.Release {
+		if (key >= glfw.KeyKP0 && key <= glfw.KeyKP9) || key == glfw.KeyKPDecimal {
+			actionLabel := "不明"
+			switch action {
+			case glfw.Press:
+				actionLabel = "押下"
+			case glfw.Release:
+				actionLabel = "離し"
+			case glfw.Repeat:
+				actionLabel = "リピート"
+			}
+			logger.Verbose(
+				logging.VERBOSE_INDEX_VIEWER,
+				"操作: テンキー key=%d action=%s shift=%t ctrl=%t",
+				key,
+				actionLabel,
+				vw.isShiftPressed(),
+				vw.isCtrlPressed(),
+			)
+		}
+	}
 	switch action {
 	case glfw.Press:
 		switch key {
@@ -471,7 +514,22 @@ func (vw *ViewerWindow) keyCallback(_ *glfw.Window, key glfw.Key, _ int, action 
 	}
 
 	if preset, ok := cameraPresets[key]; ok {
-		vw.resetCameraPosition(preset.Yaw, preset.Pitch)
+		vw.resetCameraPositionForPreset(preset.Yaw, preset.Pitch)
+		if verbose {
+			cam := vw.shader.Camera()
+			fov := float32(0)
+			if cam != nil {
+				fov = cam.FieldOfView
+			}
+			logger.Verbose(logging.VERBOSE_INDEX_VIEWER,
+				"操作: カメラプリセット name=%s key=%d yaw=%.3f pitch=%.3f fov=%.3f",
+				preset.Name,
+				key,
+				preset.Yaw,
+				preset.Pitch,
+				fov,
+			)
+		}
 	}
 }
 
@@ -1265,30 +1323,80 @@ func hasBoneFlag(bone *model.Bone, flag model.BoneFlag) bool {
 	return bone.BoneFlag&flag != 0
 }
 
-// updateCameraAngleByCursor はカーソル移動でカメラ角度を更新する。
-func (vw *ViewerWindow) updateCameraAngleByCursor(xpos, ypos float64) {
-	ratio := 0.1
-	if vw.shiftPressed {
-		ratio *= 3
-	} else if vw.ctrlPressed {
+// modifierState は修飾キーの状態と倍率を返す。
+func (vw *ViewerWindow) modifierState(base float64) (float64, bool, bool) {
+	shift := vw.isShiftPressed()
+	ctrl := vw.isCtrlPressed()
+	ratio := base
+	if shift {
+		ratio *= 10.0
+	} else if ctrl {
 		ratio *= 0.1
 	}
+	return ratio, shift, ctrl
+}
 
+// isShiftPressed はShiftキーが押されているか判定する。
+func (vw *ViewerWindow) isShiftPressed() bool {
+	if vw == nil {
+		return false
+	}
+	if vw.shiftPressed {
+		return true
+	}
+	if vw.Window == nil {
+		return false
+	}
+	return vw.Window.GetKey(glfw.KeyLeftShift) == glfw.Press ||
+		vw.Window.GetKey(glfw.KeyRightShift) == glfw.Press
+}
+
+// isCtrlPressed はCtrlキーが押されているか判定する。
+func (vw *ViewerWindow) isCtrlPressed() bool {
+	if vw == nil {
+		return false
+	}
+	if vw.ctrlPressed {
+		return true
+	}
+	if vw.Window == nil {
+		return false
+	}
+	return vw.Window.GetKey(glfw.KeyLeftControl) == glfw.Press ||
+		vw.Window.GetKey(glfw.KeyRightControl) == glfw.Press
+}
+
+// updateCameraAngleByCursor はカーソル移動でカメラ角度を更新する。
+func (vw *ViewerWindow) updateCameraAngleByCursor(xpos, ypos float64) {
+	ratio, shift, ctrl := vw.modifierState(0.1)
 	xOffset := (xpos - vw.prevCursorPos.X) * ratio
 	yOffset := (ypos - vw.prevCursorPos.Y) * ratio
 	cam := vw.shader.Camera()
-	vw.resetCameraPosition(cam.Yaw+xOffset, cam.Pitch+yOffset)
+	if cam == nil {
+		return
+	}
+	newYaw := cam.Yaw + xOffset
+	newPitch := cam.Pitch + yOffset
+	logger := logging.DefaultLogger()
+	if logger != nil && logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
+		logger.Verbose(logging.VERBOSE_INDEX_VIEWER,
+			"操作: 回転 window=%d shift=%t ctrl=%t ratio=%.3f dx=%.3f dy=%.3f yaw=%.3f pitch=%.3f",
+			vw.windowIndex,
+			shift,
+			ctrl,
+			ratio,
+			xOffset,
+			yOffset,
+			newYaw,
+			newPitch,
+		)
+	}
+	vw.resetCameraPosition(newYaw, newPitch)
 }
 
 // updateCameraPositionByCursor はカーソル移動でカメラ位置を更新する。
 func (vw *ViewerWindow) updateCameraPositionByCursor(xpos, ypos float64) {
-	ratio := 0.07
-	if vw.shiftPressed {
-		ratio *= 3
-	} else if vw.ctrlPressed {
-		ratio *= 0.1
-	}
-
+	ratio, shift, ctrl := vw.modifierState(0.07)
 	xOffset := (vw.prevCursorPos.X - xpos) * ratio
 	yOffset := (vw.prevCursorPos.Y - ypos) * ratio
 
@@ -1305,6 +1413,21 @@ func (vw *ViewerWindow) updateCameraPositionByCursor(xpos, ypos float64) {
 	rightMovement := right.MuledScalar(-xOffset)
 	movement := upMovement.Added(rightMovement)
 
+	logger := logging.DefaultLogger()
+	if logger != nil && logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
+		logger.Verbose(logging.VERBOSE_INDEX_VIEWER,
+			"操作: 移動 window=%d shift=%t ctrl=%t ratio=%.3f dx=%.3f dy=%.3f move=[x=%.3f y=%.3f z=%.3f]",
+			vw.windowIndex,
+			shift,
+			ctrl,
+			ratio,
+			xOffset,
+			yOffset,
+			movement.X,
+			movement.Y,
+			movement.Z,
+		)
+	}
 	cam.Position.Add(movement)
 	cam.LookAtCenter.Add(movement)
 	vw.shader.SetCamera(cam)
@@ -1343,13 +1466,8 @@ func (vw *ViewerWindow) syncCameraToOthers() {
 
 // scrollCallback はホイール操作でカメラのFOVを調整する。
 func (vw *ViewerWindow) scrollCallback(_ *glfw.Window, _ float64, yoff float64) {
-	step := float32(1.0)
-	if vw.shiftPressed {
-		step *= 5
-	} else if vw.ctrlPressed {
-		step *= 0.1
-	}
-
+	stepRatio, shift, ctrl := vw.modifierState(1.0)
+	step := float32(stepRatio)
 	cam := vw.shader.Camera()
 	if cam == nil {
 		return
@@ -1363,6 +1481,18 @@ func (vw *ViewerWindow) scrollCallback(_ *glfw.Window, _ float64, yoff float64) 
 		cam.FieldOfView += step
 	}
 	vw.shader.SetCamera(cam)
+	logger := logging.DefaultLogger()
+	if logger != nil && logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
+		logger.Verbose(logging.VERBOSE_INDEX_VIEWER,
+			"操作: ズーム window=%d shift=%t ctrl=%t step=%.3f yoff=%.3f fov=%.3f",
+			vw.windowIndex,
+			shift,
+			ctrl,
+			stepRatio,
+			yoff,
+			cam.FieldOfView,
+		)
+	}
 	vw.syncCameraToOthers()
 }
 

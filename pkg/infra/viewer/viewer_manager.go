@@ -294,17 +294,9 @@ func (vl *ViewerManager) handleWindowFocus() {
 	if !vl.shared.IsControlWindowReady() || !vl.shared.IsAllViewerWindowsReady() {
 		return
 	}
-	logger := logging.DefaultLogger()
-	verboseEnabled := false
-	if logger != nil {
-		verboseEnabled = logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER)
-	}
 	if vl.shared.IsControlWindowFocused() {
 		vl.bringViewerWindowsToFrontNoActivate()
 		vl.bringControlWindowToFrontNoActivate()
-		if verboseEnabled && logger != nil {
-			logger.Verbose(logging.VERBOSE_INDEX_VIEWER, "フォーカス連動: コントローラー操作で他ウィンドウを前面化 -> 自分を再前面化")
-		}
 		vl.shared.KeepFocus()
 		vl.shared.SetControlWindowFocused(false)
 		return
@@ -315,9 +307,6 @@ func (vl *ViewerManager) handleWindowFocus() {
 			vl.bringViewerWindowsToFrontNoActivateExcept(i)
 			vl.bringWindowToFrontNoActivate(vl.shared.ViewerWindowHandle(i))
 			vl.windowList[i].Focus()
-			if verboseEnabled && logger != nil {
-				logger.Verbose(logging.VERBOSE_INDEX_VIEWER, "フォーカス連動: ビューワー%d操作で他ウィンドウを前面化 -> 自分を再前面化", i)
-			}
 			vl.shared.KeepFocus()
 			vl.shared.SetViewerWindowFocused(i, false)
 			return
