@@ -133,12 +133,18 @@ func NewControlWindow(shared *state.SharedState, baseServices base.IBaseServices
 	}
 
 	controllerItems := cw.buildControllerMenuItems()
-	if len(helpMenuItems) > 0 {
-		controllerItems = append(controllerItems, declarative.Separator{})
-		controllerItems = append(controllerItems, helpMenuItems...)
-	}
+	toolMenuItems := helpMenuItems
 
 	var consoleContainer *walk.Composite
+
+	menuItems := []declarative.MenuItem{
+		cw.buildViewerMenu(),
+		declarative.Menu{Text: cw.t("&コントローラーウィンドウ"), Items: controllerItems},
+	}
+	if len(toolMenuItems) > 0 {
+		menuItems = append(menuItems, declarative.Menu{Text: cw.t("&ツールについて"), Items: toolMenuItems})
+	}
+	menuItems = append(menuItems, declarative.Menu{Text: cw.t("&言語"), Items: cw.buildLanguageMenu()})
 
 	if err := (declarative.MainWindow{
 		AssignTo: &cw.MainWindow,
@@ -148,11 +154,7 @@ func NewControlWindow(shared *state.SharedState, baseServices base.IBaseServices
 		Background: declarative.SolidColorBrush{
 			Color: ColorWindowBackground,
 		},
-		MenuItems: []declarative.MenuItem{
-			cw.buildViewerMenu(),
-			declarative.Menu{Text: cw.t("&コントローラーウィンドウ"), Items: controllerItems},
-			declarative.Menu{Text: cw.t("&言語"), Items: cw.buildLanguageMenu()},
-		},
+		MenuItems: menuItems,
 		Children: []declarative.Widget{
 			declarative.TabWidget{AssignTo: &cw.tabWidget, Pages: tabPages},
 			declarative.Composite{

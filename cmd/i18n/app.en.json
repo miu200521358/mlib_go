@@ -78,5 +78,21 @@
     {
         "id": "モーションファイルを選択してください",
         "translation": "Please select a motion file"
+    },
+    {
+        "id": "材質ビュー",
+        "translation": "Material View"
+    },
+    {
+        "id": "材質ビュー説明",
+        "translation": "Material View Help"
+    },
+    {
+        "id": "全",
+        "translation": "All"
+    },
+    {
+        "id": "反",
+        "translation": "Invert"
     }
 ]

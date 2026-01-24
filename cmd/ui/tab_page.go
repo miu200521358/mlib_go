@@ -6,12 +6,14 @@ package ui
 
 import (
 	"errors"
+	"path/filepath"
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
 	"github.com/miu200521358/mlib_go/pkg/infra/controller"
 	"github.com/miu200521358/mlib_go/pkg/infra/controller/widget"
+	"github.com/miu200521358/mlib_go/pkg/infra/file/mfile"
 	"github.com/miu200521358/mlib_go/pkg/shared/base"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
@@ -25,9 +27,10 @@ type overrideBoneInserter interface {
 	InsertShortageOverrideBones() error
 }
 
-// NewTabPage はサンプル用のタブページを生成する。
-func NewTabPage(mWidgets *controller.MWidgets, baseServices base.IBaseServices) declarative.TabPage {
+// NewTabPages はサンプル用のタブページ群を生成する。
+func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices) []declarative.TabPage {
 	var fileTab *walk.TabPage
+	var materialTab *walk.TabPage
 
 	var translator i18n.II18n
 	var logger logging.ILogger
@@ -45,6 +48,37 @@ func NewTabPage(mWidgets *controller.MWidgets, baseServices base.IBaseServices) 
 
 	player := widget.NewMotionPlayer(translator)
 
+	materialView := widget.NewMaterialTableView(
+		translator,
+		translate(translator, "材質ビュー説明"),
+		func(cw *controller.ControlWindow, indexes []int) {
+			if cw == nil {
+				return
+			}
+			cw.SetSelectedMaterialIndexes(0, 0, indexes)
+		},
+	)
+
+	allMaterialButton := widget.NewMPushButton()
+	allMaterialButton.SetLabel(translate(translator, "全"))
+	allMaterialButton.SetMinSize(declarative.Size{Width: 50})
+	allMaterialButton.SetOnClicked(func(cw *controller.ControlWindow) {
+		if materialView == nil {
+			return
+		}
+		materialView.SetAllChecked(true)
+	})
+
+	invertMaterialButton := widget.NewMPushButton()
+	invertMaterialButton.SetLabel(translate(translator, "反"))
+	invertMaterialButton.SetMinSize(declarative.Size{Width: 50})
+	invertMaterialButton.SetOnClicked(func(cw *controller.ControlWindow) {
+		if materialView == nil {
+			return
+		}
+		materialView.InvertChecked()
+	})
+
 	pmxLoad11Picker := widget.NewPmxXLoadFilePicker(
 		userConfig,
 		translator,
@@ -52,7 +86,7 @@ func NewTabPage(mWidgets *controller.MWidgets, baseServices base.IBaseServices) 
 		translate(translator, "モデルファイル1-1"),
 		translate(translator, "モデルファイルを選択してください"),
 		func(cw *controller.ControlWindow, rep io_common.IFileReader, path string) {
-			loadModel(logger, translator, cw, rep, path, 0, 0)
+			loadModel(logger, translator, cw, rep, path, materialView, 0, 0)
 		},
 	)
 
@@ -74,7 +108,7 @@ func NewTabPage(mWidgets *controller.MWidgets, baseServices base.IBaseServices) 
 		translate(translator, "モデルファイル2-1"),
 		translate(translator, "モデルファイルを選択してください"),
 		func(cw *controller.ControlWindow, rep io_common.IFileReader, path string) {
-			loadModel(logger, translator, cw, rep, path, 1, 0)
+			loadModel(logger, translator, cw, rep, path, nil, 1, 0)
 		},
 	)
 
@@ -90,7 +124,7 @@ func NewTabPage(mWidgets *controller.MWidgets, baseServices base.IBaseServices) 
 	)
 
 	mWidgets.Widgets = append(mWidgets.Widgets, player, pmxLoad11Picker, vmdLoad11Picker,
-		pmxLoad21Picker, vmdLoad21Picker)
+		pmxLoad21Picker, vmdLoad21Picker, materialView, allMaterialButton, invertMaterialButton)
 
 	mWidgets.SetOnLoaded(func() {
 		if mWidgets == nil || mWidgets.Window() == nil {
@@ -103,7 +137,7 @@ func NewTabPage(mWidgets *controller.MWidgets, baseServices base.IBaseServices) 
 		})
 	})
 
-	return declarative.TabPage{
+	fileTabPage := declarative.TabPage{
 		Title:    translate(translator, "ファイル"),
 		AssignTo: &fileTab,
 		Layout:   declarative.VBox{},
@@ -127,31 +161,71 @@ func NewTabPage(mWidgets *controller.MWidgets, baseServices base.IBaseServices) 
 			},
 		},
 	}
+
+	materialTabPage := declarative.TabPage{
+		Title:    translate(translator, "材質ビュー"),
+		AssignTo: &materialTab,
+		Layout:   declarative.VBox{},
+		Background: declarative.SolidColorBrush{
+			Color: controller.ColorTabBackground,
+		},
+		Children: []declarative.Widget{
+			declarative.Composite{
+				Layout: declarative.HBox{},
+				Children: []declarative.Widget{
+					declarative.TextLabel{Text: translate(translator, "材質ビュー")},
+					declarative.HSpacer{},
+					allMaterialButton.Widgets(),
+					invertMaterialButton.Widgets(),
+				},
+			},
+			materialView.Widgets(),
+		},
+	}
+
+	return []declarative.TabPage{fileTabPage, materialTabPage}
+}
+
+// NewTabPage はサンプル用のタブページを生成する。
+func NewTabPage(mWidgets *controller.MWidgets, baseServices base.IBaseServices) declarative.TabPage {
+	return NewTabPages(mWidgets, baseServices)[0]
 }
 
 // loadModel はモデル読み込み結果をControlWindowへ反映する。
-func loadModel(logger logging.ILogger, translator i18n.II18n, cw *controller.ControlWindow, rep io_common.IFileReader, path string, windowIndex, modelIndex int) {
+func loadModel(logger logging.ILogger, translator i18n.II18n, cw *controller.ControlWindow, rep io_common.IFileReader, path string, materialView *widget.MaterialTableView, windowIndex, modelIndex int) {
 	if cw == nil {
 		return
 	}
 	if path == "" {
+		if materialView != nil {
+			materialView.ResetRows(nil)
+		}
 		cw.SetModel(windowIndex, modelIndex, nil)
 		return
 	}
 	if rep == nil {
 		logLoadFailed(logger, translator, errors.New("モデル読み込みリポジトリがありません"))
+		if materialView != nil {
+			materialView.ResetRows(nil)
+		}
 		cw.SetModel(windowIndex, modelIndex, nil)
 		return
 	}
 	data, err := rep.Load(path)
 	if err != nil {
 		logLoadFailed(logger, translator, err)
+		if materialView != nil {
+			materialView.ResetRows(nil)
+		}
 		cw.SetModel(windowIndex, modelIndex, nil)
 		return
 	}
 	modelData, ok := data.(*model.PmxModel)
 	if !ok {
 		logLoadFailed(logger, translator, errors.New("モデル形式が不正です"))
+		if materialView != nil {
+			materialView.ResetRows(nil)
+		}
 		cw.SetModel(windowIndex, modelIndex, nil)
 		return
 	}
@@ -162,7 +236,44 @@ func loadModel(logger logging.ILogger, translator i18n.II18n, cw *controller.Con
 			}
 		}
 	}
+	if materialView != nil {
+		validateModelTextures(modelData)
+		materialView.ResetRows(modelData)
+	}
 	cw.SetModel(windowIndex, modelIndex, modelData)
+}
+
+// validateModelTextures はモデルのテクスチャ有効性を検証する。
+func validateModelTextures(modelData *model.PmxModel) {
+	if modelData == nil || modelData.Textures == nil {
+		return
+	}
+
+	baseDir := filepath.Dir(modelData.Path())
+	for _, texture := range modelData.Textures.Values() {
+		if texture == nil {
+			continue
+		}
+		name := texture.Name()
+		if name == "" {
+			texture.SetValid(false)
+			continue
+		}
+		texturePath := name
+		if !filepath.IsAbs(texturePath) {
+			texturePath = filepath.Join(baseDir, texturePath)
+		}
+		exists, err := mfile.ExistsFile(texturePath)
+		if err != nil || !exists {
+			texture.SetValid(false)
+			continue
+		}
+		if _, err := mfile.LoadImage(texturePath); err != nil {
+			texture.SetValid(false)
+			continue
+		}
+		texture.SetValid(true)
+	}
 }
 
 // loadMotion はモーション読み込み結果をControlWindowへ反映する。

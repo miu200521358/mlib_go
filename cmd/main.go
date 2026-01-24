@@ -10,7 +10,6 @@ import (
 	"runtime"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
 
 	"github.com/miu200521358/mlib_go/cmd/ui"
@@ -111,7 +110,7 @@ func main() {
 				sharedState,
 				baseServices,
 				ui.NewMenuItems(baseServices.I18n(), baseServices.Logger()),
-				[]declarative.TabPage{ui.NewTabPage(widgets, baseServices)},
+				ui.NewTabPages(widgets, baseServices),
 				widths[0], heights[0], positionXs[0], positionYs[0], viewerCount,
 			)
 			if controlWindowErr != nil {

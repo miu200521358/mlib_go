@@ -110,6 +110,51 @@ func (lb *MaterialTableView) SetWindow(window *controller.ControlWindow) {
 	lb.window = window
 }
 
+// ResetRows は材質行を再構築する。
+func (lb *MaterialTableView) ResetRows(modelData *model.PmxModel) {
+	if lb == nil || lb.MaterialModel == nil {
+		return
+	}
+	lb.MaterialModel.ResetRows(modelData)
+	if lb.changeFunc != nil {
+		lb.changeFunc(lb.window, lb.MaterialModel.CheckedIndexes())
+	}
+}
+
+// SetAllChecked は全材質のチェック状態を設定する。
+func (lb *MaterialTableView) SetAllChecked(checked bool) {
+	if lb == nil || lb.MaterialModel == nil {
+		return
+	}
+	for _, record := range lb.MaterialModel.Records {
+		if record == nil {
+			continue
+		}
+		record.Checked = checked
+	}
+	lb.MaterialModel.PublishRowsReset()
+	if lb.changeFunc != nil {
+		lb.changeFunc(lb.window, lb.MaterialModel.CheckedIndexes())
+	}
+}
+
+// InvertChecked は全材質のチェック状態を反転する。
+func (lb *MaterialTableView) InvertChecked() {
+	if lb == nil || lb.MaterialModel == nil {
+		return
+	}
+	for _, record := range lb.MaterialModel.Records {
+		if record == nil {
+			continue
+		}
+		record.Checked = !record.Checked
+	}
+	lb.MaterialModel.PublishRowsReset()
+	if lb.changeFunc != nil {
+		lb.changeFunc(lb.window, lb.MaterialModel.CheckedIndexes())
+	}
+}
+
 // MaterialItem は材質の表示行を表す。
 type MaterialItem struct {
 	Checked          bool
@@ -318,9 +363,9 @@ func (m *MaterialModel) ResetRows(modelData *model.PmxModel) {
 // CheckedIndexes はチェック済みの材質インデックスを返す。
 func (m *MaterialModel) CheckedIndexes() []int {
 	indexes := make([]int, 0, len(m.Records))
-	for i, r := range m.Records {
-		if r.Checked {
-			indexes = append(indexes, i)
+	for _, r := range m.Records {
+		if r != nil && r.Checked {
+			indexes = append(indexes, r.Index)
 		}
 	}
 	return indexes
