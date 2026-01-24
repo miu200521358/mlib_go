@@ -133,7 +133,6 @@ func BuildAfterPhysics(
 		return deltas
 	}
 	deltas.SetFrame(frame)
-	dynamicBones := map[int]struct{}{}
 	logger := logging.DefaultLogger()
 	logDetail := logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) && frame == 0
 
@@ -177,7 +176,6 @@ func BuildAfterPhysics(
 				parent := deltas.Bones.Get(bone.ParentIndex)
 				bd := delta.NewBoneDeltaByGlobalMatrix(bone, frame, *mat, parent)
 				deltas.Bones.Update(bd)
-				dynamicBones[bone.Index()] = struct{}{}
 				if logDetail {
 					rbUpdated++
 					rbNames = append(rbNames, bone.Name())
@@ -219,40 +217,14 @@ func BuildAfterPhysics(
 	}
 	var afterIndexes []int
 	if len(afterNames) > 0 {
-		var afterDeltas *delta.BoneDeltas
-		afterDeltas, afterIndexes = deform.ComputeBoneDeltas(modelData, motionData, frame, afterNames, true, true, false)
+		afterIndexes = deform.UpdateAfterPhysicsBoneDeltas(modelData, motionData, deltas.Bones, frame, afterNames)
 		if logDetail {
-			skipped := 0
-			merged := 0
-			var skippedNames []string
-			for _, name := range afterNames {
-				bone, err := modelData.Bones.GetByName(name)
-				if err != nil || bone == nil {
-					continue
-				}
-				if _, ok := dynamicBones[bone.Index()]; ok {
-					skipped++
-					skippedNames = append(skippedNames, name)
-					continue
-				}
-				merged++
-			}
 			logger.Verbose(logging.VERBOSE_INDEX_PHYSICS,
-				"物理後変形再計算: model=%d indexes=%d merged=%d skipped=%d",
+				"物理後変形再計算: model=%d indexes=%d",
 				modelIndex,
 				len(afterIndexes),
-				merged,
-				skipped,
 			)
-			if len(skippedNames) > 0 {
-				logger.Verbose(logging.VERBOSE_INDEX_PHYSICS,
-					"物理後変形スキップ: model=%d names=%s",
-					modelIndex,
-					strings.Join(skippedNames, ","),
-				)
-			}
 		}
-		mergeBoneDeltas(deltas.Bones, afterDeltas, dynamicBones)
 	}
 
 	// 既存のユニット行列を使い物理後変形対象のグローバル行列のみ更新する。

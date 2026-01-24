@@ -132,6 +132,89 @@ func ComputeBoneDeltas(
 	return boneDeltas, deformBoneIndexes
 }
 
+// UpdateAfterPhysicsBoneDeltas は既存の差分を参照して物理後変形対象ボーンを再計算する。
+func UpdateAfterPhysicsBoneDeltas(
+	modelData *model.PmxModel,
+	motionData *motion.VmdMotion,
+	boneDeltas *delta.BoneDeltas,
+	frame motion.Frame,
+	boneNames []string,
+) []int {
+	if modelData == nil || boneDeltas == nil {
+		return nil
+	}
+	deformBoneIndexes := collectAfterPhysicsBoneIndexes(modelData, boneNames)
+	if len(deformBoneIndexes) == 0 {
+		return deformBoneIndexes
+	}
+	boneMorphDeltas := computeBoneMorphDeltas(modelData, motionData, frame, nil)
+	for _, boneIndex := range deformBoneIndexes {
+		bone, err := modelData.Bones.Get(boneIndex)
+		if err != nil || bone == nil {
+			continue
+		}
+		d := boneDeltas.Get(boneIndex)
+		if d == nil {
+			d = delta.NewBoneDelta(bone, frame)
+		}
+		isEffectorRotation := boneIsEffectorRotation(bone)
+		isEffectorTranslation := boneIsEffectorTranslation(bone)
+		if d.UnitMatrix == nil || d.UnitMatrix.IsIdent() || isEffectorRotation || isEffectorTranslation {
+			bf := getBoneFrame(motionData, bone.Name(), frame)
+			if bf != nil {
+				if bf.Position != nil {
+					d.FramePosition = bf.Position
+				}
+				if bf.Rotation != nil {
+					d.FrameRotation = bf.Rotation
+				}
+				if bf.CancelablePosition != nil {
+					d.FrameCancelablePosition = bf.CancelablePosition
+				}
+				if bf.CancelableRotation != nil {
+					d.FrameCancelableRotation = bf.CancelableRotation
+				}
+				if bf.Scale != nil {
+					d.FrameScale = bf.Scale
+				}
+				if bf.CancelableScale != nil {
+					d.FrameCancelableScale = bf.CancelableScale
+				}
+			}
+			if boneMorphDeltas != nil {
+				morphDelta := boneMorphDeltas.Get(boneIndex)
+				if morphDelta != nil {
+					if morphDelta.FramePosition != nil {
+						d.FrameMorphPosition = morphDelta.FramePosition
+					}
+					if morphDelta.FrameRotation != nil {
+						d.FrameMorphRotation = morphDelta.FrameRotation
+					}
+					if morphDelta.FrameCancelablePosition != nil {
+						d.FrameMorphCancelablePosition = morphDelta.FrameCancelablePosition
+					}
+					if morphDelta.FrameCancelableRotation != nil {
+						d.FrameMorphCancelableRotation = morphDelta.FrameCancelableRotation
+					}
+					if morphDelta.FrameScale != nil {
+						d.FrameMorphScale = morphDelta.FrameScale
+					}
+					if morphDelta.FrameCancelableScale != nil {
+						d.FrameMorphCancelableScale = morphDelta.FrameCancelableScale
+					}
+					if morphDelta.FrameLocalMat != nil {
+						d.FrameLocalMorphMat = morphDelta.FrameLocalMat
+					}
+				}
+			}
+			d.InvalidateTotals()
+			updateBoneDelta(modelData, boneDeltas, d)
+		}
+		boneDeltas.Update(d)
+	}
+	return deformBoneIndexes
+}
+
 // ApplyBoneMatrices はボーン行列を合成して差分へ反映する。
 func ApplyBoneMatrices(modelData *model.PmxModel, boneDeltas *delta.BoneDeltas) {
 	if modelData == nil || boneDeltas == nil {
