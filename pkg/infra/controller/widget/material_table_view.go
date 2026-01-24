@@ -24,7 +24,6 @@ type MaterialTableView struct {
 	MaterialModel       *MaterialModel
 	tooltip             string
 	translator          i18n.II18n
-	prevSelectedIndexes []int
 	changeFunc          func(cw *controller.ControlWindow, indexes []int)
 }
 
@@ -34,6 +33,8 @@ func NewMaterialTableView(translator i18n.II18n, tooltip string, changeFunc func
 	m.tooltip = tooltip
 	m.changeFunc = changeFunc
 	m.MaterialModel = new(MaterialModel)
+	m.MaterialModel.sortColumn = -1
+	m.MaterialModel.sortOrder = walk.SortAscending
 	m.translator = translator
 	return m
 }
@@ -70,6 +71,27 @@ func (lb *MaterialTableView) Widgets() declarative.Composite {
 					{Title: lb.t("有効スフィア"), Width: 50},
 					{Title: lb.t("スフィア"), Width: 150},
 				},
+				OnMouseDown: func(x, y int, button walk.MouseButton) {
+					if button != walk.LeftButton || lb.TableView == nil || lb.MaterialModel == nil {
+						return
+					}
+					if walk.ModifiersDown()&(walk.ModControl|walk.ModShift) != 0 {
+						return
+					}
+					row := lb.TableView.IndexAt(x, y)
+					if row < 0 {
+						return
+					}
+					// 既に選択済みの行を再クリックした場合のみチェックを反転する。
+					if !slices.Contains(lb.TableView.SelectedIndexes(), row) {
+						return
+					}
+					_ = lb.MaterialModel.SetChecked(row, !lb.MaterialModel.Checked(row))
+					lb.MaterialModel.PublishRowChanged(row)
+					if lb.changeFunc != nil {
+						lb.changeFunc(lb.window, lb.MaterialModel.CheckedIndexes())
+					}
+				},
 				StyleCell: func(style *walk.CellStyle) {
 					m := lb.MaterialModel.Records[style.Row()]
 					if (!m.TextureValid && m.TextureNameText != "") ||
@@ -84,16 +106,6 @@ func (lb *MaterialTableView) Widgets() declarative.Composite {
 					}
 				},
 				OnSelectedIndexesChanged: func() {
-					for _, i := range lb.SelectedIndexes() {
-						if slices.Equal(lb.prevSelectedIndexes, lb.SelectedIndexes()) || !slices.Contains(lb.prevSelectedIndexes, i) {
-							lb.MaterialModel.SetChecked(i, !lb.MaterialModel.Checked(i))
-						}
-					}
-					lb.prevSelectedIndexes = lb.SelectedIndexes()
-
-					if lb.changeFunc != nil {
-						lb.changeFunc(lb.window, lb.MaterialModel.CheckedIndexes())
-					}
 				},
 			},
 		},
@@ -224,9 +236,27 @@ func (m *MaterialModel) SetChecked(row int, checked bool) error {
 	return nil
 }
 
+// ColumnSortable はソート可否を返す。
+func (m *MaterialModel) ColumnSortable(col int) bool {
+	return col >= 0
+}
+
+// SortedColumn は現在のソート列を返す。
+func (m *MaterialModel) SortedColumn() int {
+	return m.sortColumn
+}
+
+// SortOrder は現在のソート順を返す。
+func (m *MaterialModel) SortOrder() walk.SortOrder {
+	return m.sortOrder
+}
+
 // Sort はソート条件を設定する。
 func (m *MaterialModel) Sort(col int, order walk.SortOrder) error {
 	m.sortColumn, m.sortOrder = col, order
+	if m.sortColumn < 0 {
+		return m.SorterBase.Sort(col, order)
+	}
 
 	sort.SliceStable(m.Records, func(i, j int) bool {
 		a, b := m.Records[i], m.Records[j]
@@ -296,7 +326,7 @@ func (m *MaterialModel) Sort(col int, order walk.SortOrder) error {
 		return false
 	})
 
-	return nil
+	return m.SorterBase.Sort(col, order)
 }
 
 // AddRecord は材質行を追加する。
