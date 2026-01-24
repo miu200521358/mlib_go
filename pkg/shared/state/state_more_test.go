@@ -195,6 +195,23 @@ func TestSharedStateModelsAndSelections(t *testing.T) {
 		t.Errorf("SelectedMaterialIndexes should be cloned")
 	}
 
+	if ss.SelectedVertexIndexes(-1, 0) != nil {
+		t.Errorf("SelectedVertexIndexes out-of-range should be nil")
+	}
+	if ss.SelectedVertexIndexes(0, 99) != nil {
+		t.Errorf("SelectedVertexIndexes model out-of-range should be nil")
+	}
+	ss.SetSelectedVertexIndexes(-1, 0, []int{3})
+	ss.SetSelectedVertexIndexes(0, 0, []int{3, 4})
+	vertexIdxs := ss.SelectedVertexIndexes(0, 0)
+	if len(vertexIdxs) != 2 || vertexIdxs[0] != 3 {
+		t.Errorf("SelectedVertexIndexes mismatch: %v", vertexIdxs)
+	}
+	vertexIdxs[0] = 99
+	if ss.SelectedVertexIndexes(0, 0)[0] == 99 {
+		t.Errorf("SelectedVertexIndexes should be cloned")
+	}
+
 	impl := ss.(*SharedState)
 	impl.models[0] = make([]atomic.Value, 2)
 	impl.motions[0] = make([]atomic.Value, 1)

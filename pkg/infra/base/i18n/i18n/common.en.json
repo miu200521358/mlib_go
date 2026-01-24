@@ -476,6 +476,14 @@
         "translation": "Vertex"
     },
     {
+        "id": "頂点Index",
+        "translation": "Vertex Index"
+    },
+    {
+        "id": "座標",
+        "translation": "Position"
+    },
+    {
         "id": "面",
         "translation": "Face"
     },
@@ -514,6 +522,22 @@
     {
         "id": "英語名称",
         "translation": "English Name"
+    },
+    {
+        "id": "ウェイト1",
+        "translation": "Weight1"
+    },
+    {
+        "id": "ウェイト2",
+        "translation": "Weight2"
+    },
+    {
+        "id": "ウェイト3",
+        "translation": "Weight3"
+    },
+    {
+        "id": "ウェイト4",
+        "translation": "Weight4"
     },
     {
         "id": "有効テクスチャ",

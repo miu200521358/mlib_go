@@ -88,6 +88,14 @@
         "translation": "재질 뷰 설명"
     },
     {
+        "id": "頂点ビュー",
+        "translation": "정점 뷰"
+    },
+    {
+        "id": "頂点ビュー説明",
+        "translation": "정점 뷰 설명"
+    },
+    {
         "id": "全",
         "translation": "전체"
     },

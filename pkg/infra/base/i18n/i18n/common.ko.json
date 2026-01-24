@@ -476,6 +476,14 @@
         "translation": "정점"
     },
     {
+        "id": "頂点Index",
+        "translation": "정점 인덱스"
+    },
+    {
+        "id": "座標",
+        "translation": "좌표"
+    },
+    {
         "id": "面",
         "translation": "면"
     },
@@ -514,6 +522,22 @@
     {
         "id": "英語名称",
         "translation": "영어 이름"
+    },
+    {
+        "id": "ウェイト1",
+        "translation": "가중치1"
+    },
+    {
+        "id": "ウェイト2",
+        "translation": "가중치2"
+    },
+    {
+        "id": "ウェイト3",
+        "translation": "가중치3"
+    },
+    {
+        "id": "ウェイト4",
+        "translation": "가중치4"
     },
     {
         "id": "有効テクスチャ",

@@ -164,6 +164,8 @@ type ISharedState interface {
 	Motion(viewerIndex, modelIndex int) IStateMotion
 	SelectedMaterialIndexes(viewerIndex, modelIndex int) []int
 	SetSelectedMaterialIndexes(viewerIndex, modelIndex int, indexes []int)
+	SelectedVertexIndexes(viewerIndex, modelIndex int) []int
+	SetSelectedVertexIndexes(viewerIndex, modelIndex int, indexes []int)
 	IsDeltaSaveEnabled(viewerIndex int) bool
 	SetDeltaSaveEnabled(viewerIndex int, enabled bool)
 	DeltaSaveIndex(viewerIndex int) int
@@ -217,6 +219,7 @@ type SharedState struct {
 	models                [][]atomic.Value
 	motions               [][]atomic.Value
 	selectedIndexes       [][]atomic.Value
+	selectedVertexIndexes [][]atomic.Value
 	deltaSaveEnabled      []atomic.Bool
 	deltaSaveIndexes      []atomic.Int32
 	deltaMotions          [][][]atomic.Value
@@ -235,6 +238,7 @@ func NewSharedState(viewerCount int) ISharedState {
 		models:              make([][]atomic.Value, viewerCount),
 		motions:             make([][]atomic.Value, viewerCount),
 		selectedIndexes:     make([][]atomic.Value, viewerCount),
+		selectedVertexIndexes: make([][]atomic.Value, viewerCount),
 		deltaSaveEnabled:    make([]atomic.Bool, viewerCount),
 		deltaSaveIndexes:    make([]atomic.Int32, viewerCount),
 		deltaMotions:        make([][][]atomic.Value, viewerCount),
@@ -611,6 +615,10 @@ func (ss *SharedState) SetModel(viewerIndex, modelIndex int, model IStateModel) 
 	if idxSlot != nil {
 		idxSlot.Store(stateIndexSlot{Indexes: []int{}})
 	}
+	vertexSlot := ss.ensureVertexIndexSlot(viewerIndex, modelIndex)
+	if vertexSlot != nil {
+		vertexSlot.Store(stateIndexSlot{Indexes: []int{}})
+	}
 }
 
 // Model はモデルを取得する。
@@ -661,6 +669,27 @@ func (ss *SharedState) SelectedMaterialIndexes(viewerIndex, modelIndex int) []in
 // SetSelectedMaterialIndexes は選択材質インデックスを設定する。
 func (ss *SharedState) SetSelectedMaterialIndexes(viewerIndex, modelIndex int, indexes []int) {
 	slot := ss.ensureIndexSlot(viewerIndex, modelIndex)
+	if slot == nil {
+		return
+	}
+	slot.Store(stateIndexSlot{Indexes: cloneIntSlice(indexes)})
+}
+
+// SelectedVertexIndexes は選択頂点インデックスを返す。
+func (ss *SharedState) SelectedVertexIndexes(viewerIndex, modelIndex int) []int {
+	if viewerIndex < 0 || viewerIndex >= len(ss.selectedVertexIndexes) {
+		return nil
+	}
+	if modelIndex < 0 || modelIndex >= len(ss.selectedVertexIndexes[viewerIndex]) {
+		return nil
+	}
+	slot := ss.selectedVertexIndexes[viewerIndex][modelIndex].Load().(stateIndexSlot)
+	return cloneIntSlice(slot.Indexes)
+}
+
+// SetSelectedVertexIndexes は選択頂点インデックスを設定する。
+func (ss *SharedState) SetSelectedVertexIndexes(viewerIndex, modelIndex int, indexes []int) {
+	slot := ss.ensureVertexIndexSlot(viewerIndex, modelIndex)
 	if slot == nil {
 		return
 	}
@@ -822,6 +851,7 @@ func (ss *SharedState) ensureModelSlot(viewerIndex, modelIndex int) *atomic.Valu
 	ss.models[viewerIndex] = ensureSlotSlice(ss.models[viewerIndex], modelIndex, stateModelSlot{})
 	ss.motions[viewerIndex] = ensureSlotSlice(ss.motions[viewerIndex], modelIndex, stateMotionSlot{})
 	ss.selectedIndexes[viewerIndex] = ensureSlotSlice(ss.selectedIndexes[viewerIndex], modelIndex, stateIndexSlot{Indexes: []int{}})
+	ss.selectedVertexIndexes[viewerIndex] = ensureSlotSlice(ss.selectedVertexIndexes[viewerIndex], modelIndex, stateIndexSlot{Indexes: []int{}})
 	return &ss.models[viewerIndex][modelIndex]
 }
 
@@ -845,6 +875,17 @@ func (ss *SharedState) ensureIndexSlot(viewerIndex, modelIndex int) *atomic.Valu
 	}
 	ss.selectedIndexes[viewerIndex] = ensureSlotSlice(ss.selectedIndexes[viewerIndex], modelIndex, stateIndexSlot{Indexes: []int{}})
 	return &ss.selectedIndexes[viewerIndex][modelIndex]
+}
+
+// ensureVertexIndexSlot は選択頂点インデックススロットを確保する。
+func (ss *SharedState) ensureVertexIndexSlot(viewerIndex, modelIndex int) *atomic.Value {
+	ss.mu.Lock()
+	defer ss.mu.Unlock()
+	if !ss.ensureViewerIndex(viewerIndex) {
+		return nil
+	}
+	ss.selectedVertexIndexes[viewerIndex] = ensureSlotSlice(ss.selectedVertexIndexes[viewerIndex], modelIndex, stateIndexSlot{Indexes: []int{}})
+	return &ss.selectedVertexIndexes[viewerIndex][modelIndex]
 }
 
 // ensureDeltaMotionSlot は差分モーションスロットを確保する。
@@ -885,6 +926,9 @@ func (ss *SharedState) ensureViewerIndex(viewerIndex int) bool {
 	}
 	if ss.selectedIndexes[viewerIndex] == nil {
 		ss.selectedIndexes[viewerIndex] = []atomic.Value{}
+	}
+	if ss.selectedVertexIndexes[viewerIndex] == nil {
+		ss.selectedVertexIndexes[viewerIndex] = []atomic.Value{}
 	}
 	if ss.deltaMotions[viewerIndex] == nil {
 		ss.deltaMotions[viewerIndex] = [][]atomic.Value{}

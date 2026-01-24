@@ -46,5 +46,17 @@ func NewMenuItems(translator i18n.II18n, logger logging.ILogger) []declarative.M
 				logger.Info(t("材質ビュー説明"))
 			},
 		},
+		declarative.Action{
+			Text: t("頂点ビュー説明"),
+			OnTriggered: func() {
+				if lineLogger, ok := logger.(interface {
+					InfoLine(msg string, params ...any)
+				}); ok {
+					lineLogger.InfoLine(t("頂点ビュー説明"))
+					return
+				}
+				logger.Info(t("頂点ビュー説明"))
+			},
+		},
 	}
 }

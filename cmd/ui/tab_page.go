@@ -31,6 +31,7 @@ type overrideBoneInserter interface {
 func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices) []declarative.TabPage {
 	var fileTab *walk.TabPage
 	var materialTab *walk.TabPage
+	var vertexTab *walk.TabPage
 
 	var translator i18n.II18n
 	var logger logging.ILogger
@@ -57,6 +58,10 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices)
 			}
 			cw.SetSelectedMaterialIndexes(0, 0, indexes)
 		},
+	)
+	vertexView := widget.NewVertexTableView(
+		translator,
+		translate(translator, "頂点ビュー説明"),
 	)
 
 	allMaterialButton := widget.NewMPushButton()
@@ -86,7 +91,7 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices)
 		translate(translator, "モデルファイル1-1"),
 		translate(translator, "モデルファイルを選択してください"),
 		func(cw *controller.ControlWindow, rep io_common.IFileReader, path string) {
-			loadModel(logger, translator, cw, rep, path, materialView, 0, 0)
+			loadModel(logger, translator, cw, rep, path, materialView, vertexView, 0, 0)
 		},
 	)
 
@@ -108,7 +113,7 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices)
 		translate(translator, "モデルファイル2-1"),
 		translate(translator, "モデルファイルを選択してください"),
 		func(cw *controller.ControlWindow, rep io_common.IFileReader, path string) {
-			loadModel(logger, translator, cw, rep, path, nil, 1, 0)
+			loadModel(logger, translator, cw, rep, path, nil, nil, 1, 0)
 		},
 	)
 
@@ -124,7 +129,7 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices)
 	)
 
 	mWidgets.Widgets = append(mWidgets.Widgets, player, pmxLoad11Picker, vmdLoad11Picker,
-		pmxLoad21Picker, vmdLoad21Picker, materialView, allMaterialButton, invertMaterialButton)
+		pmxLoad21Picker, vmdLoad21Picker, materialView, allMaterialButton, invertMaterialButton, vertexView)
 
 	mWidgets.SetOnLoaded(func() {
 		if mWidgets == nil || mWidgets.Window() == nil {
@@ -135,6 +140,9 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices)
 				w.SetEnabledInPlaying(playing)
 			}
 		})
+		if vertexView != nil {
+			vertexView.StartSelectionSync(0, 0)
+		}
 	})
 
 	fileTabPage := declarative.TabPage{
@@ -183,7 +191,26 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices)
 		},
 	}
 
-	return []declarative.TabPage{fileTabPage, materialTabPage}
+	vertexTabPage := declarative.TabPage{
+		Title:    translate(translator, "頂点ビュー"),
+		AssignTo: &vertexTab,
+		Layout:   declarative.VBox{},
+		Background: declarative.SolidColorBrush{
+			Color: controller.ColorTabBackground,
+		},
+		Children: []declarative.Widget{
+			declarative.Composite{
+				Layout: declarative.HBox{},
+				Children: []declarative.Widget{
+					declarative.TextLabel{Text: translate(translator, "頂点ビュー")},
+					declarative.HSpacer{},
+				},
+			},
+			vertexView.Widgets(),
+		},
+	}
+
+	return []declarative.TabPage{fileTabPage, materialTabPage, vertexTabPage}
 }
 
 // NewTabPage はサンプル用のタブページを生成する。
@@ -192,13 +219,16 @@ func NewTabPage(mWidgets *controller.MWidgets, baseServices base.IBaseServices) 
 }
 
 // loadModel はモデル読み込み結果をControlWindowへ反映する。
-func loadModel(logger logging.ILogger, translator i18n.II18n, cw *controller.ControlWindow, rep io_common.IFileReader, path string, materialView *widget.MaterialTableView, windowIndex, modelIndex int) {
+func loadModel(logger logging.ILogger, translator i18n.II18n, cw *controller.ControlWindow, rep io_common.IFileReader, path string, materialView *widget.MaterialTableView, vertexView *widget.VertexTableView, windowIndex, modelIndex int) {
 	if cw == nil {
 		return
 	}
 	if path == "" {
 		if materialView != nil {
 			materialView.ResetRows(nil)
+		}
+		if vertexView != nil {
+			vertexView.ResetRows(nil)
 		}
 		cw.SetModel(windowIndex, modelIndex, nil)
 		return
@@ -207,6 +237,9 @@ func loadModel(logger logging.ILogger, translator i18n.II18n, cw *controller.Con
 		logLoadFailed(logger, translator, errors.New("モデル読み込みリポジトリがありません"))
 		if materialView != nil {
 			materialView.ResetRows(nil)
+		}
+		if vertexView != nil {
+			vertexView.ResetRows(nil)
 		}
 		cw.SetModel(windowIndex, modelIndex, nil)
 		return
@@ -217,6 +250,9 @@ func loadModel(logger logging.ILogger, translator i18n.II18n, cw *controller.Con
 		if materialView != nil {
 			materialView.ResetRows(nil)
 		}
+		if vertexView != nil {
+			vertexView.ResetRows(nil)
+		}
 		cw.SetModel(windowIndex, modelIndex, nil)
 		return
 	}
@@ -225,6 +261,9 @@ func loadModel(logger logging.ILogger, translator i18n.II18n, cw *controller.Con
 		logLoadFailed(logger, translator, errors.New("モデル形式が不正です"))
 		if materialView != nil {
 			materialView.ResetRows(nil)
+		}
+		if vertexView != nil {
+			vertexView.ResetRows(nil)
 		}
 		cw.SetModel(windowIndex, modelIndex, nil)
 		return
@@ -241,6 +280,9 @@ func loadModel(logger logging.ILogger, translator i18n.II18n, cw *controller.Con
 		materialView.ResetRows(modelData)
 	}
 	cw.SetModel(windowIndex, modelIndex, modelData)
+	if vertexView != nil {
+		vertexView.ResetRows(modelData)
+	}
 }
 
 // validateModelTextures はモデルのテクスチャ有効性を検証する。

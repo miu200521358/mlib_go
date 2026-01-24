@@ -488,6 +488,14 @@
         "translation": "頂点"
     },
     {
+        "id": "頂点Index",
+        "translation": "頂点Index"
+    },
+    {
+        "id": "座標",
+        "translation": "座標"
+    },
+    {
         "id": "面",
         "translation": "面"
     },
@@ -526,6 +534,22 @@
     {
         "id": "英語名称",
         "translation": "英語名称"
+    },
+    {
+        "id": "ウェイト1",
+        "translation": "ウェイト1"
+    },
+    {
+        "id": "ウェイト2",
+        "translation": "ウェイト2"
+    },
+    {
+        "id": "ウェイト3",
+        "translation": "ウェイト3"
+    },
+    {
+        "id": "ウェイト4",
+        "translation": "ウェイト4"
     },
     {
         "id": "有効テクスチャ",

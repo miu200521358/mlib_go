@@ -5,6 +5,7 @@
 package viewer
 
 import (
+	"fmt"
 	"image"
 	"math"
 	"strings"
@@ -75,6 +76,10 @@ type ViewerWindow struct {
 	jointHoverNames      []string
 	jointHoverActive     bool
 	lastJointHoverAt     time.Time
+	selectedVertexHoverActive      bool
+	selectedVertexHoverIndex       int
+	selectedVertexHoverModelIndex  int
+	lastSelectedVertexHoverAt      time.Time
 
 	modelRenderers     []*render.ModelRenderer
 	motions            []*motion.VmdMotion
@@ -90,6 +95,9 @@ type ViewerWindow struct {
 	prevCursorPos       mmath.Vec2
 	cursorX             float64
 	cursorY             float64
+	pendingSelectVertex          bool
+	pendingRemoveSelectedVertex  bool
+	pendingSelectVertexPositions []float32
 }
 
 // newViewerWindow はビューワーウィンドウを生成して初期化する。
@@ -148,6 +156,8 @@ func newViewerWindow(windowIndex int, title string, width, height, positionX, po
 		motions:              make([]*motion.VmdMotion, 0),
 		vmdDeltas:            make([]*delta.VmdDeltas, 0),
 		physicsModelHashes:   make([]string, 0),
+		selectedVertexHoverIndex:      -1,
+		selectedVertexHoverModelIndex: -1,
 	}
 
 	glWindow.SetCloseCallback(vw.closeCallback)
@@ -260,12 +270,32 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 
 	vw.renderFloor()
 
+	vw.updateSelectedVertexHoverExpire()
 	vw.updateBoneHoverExpire()
 	vw.updateRigidBodyHoverExpire()
 	vw.updateJointHoverExpire()
 	var debugBoneHover []*graphics_api.DebugBoneHover
 	if vw.boneHighlighter != nil {
 		debugBoneHover = vw.boneHighlighter.DebugBoneHoverInfo()
+	}
+
+	showSelectedVertex := vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX)
+	applySelection := vw.pendingSelectVertex
+	removeSelection := vw.pendingRemoveSelectedVertex
+	selectedCursorPositions := vw.pendingSelectVertexPositions
+	if applySelection {
+		vw.pendingSelectVertex = false
+		vw.pendingRemoveSelectedVertex = false
+		vw.pendingSelectVertexPositions = nil
+	}
+
+	var hoverCursorPositions []float32
+	if showSelectedVertex {
+		limit := 0
+		if vw.list.appConfig != nil {
+			limit = vw.list.appConfig.CursorPositionLimit
+		}
+		hoverCursorPositions = vw.buildCursorPositions(vw.cursorX, vw.cursorY, limit)
 	}
 
 	for i, renderer := range vw.modelRenderers {
@@ -283,8 +313,39 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 		renderer.SetModelIndex(i)
 
 		vmdDeltas := vw.vmdDeltas[i]
-
-		renderer.Render(vw.shader, vw.list.shared, vmdDeltas, debugBoneHover)
+		selectedVertexIndexes := []int{}
+		if showSelectedVertex {
+			selectedVertexIndexes = vw.list.shared.SelectedVertexIndexes(vw.windowIndex, i)
+		}
+		cursorPositions := hoverCursorPositions
+		removeCursorPositions := []float32(nil)
+		applySelectionForModel := false
+		if showSelectedVertex && i == 0 && applySelection && len(selectedCursorPositions) > 0 {
+			cursorPositions = selectedCursorPositions
+			if removeSelection {
+				removeCursorPositions = cursorPositions
+			}
+			applySelectionForModel = true
+		}
+		updatedSelected, hoverIndex := renderer.Render(
+			vw.shader,
+			vw.list.shared,
+			vmdDeltas,
+			debugBoneHover,
+			selectedVertexIndexes,
+			cursorPositions,
+			removeCursorPositions,
+			applySelectionForModel,
+		)
+		if applySelectionForModel {
+			vw.list.shared.SetSelectedVertexIndexes(vw.windowIndex, i, updatedSelected)
+		}
+		if showSelectedVertex && i == 0 {
+			vw.updateSelectedVertexHover(i, hoverIndex)
+		}
+	}
+	if !showSelectedVertex {
+		vw.clearSelectedVertexHover()
 	}
 
 	drawRigidBodyFront := vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_RIGID_BODY_FRONT)
@@ -549,6 +610,10 @@ func (vw *ViewerWindow) mouseCallback(_ *glfw.Window, button glfw.MouseButton, a
 		switch button {
 		case glfw.MouseButtonLeft:
 			vw.leftButtonPressed = false
+			if vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) {
+				vw.queueSelectedVertexSelection(vw.cursorX, vw.cursorY, vw.isCtrlPressed())
+				return
+			}
 			drawRigidBody := vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_RIGID_BODY_FRONT) ||
 				vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_RIGID_BODY_BACK)
 			drawJoint := vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_JOINT)
@@ -587,6 +652,12 @@ func (vw *ViewerWindow) cursorPosCallback(_ *glfw.Window, xpos, ypos float64) {
 		vw.updateCameraPositionByCursor(xpos, ypos)
 	}
 	if !vw.rightButtonPressed && !vw.middleButtonPressed {
+		if vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) {
+			vw.clearNonVertexHovers()
+			vw.prevCursorPos.X = xpos
+			vw.prevCursorPos.Y = ypos
+			return
+		}
 		drawRigidBody := vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_RIGID_BODY_FRONT) ||
 			vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_RIGID_BODY_BACK)
 		drawJoint := vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_JOINT)
@@ -612,6 +683,21 @@ func (vw *ViewerWindow) cursorPosCallback(_ *glfw.Window, xpos, ypos float64) {
 	}
 	vw.prevCursorPos.X = xpos
 	vw.prevCursorPos.Y = ypos
+}
+
+// queueSelectedVertexSelection は選択頂点の更新要求をキューに積む。
+func (vw *ViewerWindow) queueSelectedVertexSelection(xpos, ypos float64, remove bool) {
+	limit := 0
+	if vw.list != nil && vw.list.appConfig != nil {
+		limit = vw.list.appConfig.CursorPositionLimit
+	}
+	positions := vw.buildCursorPositions(xpos, ypos, limit)
+	if len(positions) == 0 {
+		return
+	}
+	vw.pendingSelectVertex = true
+	vw.pendingRemoveSelectedVertex = remove
+	vw.pendingSelectVertexPositions = positions
 }
 
 // updateBoneHoverExpire はボーンホバー終了後のツールチップ消去を遅延する。
@@ -664,6 +750,40 @@ func (vw *ViewerWindow) updateJointHoverExpire() {
 	}
 }
 
+// updateSelectedVertexHoverExpire は選択頂点ホバー終了後のツールチップ消去を遅延する。
+func (vw *ViewerWindow) updateSelectedVertexHoverExpire() {
+	if vw.selectedVertexHoverActive {
+		vw.lastSelectedVertexHoverAt = time.Now()
+		return
+	}
+	if vw.lastSelectedVertexHoverAt.IsZero() {
+		return
+	}
+	if time.Since(vw.lastSelectedVertexHoverAt) >= time.Second {
+		vw.clearSelectedVertexHover()
+	}
+}
+
+// updateSelectedVertexHover は選択頂点のホバー情報を更新する。
+func (vw *ViewerWindow) updateSelectedVertexHover(modelIndex, hoverIndex int) {
+	if hoverIndex < 0 {
+		vw.selectedVertexHoverActive = false
+		return
+	}
+	vw.selectedVertexHoverActive = true
+	vw.selectedVertexHoverIndex = hoverIndex
+	vw.selectedVertexHoverModelIndex = modelIndex
+	vw.lastSelectedVertexHoverAt = time.Now()
+}
+
+// clearSelectedVertexHover は選択頂点のホバー情報をクリアする。
+func (vw *ViewerWindow) clearSelectedVertexHover() {
+	vw.selectedVertexHoverActive = false
+	vw.selectedVertexHoverIndex = -1
+	vw.selectedVertexHoverModelIndex = -1
+	vw.lastSelectedVertexHoverAt = time.Time{}
+}
+
 // renderTooltip はホバー対象に応じてツールチップを描画する。
 func (vw *ViewerWindow) renderTooltip(drawRigidBody, drawJoint bool, width, height int) {
 	if vw.tooltipRenderer == nil {
@@ -671,6 +791,9 @@ func (vw *ViewerWindow) renderTooltip(drawRigidBody, drawJoint bool, width, heig
 	}
 
 	tooltipText := ""
+	if vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) && vw.selectedVertexHoverActive && vw.selectedVertexHoverIndex >= 0 {
+		tooltipText = fmt.Sprintf("頂点 %d", vw.selectedVertexHoverIndex)
+	}
 	if drawRigidBody && vw.rigidBodyHighlighter != nil {
 		if hover := vw.rigidBodyHighlighter.DebugHoverInfo(); hover != nil && hover.RigidBody != nil {
 			tooltipText = hover.RigidBody.Name()
@@ -711,6 +834,12 @@ func (vw *ViewerWindow) clearJointHover() {
 
 // clearAllHovers はボーン/剛体/ジョイントのホバー情報をクリアする。
 func (vw *ViewerWindow) clearAllHovers() {
+	vw.clearNonVertexHovers()
+	vw.clearSelectedVertexHover()
+}
+
+// clearNonVertexHovers はボーン/剛体/ジョイントのホバー情報をクリアする。
+func (vw *ViewerWindow) clearNonVertexHovers() {
 	if vw.boneHighlighter != nil {
 		vw.boneHighlighter.UpdateDebugHoverByBones(nil, false)
 	}
@@ -781,6 +910,32 @@ func (vw *ViewerWindow) calculateRayFromTo(xpos, ypos float64) (*mmath.Vec3, *mm
 	from := cam.Position.Added(dirWorld.MuledScalar(float64(cam.NearPlane)))
 	to := cam.Position.Added(dirWorld.MuledScalar(float64(cam.FarPlane)))
 	return &from, &to
+}
+
+// buildCursorPositions はカーソル位置に沿ったサンプル点群を生成する。
+func (vw *ViewerWindow) buildCursorPositions(xpos, ypos float64, limit int) []float32 {
+	const maxCursorPositions = 100
+	if limit <= 0 {
+		limit = maxCursorPositions
+	}
+	if limit > maxCursorPositions {
+		limit = maxCursorPositions
+	}
+	if limit < 2 {
+		limit = 2
+	}
+	rayFrom, rayTo := vw.calculateRayFromTo(xpos, ypos)
+	if rayFrom == nil || rayTo == nil {
+		return nil
+	}
+	direction := rayTo.Subed(*rayFrom)
+	positions := make([]float32, 0, limit*3)
+	for i := 0; i < limit; i++ {
+		t := float64(i) / float64(limit-1)
+		pos := rayFrom.Added(direction.MuledScalar(t))
+		positions = append(positions, float32(pos.X), float32(pos.Y), float32(pos.Z))
+	}
+	return positions
 }
 
 // toMgl32Mat4 はmmath.Mat4をmgl32.Mat4に変換する。

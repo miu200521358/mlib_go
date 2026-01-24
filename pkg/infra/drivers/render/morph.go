@@ -23,6 +23,9 @@ func newVertexMorphDeltasGl(mds *delta.VertexMorphDeltas) ([]int, [][]float32) {
 
 // newVertexMorphDeltaGl は単一の頂点モーフ差分をOpenGL向けに変換する。
 func newVertexMorphDeltaGl(md *delta.VertexMorphDelta) []float32 {
+	if md == nil {
+		return make([]float32, 14)
+	}
 	var p0, p1, p2 float32
 	if md.Position != nil {
 		p := mgl.NewGlVec3(md.Position)

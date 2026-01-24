@@ -69,6 +69,13 @@ func TestSetModelInitializesSelected(t *testing.T) {
 	if len(idxs) != 0 {
 		t.Errorf("SelectedMaterialIndexes length: got=%v", len(idxs))
 	}
+	vertexIdxs := ss.SelectedVertexIndexes(0, 0)
+	if vertexIdxs == nil {
+		t.Errorf("SelectedVertexIndexes should not be nil")
+	}
+	if len(vertexIdxs) != 0 {
+		t.Errorf("SelectedVertexIndexes length: got=%v", len(vertexIdxs))
+	}
 }
 
 // TestOutOfRangeAccess は範囲外アクセスを確認する。

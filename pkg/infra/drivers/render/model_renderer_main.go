@@ -125,7 +125,16 @@ func (mr *ModelRenderer) Delete() {
 
 // Render は、最新の変形情報 vmdDeltas とアプリケーション状態 appState に基づいてモデルを描画します。
 // 描画前にバッファの更新処理を行い、その後各描画パス（メッシュ描画、法線、ボーン、選択頂点など）を呼び出します。
-func (mr *ModelRenderer) Render(shader graphics_api.IShader, shared *state.SharedState, vmdDeltas *delta.VmdDeltas, debugBoneHover []*graphics_api.DebugBoneHover) {
+func (mr *ModelRenderer) Render(
+	shader graphics_api.IShader,
+	shared *state.SharedState,
+	vmdDeltas *delta.VmdDeltas,
+	debugBoneHover []*graphics_api.DebugBoneHover,
+	selectedVertexIndexes []int,
+	cursorPositions []float32,
+	removeCursorPositions []float32,
+	applySelection bool,
+) ([]int, int) {
 	mr.bufferHandle.Bind()
 	defer mr.bufferHandle.Unbind()
 
@@ -134,7 +143,7 @@ func (mr *ModelRenderer) Render(shader graphics_api.IShader, shared *state.Share
 
 	paddedMatrixes, matrixWidth, matrixHeight, err := createBoneMatrixes(vmdDeltas.Bones, mr.boneMatrixScratch)
 	if err != nil {
-		return
+		return selectedVertexIndexes, -1
 	}
 	mr.boneMatrixScratch = paddedMatrixes
 
@@ -175,6 +184,25 @@ func (mr *ModelRenderer) Render(shader graphics_api.IShader, shared *state.Share
 	if shared.IsAnyBoneVisible() {
 		mr.drawBone(mr.windowIndex, shader, mr.Model.Bones, shared, paddedMatrixes, matrixWidth, matrixHeight, debugBoneHover)
 	}
+
+	hoverIndex := -1
+	if shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) {
+		selectedVertexIndexes, hoverIndex = mr.drawSelectedVertex(
+			mr.windowIndex,
+			mr.Model.Vertices,
+			nil,
+			selectedVertexIndexes,
+			nil,
+			shader,
+			paddedMatrixes,
+			matrixWidth,
+			matrixHeight,
+			cursorPositions,
+			removeCursorPositions,
+			applySelection,
+		)
+	}
+	return selectedVertexIndexes, hoverIndex
 }
 
 // applyTextureTypesForRender は材質参照に基づいてテクスチャ種別を確定する。

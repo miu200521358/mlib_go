@@ -539,6 +539,16 @@ func (cw *ControlWindow) SelectedMaterialIndexes(windowIndex, modelIndex int) []
 	return cw.shared.SelectedMaterialIndexes(windowIndex, modelIndex)
 }
 
+// SetSelectedVertexIndexes は選択頂点を設定する。
+func (cw *ControlWindow) SetSelectedVertexIndexes(windowIndex, modelIndex int, indexes []int) {
+	cw.shared.SetSelectedVertexIndexes(windowIndex, modelIndex, indexes)
+}
+
+// SelectedVertexIndexes は選択頂点を取得する。
+func (cw *ControlWindow) SelectedVertexIndexes(windowIndex, modelIndex int) []int {
+	return cw.shared.SelectedVertexIndexes(windowIndex, modelIndex)
+}
+
 // SetDeltaMotion は差分モーションを設定する。
 func (cw *ControlWindow) SetDeltaMotion(windowIndex, modelIndex, deltaIndex int, motionData *motion.VmdMotion) {
 	cw.shared.SetDeltaMotion(windowIndex, modelIndex, deltaIndex, motionData)
@@ -791,7 +801,9 @@ func (cw *ControlWindow) TriggerShowOverrideNone() {
 
 // TriggerShowSelectedVertex は選択頂点表示を切り替える。
 func (cw *ControlWindow) TriggerShowSelectedVertex() {
-	cw.SetDisplayFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX, cw.actionChecked(cw.showSelectedVertexAction))
+	enabled := cw.actionChecked(cw.showSelectedVertexAction)
+	cw.SetDisplayFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX, enabled)
+	cw.SetDisplayFlag(state.STATE_FLAG_SHOW_WIRE, enabled)
 }
 
 // TriggerShowBoneAll は全ボーン表示を切り替える。

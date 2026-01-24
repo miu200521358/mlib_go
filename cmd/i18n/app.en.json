@@ -88,6 +88,14 @@
         "translation": "Material View Help"
     },
     {
+        "id": "頂点ビュー",
+        "translation": "Vertex View"
+    },
+    {
+        "id": "頂点ビュー説明",
+        "translation": "Vertex View Help"
+    },
+    {
         "id": "全",
         "translation": "All"
     },

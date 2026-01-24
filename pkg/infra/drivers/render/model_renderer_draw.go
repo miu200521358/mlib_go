@@ -5,6 +5,7 @@
 package render
 
 import (
+	"math"
 	"slices"
 
 	"github.com/go-gl/gl/v4.3-core/gl"
@@ -212,7 +213,7 @@ func (mr *ModelRenderer) drawCursorLine(shader graphics_api.IShader, cursorPosit
 }
 
 // drawSelectedVertex は、選択頂点およびカーソルによる頂点選択の描画処理を行い、
-// 更新後の選択頂点インデックスを返します。
+// 更新後の選択頂点インデックスとホバー対象の頂点を返します。
 func (mr *ModelRenderer) drawSelectedVertex(
 	windowIndex int,
 	vertices *model.VertexCollection,
@@ -224,7 +225,8 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	width, height int,
 	cursorPositions []float32,
 	removeCursorPositions []float32,
-) []int {
+	applySelection bool,
+) ([]int, int) {
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.ALWAYS)
 
@@ -270,9 +272,6 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	cursorPositionsUniform := mgl.GetUniformLocation(program, mgl.ShaderCursorPositions)
 	var cursorValues [maxCursorPositions * 3]float32
 	srcCursorPositions := cursorPositions
-	if removeCursorPositions != nil {
-		srcCursorPositions = removeCursorPositions
-	}
 	maxValueCount := effectiveLimit * 3
 	if maxValueCount > len(cursorValues) {
 		maxValueCount = len(cursorValues)
@@ -314,12 +313,8 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	if len(truncatedCursorPositions) > maxValueCount {
 		truncatedCursorPositions = truncatedCursorPositions[:maxValueCount]
 	}
-	truncatedRemoveCursorPositions := removeCursorPositions
-	if len(truncatedRemoveCursorPositions) > maxValueCount {
-		truncatedRemoveCursorPositions = truncatedRemoveCursorPositions[:maxValueCount]
-	}
-	if vertexCount == 0 || mr.ssbo == 0 || (len(truncatedCursorPositions) == 0 && len(truncatedRemoveCursorPositions) == 0) {
-		return selectedSetToSlice(selectedSet)
+	if vertexCount == 0 || mr.ssbo == 0 || len(truncatedCursorPositions) == 0 {
+		return selectedSetToSlice(selectedSet), -1
 	}
 
 	// シェーダ側のSSBO書き込み完了を待ってから読み出す。
@@ -332,22 +327,41 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, 0)
 
 	// w成分に距離が入るため、w >= 0 の頂点を選択対象とする。
-	if removeCursorPositions != nil {
-		for i := 0; i+3 < len(positions); i += 4 {
-			if positions[i+3] >= 0 {
-				delete(selectedSet, i/4)
+	if applySelection {
+		if removeCursorPositions != nil {
+			for i := 0; i+3 < len(positions); i += 4 {
+				if positions[i+3] >= 0 {
+					delete(selectedSet, i/4)
+				}
 			}
-		}
-	} else {
-		for i := 0; i+3 < len(positions); i += 4 {
-			if positions[i+3] >= 0 {
-				selectedSet[i/4] = struct{}{}
+		} else {
+			for i := 0; i+3 < len(positions); i += 4 {
+				if positions[i+3] >= 0 {
+					selectedSet[i/4] = struct{}{}
+				}
 			}
 		}
 	}
 
+	hoverIndex := -1
+	hoverDistance := float32(math.MaxFloat32)
+	for i := 0; i+3 < len(positions); i += 4 {
+		distance := positions[i+3]
+		if distance < 0 {
+			continue
+		}
+		idx := i / 4
+		if _, ok := selectedSet[idx]; !ok {
+			continue
+		}
+		if distance < hoverDistance {
+			hoverDistance = distance
+			hoverIndex = idx
+		}
+	}
+
 	// 選択頂点インデックスの更新結果を返す。
-	return selectedSetToSlice(selectedSet)
+	return selectedSetToSlice(selectedSet), hoverIndex
 }
 
 // --- 内部ヘルパー関数 ---
