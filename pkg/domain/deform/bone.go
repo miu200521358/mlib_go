@@ -11,6 +11,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 )
 
 const maxEffectorRecursion = 10
@@ -29,7 +30,35 @@ func ComputeBoneDeltas(
 		return delta.NewBoneDeltas(nil), nil
 	}
 	boneDeltas := delta.NewBoneDeltas(modelData.Bones)
-	deformBoneIndexes := collectBoneIndexes(modelData, boneNames, includeIk, afterPhysics)
+	logger := logging.DefaultLogger()
+	logDetail := logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) && afterPhysics && frame == 0
+	if logDetail {
+		logger.Verbose(logging.VERBOSE_INDEX_PHYSICS,
+			"物理後変形差分計算: frame=%v boneNames=%d includeIk=%t",
+			frame,
+			len(boneNames),
+			includeIk,
+		)
+		if len(boneNames) > 0 {
+			logger.Verbose(logging.VERBOSE_INDEX_PHYSICS,
+				"物理後変形差分計算の対象名: %s",
+				strings.Join(boneNames, ","),
+			)
+		}
+	}
+	var deformBoneIndexes []int
+	if afterPhysics {
+		deformBoneIndexes = collectAfterPhysicsBoneIndexes(modelData, boneNames)
+	} else {
+		deformBoneIndexes = collectBoneIndexes(modelData, boneNames, includeIk, afterPhysics)
+	}
+	if logDetail {
+		logger.Verbose(logging.VERBOSE_INDEX_PHYSICS,
+			"物理後変形差分計算の対象index: count=%d indexes=%v",
+			len(deformBoneIndexes),
+			deformBoneIndexes,
+		)
+	}
 	boneMorphDeltas := computeBoneMorphDeltas(modelData, motionData, frame, nil)
 
 	for _, boneIndex := range deformBoneIndexes {
@@ -449,6 +478,33 @@ func collectAllBones(modelData *model.PmxModel, afterPhysics bool) []int {
 	}
 	sortBoneIndexes(modelData, out)
 	return out
+}
+
+// collectAfterPhysicsBoneIndexes は物理後変形対象のボーンindexを収集する。
+func collectAfterPhysicsBoneIndexes(modelData *model.PmxModel, boneNames []string) []int {
+	if modelData == nil || modelData.Bones == nil {
+		return nil
+	}
+	indexes := make([]int, 0)
+	if len(boneNames) == 0 {
+		for _, bone := range modelData.Bones.Values() {
+			if bone == nil || !boneIsAfterPhysics(bone) {
+				continue
+			}
+			indexes = append(indexes, bone.Index())
+		}
+		sortBoneIndexes(modelData, indexes)
+		return indexes
+	}
+	for _, name := range boneNames {
+		bone, err := modelData.Bones.GetByName(name)
+		if err != nil || bone == nil || !boneIsAfterPhysics(bone) {
+			continue
+		}
+		indexes = append(indexes, bone.Index())
+	}
+	sortBoneIndexes(modelData, indexes)
+	return indexes
 }
 
 // addBoneWithDependencies は親や付与元を含めて追加する。

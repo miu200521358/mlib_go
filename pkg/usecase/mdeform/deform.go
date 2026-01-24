@@ -2,11 +2,14 @@
 package mdeform
 
 import (
+	"strings"
+
 	"github.com/miu200521358/mlib_go/pkg/adapter/physics_api"
 	"github.com/miu200521358/mlib_go/pkg/domain/deform"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"github.com/miu200521358/mlib_go/pkg/shared/state"
 )
 
@@ -131,39 +134,131 @@ func BuildAfterPhysics(
 	}
 	deltas.SetFrame(frame)
 	dynamicBones := map[int]struct{}{}
+	logger := logging.DefaultLogger()
+	logDetail := logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) && frame == 0
 
+	var rbTotal int
+	var rbDynamic int
+	var rbStatic int
+	var rbMissingBone int
+	var rbMissingMatrix int
+	var rbUpdated int
+	var rbNames []string
 	if core != nil && physicsEnabled {
 		// 動的剛体の結果をボーンへ反映する。
 		if modelData.RigidBodies != nil {
-			for _, rigidBody := range modelData.RigidBodies.Values() {
+			rigidBodies := modelData.RigidBodies.Values()
+			for _, rigidBody := range rigidBodies {
 				if rigidBody == nil || rigidBody.PhysicsType == model.PHYSICS_TYPE_STATIC {
+					if logDetail {
+						rbTotal++
+						rbStatic++
+					}
 					continue
+				}
+				if logDetail {
+					rbTotal++
+					rbDynamic++
 				}
 				bone := boneByRigidBody(modelData, rigidBody)
 				if bone == nil {
+					if logDetail {
+						rbMissingBone++
+					}
 					continue
 				}
 				mat := core.GetRigidBodyBoneMatrix(modelIndex, rigidBody)
 				if mat == nil {
+					if logDetail {
+						rbMissingMatrix++
+					}
 					continue
 				}
 				parent := deltas.Bones.Get(bone.ParentIndex)
 				bd := delta.NewBoneDeltaByGlobalMatrix(bone, frame, *mat, parent)
 				deltas.Bones.Update(bd)
 				dynamicBones[bone.Index()] = struct{}{}
+				if logDetail {
+					rbUpdated++
+					rbNames = append(rbNames, bone.Name())
+				}
 			}
 		}
 	}
 
 	// 物理後変形対象ボーンを再計算して反映する。
 	afterNames := afterPhysicsBoneNames(modelData)
+	if logDetail {
+		logger.Verbose(logging.VERBOSE_INDEX_PHYSICS,
+			"物理後変形: model=%d frame=%v physicsEnabled=%t rigidBodies(total=%d static=%d dynamic=%d updated=%d missingBone=%d missingMatrix=%d)",
+			modelIndex,
+			frame,
+			physicsEnabled,
+			rbTotal,
+			rbStatic,
+			rbDynamic,
+			rbUpdated,
+			rbMissingBone,
+			rbMissingMatrix,
+		)
+		if len(rbNames) > 0 {
+			logger.Verbose(logging.VERBOSE_INDEX_PHYSICS,
+				"物理剛体反映ボーン: model=%d names=%s",
+				modelIndex,
+				strings.Join(rbNames, ","),
+			)
+		}
+		if len(afterNames) > 0 {
+			logger.Verbose(logging.VERBOSE_INDEX_PHYSICS,
+				"物理後変形対象ボーン: model=%d count=%d names=%s",
+				modelIndex,
+				len(afterNames),
+				strings.Join(afterNames, ","),
+			)
+		}
+	}
+	var afterIndexes []int
 	if len(afterNames) > 0 {
-		afterDeltas, _ := deform.ComputeBoneDeltas(modelData, motionData, frame, afterNames, true, true, false)
+		var afterDeltas *delta.BoneDeltas
+		afterDeltas, afterIndexes = deform.ComputeBoneDeltas(modelData, motionData, frame, afterNames, true, true, false)
+		if logDetail {
+			skipped := 0
+			merged := 0
+			var skippedNames []string
+			for _, name := range afterNames {
+				bone, err := modelData.Bones.GetByName(name)
+				if err != nil || bone == nil {
+					continue
+				}
+				if _, ok := dynamicBones[bone.Index()]; ok {
+					skipped++
+					skippedNames = append(skippedNames, name)
+					continue
+				}
+				merged++
+			}
+			logger.Verbose(logging.VERBOSE_INDEX_PHYSICS,
+				"物理後変形再計算: model=%d indexes=%d merged=%d skipped=%d",
+				modelIndex,
+				len(afterIndexes),
+				merged,
+				skipped,
+			)
+			if len(skippedNames) > 0 {
+				logger.Verbose(logging.VERBOSE_INDEX_PHYSICS,
+					"物理後変形スキップ: model=%d names=%s",
+					modelIndex,
+					strings.Join(skippedNames, ","),
+				)
+			}
+		}
 		mergeBoneDeltas(deltas.Bones, afterDeltas, dynamicBones)
 	}
 
-	// 既存のユニット行列を使いグローバル行列のみ更新する。
-	deform.ApplyGlobalMatrices(modelData, deltas.Bones)
+	// 既存のユニット行列を使い物理後変形対象のグローバル行列のみ更新する。
+	if len(afterIndexes) > 0 {
+		deform.ApplyGlobalMatricesWithIndexes(modelData, deltas.Bones, afterIndexes)
+	}
 	return deltas
 }
 
