@@ -638,5 +638,17 @@
     {
         "id": "&選択頂点表示",
         "translation": "&Selected Vertex Display"
+    },
+    {
+        "id": "&頂点選択",
+        "translation": "&Vertex Selection"
+    },
+    {
+        "id": "&ボックス選択",
+        "translation": "&Box Selection"
+    },
+    {
+        "id": "&ポイント選択",
+        "translation": "&Point Selection"
     }
 ]

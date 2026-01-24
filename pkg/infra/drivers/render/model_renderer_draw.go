@@ -50,6 +50,8 @@ type ModelDrawer struct {
 	// 頂点情報（SSBOから読み出す場合など）
 	vertices []float32
 	faces    []uint32
+	// selectedVertexVertices は選択頂点用VBOの元データを保持し、ベースコピーの参照先を維持する。
+	selectedVertexVertices []float32
 
 	// SSBO
 	ssbo uint32
@@ -217,7 +219,7 @@ func (mr *ModelRenderer) drawCursorLine(shader graphics_api.IShader, cursorPosit
 func (mr *ModelRenderer) drawSelectedVertex(
 	windowIndex int,
 	vertices *model.VertexCollection,
-	invisibleMaterialIndexes []int,
+	selectedMaterialIndexes []int,
 	nowSelectedVertexes []int,
 	nowNoSelectedVertexes []int,
 	shader graphics_api.IShader,
@@ -246,13 +248,10 @@ func (mr *ModelRenderer) drawSelectedVertex(
 		selectedVertexDeltas.Update(vd)
 	}
 
-	// VBO の更新：従来の BindVertex の代替として、selectedVertexDeltas を []float32 に変換して更新
-	vertexData := convertVertexMorphDeltasToFloat32(selectedVertexDeltas)
+	// 選択状態の更新は頂点デルタのみ反映し、元の頂点情報（位置やボーン等）を維持する。
+	mr.selectedVertexBufferHandle.UpdateVertexDeltas(selectedVertexDeltas)
 
 	mr.selectedVertexBufferHandle.Bind()
-	mr.selectedVertexBufferHandle.VBO.Bind()
-	mr.selectedVertexBufferHandle.VBO.BufferData(len(vertexData)*4, gl.Ptr(vertexData), graphics_api.BufferUsageStatic)
-	mr.selectedVertexBufferHandle.VBO.Unbind()
 	mr.selectedVertexIbo.Bind()
 
 	// ボーン行列テクスチャ設定
@@ -299,6 +298,7 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.LEQUAL)
 
+	visibleVertexFlags := buildVisibleVertexFlags(vertices, mr.Model.Materials, mr.ModelDrawer.faces, selectedMaterialIndexes)
 	selectedSet := make(map[int]struct{}, len(nowSelectedVertexes))
 	vertexCount := vertices.Len()
 	for _, idx := range nowSelectedVertexes {
@@ -326,19 +326,29 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	}
 	gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, 0)
 
-	// w成分に距離が入るため、w >= 0 の頂点を選択対象とする。
+	// w成分にレイ上の深度が入るため、w >= 0 の頂点を選択対象とする。
 	if applySelection {
-		if removeCursorPositions != nil {
-			for i := 0; i+3 < len(positions); i += 4 {
-				if positions[i+3] >= 0 {
-					delete(selectedSet, i/4)
-				}
+		frontIndex := -1
+		frontDepth := float32(math.MaxFloat32)
+		for i := 0; i+3 < len(positions); i += 4 {
+			depth := positions[i+3]
+			if depth < 0 {
+				continue
 			}
-		} else {
-			for i := 0; i+3 < len(positions); i += 4 {
-				if positions[i+3] >= 0 {
-					selectedSet[i/4] = struct{}{}
-				}
+			idx := i / 4
+			if visibleVertexFlags != nil && !visibleVertexFlags[idx] {
+				continue
+			}
+			if depth < frontDepth {
+				frontDepth = depth
+				frontIndex = idx
+			}
+		}
+		if frontIndex >= 0 {
+			if removeCursorPositions != nil {
+				delete(selectedSet, frontIndex)
+			} else {
+				selectedSet[frontIndex] = struct{}{}
 			}
 		}
 	}
@@ -351,6 +361,9 @@ func (mr *ModelRenderer) drawSelectedVertex(
 			continue
 		}
 		idx := i / 4
+		if visibleVertexFlags != nil && !visibleVertexFlags[idx] {
+			continue
+		}
 		if _, ok := selectedSet[idx]; !ok {
 			continue
 		}
@@ -362,6 +375,58 @@ func (mr *ModelRenderer) drawSelectedVertex(
 
 	// 選択頂点インデックスの更新結果を返す。
 	return selectedSetToSlice(selectedSet), hoverIndex
+}
+
+// buildVisibleVertexFlags は選択中の材質に属する頂点だけを可視判定用に抽出する。
+func buildVisibleVertexFlags(
+	vertices *model.VertexCollection,
+	materials *model.MaterialCollection,
+	faces []uint32,
+	selectedMaterialIndexes []int,
+) []bool {
+	if vertices == nil || materials == nil || len(faces) == 0 {
+		return nil
+	}
+	vertexCount := vertices.Len()
+	if vertexCount == 0 {
+		return nil
+	}
+	if len(selectedMaterialIndexes) == 0 {
+		return nil
+	}
+
+	selectedSet := make(map[int]struct{}, len(selectedMaterialIndexes))
+	for _, idx := range selectedMaterialIndexes {
+		selectedSet[idx] = struct{}{}
+	}
+
+	flags := make([]bool, vertexCount)
+	offset := 0
+	for materialIndex, material := range materials.Values() {
+		count := 0
+		if material != nil {
+			count = material.VerticesCount
+		}
+		if count < 0 {
+			count = 0
+		}
+		if _, ok := selectedSet[materialIndex]; ok {
+			end := offset + count
+			if end > len(faces) {
+				end = len(faces)
+			}
+			for _, faceIndex := range faces[offset:end] {
+				if int(faceIndex) >= 0 && int(faceIndex) < vertexCount {
+					flags[int(faceIndex)] = true
+				}
+			}
+		}
+		offset += count
+		if offset >= len(faces) {
+			break
+		}
+	}
+	return flags
 }
 
 // --- 内部ヘルパー関数 ---

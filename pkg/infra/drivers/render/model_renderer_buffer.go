@@ -88,6 +88,8 @@ func (mr *ModelRenderer) initializeBuffers(factory *mgl.BufferFactory, modelData
 
 	// 選択頂点バッファの設定
 	md.selectedVertexBufferHandle = factory.NewVertexBuffer(gl.Ptr(selectedVertexVertices), len(selectedVertexVertices))
+	// 選択頂点用の元データ参照を保持して、VBOのベースコピーが破棄されないようにする。
+	md.selectedVertexVertices = selectedVertexVertices
 
 	// 選択頂点用のインデックスバッファ（すべての頂点のインデックス）
 	indexes := createAllVertexIndexesData(modelData)
@@ -148,8 +150,9 @@ func createAllVertexData(modelData *model.PmxModel) ([]float32, []float32, []flo
 					copy(normalVertices[normalOffset+normalLocalOffset:], vgl)                      // 頂点位置
 					copy(normalVertices[normalOffset+normalLocalOffset+vertexDataSize:], normalVgl) // 法線方向の終点
 
-					// 選択頂点データ（頂点データと同じ）
-					copy(selectedVertices[selectedOffset+selectedLocalOffset:], vgl)
+					// 選択頂点データ（非選択時は描画されないUVにしておく）
+					svgl := newSelectedVertexGl(vertex)
+					copy(selectedVertices[selectedOffset+selectedLocalOffset:], svgl)
 				} else {
 					// 空データの場合
 					emptyVgl := make([]float32, vertexDataSize)

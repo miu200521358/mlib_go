@@ -75,7 +75,8 @@ type ControlWindow struct {
 	showOverrideUpperAction      *walk.Action
 	showOverrideLowerAction      *walk.Action
 	showOverrideNoneAction       *walk.Action
-	showSelectedVertexAction     *walk.Action
+	showSelectedVertexPointAction *walk.Action
+	showSelectedVertexBoxAction   *walk.Action
 	showBoneAllAction            *walk.Action
 	showBoneIkAction             *walk.Action
 	showBoneEffectorAction       *walk.Action
@@ -678,7 +679,10 @@ func (cw *ControlWindow) buildViewerMenu() declarative.Menu {
 				declarative.Action{Text: cw.t("&カメラ合わせなし"), Checkable: true, OnTriggered: cw.TriggerShowOverrideNone, AssignTo: &cw.showOverrideNoneAction},
 				declarative.Action{Text: cw.t("&サブビューワーオーバーレイの使い方"), OnTriggered: cw.showOverrideHelp},
 			}},
-			declarative.Action{Text: cw.t("&選択頂点表示"), Checkable: true, OnTriggered: cw.TriggerShowSelectedVertex, AssignTo: &cw.showSelectedVertexAction},
+			declarative.Menu{Text: cw.t("&頂点選択"), Items: []declarative.MenuItem{
+				declarative.Action{Text: cw.t("&ボックス選択"), Checkable: true, OnTriggered: cw.TriggerShowSelectedVertexBox, AssignTo: &cw.showSelectedVertexBoxAction},
+				declarative.Action{Text: cw.t("&ポイント選択"), Checkable: true, OnTriggered: cw.TriggerShowSelectedVertexPoint, AssignTo: &cw.showSelectedVertexPointAction},
+			}},
 			declarative.Menu{Text: cw.t("&ボーン表示"), Items: []declarative.MenuItem{
 				declarative.Action{Text: cw.t("&全ボーン"), Checkable: true, OnTriggered: cw.TriggerShowBoneAll, AssignTo: &cw.showBoneAllAction},
 				declarative.Action{Text: cw.t("&IKボーン"), Checkable: true, OnTriggered: cw.TriggerShowBoneIk, AssignTo: &cw.showBoneIkAction},
@@ -799,11 +803,25 @@ func (cw *ControlWindow) TriggerShowOverrideNone() {
 	cw.SetDisplayFlag(state.STATE_FLAG_SHOW_OVERRIDE_NONE, cw.actionChecked(cw.showOverrideNoneAction))
 }
 
-// TriggerShowSelectedVertex は選択頂点表示を切り替える。
-func (cw *ControlWindow) TriggerShowSelectedVertex() {
-	enabled := cw.actionChecked(cw.showSelectedVertexAction)
+// TriggerShowSelectedVertexPoint はポイント選択を切り替える。
+func (cw *ControlWindow) TriggerShowSelectedVertexPoint() {
+	enabled := cw.actionChecked(cw.showSelectedVertexPointAction)
+	if enabled {
+		cw.updateActionChecked(cw.showSelectedVertexBoxAction, false)
+	}
 	cw.SetDisplayFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX, enabled)
 	cw.SetDisplayFlag(state.STATE_FLAG_SHOW_WIRE, enabled)
+}
+
+// TriggerShowSelectedVertexBox はボックス選択を切り替える。
+func (cw *ControlWindow) TriggerShowSelectedVertexBox() {
+	enabled := cw.actionChecked(cw.showSelectedVertexBoxAction)
+	if enabled {
+		cw.updateActionChecked(cw.showSelectedVertexPointAction, false)
+	}
+	// ボックス選択は未実装のため、現状はポイント選択のみ有効にする。
+	cw.SetDisplayFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX, false)
+	cw.SetDisplayFlag(state.STATE_FLAG_SHOW_WIRE, false)
 }
 
 // TriggerShowBoneAll は全ボーン表示を切り替える。
@@ -1040,7 +1058,7 @@ func (cw *ControlWindow) updateDisplayAction(flag state.StateFlag, enabled bool)
 	case state.STATE_FLAG_SHOW_OVERRIDE_NONE:
 		cw.updateActionChecked(cw.showOverrideNoneAction, enabled)
 	case state.STATE_FLAG_SHOW_SELECTED_VERTEX:
-		cw.updateActionChecked(cw.showSelectedVertexAction, enabled)
+		cw.updateActionChecked(cw.showSelectedVertexPointAction, enabled)
 	case state.STATE_FLAG_SHOW_BONE_ALL:
 		cw.updateActionChecked(cw.showBoneAllAction, enabled)
 	case state.STATE_FLAG_SHOW_BONE_IK:

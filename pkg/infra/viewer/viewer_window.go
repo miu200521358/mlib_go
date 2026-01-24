@@ -338,6 +338,20 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 			applySelectionForModel,
 		)
 		if applySelectionForModel {
+			logger := logging.DefaultLogger()
+			if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
+				logger.Verbose(
+					logging.VERBOSE_INDEX_VIEWER,
+					"頂点選択: 適用 model=%d remove=%t cursor_positions=%d selected=%d hover=%d",
+					i,
+					removeSelection,
+					len(cursorPositions)/3,
+					len(updatedSelected),
+					hoverIndex,
+				)
+			}
+		}
+		if applySelectionForModel {
 			vw.list.shared.SetSelectedVertexIndexes(vw.windowIndex, i, updatedSelected)
 		}
 		if showSelectedVertex && i == 0 {
@@ -691,9 +705,41 @@ func (vw *ViewerWindow) queueSelectedVertexSelection(xpos, ypos float64, remove 
 	if vw.list != nil && vw.list.appConfig != nil {
 		limit = vw.list.appConfig.CursorPositionLimit
 	}
+	logger := logging.DefaultLogger()
+	if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
+		logger.Verbose(
+			logging.VERBOSE_INDEX_VIEWER,
+			"頂点選択: クリック x=%.2f y=%.2f ctrl=%t limit=%d",
+			xpos,
+			ypos,
+			remove,
+			limit,
+		)
+	}
 	positions := vw.buildCursorPositions(xpos, ypos, limit)
 	if len(positions) == 0 {
+		if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
+			logger.Verbose(logging.VERBOSE_INDEX_VIEWER, "頂点選択: カーソル位置の変換結果が空です")
+		}
 		return
+	}
+	if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
+		sample := ""
+		if len(positions) >= 6 {
+			sample = fmt.Sprintf(
+				"[from x=%.4f,y=%.4f,z=%.4f to x=%.4f,y=%.4f,z=%.4f]",
+				positions[0], positions[1], positions[2],
+				positions[3], positions[4], positions[5],
+			)
+		} else if len(positions) >= 3 {
+			sample = fmt.Sprintf("[x=%.4f,y=%.4f,z=%.4f]", positions[0], positions[1], positions[2])
+		}
+		logger.Verbose(
+			logging.VERBOSE_INDEX_VIEWER,
+			"頂点選択: カーソル位置=%d sample=%s",
+			len(positions)/3,
+			sample,
+		)
 	}
 	vw.pendingSelectVertex = true
 	vw.pendingRemoveSelectedVertex = remove
@@ -853,8 +899,9 @@ func (vw *ViewerWindow) clearNonVertexHovers() {
 
 // calculateRayFromTo はカーソル位置からレイを生成する。
 func (vw *ViewerWindow) calculateRayFromTo(xpos, ypos float64) (*mmath.Vec3, *mmath.Vec3) {
-	width, height := vw.GetSize()
-	if width == 0 || height == 0 {
+	windowWidth, windowHeight := vw.GetSize()
+	framebufferWidth, framebufferHeight := vw.GetFramebufferSize()
+	if framebufferWidth == 0 || framebufferHeight == 0 {
 		return nil, nil
 	}
 	cam := vw.shader.Camera()
@@ -862,16 +909,24 @@ func (vw *ViewerWindow) calculateRayFromTo(xpos, ypos float64) (*mmath.Vec3, *mm
 		return nil, nil
 	}
 
-	projection := toMgl32Mat4(cam.GetProjectionMatrix(width, height))
+	// GLFWのカーソル座標はウィンドウ座標なので、フレームバッファ座標に変換する。
+	if windowWidth > 0 && windowHeight > 0 {
+		scaleX := float64(framebufferWidth) / float64(windowWidth)
+		scaleY := float64(framebufferHeight) / float64(windowHeight)
+		xpos *= scaleX
+		ypos *= scaleY
+	}
+
+	projection := toMgl32Mat4(cam.GetProjectionMatrix(framebufferWidth, framebufferHeight))
 	view := toMgl32Mat4(cam.GetViewMatrix())
 
 	nearWorld, errNear := mgl32.UnProject(
-		mgl32.Vec3{float32(xpos), float32(height) - float32(ypos), 0.0},
-		view, projection, 0, 0, width, height,
+		mgl32.Vec3{float32(xpos), float32(framebufferHeight) - float32(ypos), 0.0},
+		view, projection, 0, 0, framebufferWidth, framebufferHeight,
 	)
 	farWorld, errFar := mgl32.UnProject(
-		mgl32.Vec3{float32(xpos), float32(height) - float32(ypos), 1.0},
-		view, projection, 0, 0, width, height,
+		mgl32.Vec3{float32(xpos), float32(framebufferHeight) - float32(ypos), 1.0},
+		view, projection, 0, 0, framebufferWidth, framebufferHeight,
 	)
 	if errNear == nil && errFar == nil {
 		rayFrom := mmath.Vec3{}
@@ -885,8 +940,8 @@ func (vw *ViewerWindow) calculateRayFromTo(xpos, ypos float64) (*mmath.Vec3, *mm
 		return &rayFrom, &rayTo
 	}
 
-	ndcX := (2.0*float64(xpos))/float64(width) - 1.0
-	ndcY := 1.0 - (2.0*float64(ypos))/float64(height)
+	ndcX := (2.0*float64(xpos))/float64(framebufferWidth) - 1.0
+	ndcY := 1.0 - (2.0*float64(ypos))/float64(framebufferHeight)
 	aspect := float64(cam.AspectRatio)
 	fovRad := mmath.DegToRad(float64(cam.FieldOfView))
 	tanFov := math.Tan(fovRad * 0.5)
@@ -914,27 +969,14 @@ func (vw *ViewerWindow) calculateRayFromTo(xpos, ypos float64) (*mmath.Vec3, *mm
 
 // buildCursorPositions はカーソル位置に沿ったサンプル点群を生成する。
 func (vw *ViewerWindow) buildCursorPositions(xpos, ypos float64, limit int) []float32 {
-	const maxCursorPositions = 100
-	if limit <= 0 {
-		limit = maxCursorPositions
-	}
-	if limit > maxCursorPositions {
-		limit = maxCursorPositions
-	}
-	if limit < 2 {
-		limit = 2
-	}
 	rayFrom, rayTo := vw.calculateRayFromTo(xpos, ypos)
 	if rayFrom == nil || rayTo == nil {
 		return nil
 	}
-	direction := rayTo.Subed(*rayFrom)
-	positions := make([]float32, 0, limit*3)
-	for i := 0; i < limit; i++ {
-		t := float64(i) / float64(limit-1)
-		pos := rayFrom.Added(direction.MuledScalar(t))
-		positions = append(positions, float32(pos.X), float32(pos.Y), float32(pos.Z))
-	}
+	// レイの始点と終点のみを送って、シェーダ側で距離と深度を計算する。
+	positions := make([]float32, 0, 6)
+	positions = append(positions, float32(rayFrom.X), float32(rayFrom.Y), float32(rayFrom.Z))
+	positions = append(positions, float32(rayTo.X), float32(rayTo.Y), float32(rayTo.Z))
 	return positions
 }
 

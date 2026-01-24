@@ -190,7 +190,7 @@ func (mr *ModelRenderer) Render(
 		selectedVertexIndexes, hoverIndex = mr.drawSelectedVertex(
 			mr.windowIndex,
 			mr.Model.Vertices,
-			nil,
+			selectedMaterialIndexes,
 			selectedVertexIndexes,
 			nil,
 			shader,
