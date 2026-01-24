@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	PhysicsDefaultMaxSubSteps = 3 // 物理シミュレーションのデフォルト最大サブステップ数
+	PhysicsDefaultMaxSubSteps = 5 // 物理シミュレーションのデフォルト最大サブステップ数
 )
 
 // IPhysicsCore は物理エンジンのコア契約を表す。
