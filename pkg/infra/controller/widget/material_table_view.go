@@ -33,7 +33,7 @@ func NewMaterialTableView(translator i18n.II18n, tooltip string, changeFunc func
 	m.tooltip = tooltip
 	m.changeFunc = changeFunc
 	m.MaterialModel = new(MaterialModel)
-	m.MaterialModel.sortColumn = -1
+	m.MaterialModel.sortColumn = 1
 	m.MaterialModel.sortOrder = walk.SortAscending
 	m.translator = translator
 	return m
@@ -238,7 +238,7 @@ func (m *MaterialModel) SetChecked(row int, checked bool) error {
 
 // ColumnSortable はソート可否を返す。
 func (m *MaterialModel) ColumnSortable(col int) bool {
-	return col >= 0
+	return col > 0
 }
 
 // SortedColumn は現在のソート列を返す。
@@ -253,6 +253,9 @@ func (m *MaterialModel) SortOrder() walk.SortOrder {
 
 // Sort はソート条件を設定する。
 func (m *MaterialModel) Sort(col int, order walk.SortOrder) error {
+	if col <= 0 {
+		col = 1
+	}
 	m.sortColumn, m.sortOrder = col, order
 	if m.sortColumn < 0 {
 		return m.SorterBase.Sort(col, order)
