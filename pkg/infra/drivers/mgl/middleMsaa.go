@@ -101,6 +101,35 @@ func (m *IntermediateMsaaBuffer) ReadDepthAt(x, y, width, height int) float32 {
 	return depth
 }
 
+// ReadDepthRegion は指定矩形の深度値を読み取る。
+func (m *IntermediateMsaaBuffer) ReadDepthRegion(x, y, width, height, framebufferHeight int) []float32 {
+	if width <= 0 || height <= 0 || framebufferHeight <= 0 {
+		return nil
+	}
+	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, m.msaaFBO)
+	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, m.intermediateFBO)
+	gl.BlitFramebuffer(
+		0, 0, int32(m.config.width), int32(m.config.height),
+		0, 0, int32(m.config.width), int32(m.config.height),
+		gl.DEPTH_BUFFER_BIT, gl.NEAREST,
+	)
+
+	gl.BindFramebuffer(gl.FRAMEBUFFER, m.intermediateFBO)
+	var depth []float32
+	readY := framebufferHeight - (y + height)
+	if readY < 0 {
+		readY = 0
+	}
+	if width > 0 && height > 0 {
+		depth = make([]float32, width*height)
+		gl.ReadPixels(int32(x), int32(readY), int32(width), int32(height), gl.DEPTH_COMPONENT, gl.FLOAT, gl.Ptr(&depth[0]))
+	}
+
+	m.Unbind()
+
+	return depth
+}
+
 // Bind は描画先をMSAAに切り替える。
 func (m *IntermediateMsaaBuffer) Bind() {
 	gl.BindFramebuffer(gl.FRAMEBUFFER, m.msaaFBO)

@@ -9,11 +9,26 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/graphics_api"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/mgl"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"github.com/miu200521358/mlib_go/pkg/shared/state"
 )
+
+// VertexSelectionRequest は選択頂点の更新要求をまとめる。
+type VertexSelectionRequest struct {
+	Mode                  state.SelectedVertexMode
+	Apply                 bool
+	Remove                bool
+	CursorPositions       []float32
+	RemoveCursorPositions []float32
+	ScreenWidth           int
+	ScreenHeight          int
+	RectMin               mmath.Vec2
+	RectMax               mmath.Vec2
+	HasRect               bool
+}
 
 // ModelRenderer は、PMXモデル全体の描画処理を統括する構造体です。
 // バッファの初期化は model_renderer_buffer.go に、描画処理は model_renderer_draw.go に分割して実装します。
@@ -131,9 +146,7 @@ func (mr *ModelRenderer) Render(
 	vmdDeltas *delta.VmdDeltas,
 	debugBoneHover []*graphics_api.DebugBoneHover,
 	selectedVertexIndexes []int,
-	cursorPositions []float32,
-	removeCursorPositions []float32,
-	applySelection bool,
+	selectionRequest *VertexSelectionRequest,
 ) ([]int, int) {
 	mr.bufferHandle.Bind()
 	defer mr.bufferHandle.Unbind()
@@ -197,9 +210,7 @@ func (mr *ModelRenderer) Render(
 			paddedMatrixes,
 			matrixWidth,
 			matrixHeight,
-			cursorPositions,
-			removeCursorPositions,
-			applySelection,
+			selectionRequest,
 		)
 	}
 	return selectedVertexIndexes, hoverIndex

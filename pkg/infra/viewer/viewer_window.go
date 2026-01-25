@@ -99,6 +99,11 @@ type ViewerWindow struct {
 	leftCursorRemoveWindowPositions       map[mmath.Vec2]float32
 	leftCursorWorldHistoryPositions       []*mmath.Vec3
 	leftCursorRemoveWorldHistoryPositions []*mmath.Vec3
+	boxSelectionDragging                  bool
+	boxSelectionPending                   bool
+	boxSelectionRemove                    bool
+	boxSelectionStart                     mmath.Vec2
+	boxSelectionEnd                       mmath.Vec2
 }
 
 // newViewerWindow はビューワーウィンドウを生成して初期化する。
@@ -255,9 +260,10 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 	vw.shader.Resize(fbW, fbH)
 
 	showSelectedVertex := vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX)
+	selectionMode := vw.selectedVertexMode()
 	var leftCursorWorldPositions []*mmath.Vec3
 	var leftCursorRemoveWorldPositions []*mmath.Vec3
-	if showSelectedVertex {
+	if showSelectedVertex && selectionMode == state.SELECTED_VERTEX_MODE_POINT {
 		leftCursorWorldPositions, leftCursorRemoveWorldPositions = vw.updateCursorPositions()
 	}
 
@@ -271,8 +277,40 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 	}
 	selectedCursorPositions := flattenCursorPositions(leftCursorWorldPositions, limit)
 	removeSelectedCursorPositions := flattenCursorPositions(leftCursorRemoveWorldPositions, limit)
-	applySelection := len(selectedCursorPositions) > 0 || len(removeSelectedCursorPositions) > 0
-	removeSelection := len(removeSelectedCursorPositions) > 0
+	applyPointSelection := len(selectedCursorPositions) > 0 || len(removeSelectedCursorPositions) > 0
+	removePointSelection := len(removeSelectedCursorPositions) > 0
+	applyBoxSelection := false
+	boxSelectionRemove := false
+	boxSelectionMin := mmath.Vec2{}
+	boxSelectionMax := mmath.Vec2{}
+	if showSelectedVertex && selectionMode == state.SELECTED_VERTEX_MODE_BOX {
+		if minPos, maxPos, remove, ok := vw.consumeBoxSelectionRect(winW, winH, fbW, fbH); ok {
+			applyBoxSelection = true
+			boxSelectionRemove = remove
+			boxSelectionMin = minPos
+			boxSelectionMax = maxPos
+			logger := logging.DefaultLogger()
+			if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
+				logger.Verbose(
+					logging.VERBOSE_INDEX_VIEWER,
+					"ボックス選択: win=(%d,%d) fb=(%d,%d) start=(%.2f,%.2f) end=(%.2f,%.2f) rect=(%.2f,%.2f)-(%.2f,%.2f) remove=%t",
+					winW,
+					winH,
+					fbW,
+					fbH,
+					vw.boxSelectionStart.X,
+					vw.boxSelectionStart.Y,
+					vw.boxSelectionEnd.X,
+					vw.boxSelectionEnd.Y,
+					boxSelectionMin.X,
+					boxSelectionMin.Y,
+					boxSelectionMax.X,
+					boxSelectionMax.Y,
+					boxSelectionRemove,
+				)
+			}
+		}
+	}
 
 	if len(vw.list.windowList) > 1 && vw.list.shared.IsShowOverride() && vw.windowIndex != 0 {
 		vw.shader.OverrideRenderer().Bind()
@@ -330,14 +368,45 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 		cursorPositions := hoverCursorPositions
 		removeCursorPositions := []float32(nil)
 		applySelectionForModel := false
-		if showSelectedVertex && i == 0 && applySelection {
-			if removeSelection {
-				cursorPositions = removeSelectedCursorPositions
-				removeCursorPositions = cursorPositions
-			} else {
-				cursorPositions = selectedCursorPositions
+		selectionRequest := (*render.VertexSelectionRequest)(nil)
+		if showSelectedVertex {
+			selectionRequest = &render.VertexSelectionRequest{
+				Mode:                  selectionMode,
+				Apply:                 false,
+				Remove:                false,
+				CursorPositions:       cursorPositions,
+				RemoveCursorPositions: removeCursorPositions,
+				ScreenWidth:           fbW,
+				ScreenHeight:          fbH,
+				RectMin:               boxSelectionMin,
+				RectMax:               boxSelectionMax,
+				HasRect:               false,
 			}
-			applySelectionForModel = true
+		}
+		if showSelectedVertex && i == 0 {
+			switch selectionMode {
+			case state.SELECTED_VERTEX_MODE_BOX:
+				if applyBoxSelection && selectionRequest != nil {
+					selectionRequest.Apply = true
+					selectionRequest.Remove = boxSelectionRemove
+					selectionRequest.HasRect = true
+					applySelectionForModel = true
+				}
+			default:
+				if applyPointSelection && selectionRequest != nil {
+					if removePointSelection {
+						cursorPositions = removeSelectedCursorPositions
+						removeCursorPositions = cursorPositions
+					} else {
+						cursorPositions = selectedCursorPositions
+					}
+					selectionRequest.CursorPositions = cursorPositions
+					selectionRequest.RemoveCursorPositions = removeCursorPositions
+					selectionRequest.Apply = true
+					selectionRequest.Remove = removePointSelection
+					applySelectionForModel = true
+				}
+			}
 		}
 		updatedSelected, hoverIndex := renderer.Render(
 			vw.shader,
@@ -345,9 +414,7 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 			vmdDeltas,
 			debugBoneHover,
 			selectedVertexIndexes,
-			cursorPositions,
-			removeCursorPositions,
-			applySelectionForModel,
+			selectionRequest,
 		)
 		if applySelectionForModel {
 			vw.list.shared.SetSelectedVertexIndexes(vw.windowIndex, i, updatedSelected)
@@ -388,11 +455,17 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 	}
 
 	vw.SwapBuffers()
+	if !showSelectedVertex {
+		vw.resetBoxSelection()
+	}
 	if showSelectedVertex && !vw.leftButtonPressed {
-		vw.leftCursorWindowPositions = make(map[mmath.Vec2]float32)
-		vw.leftCursorRemoveWindowPositions = make(map[mmath.Vec2]float32)
-		vw.leftCursorWorldHistoryPositions = make([]*mmath.Vec3, 0)
-		vw.leftCursorRemoveWorldHistoryPositions = make([]*mmath.Vec3, 0)
+		vw.boxSelectionDragging = false
+		if selectionMode == state.SELECTED_VERTEX_MODE_POINT {
+			vw.leftCursorWindowPositions = make(map[mmath.Vec2]float32)
+			vw.leftCursorRemoveWindowPositions = make(map[mmath.Vec2]float32)
+			vw.leftCursorWorldHistoryPositions = make([]*mmath.Vec3, 0)
+			vw.leftCursorRemoveWorldHistoryPositions = make([]*mmath.Vec3, 0)
+		}
 	}
 }
 
@@ -619,6 +692,12 @@ func (vw *ViewerWindow) mouseCallback(_ *glfw.Window, button glfw.MouseButton, a
 		switch button {
 		case glfw.MouseButtonLeft:
 			vw.leftButtonPressed = true
+			if vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) &&
+				vw.selectedVertexMode() == state.SELECTED_VERTEX_MODE_BOX {
+				vw.boxSelectionDragging = true
+				vw.boxSelectionStart = mmath.Vec2{X: vw.cursorX, Y: vw.cursorY}
+				vw.boxSelectionEnd = vw.boxSelectionStart
+			}
 		case glfw.MouseButtonMiddle:
 			vw.middleButtonPressed = true
 		case glfw.MouseButtonRight:
@@ -629,6 +708,13 @@ func (vw *ViewerWindow) mouseCallback(_ *glfw.Window, button glfw.MouseButton, a
 		case glfw.MouseButtonLeft:
 			vw.leftButtonPressed = false
 			if vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) {
+				if vw.selectedVertexMode() == state.SELECTED_VERTEX_MODE_BOX {
+					vw.boxSelectionDragging = false
+					vw.boxSelectionPending = true
+					vw.boxSelectionRemove = vw.isCtrlPressed()
+					vw.boxSelectionEnd = mmath.Vec2{X: vw.cursorX, Y: vw.cursorY}
+					return
+				}
 				vw.queueSelectedVertexSelection(vw.cursorX, vw.cursorY, vw.isCtrlPressed())
 				return
 			}
@@ -670,11 +756,17 @@ func (vw *ViewerWindow) cursorPosCallback(_ *glfw.Window, xpos, ypos float64) {
 		vw.updateCameraPositionByCursor(xpos, ypos)
 	}
 	if vw.leftButtonPressed && vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) {
-		screenPos := mmath.Vec2{X: xpos, Y: ypos}
-		if vw.isCtrlPressed() {
-			vw.leftCursorRemoveWindowPositions[screenPos] = 0
+		if vw.selectedVertexMode() == state.SELECTED_VERTEX_MODE_BOX {
+			if vw.boxSelectionDragging {
+				vw.boxSelectionEnd = mmath.Vec2{X: xpos, Y: ypos}
+			}
 		} else {
-			vw.leftCursorWindowPositions[screenPos] = 0
+			screenPos := mmath.Vec2{X: xpos, Y: ypos}
+			if vw.isCtrlPressed() {
+				vw.leftCursorRemoveWindowPositions[screenPos] = 0
+			} else {
+				vw.leftCursorWindowPositions[screenPos] = 0
+			}
 		}
 	}
 	if !vw.rightButtonPressed && !vw.middleButtonPressed {
@@ -717,6 +809,9 @@ func (vw *ViewerWindow) updateCursorPositions() ([]*mmath.Vec3, []*mmath.Vec3) {
 		return nil, nil
 	}
 	if !vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) {
+		return nil, nil
+	}
+	if vw.selectedVertexMode() != state.SELECTED_VERTEX_MODE_POINT {
 		return nil, nil
 	}
 	leftCursorWorldPositions := make([]*mmath.Vec3, 0)
@@ -1133,6 +1228,50 @@ func (vw *ViewerWindow) buildCursorPositions(xpos, ypos float64, limit int) []fl
 	positions := make([]float32, 0, 3)
 	positions = append(positions, float32(worldPos.X), float32(worldPos.Y), float32(worldPos.Z))
 	return positions
+}
+
+// selectedVertexMode は選択頂点のモードを返す。
+func (vw *ViewerWindow) selectedVertexMode() state.SelectedVertexMode {
+	if vw == nil || vw.list == nil || vw.list.shared == nil {
+		return state.SELECTED_VERTEX_MODE_POINT
+	}
+	return vw.list.shared.SelectedVertexMode()
+}
+
+// resetBoxSelection はボックス選択状態をクリアする。
+func (vw *ViewerWindow) resetBoxSelection() {
+	vw.boxSelectionDragging = false
+	vw.boxSelectionPending = false
+	vw.boxSelectionRemove = false
+}
+
+// consumeBoxSelectionRect はボックス選択の矩形を取り出してクリアする。
+func (vw *ViewerWindow) consumeBoxSelectionRect(winW, winH, fbW, fbH int) (mmath.Vec2, mmath.Vec2, bool, bool) {
+	if vw == nil || !vw.boxSelectionPending || winW <= 0 || winH <= 0 || fbW <= 0 || fbH <= 0 {
+		return mmath.Vec2{}, mmath.Vec2{}, false, false
+	}
+	vw.boxSelectionPending = false
+	remove := vw.boxSelectionRemove
+	vw.boxSelectionRemove = false
+
+	scaleX := float64(fbW) / float64(winW)
+	scaleY := float64(fbH) / float64(winH)
+	startX := vw.boxSelectionStart.X * scaleX
+	startY := vw.boxSelectionStart.Y * scaleY
+	endX := vw.boxSelectionEnd.X * scaleX
+	endY := vw.boxSelectionEnd.Y * scaleY
+
+	minX := math.Min(startX, endX)
+	maxX := math.Max(startX, endX)
+	minY := math.Min(startY, endY)
+	maxY := math.Max(startY, endY)
+
+	minX = max(minX, 0)
+	minY = max(minY, 0)
+	maxX = min(maxX, float64(fbW))
+	maxY = min(maxY, float64(fbH))
+
+	return mmath.Vec2{X: minX, Y: minY}, mmath.Vec2{X: maxX, Y: maxY}, remove, true
 }
 
 // toMgl32Mat4 はmmath.Mat4をmgl32.Mat4に変換する。

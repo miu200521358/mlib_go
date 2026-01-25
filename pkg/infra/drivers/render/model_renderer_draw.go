@@ -10,12 +10,14 @@ import (
 
 	"github.com/go-gl/gl/v4.3-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
+	"gonum.org/v1/gonum/spatial/r3"
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/graphics_api"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/mgl"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"github.com/miu200521358/mlib_go/pkg/shared/state"
 )
 
@@ -225,10 +227,31 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	shader graphics_api.IShader,
 	paddedMatrixes []float32,
 	width, height int,
-	cursorPositions []float32,
-	removeCursorPositions []float32,
-	applySelection bool,
+	selectionRequest *VertexSelectionRequest,
 ) ([]int, int) {
+	selectionMode := state.SELECTED_VERTEX_MODE_POINT
+	applySelection := false
+	removeSelection := false
+	cursorPositions := []float32(nil)
+	removeCursorPositions := []float32(nil)
+	screenWidth := 0
+	screenHeight := 0
+	rectMin := mmath.Vec2{}
+	rectMax := mmath.Vec2{}
+	hasRect := false
+	if selectionRequest != nil {
+		selectionMode = selectionRequest.Mode
+		applySelection = selectionRequest.Apply
+		removeSelection = selectionRequest.Remove
+		cursorPositions = selectionRequest.CursorPositions
+		removeCursorPositions = selectionRequest.RemoveCursorPositions
+		screenWidth = selectionRequest.ScreenWidth
+		screenHeight = selectionRequest.ScreenHeight
+		rectMin = selectionRequest.RectMin
+		rectMax = selectionRequest.RectMax
+		hasRect = selectionRequest.HasRect
+	}
+
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.ALWAYS)
 
@@ -264,7 +287,14 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	gl.PointSize(5.0)
 
 	thresholdUniform := mgl.GetUniformLocation(program, mgl.ShaderCursorThreshold)
-	gl.Uniform1f(thresholdUniform, shader.Camera().FieldOfView)
+	cursorThreshold := float32(0)
+	if shader.Camera() != nil {
+		cursorThreshold = shader.Camera().FieldOfView
+	}
+	if selectionMode == state.SELECTED_VERTEX_MODE_BOX && applySelection && hasRect {
+		cursorThreshold = 1.0e9
+	}
+	gl.Uniform1f(thresholdUniform, cursorThreshold)
 
 	const maxCursorPositions = 100
 	effectiveLimit := mr.effectiveCursorPositionLimit()
@@ -284,12 +314,15 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	copy(cursorValues[:], srcCursorPositions)
 	gl.Uniform3fv(cursorPositionsUniform, maxCursorPositions, &cursorValues[0])
 
+	// 選択頂点描画は深度バッファを書き換えずに行う。
+	gl.DepthMask(false)
 	gl.DrawElements(
 		gl.POINTS,
 		int32(mr.selectedVertexCount),
 		gl.UNSIGNED_INT,
 		nil,
 	)
+	gl.DepthMask(true)
 
 	mr.selectedVertexIbo.Unbind()
 	mr.selectedVertexBufferHandle.Unbind()
@@ -313,7 +346,11 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	if len(truncatedCursorPositions) > maxValueCount {
 		truncatedCursorPositions = truncatedCursorPositions[:maxValueCount]
 	}
-	if vertexCount == 0 || mr.ssbo == 0 || len(truncatedCursorPositions) == 0 {
+	needCursorPositions := len(truncatedCursorPositions) > 0
+	if selectionMode == state.SELECTED_VERTEX_MODE_BOX && applySelection && hasRect {
+		needCursorPositions = true
+	}
+	if vertexCount == 0 || mr.ssbo == 0 || !needCursorPositions {
 		return selectedSetToSlice(selectedSet), -1
 	}
 
@@ -326,29 +363,99 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	}
 	gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, 0)
 
-	// w成分にレイ上の深度が入るため、w >= 0 の頂点を選択対象とする。
 	if applySelection {
-		frontIndex := -1
-		frontDepth := float32(math.MaxFloat32)
-		for i := 0; i+3 < len(positions); i += 4 {
-			depth := positions[i+3]
-			if depth < 0 {
-				continue
+		switch {
+		case selectionMode == state.SELECTED_VERTEX_MODE_BOX && hasRect:
+			minX, minY, maxX, maxY, ok := normalizeSelectionRect(rectMin, rectMax, screenWidth, screenHeight)
+			if ok {
+				view, projection, ok := selectionViewProjection(shader, screenWidth, screenHeight)
+				if ok {
+					rectX0, rectY0, rectW, rectH, rectOk := selectionRectToPixels(minX, minY, maxX, maxY, screenWidth, screenHeight)
+					depthMap := []float32(nil)
+					if rectOk && shader != nil && shader.Msaa() != nil {
+						if reader, ok := shader.Msaa().(interface {
+							ReadDepthRegion(x, y, width, height, framebufferHeight int) []float32
+						}); ok {
+							depthMap = reader.ReadDepthRegion(rectX0, rectY0, rectW, rectH, screenHeight)
+						}
+					}
+					const depthEpsilon = 0.00001
+					logger := logging.DefaultLogger()
+					for i := 0; i+3 < len(positions); i += 4 {
+						if positions[i+3] < 0 {
+							continue
+						}
+						idx := i / 4
+						if visibleVertexFlags != nil && !visibleVertexFlags[idx] {
+							continue
+						}
+						pos := mmath.Vec3{
+							Vec: r3.Vec{
+								X: float64(positions[i]), Y: float64(positions[i+1]), Z: float64(positions[i+2]),
+							},
+						}
+						screenX, screenY, depth, ok := projectToScreenForSelection(pos, view, projection, screenWidth, screenHeight)
+						if !ok {
+							continue
+						}
+						if screenX < minX || screenX > maxX || screenY < minY || screenY > maxY {
+							continue
+						}
+						depthAt := float32(-1)
+						if rectOk && len(depthMap) == rectW*rectH {
+							px := int(math.Floor(screenX))
+							py := int(math.Floor(screenY))
+							if px < rectX0 || py < rectY0 || px >= rectX0+rectW || py >= rectY0+rectH {
+								continue
+							}
+							ix := px - rectX0
+							iy := (rectH - 1) - (py - rectY0)
+							depthAt = depthMap[iy*rectW+ix]
+							if depthAt <= 0.0 || depthAt >= 1.0 {
+								continue
+							}
+							if math.Abs(float64(depth-depthAt)) > depthEpsilon {
+								continue
+							}
+						}
+						if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
+							logger.Verbose(
+								logging.VERBOSE_INDEX_VIEWER,
+								"ボックス選択:頂点 index=%d pos=[x=%.4f, y=%.4f, z=%.4f] screen=(%.2f, %.2f) depth=%.6f depthAt=%.6f remove=%t",
+								idx, pos.X, pos.Y, pos.Z, screenX, screenY, depth, depthAt, removeSelection,
+							)
+						}
+						if removeSelection {
+							delete(selectedSet, idx)
+						} else {
+							selectedSet[idx] = struct{}{}
+						}
+					}
+				}
 			}
-			idx := i / 4
-			if visibleVertexFlags != nil && !visibleVertexFlags[idx] {
-				continue
+		default:
+			frontIndex := -1
+			frontDepth := float32(math.MaxFloat32)
+			for i := 0; i+3 < len(positions); i += 4 {
+				depth := positions[i+3]
+				if depth < 0 {
+					continue
+				}
+				idx := i / 4
+				if visibleVertexFlags != nil && !visibleVertexFlags[idx] {
+					continue
+				}
+				if depth < frontDepth {
+					frontDepth = depth
+					frontIndex = idx
+				}
 			}
-			if depth < frontDepth {
-				frontDepth = depth
-				frontIndex = idx
-			}
-		}
-		if frontIndex >= 0 {
-			if removeCursorPositions != nil {
-				delete(selectedSet, frontIndex)
-			} else {
-				selectedSet[frontIndex] = struct{}{}
+			if frontIndex >= 0 {
+				if removeCursorPositions != nil {
+					delete(selectedSet, frontIndex)
+				} else {
+					selectedSet[frontIndex] = struct{}{}
+				}
 			}
 		}
 	}
@@ -375,6 +482,103 @@ func (mr *ModelRenderer) drawSelectedVertex(
 
 	// 選択頂点インデックスの更新結果を返す。
 	return selectedSetToSlice(selectedSet), hoverIndex
+}
+
+// selectionViewProjection は選択判定用のビュー・射影行列を構築する。
+func selectionViewProjection(shader graphics_api.IShader, width, height int) (mgl32.Mat4, mgl32.Mat4, bool) {
+	if shader == nil || width <= 0 || height <= 0 {
+		return mgl32.Mat4{}, mgl32.Mat4{}, false
+	}
+	cam := shader.Camera()
+	if cam == nil || cam.Position == nil || cam.LookAtCenter == nil || cam.Up == nil {
+		return mgl32.Mat4{}, mgl32.Mat4{}, false
+	}
+	projection := mgl32.Perspective(
+		mgl32.DegToRad(cam.FieldOfView),
+		float32(width)/float32(height),
+		cam.NearPlane,
+		cam.FarPlane,
+	)
+	view := mgl32.LookAtV(
+		mgl.NewGlVec3(cam.Position),
+		mgl.NewGlVec3(cam.LookAtCenter),
+		mgl.NewGlVec3(cam.Up),
+	)
+	return view, projection, true
+}
+
+// projectToScreenForSelection はワールド座標をスクリーン座標へ変換し、深度値を返す。
+func projectToScreenForSelection(pos mmath.Vec3, view, projection mgl32.Mat4, width, height int) (float64, float64, float32, bool) {
+	if width <= 0 || height <= 0 {
+		return 0, 0, 0, false
+	}
+	// SSBOの座標はOpenGL座標系なので、そのまま投影する。
+	clip := projection.Mul4(view).Mul4x1(mgl32.Vec4{float32(pos.X), float32(pos.Y), float32(pos.Z), 1})
+	if clip.W() == 0 {
+		return 0, 0, 0, false
+	}
+	ndc := clip.Mul(1.0 / clip.W())
+	if ndc.Z() < -1.0 || ndc.Z() > 1.0 {
+		return 0, 0, 0, false
+	}
+	screenX := (float64(ndc.X()) + 1.0) * 0.5 * float64(width)
+	screenY := (1.0 - float64(ndc.Y())) * 0.5 * float64(height)
+	depth := float32((ndc.Z() + 1.0) * 0.5)
+	return screenX, screenY, depth, true
+}
+
+// selectionRectToPixels は選択矩形をピクセル単位に変換する。
+func selectionRectToPixels(minX, minY, maxX, maxY float64, width, height int) (int, int, int, int, bool) {
+	if width <= 0 || height <= 0 {
+		return 0, 0, 0, 0, false
+	}
+	x0 := int(math.Floor(minX))
+	y0 := int(math.Floor(minY))
+	x1 := int(math.Ceil(maxX))
+	y1 := int(math.Ceil(maxY))
+	if x0 < 0 {
+		x0 = 0
+	}
+	if y0 < 0 {
+		y0 = 0
+	}
+	if x1 >= width {
+		x1 = width - 1
+	}
+	if y1 >= height {
+		y1 = height - 1
+	}
+	if x1 < x0 || y1 < y0 {
+		return 0, 0, 0, 0, false
+	}
+	rectW := x1 - x0 + 1
+	rectH := y1 - y0 + 1
+	if rectW <= 0 || rectH <= 0 {
+		return 0, 0, 0, 0, false
+	}
+	return x0, y0, rectW, rectH, true
+}
+
+// normalizeSelectionRect は選択矩形の座標を正規化する。
+func normalizeSelectionRect(minPos, maxPos mmath.Vec2, width, height int) (float64, float64, float64, float64, bool) {
+	if width <= 0 || height <= 0 {
+		return 0, 0, 0, 0, false
+	}
+	minX := math.Min(minPos.X, maxPos.X)
+	minY := math.Min(minPos.Y, maxPos.Y)
+	maxX := math.Max(minPos.X, maxPos.X)
+	maxY := math.Max(minPos.Y, maxPos.Y)
+	if maxX < 0 || maxY < 0 || minX > float64(width) || minY > float64(height) {
+		return 0, 0, 0, 0, false
+	}
+	minX = max(minX, 0)
+	minY = max(minY, 0)
+	maxX = min(maxX, float64(width))
+	maxY = min(maxY, float64(height))
+	if minX > maxX || minY > maxY {
+		return 0, 0, 0, 0, false
+	}
+	return minX, minY, maxX, maxY, true
 }
 
 // buildVisibleVertexFlags は選択中の材質に属する頂点だけを可視判定用に抽出する。

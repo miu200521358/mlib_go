@@ -98,6 +98,16 @@ const (
 	PHYSICS_RESET_TYPE_START_FIT_FRAME
 )
 
+// SelectedVertexMode は選択頂点の選択モードを表す。
+type SelectedVertexMode int
+
+const (
+	// SELECTED_VERTEX_MODE_POINT はポイント選択。
+	SELECTED_VERTEX_MODE_POINT SelectedVertexMode = iota
+	// SELECTED_VERTEX_MODE_BOX はボックス選択。
+	SELECTED_VERTEX_MODE_BOX
+)
+
 // IStateModel は共有状態で扱うモデルI/F。
 type IStateModel interface {
 	hashable.IHashable
@@ -166,6 +176,8 @@ type ISharedState interface {
 	SetSelectedMaterialIndexes(viewerIndex, modelIndex int, indexes []int)
 	SelectedVertexIndexes(viewerIndex, modelIndex int) []int
 	SetSelectedVertexIndexes(viewerIndex, modelIndex int, indexes []int)
+	SelectedVertexMode() SelectedVertexMode
+	SetSelectedVertexMode(mode SelectedVertexMode)
 	IsDeltaSaveEnabled(viewerIndex int) bool
 	SetDeltaSaveEnabled(viewerIndex int, enabled bool)
 	DeltaSaveIndex(viewerIndex int) int
@@ -220,6 +232,7 @@ type SharedState struct {
 	motions               [][]atomic.Value
 	selectedIndexes       [][]atomic.Value
 	selectedVertexIndexes [][]atomic.Value
+	selectedVertexMode    atomic.Int32
 	deltaSaveEnabled      []atomic.Bool
 	deltaSaveIndexes      []atomic.Int32
 	deltaMotions          [][][]atomic.Value
@@ -258,6 +271,7 @@ func NewSharedState(viewerCount int) ISharedState {
 	ss.fpsLimitTriggered.Store(false)
 	ss.controlWindowMoving.Store(false)
 	ss.closed.Store(false)
+	ss.selectedVertexMode.Store(int32(SELECTED_VERTEX_MODE_POINT))
 	ss.focusLinkEnabled.Store(true)
 	ss.linkingFocus.Store(false)
 	ss.physicsResetType.Store(int32(PHYSICS_RESET_TYPE_NONE))
@@ -694,6 +708,16 @@ func (ss *SharedState) SetSelectedVertexIndexes(viewerIndex, modelIndex int, ind
 		return
 	}
 	slot.Store(stateIndexSlot{Indexes: cloneIntSlice(indexes)})
+}
+
+// SelectedVertexMode は選択頂点のモードを返す。
+func (ss *SharedState) SelectedVertexMode() SelectedVertexMode {
+	return SelectedVertexMode(ss.selectedVertexMode.Load())
+}
+
+// SetSelectedVertexMode は選択頂点のモードを設定する。
+func (ss *SharedState) SetSelectedVertexMode(mode SelectedVertexMode) {
+	ss.selectedVertexMode.Store(int32(mode))
 }
 
 // IsDeltaSaveEnabled は差分保存が有効か判定する。

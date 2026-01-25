@@ -808,6 +808,7 @@ func (cw *ControlWindow) TriggerShowSelectedVertexPoint() {
 	enabled := cw.actionChecked(cw.showSelectedVertexPointAction)
 	if enabled {
 		cw.updateActionChecked(cw.showSelectedVertexBoxAction, false)
+		cw.shared.SetSelectedVertexMode(state.SELECTED_VERTEX_MODE_POINT)
 	}
 	cw.SetDisplayFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX, enabled)
 	cw.SetDisplayFlag(state.STATE_FLAG_SHOW_WIRE, enabled)
@@ -818,10 +819,10 @@ func (cw *ControlWindow) TriggerShowSelectedVertexBox() {
 	enabled := cw.actionChecked(cw.showSelectedVertexBoxAction)
 	if enabled {
 		cw.updateActionChecked(cw.showSelectedVertexPointAction, false)
+		cw.shared.SetSelectedVertexMode(state.SELECTED_VERTEX_MODE_BOX)
 	}
-	// ボックス選択は未実装のため、現状はポイント選択のみ有効にする。
-	cw.SetDisplayFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX, false)
-	cw.SetDisplayFlag(state.STATE_FLAG_SHOW_WIRE, false)
+	cw.SetDisplayFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX, enabled)
+	cw.SetDisplayFlag(state.STATE_FLAG_SHOW_WIRE, enabled)
 }
 
 // TriggerShowBoneAll は全ボーン表示を切り替える。
@@ -1058,7 +1059,22 @@ func (cw *ControlWindow) updateDisplayAction(flag state.StateFlag, enabled bool)
 	case state.STATE_FLAG_SHOW_OVERRIDE_NONE:
 		cw.updateActionChecked(cw.showOverrideNoneAction, enabled)
 	case state.STATE_FLAG_SHOW_SELECTED_VERTEX:
-		cw.updateActionChecked(cw.showSelectedVertexPointAction, enabled)
+		if !enabled {
+			cw.updateActionChecked(cw.showSelectedVertexPointAction, false)
+			cw.updateActionChecked(cw.showSelectedVertexBoxAction, false)
+			return
+		}
+		mode := state.SELECTED_VERTEX_MODE_POINT
+		if cw.shared != nil {
+			mode = cw.shared.SelectedVertexMode()
+		}
+		if mode == state.SELECTED_VERTEX_MODE_BOX {
+			cw.updateActionChecked(cw.showSelectedVertexBoxAction, true)
+			cw.updateActionChecked(cw.showSelectedVertexPointAction, false)
+			return
+		}
+		cw.updateActionChecked(cw.showSelectedVertexPointAction, true)
+		cw.updateActionChecked(cw.showSelectedVertexBoxAction, false)
 	case state.STATE_FLAG_SHOW_BONE_ALL:
 		cw.updateActionChecked(cw.showBoneAllAction, enabled)
 	case state.STATE_FLAG_SHOW_BONE_IK:
