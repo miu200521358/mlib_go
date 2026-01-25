@@ -19,12 +19,12 @@ import (
 // MaterialTableView は材質一覧ウィジェットを表す。
 type MaterialTableView struct {
 	*walk.TableView
-	window              *controller.ControlWindow
-	Materials           *model.PmxModel
-	MaterialModel       *MaterialModel
-	tooltip             string
-	translator          i18n.II18n
-	changeFunc          func(cw *controller.ControlWindow, indexes []int)
+	window        *controller.ControlWindow
+	Materials     *model.PmxModel
+	MaterialModel *MaterialModel
+	tooltip       string
+	translator    i18n.II18n
+	changeFunc    func(cw *controller.ControlWindow, indexes []int)
 }
 
 // NewMaterialTableView はMaterialTableViewを生成する。
@@ -58,7 +58,7 @@ func (lb *MaterialTableView) Widgets() declarative.Composite {
 				ColumnsOrderable: true,
 				MultiSelection:   true,
 				Model:            lb.MaterialModel,
-				MinSize:          declarative.Size{Width: 400, Height: 250},
+				MinSize:          declarative.Size{Width: 400, Height: 200},
 				Columns: []declarative.TableViewColumn{
 					{Title: "#", Width: 50},
 					{Title: "No.", Width: 50},
