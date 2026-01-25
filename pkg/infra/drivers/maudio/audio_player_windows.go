@@ -43,7 +43,7 @@ type AudioPlayer struct {
 
 // NewAudioPlayer は音声プレイヤーを生成する。
 func NewAudioPlayer() audio_api.IAudioPlayer {
-	player := &AudioPlayer{volume: 100}
+	player := &AudioPlayer{volume: 50}
 	return player
 }
 

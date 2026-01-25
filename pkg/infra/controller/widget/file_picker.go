@@ -219,6 +219,27 @@ func (fp *FilePicker) SetEnabled(enabled bool) {
 	if fp.historyPushButton != nil {
 		fp.historyPushButton.SetEnabled(enabled)
 	}
+	fp.applyNameEditBackground()
+}
+
+// SetPath は外部からパスを設定し、読み込み処理を実行する。
+func (fp *FilePicker) SetPath(path string) {
+	if fp == nil {
+		return
+	}
+	fp.handlePathChanged(path)
+}
+
+// applyNameEditBackground は表示名欄の背景色を再設定する。
+func (fp *FilePicker) applyNameEditBackground() {
+	if fp == nil || fp.nameEdit == nil {
+		return
+	}
+	bg, err := walk.NewSolidColorBrush(controller.ColorTabBackground)
+	if err != nil {
+		return
+	}
+	fp.nameEdit.SetBackground(bg)
 }
 
 // Widgets はUI構成を返す。
@@ -261,6 +282,9 @@ func (fp *FilePicker) Widgets() declarative.Composite {
 			ToolTipText: fp.tooltip,
 			OnTextChanged: func() {
 				fp.handlePathChanged(fp.pathEdit.Text())
+			},
+			OnEditingFinished: func() {
+				fp.handlePathConfirmed(fp.pathEdit.Text())
 			},
 		},
 		declarative.PushButton{
@@ -363,6 +387,29 @@ func (fp *FilePicker) handlePathChanged(path string) {
 		fp.pathEdit.SetText(cleaned)
 	}
 	if fp.nameEdit != nil {
+		fp.nameEdit.SetText(fp.repository.InferName(cleaned))
+	}
+	if fp.onPathChanged != nil {
+		fp.onPathChanged(fp.window, fp.repository, cleaned)
+	}
+	fp.saveHistoryIfNeeded(cleaned)
+}
+
+// handlePathConfirmed はEnter確定時にパス変更処理を実行する。
+func (fp *FilePicker) handlePathConfirmed(path string) {
+	cleaned := fp.cleanPath(path)
+	if cleaned == "" {
+		return
+	}
+	if fp.historyKey != "" && fp.repository != nil && !fp.repository.CanLoad(cleaned) {
+		return
+	}
+
+	fp.prevPath = cleaned
+	if fp.pathEdit != nil {
+		fp.pathEdit.SetText(cleaned)
+	}
+	if fp.nameEdit != nil && fp.repository != nil {
 		fp.nameEdit.SetText(fp.repository.InferName(cleaned))
 	}
 	if fp.onPathChanged != nil {
