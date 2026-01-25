@@ -742,7 +742,8 @@ func (cw *ControlWindow) buildLanguageMenu() []declarative.MenuItem {
 
 // onChangeLanguage は言語変更を行う。
 func (cw *ControlWindow) onChangeLanguage(lang i18n.LangCode) {
-	if result := walk.MsgBox(cw, cw.t("言語変更"), cw.t("言語変更メッセージ"), walk.MsgBoxIconQuestion|walk.MsgBoxOKCancel); result != walk.DlgCmdOK {
+	if result := walk.MsgBox(cw, cw.translator.TWithLang(lang, "言語変更"),
+		cw.translator.TWithLang(lang, "言語変更メッセージ"), walk.MsgBoxIconQuestion|walk.MsgBoxOKCancel); result != walk.DlgCmdOK {
 		return
 	}
 	if cw.translator == nil {
