@@ -67,37 +67,37 @@ type ControlWindow struct {
 
 	leftButtonPressed bool
 
-	enabledFrameDropAction       *walk.Action
-	enabledPhysicsAction         *walk.Action
-	physicsResetAction           *walk.Action
-	showNormalAction             *walk.Action
-	showWireAction               *walk.Action
-	showOverrideUpperAction      *walk.Action
-	showOverrideLowerAction      *walk.Action
-	showOverrideNoneAction       *walk.Action
+	enabledFrameDropAction        *walk.Action
+	enabledPhysicsAction          *walk.Action
+	physicsResetAction            *walk.Action
+	showNormalAction              *walk.Action
+	showWireAction                *walk.Action
+	showOverrideUpperAction       *walk.Action
+	showOverrideLowerAction       *walk.Action
+	showOverrideNoneAction        *walk.Action
 	showSelectedVertexPointAction *walk.Action
 	showSelectedVertexBoxAction   *walk.Action
-	showBoneAllAction            *walk.Action
-	showBoneIkAction             *walk.Action
-	showBoneEffectorAction       *walk.Action
-	showBoneFixedAction          *walk.Action
-	showBoneRotateAction         *walk.Action
-	showBoneTranslateAction      *walk.Action
-	showBoneVisibleAction        *walk.Action
-	showRigidBodyFrontAction     *walk.Action
-	showRigidBodyBackAction      *walk.Action
-	showJointAction              *walk.Action
-	showInfoAction               *walk.Action
-	limitFps30Action             *walk.Action
-	limitFps60Action             *walk.Action
-	limitFpsUnLimitAction        *walk.Action
-	cameraSyncAction             *walk.Action
-	logLevelDebugAction          *walk.Action
-	logLevelVerboseAction        *walk.Action
-	logLevelIkVerboseAction      *walk.Action
-	logLevelPhysicsVerboseAction *walk.Action
-	logLevelViewerVerboseAction  *walk.Action
-	linkWindowAction             *walk.Action
+	showBoneAllAction             *walk.Action
+	showBoneIkAction              *walk.Action
+	showBoneEffectorAction        *walk.Action
+	showBoneFixedAction           *walk.Action
+	showBoneRotateAction          *walk.Action
+	showBoneTranslateAction       *walk.Action
+	showBoneVisibleAction         *walk.Action
+	showRigidBodyFrontAction      *walk.Action
+	showRigidBodyBackAction       *walk.Action
+	showJointAction               *walk.Action
+	showInfoAction                *walk.Action
+	limitFps30Action              *walk.Action
+	limitFps60Action              *walk.Action
+	limitFpsUnLimitAction         *walk.Action
+	cameraSyncAction              *walk.Action
+	logLevelDebugAction           *walk.Action
+	logLevelVerboseAction         *walk.Action
+	logLevelIkVerboseAction       *walk.Action
+	logLevelPhysicsVerboseAction  *walk.Action
+	logLevelViewerVerboseAction   *walk.Action
+	linkWindowAction              *walk.Action
 
 	verboseSinks map[logging.VerboseIndex]logging.IVerboseSink
 }
@@ -670,19 +670,6 @@ func (cw *ControlWindow) buildViewerMenu() declarative.Menu {
 			declarative.Action{Text: cw.t("&物理ON/OFF"), Checkable: true, OnTriggered: cw.TriggerEnabledPhysics, AssignTo: &cw.enabledPhysicsAction},
 			declarative.Action{Text: cw.t("&物理リセット"), OnTriggered: cw.TriggerPhysicsReset, AssignTo: &cw.physicsResetAction},
 			declarative.Separator{},
-			declarative.Action{Text: cw.t("&法線表示"), Checkable: true, OnTriggered: cw.TriggerShowNormal, AssignTo: &cw.showNormalAction},
-			declarative.Action{Text: cw.t("&ワイヤーフレーム表示"), Checkable: true, OnTriggered: cw.TriggerShowWire, AssignTo: &cw.showWireAction},
-			declarative.Action{Text: cw.t("&カメラ同期"), Checkable: true, OnTriggered: cw.TriggerCameraSync, AssignTo: &cw.cameraSyncAction},
-			declarative.Menu{Text: cw.t("&サブビューワーオーバーレイ"), Items: []declarative.MenuItem{
-				declarative.Action{Text: cw.t("&上半身合わせ"), Checkable: true, OnTriggered: cw.TriggerShowOverrideUpper, AssignTo: &cw.showOverrideUpperAction},
-				declarative.Action{Text: cw.t("&下半身合わせ"), Checkable: true, OnTriggered: cw.TriggerShowOverrideLower, AssignTo: &cw.showOverrideLowerAction},
-				declarative.Action{Text: cw.t("&カメラ合わせなし"), Checkable: true, OnTriggered: cw.TriggerShowOverrideNone, AssignTo: &cw.showOverrideNoneAction},
-				declarative.Action{Text: cw.t("&サブビューワーオーバーレイの使い方"), OnTriggered: cw.showOverrideHelp},
-			}},
-			declarative.Menu{Text: cw.t("&頂点選択"), Items: []declarative.MenuItem{
-				declarative.Action{Text: cw.t("&ボックス選択"), Checkable: true, OnTriggered: cw.TriggerShowSelectedVertexBox, AssignTo: &cw.showSelectedVertexBoxAction},
-				declarative.Action{Text: cw.t("&ポイント選択"), Checkable: true, OnTriggered: cw.TriggerShowSelectedVertexPoint, AssignTo: &cw.showSelectedVertexPointAction},
-			}},
 			declarative.Menu{Text: cw.t("&ボーン表示"), Items: []declarative.MenuItem{
 				declarative.Action{Text: cw.t("&全ボーン"), Checkable: true, OnTriggered: cw.TriggerShowBoneAll, AssignTo: &cw.showBoneAllAction},
 				declarative.Action{Text: cw.t("&IKボーン"), Checkable: true, OnTriggered: cw.TriggerShowBoneIk, AssignTo: &cw.showBoneIkAction},
@@ -699,6 +686,22 @@ func (cw *ControlWindow) buildViewerMenu() declarative.Menu {
 				declarative.Action{Text: cw.t("&剛体表示の使い方"), OnTriggered: cw.showRigidBodyHelp},
 			}},
 			declarative.Action{Text: cw.t("&ジョイント表示"), Checkable: true, OnTriggered: cw.TriggerShowJoint, AssignTo: &cw.showJointAction},
+			declarative.Separator{},
+			declarative.Action{Text: cw.t("&法線表示"), Checkable: true, OnTriggered: cw.TriggerShowNormal, AssignTo: &cw.showNormalAction},
+			declarative.Action{Text: cw.t("&ワイヤーフレーム表示"), Checkable: true, OnTriggered: cw.TriggerShowWire, AssignTo: &cw.showWireAction},
+			declarative.Separator{},
+			declarative.Menu{Text: cw.t("&頂点選択"), Items: []declarative.MenuItem{
+				declarative.Action{Text: cw.t("&ボックス選択"), Checkable: true, OnTriggered: cw.TriggerShowSelectedVertexBox, AssignTo: &cw.showSelectedVertexBoxAction},
+				declarative.Action{Text: cw.t("&ポイント選択"), Checkable: true, OnTriggered: cw.TriggerShowSelectedVertexPoint, AssignTo: &cw.showSelectedVertexPointAction},
+			}},
+			declarative.Separator{},
+			declarative.Action{Text: cw.t("&カメラ同期"), Checkable: true, OnTriggered: cw.TriggerCameraSync, AssignTo: &cw.cameraSyncAction},
+			declarative.Menu{Text: cw.t("&サブビューワーオーバーレイ"), Items: []declarative.MenuItem{
+				declarative.Action{Text: cw.t("&上半身合わせ"), Checkable: true, OnTriggered: cw.TriggerShowOverrideUpper, AssignTo: &cw.showOverrideUpperAction},
+				declarative.Action{Text: cw.t("&下半身合わせ"), Checkable: true, OnTriggered: cw.TriggerShowOverrideLower, AssignTo: &cw.showOverrideLowerAction},
+				declarative.Action{Text: cw.t("&カメラ合わせなし"), Checkable: true, OnTriggered: cw.TriggerShowOverrideNone, AssignTo: &cw.showOverrideNoneAction},
+				declarative.Action{Text: cw.t("&サブビューワーオーバーレイの使い方"), OnTriggered: cw.showOverrideHelp},
+			}},
 			declarative.Separator{},
 			declarative.Action{Text: cw.t("&ビューワーの使い方"), OnTriggered: cw.showViewerHelp},
 		},
