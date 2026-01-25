@@ -66,38 +66,39 @@ type ViewerWindow struct {
 	shader      graphics_api.IShader
 	physics     physics_api.IPhysics
 
-	tooltipRenderer      *mgl.TooltipRenderer
-	boneHighlighter      *mgl.BoneHighlighter
-	boneHoverActive      bool
-	lastBoneHoverAt      time.Time
-	rigidBodyHighlighter *mgl.RigidBodyHighlighter
-	rigidBodyHoverActive bool
-	lastRigidBodyHoverAt time.Time
-	jointHoverNames      []string
-	jointHoverActive     bool
-	lastJointHoverAt     time.Time
-	selectedVertexHoverActive      bool
-	selectedVertexHoverIndex       int
-	selectedVertexHoverModelIndex  int
-	lastSelectedVertexHoverAt      time.Time
+	tooltipRenderer               *mgl.TooltipRenderer
+	boneHighlighter               *mgl.BoneHighlighter
+	boneHoverActive               bool
+	lastBoneHoverAt               time.Time
+	rigidBodyHighlighter          *mgl.RigidBodyHighlighter
+	rigidBodyHoverActive          bool
+	lastRigidBodyHoverAt          time.Time
+	jointHoverNames               []string
+	jointHoverActive              bool
+	lastJointHoverAt              time.Time
+	selectedVertexHoverActive     bool
+	selectedVertexHoverIndex      int
+	selectedVertexHoverModelIndex int
+	lastSelectedVertexHoverAt     time.Time
 
 	modelRenderers     []*render.ModelRenderer
 	motions            []*motion.VmdMotion
 	vmdDeltas          []*delta.VmdDeltas
 	physicsModelHashes []string
 
-	leftButtonPressed   bool
-	middleButtonPressed bool
-	rightButtonPressed  bool
-	shiftPressed        bool
-	ctrlPressed         bool
-	updatedPrevCursor   bool
-	prevCursorPos       mmath.Vec2
-	cursorX             float64
-	cursorY             float64
-	pendingSelectVertex          bool
-	pendingRemoveSelectedVertex  bool
-	pendingSelectVertexPositions []float32
+	leftButtonPressed            bool
+	middleButtonPressed          bool
+	rightButtonPressed           bool
+	shiftPressed                 bool
+	ctrlPressed                  bool
+	updatedPrevCursor            bool
+	prevCursorPos                mmath.Vec2
+	cursorX                      float64
+	cursorY                      float64
+	leftCursorWindowPositions             map[mmath.Vec2]float32
+	leftCursorRemoveWindowPositions       map[mmath.Vec2]float32
+	leftCursorWorldHistoryPositions       []*mmath.Vec3
+	leftCursorRemoveWorldHistoryPositions []*mmath.Vec3
 }
 
 // newViewerWindow はビューワーウィンドウを生成して初期化する。
@@ -143,21 +144,25 @@ func newViewerWindow(windowIndex int, title string, width, height, positionX, po
 	physics := physics_api.NewPhysics(&gravity)
 
 	vw := &ViewerWindow{
-		Window:               glWindow,
-		windowIndex:          windowIndex,
-		title:                title,
-		list:                 list,
-		shader:               shader,
-		physics:              physics,
-		tooltipRenderer:      tooltipRenderer,
-		boneHighlighter:      mgl.NewBoneHighlighter(),
-		rigidBodyHighlighter: mgl.NewRigidBodyHighlighter(),
-		modelRenderers:       make([]*render.ModelRenderer, 0),
-		motions:              make([]*motion.VmdMotion, 0),
-		vmdDeltas:            make([]*delta.VmdDeltas, 0),
-		physicsModelHashes:   make([]string, 0),
+		Window:                        glWindow,
+		windowIndex:                   windowIndex,
+		title:                         title,
+		list:                          list,
+		shader:                        shader,
+		physics:                       physics,
+		tooltipRenderer:               tooltipRenderer,
+		boneHighlighter:               mgl.NewBoneHighlighter(),
+		rigidBodyHighlighter:          mgl.NewRigidBodyHighlighter(),
+		modelRenderers:                make([]*render.ModelRenderer, 0),
+		motions:                       make([]*motion.VmdMotion, 0),
+		vmdDeltas:                     make([]*delta.VmdDeltas, 0),
+		physicsModelHashes:            make([]string, 0),
 		selectedVertexHoverIndex:      -1,
 		selectedVertexHoverModelIndex: -1,
+		leftCursorWindowPositions:             make(map[mmath.Vec2]float32),
+		leftCursorRemoveWindowPositions:       make(map[mmath.Vec2]float32),
+		leftCursorWorldHistoryPositions:       make([]*mmath.Vec3, 0),
+		leftCursorRemoveWorldHistoryPositions: make([]*mmath.Vec3, 0),
 	}
 
 	glWindow.SetCloseCallback(vw.closeCallback)
@@ -238,12 +243,36 @@ func (vw *ViewerWindow) resetCameraPositionForPreset(yaw, pitch float64) {
 
 // render は1フレーム分の描画を行う。
 func (vw *ViewerWindow) render(frame motion.Frame) {
-	w, h := vw.GetSize()
-	if w == 0 && h == 0 {
+	winW, winH := vw.GetSize()
+	fbW, fbH := vw.GetFramebufferSize()
+	if fbW == 0 || fbH == 0 {
+		fbW, fbH = winW, winH
+	}
+	if fbW == 0 || fbH == 0 {
 		return
 	}
 	vw.MakeContextCurrent()
-	vw.shader.Resize(w, h)
+	vw.shader.Resize(fbW, fbH)
+
+	showSelectedVertex := vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX)
+	var leftCursorWorldPositions []*mmath.Vec3
+	var leftCursorRemoveWorldPositions []*mmath.Vec3
+	if showSelectedVertex {
+		leftCursorWorldPositions, leftCursorRemoveWorldPositions = vw.updateCursorPositions()
+	}
+
+	limit := 0
+	if vw.list.appConfig != nil {
+		limit = vw.list.appConfig.CursorPositionLimit
+	}
+	var hoverCursorPositions []float32
+	if showSelectedVertex {
+		hoverCursorPositions = vw.buildCursorPositions(vw.cursorX, vw.cursorY, limit)
+	}
+	selectedCursorPositions := flattenCursorPositions(leftCursorWorldPositions, limit)
+	removeSelectedCursorPositions := flattenCursorPositions(leftCursorRemoveWorldPositions, limit)
+	applySelection := len(selectedCursorPositions) > 0 || len(removeSelectedCursorPositions) > 0
+	removeSelection := len(removeSelectedCursorPositions) > 0
 
 	if len(vw.list.windowList) > 1 && vw.list.shared.IsShowOverride() && vw.windowIndex != 0 {
 		vw.shader.OverrideRenderer().Bind()
@@ -279,25 +308,6 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 		debugBoneHover = vw.boneHighlighter.DebugBoneHoverInfo()
 	}
 
-	showSelectedVertex := vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX)
-	applySelection := vw.pendingSelectVertex
-	removeSelection := vw.pendingRemoveSelectedVertex
-	selectedCursorPositions := vw.pendingSelectVertexPositions
-	if applySelection {
-		vw.pendingSelectVertex = false
-		vw.pendingRemoveSelectedVertex = false
-		vw.pendingSelectVertexPositions = nil
-	}
-
-	var hoverCursorPositions []float32
-	if showSelectedVertex {
-		limit := 0
-		if vw.list.appConfig != nil {
-			limit = vw.list.appConfig.CursorPositionLimit
-		}
-		hoverCursorPositions = vw.buildCursorPositions(vw.cursorX, vw.cursorY, limit)
-	}
-
 	for i, renderer := range vw.modelRenderers {
 		if renderer == nil || renderer.Model == nil {
 			continue
@@ -320,10 +330,12 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 		cursorPositions := hoverCursorPositions
 		removeCursorPositions := []float32(nil)
 		applySelectionForModel := false
-		if showSelectedVertex && i == 0 && applySelection && len(selectedCursorPositions) > 0 {
-			cursorPositions = selectedCursorPositions
+		if showSelectedVertex && i == 0 && applySelection {
 			if removeSelection {
+				cursorPositions = removeSelectedCursorPositions
 				removeCursorPositions = cursorPositions
+			} else {
+				cursorPositions = selectedCursorPositions
 			}
 			applySelectionForModel = true
 		}
@@ -337,20 +349,6 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 			removeCursorPositions,
 			applySelectionForModel,
 		)
-		if applySelectionForModel {
-			logger := logging.DefaultLogger()
-			if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
-				logger.Verbose(
-					logging.VERBOSE_INDEX_VIEWER,
-					"頂点選択: 適用 model=%d remove=%t cursor_positions=%d selected=%d hover=%d",
-					i,
-					removeSelection,
-					len(cursorPositions)/3,
-					len(updatedSelected),
-					hoverIndex,
-				)
-			}
-		}
 		if applySelectionForModel {
 			vw.list.shared.SetSelectedVertexIndexes(vw.windowIndex, i, updatedSelected)
 		}
@@ -377,7 +375,7 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 		vw.rigidBodyHighlighter.CheckAndClearHighlightOnDebugChange(drawRigidBody)
 	}
 
-	vw.renderTooltip(drawRigidBody, drawJoint, w, h)
+	vw.renderTooltip(drawRigidBody, drawJoint, winW, winH)
 
 	if len(vw.list.windowList) > 1 && vw.list.shared.IsShowOverride() && vw.windowIndex != 0 {
 		vw.shader.OverrideRenderer().Unbind()
@@ -390,6 +388,12 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 	}
 
 	vw.SwapBuffers()
+	if showSelectedVertex && !vw.leftButtonPressed {
+		vw.leftCursorWindowPositions = make(map[mmath.Vec2]float32)
+		vw.leftCursorRemoveWindowPositions = make(map[mmath.Vec2]float32)
+		vw.leftCursorWorldHistoryPositions = make([]*mmath.Vec3, 0)
+		vw.leftCursorRemoveWorldHistoryPositions = make([]*mmath.Vec3, 0)
+	}
 }
 
 // cleanupResources はビューワーが保持するOpenGLリソースを解放する。
@@ -665,6 +669,14 @@ func (vw *ViewerWindow) cursorPosCallback(_ *glfw.Window, xpos, ypos float64) {
 	} else if vw.middleButtonPressed {
 		vw.updateCameraPositionByCursor(xpos, ypos)
 	}
+	if vw.leftButtonPressed && vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) {
+		screenPos := mmath.Vec2{X: xpos, Y: ypos}
+		if vw.isCtrlPressed() {
+			vw.leftCursorRemoveWindowPositions[screenPos] = 0
+		} else {
+			vw.leftCursorWindowPositions[screenPos] = 0
+		}
+	}
 	if !vw.rightButtonPressed && !vw.middleButtonPressed {
 		if vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) {
 			vw.clearNonVertexHovers()
@@ -699,51 +711,96 @@ func (vw *ViewerWindow) cursorPosCallback(_ *glfw.Window, xpos, ypos float64) {
 	vw.prevCursorPos.Y = ypos
 }
 
+// updateCursorPositions は左クリックで記録したスクリーン座標をワールド座標に変換する。
+func (vw *ViewerWindow) updateCursorPositions() ([]*mmath.Vec3, []*mmath.Vec3) {
+	if vw == nil || vw.shader == nil || vw.list == nil || vw.list.shared == nil {
+		return nil, nil
+	}
+	if !vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) {
+		return nil, nil
+	}
+	leftCursorWorldPositions := make([]*mmath.Vec3, 0)
+	leftCursorRemoveWorldPositions := make([]*mmath.Vec3, 0)
+
+	winW, winH := vw.GetSize()
+	fbW, fbH := vw.GetFramebufferSize()
+	if fbW <= 0 || fbH <= 0 {
+		return leftCursorWorldPositions, leftCursorRemoveWorldPositions
+	}
+	scaleX, scaleY := 1.0, 1.0
+	if winW > 0 && winH > 0 {
+		scaleX = float64(fbW) / float64(winW)
+		scaleY = float64(fbH) / float64(winH)
+	}
+
+	for screenPos, depth := range vw.leftCursorWindowPositions {
+		if depth != 0 {
+			continue
+		}
+		for range 20 {
+			x := float32(screenPos.X * scaleX)
+			y := float32(screenPos.Y * scaleY)
+			newDepth := vw.shader.Msaa().ReadDepthAt(int(x), int(y), fbW, fbH)
+			if newDepth > 0.0 && newDepth < 1.0 {
+				vw.leftCursorWindowPositions[screenPos] = newDepth
+				worldPos := vw.getWorldPosition(x, y, newDepth, fbW, fbH)
+				if worldPos != nil {
+					leftCursorWorldPositions = append(leftCursorWorldPositions, worldPos)
+					vw.leftCursorWorldHistoryPositions = append(vw.leftCursorWorldHistoryPositions, worldPos)
+				}
+				break
+			}
+		}
+	}
+	for screenPos, depth := range vw.leftCursorRemoveWindowPositions {
+		if depth != 0 {
+			continue
+		}
+		for range 20 {
+			x := float32(screenPos.X * scaleX)
+			y := float32(screenPos.Y * scaleY)
+			newDepth := vw.shader.Msaa().ReadDepthAt(int(x), int(y), fbW, fbH)
+			if newDepth > 0.0 && newDepth < 1.0 {
+				vw.leftCursorRemoveWindowPositions[screenPos] = newDepth
+				worldPos := vw.getWorldPosition(x, y, newDepth, fbW, fbH)
+				if worldPos != nil {
+					leftCursorRemoveWorldPositions = append(leftCursorRemoveWorldPositions, worldPos)
+					vw.leftCursorRemoveWorldHistoryPositions = append(vw.leftCursorRemoveWorldHistoryPositions, worldPos)
+				}
+				break
+			}
+		}
+	}
+
+	return leftCursorWorldPositions, leftCursorRemoveWorldPositions
+}
+
+// flattenCursorPositions はワールド座標配列をGPU向け配列に変換する。
+func flattenCursorPositions(positions []*mmath.Vec3, limit int) []float32 {
+	if len(positions) == 0 {
+		return nil
+	}
+	out := make([]float32, 0, len(positions)*3)
+	for _, pos := range positions {
+		if pos == nil {
+			continue
+		}
+		out = append(out, float32(pos.X), float32(pos.Y), float32(pos.Z))
+		if limit > 0 && len(out)/3 >= limit {
+			break
+		}
+	}
+	return out
+}
+
 // queueSelectedVertexSelection は選択頂点の更新要求をキューに積む。
 func (vw *ViewerWindow) queueSelectedVertexSelection(xpos, ypos float64, remove bool) {
-	limit := 0
-	if vw.list != nil && vw.list.appConfig != nil {
-		limit = vw.list.appConfig.CursorPositionLimit
-	}
-	logger := logging.DefaultLogger()
-	if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
-		logger.Verbose(
-			logging.VERBOSE_INDEX_VIEWER,
-			"頂点選択: クリック x=%.2f y=%.2f ctrl=%t limit=%d",
-			xpos,
-			ypos,
-			remove,
-			limit,
-		)
-	}
-	positions := vw.buildCursorPositions(xpos, ypos, limit)
-	if len(positions) == 0 {
-		if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
-			logger.Verbose(logging.VERBOSE_INDEX_VIEWER, "頂点選択: カーソル位置の変換結果が空です")
-		}
+	screenPos := mmath.Vec2{X: xpos, Y: ypos}
+	if remove {
+		vw.leftCursorRemoveWindowPositions[screenPos] = 0
 		return
 	}
-	if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
-		sample := ""
-		if len(positions) >= 6 {
-			sample = fmt.Sprintf(
-				"[from x=%.4f,y=%.4f,z=%.4f to x=%.4f,y=%.4f,z=%.4f]",
-				positions[0], positions[1], positions[2],
-				positions[3], positions[4], positions[5],
-			)
-		} else if len(positions) >= 3 {
-			sample = fmt.Sprintf("[x=%.4f,y=%.4f,z=%.4f]", positions[0], positions[1], positions[2])
-		}
-		logger.Verbose(
-			logging.VERBOSE_INDEX_VIEWER,
-			"頂点選択: カーソル位置=%d sample=%s",
-			len(positions)/3,
-			sample,
-		)
-	}
-	vw.pendingSelectVertex = true
-	vw.pendingRemoveSelectedVertex = remove
-	vw.pendingSelectVertexPositions = positions
+	vw.leftCursorWindowPositions[screenPos] = 0
 }
 
 // updateBoneHoverExpire はボーンホバー終了後のツールチップ消去を遅延する。
@@ -967,16 +1024,114 @@ func (vw *ViewerWindow) calculateRayFromTo(xpos, ypos float64) (*mmath.Vec3, *mm
 	return &from, &to
 }
 
-// buildCursorPositions はカーソル位置に沿ったサンプル点群を生成する。
-func (vw *ViewerWindow) buildCursorPositions(xpos, ypos float64, limit int) []float32 {
-	rayFrom, rayTo := vw.calculateRayFromTo(xpos, ypos)
-	if rayFrom == nil || rayTo == nil {
+// cursorWorldPosition はスクリーン座標からワールド座標を求める。
+func (vw *ViewerWindow) cursorWorldPosition(xpos, ypos float64) (*mmath.Vec3, bool) {
+	if vw.shader == nil {
+		return nil, false
+	}
+	windowWidth, windowHeight := vw.GetSize()
+	framebufferWidth, framebufferHeight := vw.GetFramebufferSize()
+	if framebufferWidth <= 0 || framebufferHeight <= 0 {
+		return nil, false
+	}
+	if windowWidth > 0 && windowHeight > 0 {
+		scaleX := float64(framebufferWidth) / float64(windowWidth)
+		scaleY := float64(framebufferHeight) / float64(windowHeight)
+		xpos *= scaleX
+		ypos *= scaleY
+	}
+	for range 20 {
+		depth := vw.shader.Msaa().ReadDepthAt(int(xpos), int(ypos), framebufferWidth, framebufferHeight)
+		if depth <= 0.0 || depth >= 1.0 {
+			continue
+		}
+		world := vw.getWorldPosition(float32(xpos), float32(ypos), depth, framebufferWidth, framebufferHeight)
+		if world != nil {
+			return world, true
+		}
+	}
+	return nil, false
+}
+
+// getWorldPosition はスクリーン座標と深度値からワールド座標を計算する。
+func (vw *ViewerWindow) getWorldPosition(mouseX, mouseY, depth float32, width, height int) *mmath.Vec3 {
+	projection, view, ok := vw.getCameraMatricesForGL(width, height)
+	if !ok {
 		return nil
 	}
-	// レイの始点と終点のみを送って、シェーダ側で距離と深度を計算する。
-	positions := make([]float32, 0, 6)
-	positions = append(positions, float32(rayFrom.X), float32(rayFrom.Y), float32(rayFrom.Z))
-	positions = append(positions, float32(rayTo.X), float32(rayTo.Y), float32(rayTo.Z))
+
+	ndcX := clampNormalized(2.0*mouseX/float32(width) - 1.0)
+	ndcY := clampNormalized(1.0 - (2.0*mouseY)/float32(height))
+	ndcZ := clampNormalized(depth*2.0 - 1.0)
+	clip := mgl32.Vec4{ndcX, ndcY, ndcZ, 1.0}
+
+	viewCoords := projection.Inv().Mul4x1(clip)
+	viewPos := mgl32.Vec4{viewCoords.X(), viewCoords.Y(), viewCoords.Z(), 1.0}
+	if viewCoords.W() != 0.0 {
+		viewPos = mgl32.Vec4{
+			viewCoords.X() / viewCoords.W(),
+			viewCoords.Y() / viewCoords.W(),
+			viewCoords.Z() / viewCoords.W(),
+			1.0,
+		}
+	}
+
+	worldCoords := view.Inv().Mul4x1(viewPos)
+	worldPos := mgl32.Vec3{worldCoords.X(), worldCoords.Y(), worldCoords.Z()}
+	if worldCoords.W() != 0.0 {
+		worldPos = mgl32.Vec3{
+			worldCoords.X() / worldCoords.W(),
+			worldCoords.Y() / worldCoords.W(),
+			worldCoords.Z() / worldCoords.W(),
+		}
+	}
+
+	out := mmath.Vec3{}
+	out.X = float64(worldPos.X())
+	out.Y = float64(worldPos.Y())
+	out.Z = float64(worldPos.Z())
+	return &out
+}
+
+// getCameraMatricesForGL はOpenGL座標系の射影行列とビュー行列を返す。
+func (vw *ViewerWindow) getCameraMatricesForGL(width, height int) (mgl32.Mat4, mgl32.Mat4, bool) {
+	if vw == nil || vw.shader == nil || width <= 0 || height <= 0 {
+		return mgl32.Mat4{}, mgl32.Mat4{}, false
+	}
+	cam := vw.shader.Camera()
+	if cam == nil || cam.Position == nil || cam.LookAtCenter == nil || cam.Up == nil {
+		return mgl32.Mat4{}, mgl32.Mat4{}, false
+	}
+
+	projection := mgl32.Perspective(
+		mgl32.DegToRad(cam.FieldOfView),
+		float32(width)/float32(height),
+		cam.NearPlane,
+		cam.FarPlane,
+	)
+	view := mgl32.LookAtV(
+		mgl.NewGlVec3(cam.Position),
+		mgl.NewGlVec3(cam.LookAtCenter),
+		mgl.NewGlVec3(cam.Up),
+	)
+	return projection, view, true
+}
+
+// clampNormalized は-1〜1にクランプする。
+func clampNormalized(value float32) float32 {
+	return min(max(value, -1.0), 1.0)
+}
+
+// buildCursorPositions はカーソル位置に沿ったサンプル点群を生成する。
+func (vw *ViewerWindow) buildCursorPositions(xpos, ypos float64, limit int) []float32 {
+	_ = limit
+	worldPos, ok := vw.cursorWorldPosition(xpos, ypos)
+	if !ok || worldPos == nil {
+		return nil
+	}
+	// ワールド座標を点として渡す。
+	positions := make([]float32, 0, 3)
+	positions = append(positions, float32(worldPos.X), float32(worldPos.Y), float32(worldPos.Z))
 	return positions
 }
 
@@ -1565,7 +1720,7 @@ func (vw *ViewerWindow) isCtrlPressed() bool {
 
 // updateCameraAngleByCursor はカーソル移動でカメラ角度を更新する。
 func (vw *ViewerWindow) updateCameraAngleByCursor(xpos, ypos float64) {
-	ratio, shift, ctrl := vw.modifierState(0.1)
+	ratio, _, _ := vw.modifierState(0.1)
 	xOffset := (xpos - vw.prevCursorPos.X) * ratio
 	yOffset := (ypos - vw.prevCursorPos.Y) * ratio
 	cam := vw.shader.Camera()
@@ -1574,26 +1729,12 @@ func (vw *ViewerWindow) updateCameraAngleByCursor(xpos, ypos float64) {
 	}
 	newYaw := cam.Yaw + xOffset
 	newPitch := cam.Pitch + yOffset
-	logger := logging.DefaultLogger()
-	if logger != nil && logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
-		logger.Verbose(logging.VERBOSE_INDEX_VIEWER,
-			"操作: 回転 window=%d shift=%t ctrl=%t ratio=%.3f dx=%.3f dy=%.3f yaw=%.3f pitch=%.3f",
-			vw.windowIndex,
-			shift,
-			ctrl,
-			ratio,
-			xOffset,
-			yOffset,
-			newYaw,
-			newPitch,
-		)
-	}
 	vw.resetCameraPosition(newYaw, newPitch)
 }
 
 // updateCameraPositionByCursor はカーソル移動でカメラ位置を更新する。
 func (vw *ViewerWindow) updateCameraPositionByCursor(xpos, ypos float64) {
-	ratio, shift, ctrl := vw.modifierState(0.07)
+	ratio, _, _ := vw.modifierState(0.07)
 	xOffset := (vw.prevCursorPos.X - xpos) * ratio
 	yOffset := (vw.prevCursorPos.Y - ypos) * ratio
 
@@ -1610,21 +1751,6 @@ func (vw *ViewerWindow) updateCameraPositionByCursor(xpos, ypos float64) {
 	rightMovement := right.MuledScalar(-xOffset)
 	movement := upMovement.Added(rightMovement)
 
-	logger := logging.DefaultLogger()
-	if logger != nil && logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
-		logger.Verbose(logging.VERBOSE_INDEX_VIEWER,
-			"操作: 移動 window=%d shift=%t ctrl=%t ratio=%.3f dx=%.3f dy=%.3f move=[x=%.3f y=%.3f z=%.3f]",
-			vw.windowIndex,
-			shift,
-			ctrl,
-			ratio,
-			xOffset,
-			yOffset,
-			movement.X,
-			movement.Y,
-			movement.Z,
-		)
-	}
 	cam.Position.Add(movement)
 	cam.LookAtCenter.Add(movement)
 	vw.shader.SetCamera(cam)
@@ -1663,7 +1789,7 @@ func (vw *ViewerWindow) syncCameraToOthers() {
 
 // scrollCallback はホイール操作でカメラのFOVを調整する。
 func (vw *ViewerWindow) scrollCallback(_ *glfw.Window, _ float64, yoff float64) {
-	stepRatio, shift, ctrl := vw.modifierState(1.0)
+	stepRatio, _, _ := vw.modifierState(1.0)
 	step := float32(stepRatio)
 	cam := vw.shader.Camera()
 	if cam == nil {
@@ -1678,18 +1804,6 @@ func (vw *ViewerWindow) scrollCallback(_ *glfw.Window, _ float64, yoff float64) 
 		cam.FieldOfView += step
 	}
 	vw.shader.SetCamera(cam)
-	logger := logging.DefaultLogger()
-	if logger != nil && logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
-		logger.Verbose(logging.VERBOSE_INDEX_VIEWER,
-			"操作: ズーム window=%d shift=%t ctrl=%t step=%.3f yoff=%.3f fov=%.3f",
-			vw.windowIndex,
-			shift,
-			ctrl,
-			stepRatio,
-			yoff,
-			cam.FieldOfView,
-		)
-	}
 	vw.syncCameraToOthers()
 }
 

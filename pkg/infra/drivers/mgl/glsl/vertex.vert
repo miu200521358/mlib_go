@@ -207,22 +207,19 @@ mat4 inverse(mat4 m) {
         a20 * b03 - a21 * b01 + a22 * b00) / det;
 }
 
-float distanceToRay(vec3 point, vec3 rayFrom, vec3 rayTo, out float depth) {
-    vec3 rayDir = rayTo - rayFrom;
-    float rayLen = length(rayDir);
-    if (rayLen <= 0.000001) {
-        depth = -1.0;
-        return 1000000.0;
+float distanceToVectors(vec3 point) {
+    float minDistance = 1000000.0;
+    for(int i = 0; i < 100; i++) {
+        vec3 cursorPosition = cursorPositions[i];
+        if (cursorPosition.x == 0 && cursorPosition.y == 0 && cursorPosition.z == 0) {
+            continue;
+        }
+        float pointDistance = distance(point, cursorPosition);
+        if(pointDistance < minDistance) {
+            minDistance = pointDistance;
+        }
     }
-    rayDir = rayDir / rayLen;
-    float t = dot(point - rayFrom, rayDir);
-    if (t < 0.0) {
-        depth = -1.0;
-        return 1000000.0;
-    }
-    vec3 proj = rayFrom + rayDir * t;
-    depth = t;
-    return distance(point, proj);
+    return minDistance;
 }
 
 void main() {
@@ -282,10 +279,9 @@ void main() {
     }
 
     // カーソルの矩形範囲内にある場合のみ、頂点位置を格納する
-    float depth = -1.0;
-    float nearestDistance = distanceToRay(vecGlobalPosition.xyz, cursorPositions[0], cursorPositions[1], depth);
-    if (nearestDistance < cursorThreshold/150.0 && depth >= 0.0) {
-        vertexPositions[gl_VertexID] = vec4(vecGlobalPosition.xyz, depth);
+    float nearestDistance = distanceToVectors(vecGlobalPosition.xyz);
+    if (nearestDistance < cursorThreshold/150.0) {
+        vertexPositions[gl_VertexID] = vec4(vecGlobalPosition.xyz, nearestDistance);
     } else {
         vertexPositions[gl_VertexID] = vec4(-1);
     }
