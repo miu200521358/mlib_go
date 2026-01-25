@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/miu200521358/mlib_go/pkg/adapter/io_audio"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_model"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_model/pmx"
@@ -116,6 +117,23 @@ func NewVmdLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II18n,
 			{extension: "*.*", description: "All Files (*.*)"},
 		},
 		vmd.NewVmdRepository(),
+	)
+}
+
+// NewAudioLoadFilePicker は音楽読み込み用のFilePickerを生成する。
+func NewAudioLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
+	return newFilePicker(
+		userConfig,
+		translator,
+		historyKey,
+		title,
+		tooltip,
+		onPathChanged,
+		[]filterExtension{
+			{extension: "*.wav;*.mp3", description: "Audio Files (*.wav;*.mp3)"},
+			{extension: "*.*", description: "All Files (*.*)"},
+		},
+		io_audio.NewAudioRepository(),
 	)
 }
 

@@ -7,12 +7,20 @@ package widget
 import (
 	"time"
 
+	"github.com/miu200521358/mlib_go/pkg/adapter/audio_api"
+	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
 	"github.com/miu200521358/mlib_go/pkg/infra/controller"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"github.com/miu200521358/mlib_go/pkg/shared/contracts/mtime"
 	"github.com/miu200521358/mlib_go/pkg/shared/state"
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
+)
+
+const (
+	audioVolumeDefault = 100
 )
 
 // MotionPlayer は再生操作ウィジェットを表す。
@@ -29,6 +37,13 @@ type MotionPlayer struct {
 	onChangePlayingPre    func(playing bool)
 	onChangePlayingPost   func(playing bool)
 	startPlayingResetType func() state.PhysicsResetType
+	audioPicker           *FilePicker
+	audioPlayer           audio_api.IAudioPlayer
+	audioPath             string
+	userConfig            config.IUserConfig
+	volumeEdit            *walk.NumberEdit
+	volumeInitial         int
+	updatingVolume        bool
 }
 
 // NewMotionPlayer はMotionPlayerを生成する。
@@ -37,6 +52,7 @@ func NewMotionPlayer(translator i18n.II18n) *MotionPlayer {
 	player.translator = translator
 	player.playingText = player.t("一時停止")
 	player.stoppedText = player.t("再生")
+	player.volumeInitial = audioVolumeDefault
 	player.startPlayingResetType = func() state.PhysicsResetType {
 		return state.PHYSICS_RESET_TYPE_START_FRAME
 	}
@@ -52,6 +68,29 @@ func (mp *MotionPlayer) SetLabelTexts(playingText, stoppedText string) {
 // SetWindow はウィンドウ参照を設定する。
 func (mp *MotionPlayer) SetWindow(window *controller.ControlWindow) {
 	mp.window = window
+	if mp.audioPicker != nil {
+		mp.audioPicker.SetWindow(window)
+	}
+}
+
+// SetAudioPlayer は音声プレイヤーと設定を紐付ける。
+func (mp *MotionPlayer) SetAudioPlayer(player audio_api.IAudioPlayer, userConfig config.IUserConfig) {
+	mp.audioPlayer = player
+	mp.userConfig = userConfig
+	if mp.audioPlayer != nil {
+		mp.audioPicker = NewAudioLoadFilePicker(
+			userConfig,
+			mp.translator,
+			config.UserConfigKeyAudio,
+			mp.t("音楽ファイル"),
+			mp.t("音楽ファイルを選択してください"),
+			mp.onAudioPathChanged,
+		)
+		if mp.window != nil {
+			mp.audioPicker.SetWindow(mp.window)
+		}
+	}
+	mp.applyVolumeFromConfig()
 }
 
 // t は翻訳済み文言を返す。
@@ -64,7 +103,7 @@ func (mp *MotionPlayer) t(key string) string {
 
 // Widgets はUI構成を返す。
 func (mp *MotionPlayer) Widgets() declarative.Composite {
-	return declarative.Composite{
+	playRow := declarative.Composite{
 		Layout: declarative.HBox{},
 		Children: []declarative.Widget{
 			declarative.TextLabel{
@@ -84,8 +123,10 @@ func (mp *MotionPlayer) Widgets() declarative.Composite {
 					if mp.window == nil || mp.window.Playing() {
 						return
 					}
-					mp.window.SetFrame(mtime.Frame(mp.frameEdit.Value()))
+					frame := mtime.Frame(mp.frameEdit.Value())
+					mp.window.SetFrame(frame)
 					mp.frameSlider.ChangeValue(int(mp.frameEdit.Value()))
+					mp.seekAudioByFrame(frame)
 				},
 				ToolTipText:            mp.t("再生キーフレ説明"),
 				StretchFactor:          3,
@@ -100,8 +141,10 @@ func (mp *MotionPlayer) Widgets() declarative.Composite {
 					if mp.window == nil || mp.window.Playing() {
 						return
 					}
-					mp.window.SetFrame(mtime.Frame(mp.frameSlider.Value()))
+					frame := mtime.Frame(mp.frameSlider.Value())
+					mp.window.SetFrame(frame)
 					mp.frameEdit.ChangeValue(float64(mp.frameSlider.Value()))
+					mp.seekAudioByFrame(frame)
 				},
 				ToolTipText:   mp.t("再生スライダー説明"),
 				Value:         0,
@@ -124,6 +167,56 @@ func (mp *MotionPlayer) Widgets() declarative.Composite {
 			},
 		},
 	}
+
+	children := []declarative.Widget{playRow}
+	if mp.audioPicker != nil {
+		audioChildren := declarative.Composite{
+			Layout: declarative.HBox{
+				MarginsZero: true,
+				Alignment:   declarative.AlignHCenterVFar,
+			},
+			Children: []declarative.Widget{
+				mp.volumeWidgets(),
+				mp.audioPicker.Widgets(),
+			},
+		}
+		children = append(children, audioChildren)
+	}
+
+	return declarative.Composite{
+		Layout:   declarative.VBox{},
+		Children: children,
+	}
+}
+
+// volumeWidgets は音量ウィジェットの構成を返す。
+func (mp *MotionPlayer) volumeWidgets() declarative.Composite {
+	return declarative.Composite{
+		Layout: declarative.HBox{},
+		Children: []declarative.Widget{
+			declarative.TextLabel{
+				Text:        mp.t("音量"),
+				ToolTipText: mp.t("音量説明"),
+			},
+			declarative.NumberEdit{
+				AssignTo:           &mp.volumeEdit,
+				Decimals:           0,
+				MinValue:           0,
+				MaxValue:           100,
+				Increment:          1,
+				SpinButtonsVisible: true,
+				MinSize:            declarative.Size{Width: 60, Height: 20},
+				MaxSize:            declarative.Size{Width: 60, Height: 20},
+				Value:              float64(mp.volumeInitial),
+				OnValueChanged: func() {
+					mp.handleVolumeChanged()
+				},
+				ToolTipText:            mp.t("音量説明"),
+				StretchFactor:          3,
+				ChangedBackgroundColor: walk.ColorWhite,
+			},
+		},
+	}
 }
 
 // Reset は最大フレームを反映して再生UIを初期化する。
@@ -135,6 +228,7 @@ func (mp *MotionPlayer) Reset(maxFrame mtime.Frame) {
 		mp.window.SetFrame(0)
 		mp.window.SetMaxFrame(maxFrame)
 	}
+	mp.seekAudioByFrame(0)
 }
 
 // SetValue は表示値を設定する。
@@ -154,6 +248,12 @@ func (mp *MotionPlayer) SetEnabledInPlaying(playing bool) {
 	mp.frameEdit.SetEnabled(!playing)
 	mp.frameSlider.SetEnabled(!playing)
 	mp.playButton.SetEnabled(true)
+	if mp.audioPicker != nil {
+		mp.audioPicker.SetEnabledInPlaying(playing)
+	}
+	if mp.volumeEdit != nil {
+		mp.volumeEdit.SetEnabled(true)
+	}
 }
 
 // SetEnabled はウィジェットの有効状態を設定する。
@@ -161,6 +261,12 @@ func (mp *MotionPlayer) SetEnabled(enabled bool) {
 	mp.frameEdit.SetEnabled(enabled)
 	mp.frameSlider.SetEnabled(enabled)
 	mp.playButton.SetEnabled(enabled)
+	if mp.audioPicker != nil {
+		mp.audioPicker.SetEnabled(enabled)
+	}
+	if mp.volumeEdit != nil {
+		mp.volumeEdit.SetEnabled(enabled)
+	}
 }
 
 // SetPlaying は再生状態を更新する。
@@ -180,6 +286,12 @@ func (mp *MotionPlayer) SetPlaying(playing bool) {
 		mp.window.OnChangePlayingPre(playing)
 		mp.window.SetPlaying(playing)
 		mp.window.OnChangePlayingPost(playing)
+	}
+
+	if playing {
+		mp.startAudioPlayback(mp.currentFrame())
+	} else {
+		mp.pauseAudioPlayback()
 	}
 
 	if playing {
@@ -249,6 +361,7 @@ func (mp *MotionPlayer) syncWhilePlaying() {
 		currentFrame := mp.window.Frame()
 		if currentFrame != prevFrame {
 			mp.ChangeValue(currentFrame)
+			mp.syncAudioOnLoop(currentFrame, prevFrame)
 			prevFrame = currentFrame
 		}
 		if !mp.window.Playing() {
@@ -258,4 +371,126 @@ func (mp *MotionPlayer) syncWhilePlaying() {
 			break
 		}
 	}
+}
+
+// currentFrame は現在フレームを取得する。
+func (mp *MotionPlayer) currentFrame() mtime.Frame {
+	if mp.window != nil {
+		return mp.window.Frame()
+	}
+	if mp.frameEdit != nil {
+		return mtime.Frame(mp.frameEdit.Value())
+	}
+	return 0
+}
+
+// startAudioPlayback は音声再生を開始する。
+func (mp *MotionPlayer) startAudioPlayback(frame mtime.Frame) {
+	if !mp.isAudioReady() {
+		return
+	}
+	_ = mp.seekAudioByFrame(frame)
+	_ = mp.audioPlayer.Play()
+}
+
+// pauseAudioPlayback は音声再生を一時停止する。
+func (mp *MotionPlayer) pauseAudioPlayback() {
+	if !mp.isAudioReady() {
+		return
+	}
+	_ = mp.audioPlayer.Pause()
+}
+
+// seekAudioByFrame はフレームに合わせて音声位置を調整する。
+func (mp *MotionPlayer) seekAudioByFrame(frame mtime.Frame) error {
+	if !mp.isAudioReady() {
+		return nil
+	}
+	seconds := mtime.FramesToSeconds(frame, mtime.DefaultFps)
+	return mp.audioPlayer.Seek(float64(seconds))
+}
+
+// syncAudioOnLoop はループ時の音声位置を補正する。
+func (mp *MotionPlayer) syncAudioOnLoop(currentFrame, prevFrame mtime.Frame) {
+	if !mp.isAudioReady() {
+		return
+	}
+	if currentFrame < prevFrame {
+		_ = mp.seekAudioByFrame(currentFrame)
+		_ = mp.audioPlayer.Play()
+	}
+}
+
+// onAudioPathChanged は音声ファイル変更時の処理を行う。
+func (mp *MotionPlayer) onAudioPathChanged(_ *controller.ControlWindow, _ io_common.IFileReader, path string) {
+	if mp.audioPlayer == nil {
+		return
+	}
+	if err := mp.audioPlayer.Load(path); err != nil {
+		logger := logging.DefaultLogger()
+		logger.Error("音楽ファイル読み込み失敗: %s", err.Error())
+		controller.Beep()
+		return
+	}
+	mp.audioPath = path
+	if mp.window != nil && mp.window.Playing() {
+		mp.startAudioPlayback(mp.window.Frame())
+	}
+}
+
+// handleVolumeChanged は音量変更時の処理を行う。
+func (mp *MotionPlayer) handleVolumeChanged() {
+	if mp.volumeEdit == nil || mp.updatingVolume {
+		return
+	}
+	volume := clampVolume(int(mp.volumeEdit.Value()))
+	mp.updatingVolume = true
+	mp.volumeEdit.SetValue(float64(volume))
+	mp.updatingVolume = false
+	if mp.audioPlayer != nil {
+		if err := mp.audioPlayer.SetVolume(volume); err != nil {
+			logger := logging.DefaultLogger()
+			logger.Error("音量設定に失敗しました: %s", err.Error())
+			controller.Beep()
+		}
+	}
+	if mp.userConfig != nil {
+		_ = mp.userConfig.SetInt(config.UserConfigKeyVolume, volume)
+	}
+}
+
+// applyVolumeFromConfig はユーザー設定から音量を反映する。
+func (mp *MotionPlayer) applyVolumeFromConfig() {
+	volume := audioVolumeDefault
+	if mp.userConfig != nil {
+		if v, err := mp.userConfig.GetInt(config.UserConfigKeyVolume, audioVolumeDefault); err == nil {
+			volume = v
+		}
+	}
+	volume = clampVolume(volume)
+	mp.volumeInitial = volume
+	if mp.audioPlayer != nil {
+		_ = mp.audioPlayer.SetVolume(volume)
+	}
+	if mp.volumeEdit != nil {
+		mp.updatingVolume = true
+		mp.volumeEdit.SetValue(float64(volume))
+		mp.updatingVolume = false
+	}
+}
+
+// isAudioReady は音声再生準備ができているか判定する。
+func (mp *MotionPlayer) isAudioReady() bool {
+	return mp.audioPlayer != nil && mp.audioPlayer.IsLoaded()
+}
+
+// clampVolume は音量値を0-100に丸める。
+func clampVolume(volume int) int {
+	if volume < 0 {
+		return 0
+	}
+	if volume > 100 {
+		return 100
+	}
+	return volume
 }

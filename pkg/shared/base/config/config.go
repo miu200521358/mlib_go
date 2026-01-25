@@ -23,33 +23,33 @@ const (
 
 // AppConfig はアプリ設定を表す。
 type AppConfig struct {
-	AppName           string     `json:"AppName"`
-	Version           string     `json:"Version"`
-	EnvValue          AppEnv     `json:"Env"`
-	Horizontal        bool       `json:"Horizontal"`
-	ControlWindowSize WindowSize `json:"ControlWindowSize"`
-	ViewerWindowSize  WindowSize `json:"ViewerWindowSize"`
-	CloseConfirm      bool       `json:"CloseConfirm"`
-	IconPath          string     `json:"IconPath"`
-	IconImagePath     string     `json:"IconImagePath"`
-	CursorPositionLimit int      `json:"CursorPositionLimit"`
+	AppName             string     `json:"AppName"`
+	Version             string     `json:"Version"`
+	EnvValue            AppEnv     `json:"Env"`
+	Horizontal          bool       `json:"Horizontal"`
+	ControlWindowSize   WindowSize `json:"ControlWindowSize"`
+	ViewerWindowSize    WindowSize `json:"ViewerWindowSize"`
+	CloseConfirm        bool       `json:"CloseConfirm"`
+	IconPath            string     `json:"IconPath"`
+	IconImagePath       string     `json:"IconImagePath"`
+	CursorPositionLimit int        `json:"CursorPositionLimit"`
 }
 
 // UnmarshalJSON は旧キーを吸収して設定を取り込む。
 func (ac *AppConfig) UnmarshalJSON(data []byte) error {
 	var raw struct {
-		AppName           string     `json:"AppName"`
-		Name              string     `json:"Name"`
-		Version           string     `json:"Version"`
-		Env               AppEnv     `json:"Env"`
-		Horizontal        bool       `json:"Horizontal"`
-		ControlWindowSize WindowSize `json:"ControlWindowSize"`
-		ViewerWindowSize  WindowSize `json:"ViewerWindowSize"`
-		ViewWindowSize    WindowSize `json:"ViewWindowSize"`
-		CloseConfirm      bool       `json:"CloseConfirm"`
-		IconPath          string     `json:"IconPath"`
-		IconImagePath     string     `json:"IconImagePath"`
-		CursorPositionLimit int      `json:"CursorPositionLimit"`
+		AppName             string     `json:"AppName"`
+		Name                string     `json:"Name"`
+		Version             string     `json:"Version"`
+		Env                 AppEnv     `json:"Env"`
+		Horizontal          bool       `json:"Horizontal"`
+		ControlWindowSize   WindowSize `json:"ControlWindowSize"`
+		ViewerWindowSize    WindowSize `json:"ViewerWindowSize"`
+		ViewWindowSize      WindowSize `json:"ViewWindowSize"`
+		CloseConfirm        bool       `json:"CloseConfirm"`
+		IconPath            string     `json:"IconPath"`
+		IconImagePath       string     `json:"IconImagePath"`
+		CursorPositionLimit int        `json:"CursorPositionLimit"`
 	}
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
@@ -147,4 +147,8 @@ const (
 	UserConfigKeyWindowLinkage = "window_linkage"
 	// UserConfigKeyFrameDrop はフレームドロップキー。
 	UserConfigKeyFrameDrop = "frame_drop"
+	// UserConfigKeyAudio は音楽ファイル履歴キー。
+	UserConfigKeyAudio = "audio"
+	// UserConfigKeyVolume は音量キー。
+	UserConfigKeyVolume = "volume"
 )

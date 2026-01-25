@@ -13,6 +13,7 @@ import (
 	"github.com/miu200521358/walk/pkg/walk"
 
 	"github.com/miu200521358/mlib_go/cmd/ui"
+	"github.com/miu200521358/mlib_go/pkg/adapter/audio_api"
 	"github.com/miu200521358/mlib_go/pkg/adapter/physics_api"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/infra/app"
@@ -21,6 +22,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/infra/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/infra/base/mlogging"
 	"github.com/miu200521358/mlib_go/pkg/infra/controller"
+	"github.com/miu200521358/mlib_go/pkg/infra/drivers/maudio"
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/mbullet"
 	"github.com/miu200521358/mlib_go/pkg/infra/viewer"
 	"github.com/miu200521358/mlib_go/pkg/shared/base"
@@ -69,6 +71,7 @@ func main() {
 	physics_api.RegisterPhysicsFactory(func(gravity *mmath.Vec3) physics_api.IPhysics {
 		return mbullet.NewPhysicsEngine(gravity)
 	})
+	audio_api.RegisterAudioFactory(maudio.NewAudioPlayer)
 
 	iconImage, iconErr := config.LoadAppIconImage(appFiles, appConfig)
 	if iconErr != nil {

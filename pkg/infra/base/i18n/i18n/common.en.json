@@ -650,5 +650,25 @@
     {
         "id": "&ポイント選択",
         "translation": "&Point Selection"
+    },
+    {
+        "id": "音楽ファイル",
+        "translation": "Audio File"
+    },
+    {
+        "id": "音楽ファイルを選択してください",
+        "translation": "Please select an audio file"
+    },
+    {
+        "id": "音量",
+        "translation": "Volume"
+    },
+    {
+        "id": "音量説明",
+        "translation": "Adjust volume from 0 to 100"
+    },
+    {
+        "id": "音楽ファイル読み込み失敗",
+        "translation": "Audio file load failed"
     }
 ]
