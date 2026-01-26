@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"strings"
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
@@ -407,6 +408,32 @@ func (p *pmdReader) readIk(modelData *model.PmxModel) error {
 		if err != nil {
 			continue
 		}
+		ikName := bone.Name()
+		leftLegIkAlt := strings.ReplaceAll(model.LEG_IK.Left(), "ＩＫ", "IK")
+		rightLegIkAlt := strings.ReplaceAll(model.LEG_IK.Right(), "ＩＫ", "IK")
+		isLegIk := ikName == model.LEG_IK.Left() || ikName == model.LEG_IK.Right() || ikName == leftLegIkAlt || ikName == rightLegIkAlt
+		if isLegIk {
+			// 足IKのリンク内でひざボーンに角度制限がない場合、既定の制限を付与する。
+			minLimit := mmath.Vec3{Vec: r3.Vec{X: mmath.DegToRad(-180), Y: 0, Z: 0}}
+			maxLimit := mmath.Vec3{Vec: r3.Vec{X: mmath.DegToRad(-0.5), Y: 0, Z: 0}}
+			for linkIndex := range ik.Links {
+				link := &ik.Links[linkIndex]
+				if link.AngleLimit {
+					continue
+				}
+				linkBone, linkErr := modelData.Bones.Get(link.BoneIndex)
+				if linkErr != nil || linkBone == nil {
+					continue
+				}
+				linkName := linkBone.Name()
+				if !strings.Contains(linkName, "ひざ") && !strings.Contains(linkName, "膝") {
+					continue
+				}
+				link.AngleLimit = true
+				link.MinAngleLimit = minLimit
+				link.MaxAngleLimit = maxLimit
+			}
+		}
 		bone.Ik = ik
 		bone.BoneFlag |= model.BONE_FLAG_IS_IK
 	}
@@ -613,7 +640,7 @@ func (p *pmdReader) readExtensions(modelData *model.PmxModel) error {
 		if err != nil {
 			return err
 		}
-		boneRaw, err := p.reader.ReadUint16()
+		boneRaw, err := p.reader.ReadInt16()
 		if err != nil {
 			return wrapParseFailed("PMD剛体ボーン番号の読み込みに失敗しました", err)
 		}
@@ -621,7 +648,7 @@ func (p *pmdReader) readExtensions(modelData *model.PmxModel) error {
 		if err != nil {
 			return wrapParseFailed("PMD剛体グループの読み込みに失敗しました", err)
 		}
-		groupTarget, err := p.reader.ReadUint16()
+		collisionMask, err := p.reader.ReadInt16()
 		if err != nil {
 			return wrapParseFailed("PMD剛体グループ対象の読み込みに失敗しました", err)
 		}
@@ -629,15 +656,7 @@ func (p *pmdReader) readExtensions(modelData *model.PmxModel) error {
 		if err != nil {
 			return wrapParseFailed("PMD剛体形状の読み込みに失敗しました", err)
 		}
-		shapeW, err := p.reader.ReadFloat32()
-		if err != nil {
-			return wrapParseFailed("PMD剛体サイズの読み込みに失敗しました", err)
-		}
-		shapeH, err := p.reader.ReadFloat32()
-		if err != nil {
-			return wrapParseFailed("PMD剛体サイズの読み込みに失敗しました", err)
-		}
-		shapeD, err := p.reader.ReadFloat32()
+		size, err := p.reader.ReadVec3()
 		if err != nil {
 			return wrapParseFailed("PMD剛体サイズの読み込みに失敗しました", err)
 		}
@@ -675,18 +694,25 @@ func (p *pmdReader) readExtensions(modelData *model.PmxModel) error {
 		}
 
 		boneIndex := int(boneRaw)
-		if boneRaw == 0xFFFF {
+		if boneRaw < 0 {
 			boneIndex = -1
+		}
+		if boneIndex >= 0 {
+			bone, boneErr := modelData.Bones.Get(boneIndex)
+			if boneErr == nil {
+				// PMDの剛体位置はボーン相対のため、モデル座標に変換する。
+				pos = pos.Added(bone.Position)
+			}
 		}
 		rigid := &model.RigidBody{
 			EnglishName: "",
 			BoneIndex:   boneIndex,
 			CollisionGroup: model.CollisionGroup{
 				Group: group,
-				Mask:  ^groupTarget,
+				Mask:  uint16(collisionMask),
 			},
 			Shape:       model.Shape(shapeType),
-			Size:        mmath.Vec3{Vec: r3.Vec{X: shapeW, Y: shapeH, Z: shapeD}},
+			Size:        size,
 			Position:    pos,
 			Rotation:    rot,
 			PhysicsType: model.PhysicsType(physType),
@@ -711,11 +737,11 @@ func (p *pmdReader) readExtensions(modelData *model.PmxModel) error {
 		if err != nil {
 			return err
 		}
-		rigidA, err := p.reader.ReadUint32()
+		rigidA, err := p.reader.ReadInt32()
 		if err != nil {
 			return wrapParseFailed("PMDジョイント剛体Aの読み込みに失敗しました", err)
 		}
-		rigidB, err := p.reader.ReadUint32()
+		rigidB, err := p.reader.ReadInt32()
 		if err != nil {
 			return wrapParseFailed("PMDジョイント剛体Bの読み込みに失敗しました", err)
 		}

@@ -698,17 +698,17 @@ func (s *pmdWriteState) writeRigidBodies() error {
 			return err
 		}
 		boneIndex := s.boneMapping.mapIndex(rigid.BoneIndex)
-		boneValue := uint16(0xFFFF)
+		boneValue := int16(-1)
 		if boneIndex >= 0 {
-			boneValue = uint16(boneIndex)
+			boneValue = int16(boneIndex)
 		}
-		if err := s.writer.WriteUint16(boneValue); err != nil {
+		if err := s.writer.WriteInt16(boneValue); err != nil {
 			return io_common.NewIoSaveFailed("PMD剛体ボーン番号の書き込みに失敗しました", err)
 		}
 		if err := s.writer.WriteUint8(rigid.CollisionGroup.Group); err != nil {
 			return io_common.NewIoSaveFailed("PMD剛体グループの書き込みに失敗しました", err)
 		}
-		if err := s.writer.WriteUint16(^rigid.CollisionGroup.Mask); err != nil {
+		if err := s.writer.WriteInt16(int16(rigid.CollisionGroup.Mask)); err != nil {
 			return io_common.NewIoSaveFailed("PMD剛体グループ対象の書き込みに失敗しました", err)
 		}
 		if err := s.writer.WriteUint8(uint8(rigid.Shape)); err != nil {
@@ -717,7 +717,15 @@ func (s *pmdWriteState) writeRigidBodies() error {
 		if err := s.writeVec3(rigid.Size, true); err != nil {
 			return err
 		}
-		if err := s.writeVec3(rigid.Position, false); err != nil {
+		rigidPos := rigid.Position
+		if boneIndex >= 0 {
+			bone, boneErr := s.model.Bones.Get(rigid.BoneIndex)
+			if boneErr == nil {
+				// PMDの剛体位置はボーン相対で保存する。
+				rigidPos = rigid.Position.Subed(bone.Position)
+			}
+		}
+		if err := s.writeVec3(rigidPos, false); err != nil {
 			return err
 		}
 		if err := s.writeVec3(rigid.Rotation, false); err != nil {
@@ -771,10 +779,10 @@ func (s *pmdWriteState) writeJoints() error {
 		if mappedA < 0 || mappedB < 0 {
 			return io_common.NewIoEncodeFailed("PMDジョイント剛体参照が不正です", nil)
 		}
-		if err := s.writer.WriteUint32(uint32(mappedA)); err != nil {
+		if err := s.writer.WriteInt32(int32(mappedA)); err != nil {
 			return io_common.NewIoSaveFailed("PMDジョイント剛体Aの書き込みに失敗しました", err)
 		}
-		if err := s.writer.WriteUint32(uint32(mappedB)); err != nil {
+		if err := s.writer.WriteInt32(int32(mappedB)); err != nil {
 			return io_common.NewIoSaveFailed("PMDジョイント剛体Bの書き込みに失敗しました", err)
 		}
 		if err := s.writeVec3(joint.Param.Position, false); err != nil {
