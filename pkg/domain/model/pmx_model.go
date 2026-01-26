@@ -116,3 +116,12 @@ func (m *PmxModel) Copy() (PmxModel, error) {
 	copied.UpdateRandomHash()
 	return copied, nil
 }
+
+func (m *PmxModel) CreateDefaultDisplaySlots() {
+	if m.DisplaySlots != nil && m.DisplaySlots.Len() > 0 {
+		return
+	}
+
+	m.DisplaySlots.AppendRaw(NewRootDisplaySlot())
+	m.DisplaySlots.AppendRaw(NewMorphDisplaySlot())
+}

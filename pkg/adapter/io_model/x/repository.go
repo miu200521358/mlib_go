@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
-	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/shared/hashable"
 )
 
@@ -111,6 +111,7 @@ func (r *XRepository) Load(path string) (hashable.IHashable, error) {
 	}
 
 	addCenterBone(modelData)
+	addDisplaySlot(modelData)
 
 	info, err := file.Stat()
 	if err != nil {
@@ -156,4 +157,14 @@ func addCenterBone(modelData *model.PmxModel) {
 	bone.IsSystem = false
 	bone.Position = mmath.Vec3{}
 	modelData.Bones.AppendRaw(bone)
+}
+
+func addDisplaySlot(modelData *model.PmxModel) {
+	if modelData == nil || modelData.Bones == nil {
+		return
+	}
+	if _, err := modelData.Bones.GetByName("センター"); err != nil {
+		return
+	}
+	modelData.CreateDefaultDisplaySlots()
 }

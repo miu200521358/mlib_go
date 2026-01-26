@@ -56,6 +56,26 @@ func (d *DisplaySlot) SetName(name string) {
 	d.name = name
 }
 
+func NewRootDisplaySlot() *DisplaySlot {
+	return &DisplaySlot{
+		index:       0,
+		name:        "Root",
+		EnglishName: "Root",
+		SpecialFlag: SPECIAL_FLAG_ON,
+		References:  make([]Reference, 0),
+	}
+}
+
+func NewMorphDisplaySlot() *DisplaySlot {
+	return &DisplaySlot{
+		index:       1,
+		name:        "表情",
+		EnglishName: "Exp",
+		SpecialFlag: SPECIAL_FLAG_ON,
+		References:  make([]Reference, 0),
+	}
+}
+
 // IsValid は表示枠が有効か判定する。
 func (d *DisplaySlot) IsValid() bool {
 	return d != nil && d.index >= 0

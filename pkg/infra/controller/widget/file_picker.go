@@ -467,12 +467,18 @@ func (fp *FilePicker) resolveInitialDir() string {
 
 // openHistoryDialog は履歴ダイアログを表示する。
 func (fp *FilePicker) openHistoryDialog() {
-	if fp.historyKey == "" || fp.userConfig == nil {
+	if fp.historyKey == "" {
 		return
 	}
-	values, err := fp.userConfig.GetStringSlice(fp.historyKey)
-	if err != nil || len(values) == 0 {
-		return
+	values := []string{}
+	if fp.userConfig != nil {
+		var err error
+		values, err = fp.userConfig.GetStringSlice(fp.historyKey)
+		if err != nil {
+			logger := logging.DefaultLogger()
+			logger.Warn("履歴読込に失敗しました")
+			values = []string{}
+		}
 	}
 
 	if fp.historyDialog != nil {
@@ -489,6 +495,15 @@ func (fp *FilePicker) openHistoryDialog() {
 	dlg := new(walk.Dialog)
 	lb := new(walk.ListBox)
 	push := new(walk.PushButton)
+	var parent walk.Form
+	if fp.window != nil {
+		parent = fp.window
+	} else {
+		parent = walk.App().ActiveForm()
+	}
+	if parent == nil {
+		return
+	}
 	if err := (declarative.Dialog{
 		AssignTo: &dlg,
 		Title:    fp.t("履歴"),
@@ -528,7 +543,7 @@ func (fp *FilePicker) openHistoryDialog() {
 				},
 			},
 		},
-	}).Create(fp.window); err != nil {
+	}).Create(parent); err != nil {
 		return
 	}
 
