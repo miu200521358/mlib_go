@@ -267,12 +267,21 @@ func (p *pmdReader) readMaterials(modelData *model.PmxModel) error {
 		material.Diffuse = mmath.Vec4{X: diffuse.X, Y: diffuse.Y, Z: diffuse.Z, W: alpha}
 		material.Specular = mmath.Vec4{X: specularColor.X, Y: specularColor.Y, Z: specularColor.Z, W: specularity}
 		material.Ambient = ambient
-		if edgeFlag == 0 {
-			material.DrawFlag = model.DRAW_FLAG_DRAWING_EDGE
+		edgeEnabled := edgeFlag != 0
+		// PMD材質は明示フラグが少ないため、nanoemの判定ロジックに合わせて描画フラグを構築する。
+		drawFlag := model.DRAW_FLAG_DRAWING_SELF_SHADOWS
+		if edgeEnabled {
+			drawFlag |= model.DRAW_FLAG_DRAWING_EDGE
+			drawFlag |= model.DRAW_FLAG_GROUND_SHADOW
+		}
+		// alpha=0.98付近はセルフシャドウマップ無効扱い。
+		if !(alpha >= 0.98 && alpha < 0.99) {
+			drawFlag |= model.DRAW_FLAG_DRAWING_ON_SELF_SHADOW_MAPS
+		}
+		material.DrawFlag = drawFlag
+		material.EdgeSize = 0.0
+		if edgeEnabled {
 			material.EdgeSize = 1.0
-		} else {
-			material.DrawFlag = model.DRAW_FLAG_NONE
-			material.EdgeSize = 0.0
 		}
 		material.Edge = mmath.UNIT_W_VEC4
 		material.TextureIndex = textureIndex
@@ -282,6 +291,7 @@ func (p *pmdReader) readMaterials(modelData *model.PmxModel) error {
 		if toonIndex <= 9 {
 			material.ToonTextureIndex = int(toonIndex)
 		} else {
+			// toonIndex=0xFF は共有トゥーン未設定扱い。
 			material.ToonTextureIndex = -1
 		}
 		material.VerticesCount = int(faceVertCount)

@@ -320,9 +320,9 @@ func (s *pmdWriteState) writeMaterials() error {
 		if err := s.writer.WriteUint8(toonIndex); err != nil {
 			return io_common.NewIoSaveFailed("PMD材質Toonの書き込みに失敗しました", err)
 		}
-		edgeFlag := uint8(1)
+		edgeFlag := uint8(0)
 		if material.DrawFlag&model.DRAW_FLAG_DRAWING_EDGE != 0 {
-			edgeFlag = 0
+			edgeFlag = 1
 		}
 		if err := s.writer.WriteUint8(edgeFlag); err != nil {
 			return io_common.NewIoSaveFailed("PMD材質エッジフラグの書き込みに失敗しました", err)

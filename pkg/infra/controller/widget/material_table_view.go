@@ -380,7 +380,7 @@ func (m *MaterialModel) ResetRows(modelData *model.PmxModel) {
 		}
 		texture, _ := modelData.Textures.Get(mat.TextureIndex)
 		toon, _ := modelData.Textures.Get(mat.ToonTextureIndex)
-		if mat.ToonSharingFlag == model.TOON_SHARING_SHARING {
+		if mat.ToonSharingFlag == model.TOON_SHARING_SHARING && mat.ToonTextureIndex >= 0 {
 			toon = model.NewTexture()
 			toon.SetName(fmt.Sprintf("toon/toon%02d.bmp", mat.ToonTextureIndex))
 			toon.SetValid(true)
