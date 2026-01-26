@@ -810,5 +810,65 @@
     {
         "id": "オーバーライド用フレームバッファが不完全です: %s",
         "translation": "Override framebuffer is incomplete: %s"
+    },
+    {
+        "id": "言語設定の保存に失敗しました: %s",
+        "translation": "Failed to save language settings: %s"
+    },
+    {
+        "id": "ログ保存に失敗しました: %s",
+        "translation": "Failed to save log: %s"
+    },
+    {
+        "id": "ログを保存しました: %s",
+        "translation": "Log saved: %s"
+    },
+    {
+        "id": "冗長ログの開始に失敗しました: %s",
+        "translation": "Failed to start verbose logging: %s"
+    },
+    {
+        "id": "音楽ファイル読み込み失敗: %s",
+        "translation": "Audio file load failed: %s"
+    },
+    {
+        "id": "音量設定に失敗しました: %s",
+        "translation": "Failed to set volume: %s"
+    },
+    {
+        "id": "履歴保存に失敗しました: %s",
+        "translation": "Failed to save history: %s"
+    },
+    {
+        "id": "履歴読込に失敗しました",
+        "translation": "Failed to load history"
+    },
+    {
+        "id": "ビューワープロファイル開始に失敗しました: %s",
+        "translation": "Failed to start viewer profiling: %s"
+    },
+    {
+        "id": "ビューワープロファイル開始: %s",
+        "translation": "Viewer profiling started: %s"
+    },
+    {
+        "id": "ビューワープロファイル保存に失敗しました: %s",
+        "translation": "Failed to save viewer profiling: %s"
+    },
+    {
+        "id": "ビューワープロファイル出力: %s",
+        "translation": "Viewer profile output: %s"
+    },
+    {
+        "id": "ProgressBarの初期化に失敗しました",
+        "translation": "Failed to initialize ProgressBar"
+    },
+    {
+        "id": "ConsoleViewの初期化に失敗しました",
+        "translation": "Failed to initialize ConsoleView"
+    },
+    {
+        "id": "コントローラーウィンドウの初期化に失敗しました",
+        "translation": "Failed to initialize controller window"
     }
 ]

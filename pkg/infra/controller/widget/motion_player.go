@@ -428,7 +428,7 @@ func (mp *MotionPlayer) onAudioPathChanged(_ *controller.ControlWindow, _ io_com
 	}
 	if err := mp.audioPlayer.Load(path); err != nil {
 		logger := logging.DefaultLogger()
-		logger.Error("音楽ファイル読み込み失敗: %s", err.Error())
+		logger.Error(mp.t("音楽ファイル読み込み失敗: %s"), err.Error())
 		controller.Beep()
 		return
 	}
@@ -450,7 +450,7 @@ func (mp *MotionPlayer) handleVolumeChanged() {
 	if mp.audioPlayer != nil {
 		if err := mp.audioPlayer.SetVolume(volume); err != nil {
 			logger := logging.DefaultLogger()
-			logger.Error("音量設定に失敗しました: %s", err.Error())
+			logger.Error(mp.t("音量設定に失敗しました: %s"), err.Error())
 			controller.Beep()
 		}
 	}

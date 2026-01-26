@@ -183,7 +183,7 @@ func NewControlWindow(shared *state.SharedState, baseServices base.IBaseServices
 			cw.onRestore()
 		},
 	}).Create(); err != nil {
-		return nil, NewControllerWindowInitFailed("コントローラーウィンドウの初期化に失敗しました", err)
+		return nil, NewControllerWindowInitFailed(cw.t("コントローラーウィンドウの初期化に失敗しました"), err)
 	}
 
 	cw.SetPos(positionX, positionY)
@@ -750,7 +750,7 @@ func (cw *ControlWindow) onChangeLanguage(lang i18n.LangCode) {
 		return
 	}
 	if _, err := cw.translator.SetLang(lang); err != nil {
-		cw.loggerOrDefault().Error("言語設定の保存に失敗しました: %s", err.Error())
+		cw.loggerOrDefault().Error(cw.t("言語設定の保存に失敗しました: %s"), err.Error())
 		walk.MsgBox(cw, cw.t("言語変更"), err.Error(), walk.MsgBoxIconError)
 		return
 	}
@@ -959,11 +959,11 @@ func (cw *ControlWindow) triggerSaveLog() {
 	text := logging.ConsoleText()
 	path, err := mfile.SaveConsoleSnapshot(cw.userConfig, "console", text)
 	if err != nil {
-		cw.loggerOrDefault().Error("ログ保存に失敗しました: %s", err.Error())
+		cw.loggerOrDefault().Error(cw.t("ログ保存に失敗しました: %s"), err.Error())
 		walk.MsgBox(cw, cw.t("ログ保存"), err.Error(), walk.MsgBoxIconError)
 		return
 	}
-	cw.loggerOrDefault().Info("ログを保存しました: %s", path)
+	cw.loggerOrDefault().Info(cw.t("ログを保存しました: %s"), path)
 }
 
 // showControllerHelp はコントローラーの使い方を表示する。
@@ -1157,7 +1157,7 @@ func (cw *ControlWindow) enableVerbose(index logging.VerboseIndex, label string)
 	if _, ok := cw.verboseSinks[index]; !ok {
 		_, sink, err := mfile.OpenVerboseLogStream(cw.userConfig, label)
 		if err != nil {
-			logger.Error("冗長ログの開始に失敗しました: %s", err.Error())
+			logger.Error(cw.t("冗長ログの開始に失敗しました: %s"), err.Error())
 			return
 		}
 		cw.verboseSinks[index] = sink

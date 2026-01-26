@@ -11,6 +11,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_audio"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_model"
+	"github.com/miu200521358/mlib_go/pkg/adapter/io_model/pmd"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_model/pmx"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_motion"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_motion/vmd"
@@ -69,6 +70,23 @@ func NewPmxLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II18n,
 	)
 }
 
+// NewPmdLoadFilePicker はPMD読み込み用のFilePickerを生成する。
+func NewPmdLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
+	return newFilePicker(
+		userConfig,
+		translator,
+		historyKey,
+		title,
+		tooltip,
+		onPathChanged,
+		[]filterExtension{
+			{extension: "*.pmd", description: "Pmd Files (*.pmd)"},
+			{extension: "*.*", description: "All Files (*.*)"},
+		},
+		pmd.NewPmdRepository(),
+	)
+}
+
 // NewPmxXLoadFilePicker はPMX/X読み込み用のFilePickerを生成する。
 func NewPmxXLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
 	return newFilePicker(
@@ -79,7 +97,7 @@ func NewPmxXLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II18n
 		tooltip,
 		onPathChanged,
 		[]filterExtension{
-			{extension: "*.pmx;*.x", description: "Pmx/X Files (*.pmx,*.x)"},
+			{extension: "*.pmx;*.pmd;*.x", description: "Pmx/Pmd/X Files (*.pmx;*.pmd;*.x)"},
 			{extension: "*.*", description: "All Files (*.*)"},
 		},
 		io_model.NewModelRepository(),
@@ -148,6 +166,23 @@ func NewPmxSaveFilePicker(userConfig io_commonUserConfig, translator i18n.II18n,
 		onPathChanged,
 		[]filterExtension{
 			{extension: "*.pmx", description: "Pmx Files (*.pmx)"},
+			{extension: "*.*", description: "All Files (*.*)"},
+		},
+		io_model.NewModelRepository(),
+	)
+}
+
+// NewPmdSaveFilePicker はPMD保存用のFilePickerを生成する。
+func NewPmdSaveFilePicker(userConfig io_commonUserConfig, translator i18n.II18n, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
+	return newFilePicker(
+		userConfig,
+		translator,
+		"",
+		title,
+		tooltip,
+		onPathChanged,
+		[]filterExtension{
+			{extension: "*.pmd", description: "Pmd Files (*.pmd)"},
 			{extension: "*.*", description: "All Files (*.*)"},
 		},
 		io_model.NewModelRepository(),
@@ -434,7 +469,7 @@ func (fp *FilePicker) saveHistoryIfNeeded(path string) {
 	values = dedupe(values)
 	if err := fp.userConfig.SetStringSlice(fp.historyKey, values, 50); err != nil {
 		logger := logging.DefaultLogger()
-		logger.Warn("履歴保存に失敗しました: %s", err.Error())
+		logger.Warn(fp.t("履歴保存に失敗しました: %s"), err.Error())
 	}
 }
 
@@ -476,7 +511,7 @@ func (fp *FilePicker) openHistoryDialog() {
 		values, err = fp.userConfig.GetStringSlice(fp.historyKey)
 		if err != nil {
 			logger := logging.DefaultLogger()
-			logger.Warn("履歴読込に失敗しました")
+			logger.Warn(fp.t("履歴読込に失敗しました"))
 			values = []string{}
 		}
 	}

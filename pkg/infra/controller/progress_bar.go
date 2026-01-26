@@ -4,7 +4,10 @@
 // 指示: miu200521358
 package controller
 
-import "github.com/miu200521358/walk/pkg/walk"
+import (
+	"github.com/miu200521358/mlib_go/pkg/infra/base/i18n"
+	"github.com/miu200521358/walk/pkg/walk"
+)
 
 // ProgressBar は進捗バーを表す。
 type ProgressBar struct {
@@ -18,7 +21,7 @@ func NewProgressBar(parent walk.Container) (*ProgressBar, error) {
 	var err error
 	pb.ProgressBar, err = walk.NewProgressBar(parent)
 	if err != nil {
-		return nil, NewProgressBarInitFailed("ProgressBarの初期化に失敗しました", err)
+		return nil, NewProgressBarInitFailed(i18n.T("ProgressBarの初期化に失敗しました"), err)
 	}
 
 	return pb, nil

@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"unsafe"
 
+	"github.com/miu200521358/mlib_go/pkg/infra/base/i18n"
 	"github.com/miu200521358/walk/pkg/walk"
 	"github.com/miu200521358/win"
 )
@@ -51,13 +52,13 @@ func NewConsoleView(parent walk.Container, minWidth int, minHeight int) (*Consol
 		ConsoleViewClass,
 		win.WS_DISABLED,
 		0); err != nil {
-		return nil, NewConsoleViewInitFailed("ConsoleViewの初期化に失敗しました", err)
+		return nil, NewConsoleViewInitFailed(i18n.T("ConsoleViewの初期化に失敗しました"), err)
 	}
 
 	// テキストエディットを作成
 	te, err := walk.NewTextEditWithStyle(parent, win.WS_VISIBLE|win.WS_VSCROLL|win.ES_MULTILINE)
 	if err != nil {
-		return nil, NewConsoleViewInitFailed("ConsoleViewの初期化に失敗しました", err)
+		return nil, NewConsoleViewInitFailed(i18n.T("ConsoleViewの初期化に失敗しました"), err)
 	}
 	te.SetMinMaxSize(
 		walk.Size{Width: minWidth, Height: minHeight},
