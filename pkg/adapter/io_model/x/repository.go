@@ -3,6 +3,7 @@ package x
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -24,8 +25,12 @@ const (
 )
 
 type meshContext struct {
-	vertexOffset int
-	faceGroups   [][]*model.Face
+	vertexOffset      int
+	vertexCount       int
+	faceGroups        [][]*model.Face
+	faceIndexGroups   [][]int
+	normals           []mmath.Vec3
+	normalFaceIndexes [][]int
 }
 
 // XRepository はX形式の読み取りを表す。
@@ -145,11 +150,11 @@ func addCenterBone(modelData *model.PmxModel) {
 	if modelData == nil || modelData.Bones == nil {
 		return
 	}
-	if _, err := modelData.Bones.GetByName("センター"); err == nil {
+	if _, err := modelData.Bones.GetByName(model.CENTER.String()); err == nil {
 		return
 	}
 	bone := &model.Bone{}
-	bone.SetName("センター")
+	bone.SetName(model.CENTER.String())
 	bone.ParentIndex = -1
 	bone.TailIndex = -1
 	bone.EffectIndex = -1
@@ -163,8 +168,134 @@ func addDisplaySlot(modelData *model.PmxModel) {
 	if modelData == nil || modelData.Bones == nil {
 		return
 	}
-	if _, err := modelData.Bones.GetByName("センター"); err != nil {
+	if _, err := modelData.Bones.GetByName(model.CENTER.String()); err != nil {
 		return
 	}
 	modelData.CreateDefaultDisplaySlots()
+}
+
+// applyMeshNormals は読み込んだメッシュ情報から頂点法線を確定する。
+func applyMeshNormals(modelData *model.PmxModel, meshCtx *meshContext) error {
+	if modelData == nil || meshCtx == nil {
+		return nil
+	}
+	vertexCount := meshCtx.vertexCount
+	if vertexCount <= 0 {
+		vertexCount = modelData.Vertices.Len() - meshCtx.vertexOffset
+	}
+	if vertexCount <= 0 {
+		return nil
+	}
+
+	switch {
+	case len(meshCtx.normals) > 0 && len(meshCtx.normalFaceIndexes) > 0:
+		return applyMeshNormalsByMapping(modelData, meshCtx, vertexCount)
+	case len(meshCtx.normals) > 0:
+		return applyMeshNormalsByVertexOrder(modelData, meshCtx, vertexCount)
+	default:
+		return applyMeshNormalsFromFaces(modelData, meshCtx, vertexCount)
+	}
+}
+
+// applyMeshNormalsByMapping はMeshNormalsの面インデックスを使って法線を算出する。
+func applyMeshNormalsByMapping(modelData *model.PmxModel, meshCtx *meshContext, vertexCount int) error {
+	if len(meshCtx.faceIndexGroups) == 0 {
+		return fmt.Errorf("MeshNormalsの面情報が不足しています")
+	}
+	if len(meshCtx.normalFaceIndexes) != len(meshCtx.faceIndexGroups) {
+		return fmt.Errorf("MeshNormalsの面数が不正です")
+	}
+
+	accumulated := make([]mmath.Vec3, vertexCount)
+	for faceIdx, faceIndexes := range meshCtx.faceIndexGroups {
+		normalIndexes := meshCtx.normalFaceIndexes[faceIdx]
+		if len(normalIndexes) < len(faceIndexes) {
+			return fmt.Errorf("MeshNormalsの面頂点数が不足しています")
+		}
+		// 取り込んだ面頂点より多い法線が来た場合は、幾何の簡略化に合わせて切り詰める。
+		if len(normalIndexes) > len(faceIndexes) {
+			normalIndexes = normalIndexes[:len(faceIndexes)]
+		}
+		for i, vertexIndex := range faceIndexes {
+			local := vertexIndex - meshCtx.vertexOffset
+			if local < 0 || local >= vertexCount {
+				return fmt.Errorf("MeshNormalsの頂点番号が不正です")
+			}
+			normalIndex := normalIndexes[i]
+			if normalIndex < 0 || normalIndex >= len(meshCtx.normals) {
+				return fmt.Errorf("MeshNormalsの法線番号が不正です")
+			}
+			accumulated[local].Add(meshCtx.normals[normalIndex])
+		}
+	}
+
+	return applyAccumulatedNormals(modelData, meshCtx.vertexOffset, accumulated)
+}
+
+// applyMeshNormalsByVertexOrder はMeshNormalsの順序を頂点順とみなして法線を設定する。
+func applyMeshNormalsByVertexOrder(modelData *model.PmxModel, meshCtx *meshContext, vertexCount int) error {
+	limit := vertexCount
+	if len(meshCtx.normals) < limit {
+		limit = len(meshCtx.normals)
+	}
+	accumulated := make([]mmath.Vec3, vertexCount)
+	for i := 0; i < limit; i++ {
+		accumulated[i] = meshCtx.normals[i]
+	}
+	return applyAccumulatedNormals(modelData, meshCtx.vertexOffset, accumulated)
+}
+
+// applyMeshNormalsFromFaces は面の幾何情報から法線を算出する。
+func applyMeshNormalsFromFaces(modelData *model.PmxModel, meshCtx *meshContext, vertexCount int) error {
+	if len(meshCtx.faceGroups) == 0 {
+		return nil
+	}
+
+	accumulated := make([]mmath.Vec3, vertexCount)
+	for _, faces := range meshCtx.faceGroups {
+		for _, face := range faces {
+			v0, err := modelData.Vertices.Get(face.VertexIndexes[0])
+			if err != nil {
+				return err
+			}
+			v1, err := modelData.Vertices.Get(face.VertexIndexes[1])
+			if err != nil {
+				return err
+			}
+			v2, err := modelData.Vertices.Get(face.VertexIndexes[2])
+			if err != nil {
+				return err
+			}
+			edge1 := v1.Position.Subed(v0.Position)
+			edge2 := v2.Position.Subed(v0.Position)
+			faceNormal := edge1.Cross(edge2)
+			if faceNormal.IsZero() {
+				continue
+			}
+			for _, vertexIndex := range face.VertexIndexes {
+				local := vertexIndex - meshCtx.vertexOffset
+				if local < 0 || local >= vertexCount {
+					return fmt.Errorf("Meshの頂点番号が不正です")
+				}
+				accumulated[local].Add(faceNormal)
+			}
+		}
+	}
+
+	return applyAccumulatedNormals(modelData, meshCtx.vertexOffset, accumulated)
+}
+
+// applyAccumulatedNormals は積算済み法線を正規化して頂点へ設定する。
+func applyAccumulatedNormals(modelData *model.PmxModel, vertexOffset int, accumulated []mmath.Vec3) error {
+	for i, normal := range accumulated {
+		if normal.IsZero() {
+			continue
+		}
+		vertex, err := modelData.Vertices.Get(vertexOffset + i)
+		if err != nil {
+			return err
+		}
+		vertex.Normal = normal.Normalized()
+	}
+	return nil
 }

@@ -269,6 +269,11 @@ func (p *binaryParser) parseObject(objectName string) error {
 			return err
 		}
 		if tok == tokenCBrace {
+			if objectName == "Mesh" {
+				if err := applyMeshNormals(p.model, p.meshCtx); err != nil {
+					return err
+				}
+			}
 			return nil
 		}
 		p.pos -= 2
@@ -378,6 +383,64 @@ func (p *binaryParser) parseDataList(objectName string) error {
 	}
 }
 
+// parseMeshFaceIndexGroups は面情報の整数リストを頂点インデックス配列へ変換する。
+func (p *binaryParser) parseMeshFaceIndexGroups(list []uint32, base int, objectName string) ([][]int, error) {
+	if len(list) < 1 {
+		return nil, fmt.Errorf("%sの面情報が不足しています", objectName)
+	}
+	faceCount := int(list[0])
+	if faceCount < 0 {
+		return nil, fmt.Errorf("%sの面数が不正です", objectName)
+	}
+
+	// 可変長フォーマットを優先し、合わない場合は従来の固定長フォーマットにフォールバックする。
+	idx := 1
+	faceIndexes := make([][]int, 0, faceCount)
+	variableOK := true
+	for i := 0; i < faceCount; i++ {
+		if idx >= len(list) {
+			variableOK = false
+			break
+		}
+		count := int(list[idx])
+		idx++
+		if count < 3 || idx+count > len(list) {
+			variableOK = false
+			break
+		}
+		indexes := make([]int, 0, count)
+		for j := 0; j < count; j++ {
+			indexes = append(indexes, int(list[idx+j])+base)
+		}
+		idx += count
+		if len(indexes) > 4 {
+			indexes = indexes[:3]
+		}
+		faceIndexes = append(faceIndexes, indexes)
+	}
+	if variableOK && idx == len(list) {
+		return faceIndexes, nil
+	}
+
+	if 1+faceCount*4 > len(list) {
+		return nil, fmt.Errorf("%sの面情報が不足しています", objectName)
+	}
+	faceIndexes = make([][]int, 0, faceCount)
+	for i := 0; i < faceCount; i++ {
+		pos := 1 + i*4
+		if pos+3 >= len(list) {
+			return nil, fmt.Errorf("%sの面情報が不足しています", objectName)
+		}
+		indexes := []int{
+			int(list[pos+1]) + base,
+			int(list[pos+2]) + base,
+			int(list[pos+3]) + base,
+		}
+		faceIndexes = append(faceIndexes, indexes)
+	}
+	return faceIndexes, nil
+}
+
 // readIntegerList は整数リストを読み取る。
 func (p *binaryParser) readIntegerList(objectName string) ([]uint32, error) {
 	tok, err := p.getToken()
@@ -405,18 +468,28 @@ func (p *binaryParser) readIntegerList(objectName string) ([]uint32, error) {
 		if p.meshCtx == nil {
 			return nil, fmt.Errorf("Meshの頂点コンテキストが不正です")
 		}
-		if len(list) < 1 {
-			return nil, fmt.Errorf("Meshの面情報が不足しています")
+		faceIndexGroups, err := p.parseMeshFaceIndexGroups(list, p.meshCtx.vertexOffset, "Mesh")
+		if err != nil {
+			return nil, err
 		}
-		faceCount := int(list[0])
-		base := p.meshCtx.vertexOffset
-		for i := 0; i < faceCount; i++ {
-			idx := 1 + i*4
-			if idx+3 >= len(list) {
-				return nil, fmt.Errorf("Meshの面情報が不足しています")
+		p.meshCtx.faceIndexGroups = faceIndexGroups
+		p.meshCtx.faceGroups = make([][]*model.Face, 0, len(faceIndexGroups))
+		for _, indexes := range faceIndexGroups {
+			// 読み込み済みの面頂点を基準に三角面へ変換する。
+			var faces []*model.Face
+			switch len(indexes) {
+			case 4:
+				f1 := &model.Face{VertexIndexes: [3]int{indexes[0], indexes[1], indexes[2]}}
+				f2 := &model.Face{VertexIndexes: [3]int{indexes[0], indexes[2], indexes[3]}}
+				faces = []*model.Face{f1, f2}
+			default:
+				f := &model.Face{VertexIndexes: [3]int{indexes[0], indexes[1], indexes[2]}}
+				faces = []*model.Face{f}
 			}
-			face := &model.Face{VertexIndexes: [3]int{int(list[idx+1]) + base, int(list[idx+2]) + base, int(list[idx+3]) + base}}
-			p.model.Faces.AppendRaw(face)
+			p.meshCtx.faceGroups = append(p.meshCtx.faceGroups, faces)
+			for _, face := range faces {
+				p.model.Faces.AppendRaw(face)
+			}
 		}
 	case "MeshMaterialList":
 		if len(list) < 2 {
@@ -437,8 +510,23 @@ func (p *binaryParser) readIntegerList(objectName string) ([]uint32, error) {
 			if err != nil {
 				return nil, err
 			}
-			material.VerticesCount += 3
+			verticesCount := 3
+			if p.meshCtx != nil && i < len(p.meshCtx.faceIndexGroups) {
+				if len(p.meshCtx.faceIndexGroups[i]) == 4 {
+					verticesCount = 6
+				}
+			}
+			material.VerticesCount += verticesCount
 		}
+	case "MeshNormals":
+		if p.meshCtx == nil {
+			return nil, fmt.Errorf("MeshNormalsの頂点コンテキストが不正です")
+		}
+		normalFaceIndexes, err := p.parseMeshFaceIndexGroups(list, 0, "MeshNormals")
+		if err != nil {
+			return nil, err
+		}
+		p.meshCtx.normalFaceIndexes = normalFaceIndexes
 	}
 
 	return list, nil
@@ -471,6 +559,10 @@ func (p *binaryParser) readFloatList(objectName string) ([]float64, error) {
 		if p.meshCtx == nil {
 			return nil, fmt.Errorf("Meshの頂点コンテキストが不正です")
 		}
+		if len(list)%3 != 0 {
+			return nil, fmt.Errorf("Meshの頂点数が不正です")
+		}
+		p.meshCtx.vertexCount = len(list) / 3
 		for i := 0; i+2 < len(list); i += 3 {
 			pos := mmath.Vec3{Vec: r3.Vec{X: list[i], Y: list[i+1], Z: list[i+2]}}
 			pos.MulScalar(10)
@@ -486,14 +578,14 @@ func (p *binaryParser) readFloatList(objectName string) ([]float64, error) {
 		if p.meshCtx == nil {
 			return nil, fmt.Errorf("MeshNormalsの頂点コンテキストが不正です")
 		}
-		for i := 0; i+2 < len(list); i += 3 {
-			vidx := i / 3
-			vertex, err := p.model.Vertices.Get(p.meshCtx.vertexOffset + vidx)
-			if err != nil {
-				return nil, err
-			}
-			vertex.Normal = mmath.Vec3{Vec: r3.Vec{X: list[i], Y: list[i+1], Z: list[i+2]}}
+		if len(list)%3 != 0 {
+			return nil, fmt.Errorf("MeshNormalsの頂点数が不正です")
 		}
+		normals := make([]mmath.Vec3, 0, len(list)/3)
+		for i := 0; i+2 < len(list); i += 3 {
+			normals = append(normals, mmath.Vec3{Vec: r3.Vec{X: list[i], Y: list[i+1], Z: list[i+2]}})
+		}
+		p.meshCtx.normals = normals
 	case "MeshTextureCoords":
 		if p.meshCtx == nil {
 			return nil, fmt.Errorf("MeshTextureCoordsの頂点コンテキストが不正です")

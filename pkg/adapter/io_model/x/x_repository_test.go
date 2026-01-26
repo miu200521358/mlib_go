@@ -28,7 +28,7 @@ func TestXRepository_Load_Text(t *testing.T) {
 	if !ok {
 		t.Fatalf("Expected model type to be *PmxModel, got %T", data)
 	}
-	assertXModel(t, modelData, 4, mmath.Vec3{Vec: r3.Vec{X: 0, Y: 1, Z: 0}}, 9, 3)
+	assertXModel(t, modelData, 4, mmath.Vec3{Vec: r3.Vec{X: 0, Y: 0, Z: 1}}, 9, 3)
 }
 
 func TestXRepository_Load_Binary(t *testing.T) {
@@ -60,6 +60,28 @@ func TestXRepository_Load_CompressedBinary(t *testing.T) {
 		t.Fatalf("Expected model type to be *PmxModel, got %T", data)
 	}
 	assertXModel(t, modelData, 3, mmath.Vec3{Vec: r3.Vec{X: 0, Y: 0, Z: 1}}, 6, 3)
+}
+
+func TestXRepository_Load_Text_NoNormals(t *testing.T) {
+	path := writeTempFile(t, "sample_text_no_normals.x", []byte(buildTextXNoNormals()))
+
+	r := NewXRepository()
+	data, err := r.Load(path)
+	if err != nil {
+		t.Fatalf("Expected error to be nil, got %q", err)
+	}
+	modelData, ok := data.(*model.PmxModel)
+	if !ok {
+		t.Fatalf("Expected model type to be *PmxModel, got %T", data)
+	}
+	if modelData.Vertices.Len() != 3 {
+		t.Fatalf("Expected vertex count to be %d, got %d", 3, modelData.Vertices.Len())
+	}
+	v0, _ := modelData.Vertices.Get(0)
+	expectedNormal := mmath.Vec3{Vec: r3.Vec{X: 0, Y: 0, Z: 1}}
+	if !v0.Normal.MMD().NearEquals(expectedNormal, 1e-8) {
+		t.Errorf("Expected Normal to be %v, got %v", expectedNormal, v0.Normal.MMD())
+	}
 }
 
 func assertXModel(t *testing.T, modelData *model.PmxModel, faceCount int, expectedNormal mmath.Vec3, mat0Count, mat1Count int) {
@@ -107,7 +129,7 @@ func assertXModel(t *testing.T, modelData *model.PmxModel, faceCount int, expect
 		t.Errorf("Expected material1 SphereMode to be Multiplication")
 	}
 
-	if _, err := modelData.Bones.GetByName("センター"); err != nil {
+	if _, err := modelData.Bones.GetByName(model.CENTER.String()); err != nil {
 		t.Fatalf("Expected center bone to exist, got %q", err)
 	}
 }
@@ -131,6 +153,15 @@ func buildTextX() string {
 		"4;0,1,2,3;,",
 		"3;0,2,4;,",
 		"5;1,2,3,4,0;;",
+		"MeshNormals {",
+		"2;",
+		"0;1;0;,",
+		"0;0;1;;",
+		"3;",
+		"4;1,0,0,0;,",
+		"3;1,0,0;,",
+		"5;0,0,0,0,1;;",
+		"}",
 		"MeshMaterialList {",
 		"2;",
 		"3;",
@@ -163,6 +194,26 @@ func buildTextX() string {
 	return strings.Join(lines, "\n")
 }
 
+func buildTextXNoNormals() string {
+	lines := []string{
+		"xof 0303txt 0032",
+		"Header {",
+		"1;",
+		"0;",
+		"1;",
+		"}",
+		"Mesh {",
+		"3;",
+		"0;0;0;,",
+		"1;0;0;,",
+		"0;1;0;;",
+		"1;",
+		"3;0,1,2;;",
+		"}",
+	}
+	return strings.Join(lines, "\n")
+}
+
 func buildBinaryX() []byte {
 	payload := &bytes.Buffer{}
 	writeName(payload, "Mesh")
@@ -184,11 +235,17 @@ func buildBinaryX() []byte {
 	writeName(payload, "MeshNormals")
 	writeToken(payload, tokenOBrace)
 	writeFloatList(payload, []float64{
+		0, 1, 0,
 		0, 0, 1,
 		0, 1, 0,
 		0, 1, 0,
 		0, 1, 0,
-		0, 1, 0,
+	})
+	writeIntegerList(payload, []uint32{
+		3,
+		3, 1, 0, 0,
+		3, 1, 0, 0,
+		3, 0, 0, 0,
 	})
 	writeToken(payload, tokenCBrace)
 

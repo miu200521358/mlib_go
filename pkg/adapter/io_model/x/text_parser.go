@@ -461,6 +461,7 @@ func (p *textParser) parseTextMesh() error {
 	if err != nil {
 		return err
 	}
+	p.meshCtx.vertexCount = vertexCount
 	if _, err := p.expect(tokSemicolon); err != nil {
 		return err
 	}
@@ -490,12 +491,14 @@ func (p *textParser) parseTextMesh() error {
 		return err
 	}
 	p.meshCtx.faceGroups = make([][]*model.Face, 0, faceCount)
+	p.meshCtx.faceIndexGroups = make([][]int, 0, faceCount)
 	for i := 0; i < faceCount; i++ {
-		faces, err := p.parseMeshFace()
+		faces, faceIndexes, err := p.parseMeshFace()
 		if err != nil {
 			return err
 		}
 		p.meshCtx.faceGroups = append(p.meshCtx.faceGroups, faces)
+		p.meshCtx.faceIndexGroups = append(p.meshCtx.faceIndexGroups, faceIndexes)
 	}
 	if _, err := p.expect(tokSemicolon); err != nil {
 		return err
@@ -517,7 +520,7 @@ func (p *textParser) parseTextMesh() error {
 			}
 		case "MeshNormals":
 			p.next()
-			if err := p.skipTextUnknownTemplate(); err != nil {
+			if err := p.parseMeshNormals(); err != nil {
 				return err
 			}
 		default:
@@ -536,12 +539,43 @@ func (p *textParser) parseTextMesh() error {
 	if _, err := p.expect(tokRCurly); err != nil {
 		return err
 	}
+	if err := applyMeshNormals(p.model, p.meshCtx); err != nil {
+		return err
+	}
 	p.meshCtx = nil
 	return nil
 }
 
-// parseMeshFace は面定義を読み取る。
-func (p *textParser) parseMeshFace() ([]*model.Face, error) {
+// parseMeshFace は面定義を読み取り、三角面と使用頂点番号を返す。
+func (p *textParser) parseMeshFace() ([]*model.Face, []int, error) {
+	indexes, err := p.parseMeshFaceIndexes()
+	if err != nil {
+		return nil, nil, err
+	}
+	base := p.meshCtx.vertexOffset
+
+	usedIndexes := make([]int, len(indexes))
+	copy(usedIndexes, indexes)
+	if len(usedIndexes) > 4 {
+		usedIndexes = usedIndexes[:3]
+	}
+	for i := range usedIndexes {
+		usedIndexes[i] += base
+	}
+
+	switch {
+	case len(indexes) == 4:
+		f1 := &model.Face{VertexIndexes: [3]int{indexes[0] + base, indexes[1] + base, indexes[2] + base}}
+		f2 := &model.Face{VertexIndexes: [3]int{indexes[0] + base, indexes[2] + base, indexes[3] + base}}
+		return []*model.Face{f1, f2}, usedIndexes, nil
+	default:
+		f := &model.Face{VertexIndexes: [3]int{indexes[0] + base, indexes[1] + base, indexes[2] + base}}
+		return []*model.Face{f}, usedIndexes, nil
+	}
+}
+
+// parseMeshFaceIndexes は面の頂点番号リストを読み取る。
+func (p *textParser) parseMeshFaceIndexes() ([]int, error) {
 	count, err := p.parseNumberAsInt()
 	if err != nil {
 		return nil, err
@@ -563,17 +597,7 @@ func (p *textParser) parseMeshFace() ([]*model.Face, error) {
 	if _, err := p.expect(tokSemicolon); err != nil {
 		return nil, err
 	}
-
-	base := p.meshCtx.vertexOffset
-	switch {
-	case count == 4:
-		f1 := &model.Face{VertexIndexes: [3]int{indexes[0] + base, indexes[1] + base, indexes[2] + base}}
-		f2 := &model.Face{VertexIndexes: [3]int{indexes[0] + base, indexes[2] + base, indexes[3] + base}}
-		return []*model.Face{f1, f2}, nil
-	default:
-		f := &model.Face{VertexIndexes: [3]int{indexes[0] + base, indexes[1] + base, indexes[2] + base}}
-		return []*model.Face{f}, nil
-	}
+	return indexes, nil
 }
 
 // parseMeshMaterialList はMeshMaterialListを解析する。
@@ -789,6 +813,60 @@ func (p *textParser) parseMeshTextureCoords() error {
 	if _, err := p.expect(tokRCurly); err != nil {
 		return err
 	}
+	return nil
+}
+
+// parseMeshNormals は法線情報を読み取る。
+func (p *textParser) parseMeshNormals() error {
+	if p.meshCtx == nil {
+		return fmt.Errorf("MeshNormalsの頂点コンテキストが不正です")
+	}
+	if _, err := p.expect(tokLCurly); err != nil {
+		return err
+	}
+	normalCount, err := p.parseNumberAsInt()
+	if err != nil {
+		return err
+	}
+	if _, err := p.expect(tokSemicolon); err != nil {
+		return err
+	}
+	normals := make([]mmath.Vec3, 0, normalCount)
+	for i := 0; i < normalCount; i++ {
+		n, err := p.parseVector()
+		if err != nil {
+			return err
+		}
+		normals = append(normals, n)
+	}
+	if _, err := p.expect(tokSemicolon); err != nil {
+		return err
+	}
+
+	faceCount, err := p.parseNumberAsInt()
+	if err != nil {
+		return err
+	}
+	if _, err := p.expect(tokSemicolon); err != nil {
+		return err
+	}
+	faceNormalIndexes := make([][]int, 0, faceCount)
+	for i := 0; i < faceCount; i++ {
+		indexes, err := p.parseMeshFaceIndexes()
+		if err != nil {
+			return err
+		}
+		faceNormalIndexes = append(faceNormalIndexes, indexes)
+	}
+	if _, err := p.expect(tokSemicolon); err != nil {
+		return err
+	}
+	if _, err := p.expect(tokRCurly); err != nil {
+		return err
+	}
+
+	p.meshCtx.normals = normals
+	p.meshCtx.normalFaceIndexes = faceNormalIndexes
 	return nil
 }
 
