@@ -1,7 +1,11 @@
 // 指示: miu200521358
 package model
 
-import "github.com/miu200521358/mlib_go/pkg/domain/mmath"
+import (
+	"strings"
+
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+)
 
 // BoneFlag はボーンフラグを表す。
 type BoneFlag int
@@ -78,6 +82,13 @@ type Bone struct {
 	IsSystem         bool // システム追加ボーンの場合はtrue
 }
 
+// NewBoneByName は名前を指定してボーンを生成する。
+func NewBoneByName(name string) *Bone {
+	bone := &Bone{}
+	bone.SetName(name)
+	return bone
+}
+
 // Index はボーン index を返す。
 func (b *Bone) Index() int {
 	return b.index
@@ -98,7 +109,85 @@ func (b *Bone) SetName(name string) {
 	b.name = name
 }
 
+// Direction はボーンの左右方向を返す。
+func (b *Bone) Direction() BoneDirection {
+	if strings.Contains(b.name, "左") {
+		return BONE_DIRECTION_LEFT
+	}
+	if strings.Contains(b.name, "右") {
+		return BONE_DIRECTION_RIGHT
+	}
+	return BONE_DIRECTION_TRUNK
+}
+
 // IsValid はボーンが有効か判定する。
 func (b *Bone) IsValid() bool {
 	return b != nil && b.index >= 0
+}
+
+// Config は標準ボーン設定を返す。
+func (b *Bone) Config() *BoneConfig {
+	if b == nil {
+		return nil
+	}
+	for boneConfigName, boneConfig := range GetStandardBoneConfigs() {
+		if boneConfigName.String() == b.Name() ||
+			boneConfigName.Right() == b.Name() ||
+			boneConfigName.Left() == b.Name() {
+			return boneConfig
+		}
+	}
+	return nil
+}
+
+// ConfigParentBoneNames は定義上の親ボーン名を返す。
+func (b *Bone) ConfigParentBoneNames() []string {
+	if b == nil {
+		return []string{}
+	}
+	for boneConfigName, boneConfig := range GetStandardBoneConfigs() {
+		if boneConfigName.String() == b.Name() ||
+			boneConfigName.Right() == b.Name() ||
+			boneConfigName.Left() == b.Name() {
+			boneNames := make([]string, 0, len(boneConfig.ParentBoneNames))
+			for _, parentBoneName := range boneConfig.ParentBoneNames {
+				if boneConfigName.Right() == b.Name() {
+					boneNames = append(boneNames, parentBoneName.Right())
+				} else if boneConfigName.Left() == b.Name() {
+					boneNames = append(boneNames, parentBoneName.Left())
+				} else {
+					boneNames = append(boneNames, parentBoneName.String())
+				}
+			}
+			return boneNames
+		}
+	}
+	return []string{}
+}
+
+// ConfigChildBoneNames は定義上の子ボーン名を返す。
+func (b *Bone) ConfigChildBoneNames() []string {
+	if b == nil {
+		return []string{}
+	}
+	for boneConfigName, boneConfig := range GetStandardBoneConfigs() {
+		if boneConfigName.String() == b.Name() ||
+			boneConfigName.Right() == b.Name() ||
+			boneConfigName.Left() == b.Name() {
+			boneNames := make([]string, 0)
+			for _, tailBoneNames := range boneConfig.ChildBoneNames {
+				for _, tailBoneName := range tailBoneNames {
+					if boneConfigName.Right() == b.Name() {
+						boneNames = append(boneNames, tailBoneName.Right())
+					} else if boneConfigName.Left() == b.Name() {
+						boneNames = append(boneNames, tailBoneName.Left())
+					} else {
+						boneNames = append(boneNames, tailBoneName.String())
+					}
+				}
+			}
+			return boneNames
+		}
+	}
+	return []string{}
 }

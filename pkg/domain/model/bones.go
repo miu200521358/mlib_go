@@ -56,6 +56,15 @@ func (c *BoneCollection) GetByName(name string) (*Bone, error) {
 	return c.Get(idx)
 }
 
+// ContainsByName は name のボーンが存在するか判定する。
+func (c *BoneCollection) ContainsByName(name string) bool {
+	if c == nil {
+		return false
+	}
+	_, ok := c.nameIndex.GetByName(name)
+	return ok
+}
+
 // Append は末尾にボーンを追加する。
 func (c *BoneCollection) Append(value *Bone) (int, collection.ReindexResult) {
 	oldLen := len(c.values)

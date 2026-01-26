@@ -36,6 +36,24 @@ func TestNameErrors(t *testing.T) {
 	}
 }
 
+func TestParentNotFoundError(t *testing.T) {
+	err := NewParentNotFoundError("parent", "parent missing")
+	if err.Parent != "parent" {
+		t.Fatalf("unexpected parent: %s", err.Parent)
+	}
+	if err.Error() == "" {
+		t.Fatalf("Error should not be empty")
+	}
+	if !IsParentNotFoundError(err) {
+		t.Fatalf("IsParentNotFoundError should be true")
+	}
+
+	var nilErr *ParentNotFoundError
+	if nilErr.Error() != "" {
+		t.Fatalf("nil Error should be empty")
+	}
+}
+
 func TestModelCopyFailed(t *testing.T) {
 	cause := errors.New("boom")
 	err := NewModelCopyFailed(cause)

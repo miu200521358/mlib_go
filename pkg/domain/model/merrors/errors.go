@@ -93,6 +93,34 @@ func IsNameMismatchError(err error) bool {
 	return errors.As(err, &target)
 }
 
+// ParentNotFoundError は親ボーン未検出エラーを表す。
+type ParentNotFoundError struct {
+	Parent  string
+	Message string
+}
+
+// NewParentNotFoundError は ParentNotFoundError を生成する。
+func NewParentNotFoundError(parent, message string) *ParentNotFoundError {
+	return &ParentNotFoundError{Parent: parent, Message: message}
+}
+
+// Error はエラーメッセージを返す。
+func (e *ParentNotFoundError) Error() string {
+	if e == nil {
+		return ""
+	}
+	if e.Message != "" {
+		return e.Message
+	}
+	return fmt.Sprintf("parent not found: %s", e.Parent)
+}
+
+// IsParentNotFoundError は err が ParentNotFoundError か判定する。
+func IsParentNotFoundError(err error) bool {
+	var target *ParentNotFoundError
+	return errors.As(err, &target)
+}
+
 // ModelCopyFailed はモデルコピー失敗を表す。
 type ModelCopyFailed struct {
 	Cause error

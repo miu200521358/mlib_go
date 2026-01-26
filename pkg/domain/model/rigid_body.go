@@ -13,12 +13,14 @@ type CollisionGroup struct {
 type Shape int
 
 const (
+	// SHAPE_NONE は形状なし。
+	SHAPE_NONE Shape = -1
 	// SHAPE_SPHERE は球。
-	SHAPE_SPHERE Shape = iota
+	SHAPE_SPHERE Shape = 0
 	// SHAPE_BOX は箱。
-	SHAPE_BOX
+	SHAPE_BOX Shape = 1
 	// SHAPE_CAPSULE はカプセル。
-	SHAPE_CAPSULE
+	SHAPE_CAPSULE Shape = 2
 )
 
 // PhysicsType は剛体物理の種類を表す。
