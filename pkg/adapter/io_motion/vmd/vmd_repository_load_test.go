@@ -388,5 +388,5 @@ func testResourcePath(name string) string {
 
 // vec3 は3次元ベクトルを生成する。
 func vec3(x, y, z float64) mmath.Vec3 {
-	return mmath.Vec3{r3.Vec{X: x, Y: y, Z: z}}
+	return mmath.Vec3{Vec: r3.Vec{X: x, Y: y, Z: z}}
 }

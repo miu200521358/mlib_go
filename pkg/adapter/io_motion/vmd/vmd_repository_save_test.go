@@ -7,6 +7,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
 )
 
@@ -21,7 +22,7 @@ func TestVmdRepository_Save1(t *testing.T) {
 	bf.Position = &pos
 	rot := mmath.NewQuaternionFromDegrees(10, 20, 30)
 	bf.Rotation = &rot
-	motionData.AppendBoneFrame(boneCenter, bf)
+	motionData.AppendBoneFrame(model.CENTER.String(), bf)
 
 	r := NewVmdRepository()
 
@@ -42,9 +43,9 @@ func TestVmdRepository_Save1(t *testing.T) {
 		t.Errorf("Expected model name to be '%s', got %q", motionData.Name(), reloadMotion.Name())
 	}
 
-	frames := reloadMotion.BoneFrames.Get(boneCenter)
+	frames := reloadMotion.BoneFrames.Get(model.CENTER.String())
 	if !frames.Has(motion.Frame(0)) {
-		t.Errorf("Expected %s to contain frame 0", boneCenter)
+		t.Errorf("Expected %s to contain frame 0", model.CENTER.String())
 	}
 
 	reloadBf := frames.Get(motion.Frame(0))
