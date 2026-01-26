@@ -25,6 +25,7 @@ import (
 	"github.com/miu200521358/dds/pkg/dds"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
+	"github.com/miu200521358/mlib_go/pkg/infra/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 	"golang.org/x/image/bmp"
@@ -132,12 +133,12 @@ func (tm *TextureManager) LoadAllTextures(windowIndex int, textures *model.Textu
 			if loadErr == nil {
 				loadErr = err
 			}
-			logging.DefaultLogger().Warn("テクスチャ読み込みに失敗しました: %v", err)
+			logging.DefaultLogger().Warn(i18n.T("テクスチャ読み込みに失敗しました: %v"), err)
 			continue
 		}
 		idx := texture.Index()
 		if idx < 0 || idx >= len(tm.textures) {
-			logging.DefaultLogger().Warn("テクスチャインデックスが範囲外です: %d", idx)
+			logging.DefaultLogger().Warn(i18n.T("テクスチャインデックスが範囲外です: %d"), idx)
 			continue
 		}
 		tm.textures[idx] = texGl
@@ -199,7 +200,7 @@ func (tm *TextureManager) LoadToonTextures(windowIndex int) error {
 		}
 		image := convertToNRGBA(img)
 		if image == nil {
-			return merr.NewImagePackageError("トゥーンテクスチャの変換に失敗しました: "+filePath, nil)
+			return merr.NewImagePackageError(fmt.Sprintf(i18n.T("トゥーンテクスチャの変換に失敗しました: %s"), filePath), nil)
 		}
 
 		toonGl.bind()
@@ -251,7 +252,7 @@ func (tm *TextureManager) Delete() {
 // loadTextureGl は単一テクスチャをOpenGL向けにロードする。
 func (tm *TextureManager) loadTextureGl(windowIndex int, texture *model.Texture, modelPath string) (*textureGl, error) {
 	if texture == nil || texture.Name() == "" {
-		return nil, merr.NewImagePackageError("テクスチャ名が不正です", nil)
+		return nil, merr.NewImagePackageError(i18n.T("テクスチャ名が不正です"), nil)
 	}
 	displayName := filepath.Base(texture.Name())
 
@@ -270,7 +271,7 @@ func (tm *TextureManager) loadTextureGl(windowIndex int, texture *model.Texture,
 	}
 	image := convertToNRGBA(img)
 	if image == nil {
-		return texGl, merr.NewImagePackageError("テクスチャの変換に失敗しました: "+displayName, nil)
+		return texGl, merr.NewImagePackageError(fmt.Sprintf(i18n.T("テクスチャの変換に失敗しました: %s"), displayName), nil)
 	}
 
 	texGl.IsGeneratedMipmap =
@@ -296,7 +297,7 @@ func (tm *TextureManager) loadTextureGl(windowIndex int, texture *model.Texture,
 	if texGl.IsGeneratedMipmap {
 		gl.GenerateMipmap(gl.TEXTURE_2D)
 	} else {
-		logging.DefaultLogger().Debug("ミップマップ生成エラー: %s", displayName)
+		logging.DefaultLogger().Debug(i18n.T("ミップマップ生成エラー: %s"), displayName)
 	}
 
 	texGl.unbind()
@@ -349,7 +350,7 @@ var errUnsupportedImageFormat = errors.New("unsupported image format")
 func loadImageFromResources(resources embed.FS, fileName string) (image.Image, error) {
 	data, err := fs.ReadFile(resources, fileName)
 	if err != nil {
-		return nil, merr.NewFsPackageError("トゥーンテクスチャの読み込みに失敗しました: "+fileName, err)
+		return nil, merr.NewFsPackageError(fmt.Sprintf(i18n.T("トゥーンテクスチャの読み込みに失敗しました: %s"), fileName), err)
 	}
 	open := func() (io.ReadCloser, error) {
 		return io.NopCloser(bytes.NewReader(data)), nil
@@ -363,7 +364,7 @@ func loadImageFromFile(path string) (image.Image, error) {
 	open := func() (io.ReadCloser, error) {
 		file, err := os.Open(path)
 		if err != nil {
-			return nil, merr.NewOsPackageError("テクスチャファイルの読み込みに失敗しました: "+baseName, err)
+			return nil, merr.NewOsPackageError(fmt.Sprintf(i18n.T("テクスチャファイルの読み込みに失敗しました: %s"), baseName), err)
 		}
 		return file, nil
 	}
@@ -374,7 +375,7 @@ func loadImageFromFile(path string) (image.Image, error) {
 func loadImage(path string, displayName string, open imageOpenFunc) (image.Image, error) {
 	candidates := imageExtensionCandidates(path)
 	if len(candidates) == 0 {
-		return nil, merr.NewImagePackageError("未対応の画像形式です: "+displayName, nil)
+		return nil, merr.NewImagePackageError(fmt.Sprintf(i18n.T("未対応の画像形式です: %s"), displayName), nil)
 	}
 	var lastErr error
 	for _, ext := range candidates {
@@ -400,7 +401,7 @@ func loadImage(path string, displayName string, open imageOpenFunc) (image.Image
 		if lastErr == nil {
 			lastErr = err
 		}
-		return nil, merr.NewImagePackageError("テクスチャのデコードに失敗しました: "+displayName, lastErr)
+		return nil, merr.NewImagePackageError(fmt.Sprintf(i18n.T("テクスチャのデコードに失敗しました: %s"), displayName), lastErr)
 	}
 	return img, nil
 }

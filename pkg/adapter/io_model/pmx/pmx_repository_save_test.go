@@ -156,7 +156,7 @@ func TestPmxRepository_Save(t *testing.T) {
 	}
 
 	{
-		rigid, err := savedModel.RigidBodies.GetByName("右腕")
+		rigid, err := savedModel.RigidBodies.GetByName(model.ARM.Right())
 		if err != nil {
 			t.Fatalf("Expected rigid body to be found, got %v", err)
 		}

@@ -609,14 +609,14 @@ func TestVmdMotion_DeformLegIk7_Syou_ISAO(t *testing.T) {
 	}
 	{
 		expectedPosition := vec3(0.04952335, 11.02838314, 2.29172656)
-		if !boneDeltas.GetByName("腰").FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
-			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("腰").FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName("腰").FilledGlobalPosition()))
+		if !boneDeltas.GetByName(model.WAIST.String()).FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(model.WAIST.String()).FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName(model.WAIST.String()).FilledGlobalPosition()))
 		}
 	}
 	{
 		expectedPosition := vec3(0.04952335, 11.9671191, 1.06765032)
-		if !boneDeltas.GetByName("下半身").FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
-			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("下半身").FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName("下半身").FilledGlobalPosition()))
+		if !boneDeltas.GetByName(model.LOWER.String()).FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(model.LOWER.String()).FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName(model.LOWER.String()).FilledGlobalPosition()))
 		}
 	}
 	// TODO(miu200521358, 2026-01-18): 物理後のため現時点では検証不可
@@ -634,8 +634,8 @@ func TestVmdMotion_DeformLegIk7_Syou_ISAO(t *testing.T) {
 	}
 	{
 		expectedPosition := vec3(0.90331914, 10.27362702, 1.00949975)
-		if !boneDeltas.GetByName("左足").FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
-			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左足").FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName("左足").FilledGlobalPosition()))
+		if !boneDeltas.GetByName(model.LEG.Left()).FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(model.LEG.Left()).FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName(model.LEG.Left()).FilledGlobalPosition()))
 		}
 	}
 	{
@@ -2048,8 +2048,8 @@ func TestVmdMotion_DeformArmIk3(t *testing.T) {
 	boneDeltas, _ := computeBoneDeltas(pmxModel, vmdMotion, motion.Frame(0), nil, true, false, false)
 	{
 		expectedPosition := vec3(1.018832, 15.840092, 0.532239)
-		if !boneDeltas.GetByName("左腕").FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
-			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕").FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName("左腕").FilledGlobalPosition()))
+		if !boneDeltas.GetByName(model.ARM.Left()).FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(model.ARM.Left()).FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName(model.ARM.Left()).FilledGlobalPosition()))
 		}
 	}
 	{
@@ -2060,8 +2060,8 @@ func TestVmdMotion_DeformArmIk3(t *testing.T) {
 	}
 	{
 		expectedPosition := vec3(1.353175, 13.181011, -0.334196)
-		if !boneDeltas.GetByName("左ひじ").FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
-			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左ひじ").FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName("左ひじ").FilledGlobalPosition()))
+		if !boneDeltas.GetByName(model.ELBOW.Left()).FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(model.ELBOW.Left()).FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName(model.ELBOW.Left()).FilledGlobalPosition()))
 		}
 	}
 	{
@@ -2940,20 +2940,20 @@ func TestVmdMotion_DeformArmIk2(t *testing.T) {
 	}
 	{
 		expectedPosition := vec3(0.04952335, 11.02838314, 2.29172656)
-		if !boneDeltas.GetByName("腰").FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
-			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("腰").FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName("腰").FilledGlobalPosition()))
+		if !boneDeltas.GetByName(model.WAIST.String()).FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(model.WAIST.String()).FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName(model.WAIST.String()).FilledGlobalPosition()))
 		}
 	}
 	{
 		expectedPosition := vec3(0.04952335, 11.9671191, 1.06765032)
-		if !boneDeltas.GetByName("上半身").FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
-			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("上半身").FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName("上半身").FilledGlobalPosition()))
+		if !boneDeltas.GetByName(model.UPPER.String()).FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(model.UPPER.String()).FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName(model.UPPER.String()).FilledGlobalPosition()))
 		}
 	}
 	{
 		expectedPosition := vec3(0.26284261, 13.14576297, 0.84720008)
-		if !boneDeltas.GetByName("上半身2").FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
-			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("上半身2").FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName("上半身2").FilledGlobalPosition()))
+		if !boneDeltas.GetByName(model.UPPER2.String()).FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(model.UPPER2.String()).FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName(model.UPPER2.String()).FilledGlobalPosition()))
 		}
 	}
 	{
@@ -2970,8 +2970,8 @@ func TestVmdMotion_DeformArmIk2(t *testing.T) {
 	}
 	{
 		expectedPosition := vec3(-0.63104276, 15.44542768, 0.8507726)
-		if !boneDeltas.GetByName("右腕").FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
-			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右腕").FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName("右腕").FilledGlobalPosition()))
+		if !boneDeltas.GetByName(model.ARM.Right()).FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(model.ARM.Right()).FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName(model.ARM.Right()).FilledGlobalPosition()))
 		}
 	}
 	{
@@ -2982,8 +2982,8 @@ func TestVmdMotion_DeformArmIk2(t *testing.T) {
 	}
 	{
 		expectedPosition := vec3(-1.50502977, 12.52976106, 0.66393998)
-		if !boneDeltas.GetByName("右ひじ").FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
-			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右ひじ").FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName("右ひじ").FilledGlobalPosition()))
+		if !boneDeltas.GetByName(model.ELBOW.Right()).FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(model.ELBOW.Right()).FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName(model.ELBOW.Right()).FilledGlobalPosition()))
 		}
 	}
 	{
@@ -2994,8 +2994,8 @@ func TestVmdMotion_DeformArmIk2(t *testing.T) {
 	}
 	{
 		expectedPosition := vec3(-1.36287259, 13.90869981, -1.41662258)
-		if !boneDeltas.GetByName("右手首").FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
-			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("右手首").FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName("右手首").FilledGlobalPosition()))
+		if !boneDeltas.GetByName(model.WRIST.Right()).FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(model.WRIST.Right()).FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName(model.WRIST.Right()).FilledGlobalPosition()))
 		}
 	}
 	{
@@ -3438,14 +3438,14 @@ func TestVmdMotion_DeformArmIk4_DMF(t *testing.T) {
 	}
 	{
 		expectedPosition := vec3(6.210230, 12.836980, -0.159825)
-		if !boneDeltas.GetByName("上半身").FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
-			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("上半身").FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName("上半身").FilledGlobalPosition()))
+		if !boneDeltas.GetByName(model.UPPER.String()).FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(model.UPPER.String()).FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName(model.UPPER.String()).FilledGlobalPosition()))
 		}
 	}
 	{
 		expectedPosition := vec3(6.261481, 13.968025, 0.288966)
-		if !boneDeltas.GetByName("上半身2").FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
-			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("上半身2").FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName("上半身2").FilledGlobalPosition()))
+		if !boneDeltas.GetByName(model.UPPER2.String()).FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(model.UPPER2.String()).FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName(model.UPPER2.String()).FilledGlobalPosition()))
 		}
 	}
 	{
@@ -3456,8 +3456,8 @@ func TestVmdMotion_DeformArmIk4_DMF(t *testing.T) {
 	}
 	{
 		expectedPosition := vec3(7.451898, 16.031992, 1.675949)
-		if !boneDeltas.GetByName("左腕").FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
-			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左腕").FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName("左腕").FilledGlobalPosition()))
+		if !boneDeltas.GetByName(model.ARM.Left()).FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(model.ARM.Left()).FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName(model.ARM.Left()).FilledGlobalPosition()))
 		}
 	}
 	{
@@ -3468,8 +3468,8 @@ func TestVmdMotion_DeformArmIk4_DMF(t *testing.T) {
 	}
 	{
 		expectedPosition := vec3(9.646749, 13.918620, 1.803021)
-		if !boneDeltas.GetByName("左ひじ").FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
-			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左ひじ").FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName("左ひじ").FilledGlobalPosition()))
+		if !boneDeltas.GetByName(model.ELBOW.Left()).FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(model.ELBOW.Left()).FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName(model.ELBOW.Left()).FilledGlobalPosition()))
 		}
 	}
 	{
@@ -3480,8 +3480,8 @@ func TestVmdMotion_DeformArmIk4_DMF(t *testing.T) {
 	}
 	{
 		expectedPosition := vec3(7.772219, 12.307291, 1.428628)
-		if !boneDeltas.GetByName("左手首").FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
-			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName("左手首").FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName("左手首").FilledGlobalPosition()))
+		if !boneDeltas.GetByName(model.WRIST.Left()).FilledGlobalPosition().NearEquals(expectedPosition, 0.01) {
+			t.Errorf("Expected %v, got %v (%.3f)", expectedPosition, boneDeltas.GetByName(model.WRIST.Left()).FilledGlobalPosition(), expectedPosition.Distance(boneDeltas.GetByName(model.WRIST.Left()).FilledGlobalPosition()))
 		}
 	}
 	{
@@ -4073,7 +4073,7 @@ func TestVmdMotion_Neck(t *testing.T) {
 
 	pmxModel := loadPmx(t, "D:/MMD/MikuMikuDance_v926x64/UserFile/Model/VOCALOID/初音ミク/ISAO式ミク/I_ミクv4/Miku_V4.pmx")
 
-	boneDeltas, _ := computeBoneDeltas(pmxModel, vmdMotion, motion.Frame(0), []string{"頭"}, true, false, false)
+	boneDeltas, _ := computeBoneDeltas(pmxModel, vmdMotion, motion.Frame(0), []string{model.HEAD.String()}, true, false, false)
 	{
 		boneName := model.NECK.String()
 		expectedPosition := vec3(0.883310, 17.340812, -1.313977)

@@ -11,6 +11,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
+	"github.com/miu200521358/mlib_go/pkg/infra/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/mgl"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"github.com/miu200521358/mlib_go/pkg/shared/state"
@@ -74,10 +75,10 @@ func NewModelRenderer(windowIndex int, modelData *model.PmxModel) *ModelRenderer
 
 	tm := NewTextureManager()
 	if err := tm.LoadToonTextures(windowIndex); err != nil {
-		logging.DefaultLogger().Warn("トゥーンテクスチャの読み込みに失敗しました: %v", err)
+		logging.DefaultLogger().Warn(i18n.T("トゥーンテクスチャの読み込みに失敗しました: %v"), err)
 	}
 	if err := tm.LoadAllTextures(windowIndex, modelData.Textures, modelData.Path()); err != nil {
-		logging.DefaultLogger().Warn("テクスチャの読み込みに失敗しました: %v", err)
+		logging.DefaultLogger().Warn(i18n.T("テクスチャの読み込みに失敗しました: %v"), err)
 	}
 
 	// メインのモデル描画用頂点バッファを初期化

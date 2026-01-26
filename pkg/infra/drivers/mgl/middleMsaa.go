@@ -7,19 +7,20 @@ package mgl
 import (
 	"github.com/go-gl/gl/v4.3-core/gl"
 	"github.com/miu200521358/mlib_go/pkg/adapter/graphics_api"
+	"github.com/miu200521358/mlib_go/pkg/infra/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 )
 
 // IntermediateMsaaBuffer は中間FBOを使ったMSAA実装。
 type IntermediateMsaaBuffer struct {
-	config                    msaaConfig
-	msaaFBO                   uint32
-	msaaColorBuffer           uint32
-	msaaDepthBuffer           uint32
-	intermediateFBO           uint32
-	intermediateColorBuffer   uint32
-	intermediateDepthTexture  uint32
-	initErr                   error
+	config                   msaaConfig
+	msaaFBO                  uint32
+	msaaColorBuffer          uint32
+	msaaDepthBuffer          uint32
+	intermediateFBO          uint32
+	intermediateColorBuffer  uint32
+	intermediateDepthTexture uint32
+	initErr                  error
 }
 
 // NewIntermediateMsaaBuffer は中間FBOを使用するMSAAバッファを生成する。
@@ -46,8 +47,8 @@ func (m *IntermediateMsaaBuffer) init() {
 	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, m.msaaDepthBuffer)
 
 	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
-		m.initErr = graphics_api.NewFramebufferIncomplete("中間MSAAのマルチサンプルFBOが不完全です", nil)
-		logging.DefaultLogger().Warn("中間MSAAのマルチサンプルFBOが不完全です")
+		m.initErr = graphics_api.NewFramebufferIncomplete(i18n.T("中間MSAAのマルチサンプルFBOが不完全です"), nil)
+		logging.DefaultLogger().Warn(i18n.T("中間MSAAのマルチサンプルFBOが不完全です"))
 	}
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 
@@ -67,8 +68,8 @@ func (m *IntermediateMsaaBuffer) init() {
 	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, m.intermediateDepthTexture, 0)
 
 	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
-		m.initErr = graphics_api.NewFramebufferIncomplete("中間MSAAの中間FBOが不完全です", nil)
-		logging.DefaultLogger().Warn("中間MSAAの中間FBOが不完全です")
+		m.initErr = graphics_api.NewFramebufferIncomplete(i18n.T("中間MSAAの中間FBOが不完全です"), nil)
+		logging.DefaultLogger().Warn(i18n.T("中間MSAAの中間FBOが不完全です"))
 	}
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 }

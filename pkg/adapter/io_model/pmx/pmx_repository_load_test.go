@@ -243,7 +243,7 @@ func assertSampleModel(t *testing.T, modelData *model.PmxModel) {
 
 	{
 		b, _ := pmxModel.Bones.Get(5)
-		expectedName := "上半身"
+		expectedName := model.UPPER.String()
 		if b.Name() != expectedName {
 			t.Errorf("Expected Name to be %q, got %q", expectedName, b.Name())
 		}
@@ -371,7 +371,7 @@ func assertSampleModel(t *testing.T, modelData *model.PmxModel) {
 
 	{
 		b, _ := pmxModel.Bones.Get(98)
-		expectedName := "左足ＩＫ"
+		expectedName := model.LEG_IK.Left()
 		if b.Name() != expectedName {
 			t.Errorf("Expected Name to be %q, got %q", expectedName, b.Name())
 		}
@@ -702,7 +702,7 @@ func assertSampleModel(t *testing.T, modelData *model.PmxModel) {
 
 	{
 		r, _ := pmxModel.RigidBodies.Get(14)
-		expectedName := "右腕"
+		expectedName := model.ARM.Right()
 		if r.Name() != expectedName {
 			t.Errorf("Expected Name to be %q, got %q", expectedName, r.Name())
 		}

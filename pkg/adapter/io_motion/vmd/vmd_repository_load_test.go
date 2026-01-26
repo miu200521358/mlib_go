@@ -6,16 +6,9 @@ import (
 	"testing"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
 	"gonum.org/v1/gonum/spatial/r3"
-)
-
-const (
-	boneCenter     = "センター"
-	boneUpper      = "上半身"
-	boneLegIkLeft  = "左足ＩＫ"
-	boneLegIkRight = "右足ＩＫ"
-	boneArmRight   = "右腕"
 )
 
 func TestVmdRepository_Load(t *testing.T) {
@@ -31,7 +24,7 @@ func TestVmdRepository_Load(t *testing.T) {
 
 	// Test case 1: Successful read
 	path := testResourcePath("サンプルモーション.vmd")
-	model, err := r.Load(path)
+	loaded, err := r.Load(path)
 
 	if err != nil {
 		t.Errorf("Expected error to be nil, got %q", err)
@@ -39,24 +32,24 @@ func TestVmdRepository_Load(t *testing.T) {
 
 	// Verify the model properties
 	expectedPath := path
-	if model.Path() != expectedPath {
-		t.Errorf("Expected Path to be %q, got %q", expectedPath, model.Path())
+	if loaded.Path() != expectedPath {
+		t.Errorf("Expected Path to be %q, got %q", expectedPath, loaded.Path())
 	}
 
 	// モデル名
 	expectedModelName := "日本 roco式 トレス用"
-	if model.Name() != expectedModelName {
-		t.Errorf("Expected modelName to be %q, got %q", expectedModelName, model.Name())
+	if loaded.Name() != expectedModelName {
+		t.Errorf("Expected modelName to be %q, got %q", expectedModelName, loaded.Name())
 	}
 
-	motionData, ok := model.(*motion.VmdMotion)
+	motionData, ok := loaded.(*motion.VmdMotion)
 	if !ok {
-		t.Fatalf("Expected motion type to be *VmdMotion, got %T", model)
+		t.Fatalf("Expected motion type to be *VmdMotion, got %T", loaded)
 	}
 
 	// キーフレがある
 	{
-		bf := motionData.BoneFrames.Get(boneCenter).Get(358)
+		bf := motionData.BoneFrames.Get(model.CENTER.String()).Get(358)
 
 		// フレーム番号
 		expectedFrameNo := motion.Frame(358)
@@ -128,7 +121,7 @@ func TestVmdRepository_Load(t *testing.T) {
 	}
 
 	{
-		bf := motionData.BoneFrames.Get(boneUpper).Get(689)
+		bf := motionData.BoneFrames.Get(model.UPPER.String()).Get(689)
 
 		// フレーム番号
 		expectedFrameNo := motion.Frame(689)
@@ -200,7 +193,7 @@ func TestVmdRepository_Load(t *testing.T) {
 	}
 
 	{
-		bf := motionData.BoneFrames.Get(boneLegIkRight).Get(384)
+		bf := motionData.BoneFrames.Get(model.LEG_IK.Right()).Get(384)
 
 		// フレーム番号
 		expectedFrameNo := motion.Frame(384)
@@ -273,7 +266,7 @@ func TestVmdRepository_Load(t *testing.T) {
 
 	{
 		// キーがないフレーム
-		bf := motionData.BoneFrames.Get(boneLegIkLeft).Get(384)
+		bf := motionData.BoneFrames.Get(model.LEG_IK.Left()).Get(384)
 
 		// フレーム番号
 		expectedFrameNo := motion.Frame(384)
@@ -302,7 +295,7 @@ func TestVmdRepository_Load(t *testing.T) {
 
 	{
 		// キーがないフレーム
-		bf := motionData.BoneFrames.Get(boneLegIkLeft).Get(394)
+		bf := motionData.BoneFrames.Get(model.LEG_IK.Left()).Get(394)
 
 		// フレーム番号
 		expectedFrameNo := motion.Frame(394)
@@ -331,7 +324,7 @@ func TestVmdRepository_Load(t *testing.T) {
 
 	{
 		// キーがないフレーム
-		bf := motionData.BoneFrames.Get(boneLegIkLeft).Get(412)
+		bf := motionData.BoneFrames.Get(model.LEG_IK.Left()).Get(412)
 
 		// フレーム番号
 		expectedFrameNo := motion.Frame(412)
@@ -360,7 +353,7 @@ func TestVmdRepository_Load(t *testing.T) {
 
 	{
 		// キーがないフレーム
-		bf := motionData.BoneFrames.Get(boneArmRight).Get(384)
+		bf := motionData.BoneFrames.Get(model.ARM.Right()).Get(384)
 
 		// フレーム番号
 		expectedFrameNo := motion.Frame(384)

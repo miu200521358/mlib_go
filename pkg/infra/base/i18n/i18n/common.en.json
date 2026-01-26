@@ -670,5 +670,145 @@
     {
         "id": "音楽ファイル読み込み失敗",
         "translation": "Audio file load failed"
+    },
+    {
+        "id": "アプリアイコンの読込に失敗しました: %s",
+        "translation": "Failed to load the app icon: %s"
+    },
+    {
+        "id": "アプリアイコンの生成に失敗しました: %s",
+        "translation": "Failed to create the app icon: %s"
+    },
+    {
+        "id": "共有状態の初期化に失敗しました",
+        "translation": "Failed to initialize shared state"
+    },
+    {
+        "id": "GLFWの初期化に失敗しました: %w",
+        "translation": "Failed to initialize GLFW: %w"
+    },
+    {
+        "id": "モデル読み込みリポジトリがありません",
+        "translation": "No model repository is available"
+    },
+    {
+        "id": "モデル形式が不正です",
+        "translation": "Invalid model format"
+    },
+    {
+        "id": "モーション読み込みリポジトリがありません",
+        "translation": "No motion repository is available"
+    },
+    {
+        "id": "モーション形式が不正です",
+        "translation": "Invalid motion format"
+    },
+    {
+        "id": "テクスチャ読み込みに失敗しました: %v",
+        "translation": "Failed to load texture: %v"
+    },
+    {
+        "id": "テクスチャインデックスが範囲外です: %d",
+        "translation": "Texture index is out of range: %d"
+    },
+    {
+        "id": "ミップマップ生成エラー: %s",
+        "translation": "Mipmap generation error: %s"
+    },
+    {
+        "id": "トゥーンテクスチャの読み込みに失敗しました: %v",
+        "translation": "Failed to load toon texture: %v"
+    },
+    {
+        "id": "テクスチャの読み込みに失敗しました: %v",
+        "translation": "Failed to load texture: %v"
+    },
+    {
+        "id": "物理デバッグシェーダーが未初期化のため描画をスキップしました",
+        "translation": "Skipped drawing because the physics debug shader is not initialized"
+    },
+    {
+        "id": "中間MSAAのマルチサンプルFBOが不完全です",
+        "translation": "Intermediate MSAA multisample FBO is incomplete"
+    },
+    {
+        "id": "中間MSAAの中間FBOが不完全です",
+        "translation": "Intermediate MSAA FBO is incomplete"
+    },
+    {
+        "id": "NotoSansJPフォントの読み込みに失敗しました: %v",
+        "translation": "Failed to load NotoSansJP font: %v"
+    },
+    {
+        "id": "NotoSansJPフォントの初期化に失敗しました: %v",
+        "translation": "Failed to initialize NotoSansJP font: %v"
+    },
+    {
+        "id": "オーバーライドFBOの初期化に失敗しました: %v",
+        "translation": "Failed to initialize override FBO: %v"
+    },
+    {
+        "id": "共有テクスチャが未設定のためオーバーライド合成をスキップします",
+        "translation": "Skipping override composition because the shared texture is not set"
+    },
+    {
+        "id": "MSAA初期化エラー: %v",
+        "translation": "MSAA initialization error: %v"
+    },
+    {
+        "id": "オーバーライド描画の初期化エラー: %v",
+        "translation": "Override rendering initialization error: %v"
+    },
+    {
+        "id": "シェーダープログラム生成に失敗: %v (%v)",
+        "translation": "Failed to create shader program: %v (%v)"
+    },
+    {
+        "id": "トゥーンテクスチャの変換に失敗しました: %s",
+        "translation": "Failed to convert toon texture: %s"
+    },
+    {
+        "id": "テクスチャ名が不正です",
+        "translation": "Texture name is invalid"
+    },
+    {
+        "id": "テクスチャの変換に失敗しました: %s",
+        "translation": "Failed to convert texture: %s"
+    },
+    {
+        "id": "トゥーンテクスチャの読み込みに失敗しました: %s",
+        "translation": "Failed to load toon texture: %s"
+    },
+    {
+        "id": "テクスチャファイルの読み込みに失敗しました: %s",
+        "translation": "Failed to load texture file: %s"
+    },
+    {
+        "id": "未対応の画像形式です: %s",
+        "translation": "Unsupported image format: %s"
+    },
+    {
+        "id": "テクスチャのデコードに失敗しました: %s",
+        "translation": "Failed to decode texture: %s"
+    },
+    {
+        "id": "音楽ファイルの読み込みは未実装です",
+        "translation": "Audio file loading is not implemented"
+    },
+    {
+        "id": "通常エラーが発生しました",
+        "translation": "An error has occurred"
+    },
+    {
+        "id": "通常エラーヘッダー",
+        "translation": "Error"
+    },
+    {
+        "id": "エラーダイアログを閉じる",
+        "translation": "Close error dialog"
+    },
+    {
+        "id": "オーバーライド用フレームバッファが不完全です: %s",
+        "translation": "Override framebuffer is incomplete: %s"
     }
 ]

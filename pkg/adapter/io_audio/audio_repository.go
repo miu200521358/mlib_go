@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
+	"github.com/miu200521358/mlib_go/pkg/infra/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/shared/hashable"
 )
 
@@ -31,7 +32,7 @@ func (r *AudioRepository) CanLoad(path string) bool {
 
 // Load は音声ファイルを読み込む。
 func (r *AudioRepository) Load(path string) (hashable.IHashable, error) {
-	return nil, io_common.NewIoFormatNotSupported("音楽ファイルの読み込みは未実装です", nil)
+	return nil, io_common.NewIoFormatNotSupported(i18n.T("音楽ファイルの読み込みは未実装です"), nil)
 }
 
 // InferName はパスから表示名を推定する。

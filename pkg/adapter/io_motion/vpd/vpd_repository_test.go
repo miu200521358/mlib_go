@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
 	"golang.org/x/text/encoding/japanese"
 	"gonum.org/v1/gonum/spatial/r3"
@@ -18,7 +19,7 @@ func TestVpdRepository_Load(t *testing.T) {
 		"Vocaloid Pose Data file",
 		"1",
 		"Sample.osm; // 親ファイル名",
-		"{センター",
+		"{" + model.CENTER.String(),
 		"0.5,1.25,2.75; // trans",
 		"0,0,0,1; // Quaternion",
 	}, "\n"))
@@ -37,7 +38,7 @@ func TestVpdRepository_Load(t *testing.T) {
 		t.Errorf("Expected model name to be %q, got %q", "Sample", motionData.Name())
 	}
 
-	frames := motionData.BoneFrames.Get("センター")
+	frames := motionData.BoneFrames.Get(model.CENTER.String())
 	bf := frames.Get(motion.Frame(0))
 	if bf == nil {
 		t.Fatalf("Expected bone frame to be not nil")

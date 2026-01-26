@@ -5,10 +5,12 @@
 package mgl
 
 import (
+	"fmt"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.3-core/gl"
 	"github.com/miu200521358/mlib_go/pkg/adapter/graphics_api"
+	"github.com/miu200521358/mlib_go/pkg/infra/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 )
 
@@ -103,10 +105,10 @@ func (m *OverrideRenderer) initFBOAndTexture() {
 	status := gl.CheckFramebufferStatus(gl.FRAMEBUFFER)
 	if status != gl.FRAMEBUFFER_COMPLETE {
 		m.initErr = graphics_api.NewFramebufferIncomplete(
-			"オーバーライド用フレームバッファが不完全です: "+getFrameBufferStatusString(status),
+			fmt.Sprintf(i18n.T("オーバーライド用フレームバッファが不完全です: %s"), getFrameBufferStatusString(status)),
 			nil,
 		)
-		logging.DefaultLogger().Warn("オーバーライドFBOの初期化に失敗しました: %v", m.initErr)
+		logging.DefaultLogger().Warn(i18n.T("オーバーライドFBOの初期化に失敗しました: %v"), m.initErr)
 	}
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 }
@@ -162,7 +164,7 @@ func (m *OverrideRenderer) Unbind() {
 func (m *OverrideRenderer) Resolve() {
 	if m.sharedTextureID == nil || *m.sharedTextureID == 0 {
 		if !m.warnedMissingSharedTexture {
-			logging.DefaultLogger().Warn("共有テクスチャが未設定のためオーバーライド合成をスキップします")
+			logging.DefaultLogger().Warn(i18n.T("共有テクスチャが未設定のためオーバーライド合成をスキップします"))
 			m.warnedMissingSharedTexture = true
 		}
 		return

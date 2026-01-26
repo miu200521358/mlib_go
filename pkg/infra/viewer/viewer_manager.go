@@ -1199,7 +1199,7 @@ func findArmBoneByPrefix(modelData *model.PmxModel, direction string) *model.Bon
 	if modelData == nil || modelData.Bones == nil {
 		return nil
 	}
-	name := direction + "腕"
+	name := model.ARM.StringFromDirection(model.BoneDirection(direction))
 	bone, err := modelData.Bones.GetByName(name)
 	if err != nil {
 		return nil
