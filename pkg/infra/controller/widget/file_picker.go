@@ -407,7 +407,7 @@ func (fp *FilePicker) showOpenDialog() {
 	if !ok {
 		return
 	}
-	fp.handlePathChanged(fd.FilePath)
+	fp.handlePathConfirmed(fd.FilePath)
 }
 
 // showSaveDialog は保存用ダイアログを表示する。
@@ -425,7 +425,7 @@ func (fp *FilePicker) showSaveDialog() {
 	if !ok {
 		return
 	}
-	fp.handlePathChanged(fd.FilePath)
+	fp.handlePathConfirmed(fd.FilePath)
 }
 
 // handlePathChanged はパス変更時の処理を行う。
@@ -487,7 +487,7 @@ func (fp *FilePicker) handleDropFiles(files []string) {
 		if fp.repository != nil && !fp.repository.CanLoad(cleaned) {
 			continue
 		}
-		fp.handlePathChanged(cleaned)
+		fp.handlePathConfirmed(cleaned)
 		return
 	}
 }
@@ -594,7 +594,7 @@ func (fp *FilePicker) openHistoryDialog() {
 						return
 					}
 					push.SetEnabled(true)
-					fp.handlePathChanged(values[idx])
+					fp.handlePathConfirmed(values[idx])
 					dlg.Accept()
 				},
 			}, declarative.Composite{
