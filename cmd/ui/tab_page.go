@@ -5,11 +5,8 @@
 package ui
 
 import (
-	"path/filepath"
-
 	"github.com/miu200521358/mlib_go/pkg/adapter/audio_api"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
-	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/infra/controller"
 	"github.com/miu200521358/mlib_go/pkg/infra/controller/widget"
 	"github.com/miu200521358/mlib_go/pkg/infra/file/mfile"
@@ -243,45 +240,13 @@ func loadModel(logger logging.ILogger, translator i18n.II18n, cw *controller.Con
 		return
 	}
 	if materialView != nil {
-		validateModelTextures(modelData)
+		validation := usecase.ValidateModelTextures(modelData, mfile.NewTextureValidator())
+		logTextureValidationErrors(logger, validation)
 		materialView.ResetRows(modelData)
 	}
 	cw.SetModel(windowIndex, modelIndex, modelData)
 	if vertexView != nil {
 		vertexView.ResetRows(modelData)
-	}
-}
-
-// validateModelTextures はモデルのテクスチャ有効性を検証する。
-func validateModelTextures(modelData *model.PmxModel) {
-	if modelData == nil || modelData.Textures == nil {
-		return
-	}
-
-	baseDir := filepath.Dir(modelData.Path())
-	for _, texture := range modelData.Textures.Values() {
-		if texture == nil {
-			continue
-		}
-		name := texture.Name()
-		if name == "" {
-			texture.SetValid(false)
-			continue
-		}
-		texturePath := name
-		if !filepath.IsAbs(texturePath) {
-			texturePath = filepath.Join(baseDir, texturePath)
-		}
-		exists, err := mfile.ExistsFile(texturePath)
-		if err != nil || !exists {
-			texture.SetValid(false)
-			continue
-		}
-		if _, err := mfile.LoadImage(texturePath); err != nil {
-			texture.SetValid(false)
-			continue
-		}
-		texture.SetValid(true)
 	}
 }
 
@@ -312,6 +277,22 @@ func logLoadFailed(logger logging.ILogger, translator i18n.II18n, err error) {
 		logger = logging.DefaultLogger()
 	}
 	logErrorTitle(logger, i18n.TranslateOrMark(translator, "読み込み失敗"), err)
+}
+
+// logTextureValidationErrors はテクスチャ検証エラーをログ出力する。
+func logTextureValidationErrors(logger logging.ILogger, result *usecase.TextureValidationResult) {
+	if logger == nil || result == nil {
+		return
+	}
+	if len(result.Errors) == 0 {
+		return
+	}
+	for _, err := range result.Errors {
+		if err == nil {
+			continue
+		}
+		logger.Warn("テクスチャ検証でエラーが発生しました: %s", err.Error())
+	}
 }
 
 // logErrorTitle はタイトル付きエラーを出力する。

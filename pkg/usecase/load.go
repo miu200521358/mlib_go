@@ -2,10 +2,10 @@
 package usecase
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
+	portio "github.com/miu200521358/mlib_go/pkg/usecase/port/io"
 )
 
 // iOverrideBoneInserter は不足ボーン補完のI/F。
@@ -13,10 +13,13 @@ type iOverrideBoneInserter interface {
 	InsertShortageOverrideBones() error
 }
 
-const repositoryNotConfiguredErrorID = "95504"
+const (
+	repositoryNotConfiguredErrorID = "95504"
+	ioFormatNotSupportedErrorID    = "14103"
+)
 
 // LoadModel はモデルを読み込み、型を検証して返す。
-func LoadModel(rep io_common.IFileReader, path string) (*model.PmxModel, error) {
+func LoadModel(rep portio.IFileReader, path string) (*model.PmxModel, error) {
 	if path == "" {
 		return nil, nil
 	}
@@ -29,7 +32,7 @@ func LoadModel(rep io_common.IFileReader, path string) (*model.PmxModel, error) 
 	}
 	modelData, ok := data.(*model.PmxModel)
 	if !ok {
-		return nil, io_common.NewIoFormatNotSupported("モデル形式が不正です", nil)
+		return nil, newFormatNotSupportedError("モデル形式が不正です")
 	}
 	if modelData.Bones != nil {
 		if inserter, ok := any(modelData.Bones).(iOverrideBoneInserter); ok {
@@ -41,7 +44,7 @@ func LoadModel(rep io_common.IFileReader, path string) (*model.PmxModel, error) 
 }
 
 // LoadMotion はモーションを読み込み、型を検証して返す。
-func LoadMotion(rep io_common.IFileReader, path string) (*motion.VmdMotion, error) {
+func LoadMotion(rep portio.IFileReader, path string) (*motion.VmdMotion, error) {
 	if path == "" {
 		return nil, nil
 	}
@@ -54,7 +57,7 @@ func LoadMotion(rep io_common.IFileReader, path string) (*motion.VmdMotion, erro
 	}
 	motionData, ok := data.(*motion.VmdMotion)
 	if !ok {
-		return nil, io_common.NewIoFormatNotSupported("モーション形式が不正です", nil)
+		return nil, newFormatNotSupportedError("モーション形式が不正です")
 	}
 	return motionData, nil
 }
@@ -62,4 +65,9 @@ func LoadMotion(rep io_common.IFileReader, path string) (*motion.VmdMotion, erro
 // newRepositoryNotConfiguredError は読み込みリポジトリ未設定エラーを生成する。
 func newRepositoryNotConfiguredError(target string) error {
 	return merr.NewCommonError(repositoryNotConfiguredErrorID, merr.ErrorKindInternal, "読み込みリポジトリがありません: %s", nil, target)
+}
+
+// newFormatNotSupportedError は形式未対応エラーを生成する。
+func newFormatNotSupportedError(message string) error {
+	return merr.NewCommonError(ioFormatNotSupportedErrorID, merr.ErrorKindValidate, message, nil)
 }
