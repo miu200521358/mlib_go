@@ -3,6 +3,7 @@ package pmx
 
 import (
 	"io"
+	"strings"
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
@@ -204,10 +205,10 @@ func (s *pmxWriteState) writeHeader() error {
 	if err := s.writeText(s.model.EnglishName); err != nil {
 		return err
 	}
-	if err := s.writeText(s.model.Comment); err != nil {
+	if err := s.writeText(normalizeCommentLineBreaks(s.model.Comment)); err != nil {
 		return err
 	}
-	if err := s.writeText(s.model.EnglishComment); err != nil {
+	if err := s.writeText(normalizeCommentLineBreaks(s.model.EnglishComment)); err != nil {
 		return err
 	}
 	return nil
@@ -1038,6 +1039,16 @@ func (s *pmxWriteState) writeVec4(vec mmath.Vec4, positiveOnly bool) error {
 		return io_common.NewIoSaveFailed("PMXVec4の書き込みに失敗しました", err)
 	}
 	return nil
+}
+
+// normalizeCommentLineBreaks はコメント欄の改行コードをCRLFに正規化する。
+func normalizeCommentLineBreaks(text string) string {
+	if text == "" {
+		return text
+	}
+	normalized := strings.ReplaceAll(text, "\r\n", "\n")
+	normalized = strings.ReplaceAll(normalized, "\r", "\n")
+	return strings.ReplaceAll(normalized, "\n", "\r\n")
 }
 
 // encodeText は文字列を指定エンコードで変換する。

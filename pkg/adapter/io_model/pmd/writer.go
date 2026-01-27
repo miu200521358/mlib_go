@@ -5,6 +5,7 @@ import (
 	"io"
 	"math"
 	"sort"
+	"strings"
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
@@ -220,7 +221,7 @@ func (s *pmdWriteState) writeHeader() error {
 	if err := s.writeFixedString(s.model.Name(), 20, "PMDモデル名"); err != nil {
 		return err
 	}
-	if err := s.writeFixedString(s.model.Comment, 256, "PMDコメント"); err != nil {
+	if err := s.writeFixedString(normalizeCommentLineBreaks(s.model.Comment), 256, "PMDコメント"); err != nil {
 		return err
 	}
 	return nil
@@ -641,7 +642,7 @@ func (s *pmdWriteState) writeExtensions(boneSlotNames, boneSlotEnglish []string)
 		if err := s.writeFixedString(s.model.EnglishName, 20, "PMD英名モデル名"); err != nil {
 			return err
 		}
-		if err := s.writeFixedString(s.model.EnglishComment, 256, "PMD英名コメント"); err != nil {
+		if err := s.writeFixedString(normalizeCommentLineBreaks(s.model.EnglishComment), 256, "PMD英名コメント"); err != nil {
 			return err
 		}
 		for _, oldIndex := range s.boneMapping.newToOld {
@@ -999,6 +1000,16 @@ func (s *pmdWriteState) vertexBoneWeights(vertex *model.Vertex) (int, int, int) 
 		weight = 100
 	}
 	return idx0, idx1, weight
+}
+
+// normalizeCommentLineBreaks はコメント欄の改行コードをCRLFに正規化する。
+func normalizeCommentLineBreaks(text string) string {
+	if text == "" {
+		return text
+	}
+	normalized := strings.ReplaceAll(text, "\r\n", "\n")
+	normalized = strings.ReplaceAll(normalized, "\r", "\n")
+	return strings.ReplaceAll(normalized, "\n", "\r\n")
 }
 
 // writeFixedString は固定長文字列を書き込む。
