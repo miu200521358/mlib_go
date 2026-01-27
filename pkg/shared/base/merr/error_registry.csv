@@ -1,6 +1,6 @@
 ID,Kind,Layer,Module,ErrorName,Summary,Remedy,SourcePaths
 20001,NotFound,domain,00,NameNotFoundError,名前解決に失敗,,-
-12201,Validate,domain,22,InvalidIndexError,インデックスが無効,インデックスの定義を確認する,mlib_go_t4/pkg/domain/model/bone_human.go
+12201,Validate,domain,22,InvalidIndexError,インデックスが無効,インデックスの定義を確認してください,mlib_go_t4/pkg/domain/model/bone_human.go
 22201,NotFound,domain,22,ParentNotFoundError,親要素が見つからない,,-
 92202,Internal,domain,22,IndexOutOfRangeError,インデックスが範囲外,,-
 92203,Internal,domain,22,NameConflictError,名称が既存要素と衝突,,-
@@ -11,21 +11,21 @@ ID,Kind,Layer,Module,ErrorName,Summary,Remedy,SourcePaths
 99003,External,shared,99,ImagePackageError,imageパッケージでエラーが発生,,mlib_go_t4/pkg/shared/base/merr/err.go
 99004,External,shared,99,FsPackageError,io/fsパッケージでエラーが発生,,mlib_go_t4/pkg/shared/base/merr/err.go
 99005,External,shared,99,DeepcopyPackageError,go-deepcopyパッケージでエラーが発生,,mlib_go_t4/pkg/shared/base/merr/err.go
-13001,Validate,usecase,39,PrerequisiteMissingError,前提不足で処理開始できない,前提を満たしてから再実行する,-
-14101,Validate,adapter,41,IoFileNotFound,入力ファイルが存在しない,パスを確認して再指定する,-
-14102,Validate,adapter,41,IoExtInvalid,拡張子が不正,拡張子を対応形式に修正する,-
-14103,Validate,adapter,41,IoFormatNotSupported,形式/バージョンが非対応,対応形式/バージョンに変換する,-
-14104,Validate,adapter,41,IoEncodingUnknown,未知のエンコード方式,対応エンコードで保存する,-
-14105,Validate,adapter,41,IoParseFailed,ファイル内容の解析に失敗,ファイル形式/破損を確認する,-
-14106,Validate,adapter,41,IoEncodeFailed,出力データのエンコードに失敗,出力内容/文字コードを確認する,-
-14107,Validate,adapter,41,IoNameEncodeFailed,名前のエンコードに失敗,名称/文字コードを確認する,-
-14108,Validate,adapter,41,IoSaveFailed,ファイル保存に失敗,出力先/権限/ディスク容量を確認する,-
+13001,Validate,usecase,39,PrerequisiteMissingError,前提不足で処理開始できない,前提を満たしてから再実行してください,-
+14101,Validate,adapter,41,IoFileNotFound,入力ファイルが存在しない,パスを確認して再指定してください。絵文字/特殊記号が含まれる場合は英数字のみのパスへ移動してください。,-
+14102,Validate,adapter,41,IoExtInvalid,拡張子が不正,拡張子を対応形式に修正してください。パスに絵文字/特殊記号がある場合は英数字のみのパスへ移動してください。,-
+14103,Validate,adapter,41,IoFormatNotSupported,形式/バージョンが非対応,対応形式/バージョンに変換してください,-
+14104,Validate,adapter,41,IoEncodingUnknown,未知のエンコード方式,対応エンコードで保存してください,-
+14105,Validate,adapter,41,IoParseFailed,ファイル内容の解析に失敗,ファイル形式/破損を確認してください。パスに絵文字/特殊記号がある場合は英数字のみのパスへ移動してください。,-
+14106,Validate,adapter,41,IoEncodeFailed,出力データのエンコードに失敗,出力内容/文字コードを確認してください,-
+14107,Validate,adapter,41,IoNameEncodeFailed,名前のエンコードに失敗,名称/文字コードを確認してください,-
+14108,Validate,adapter,41,IoSaveFailed,ファイル保存に失敗,出力先/権限/ディスク容量を確認してください。パスに絵文字/特殊記号がある場合は英数字のみのパスへ保存してください。,-
 85401,External,infra,54,TerminateError,ユーザー中止で終了処理へ移行,,mlib_go_t4/pkg/infra/base/err/err.go; bone_baker/pkg/application/usecase/output_usecase.go; vmd_sizing_t4/pkg/usecase/sizing.go; vmd_sizing_t4/pkg/usecase/sizing_leg.go
-94501,Internal,adapter,45,ShaderSourceLoadFailed,シェーダソース読込に失敗,ファイルパス/配布物を確認する,-
-94502,Internal,adapter,45,ShaderCompileFailed,シェーダのコンパイルに失敗,シェーダの文法/対応GLSLを確認する,-
-94503,Internal,adapter,45,ShaderLinkFailed,シェーダのリンクに失敗,シェーダの入出力整合性を確認する,-
-94504,Internal,adapter,45,FramebufferIncomplete,Framebufferが不完全,MSAA/FBO設定を確認する,-
-94505,Internal,adapter,45,OpenGLError,OpenGLエラーが発生,ドライバ/GL状態/描画順序を確認する,-
+94501,Internal,adapter,45,ShaderSourceLoadFailed,シェーダソース読込に失敗,ファイルパス/配布物を確認してください,-
+94502,Internal,adapter,45,ShaderCompileFailed,シェーダのコンパイルに失敗,シェーダの文法/対応GLSLを確認してください,-
+94503,Internal,adapter,45,ShaderLinkFailed,シェーダのリンクに失敗,シェーダの入出力整合性を確認してください,-
+94504,Internal,adapter,45,FramebufferIncomplete,Framebufferが不完全,MSAA/FBO設定を確認してください,-
+94505,Internal,adapter,45,OpenGLError,OpenGLエラーが発生,ドライバ/GL状態/描画順序を確認してください,-
 94506,Internal,adapter,45,GraphicsContextInitFailed,OpenGLコンテキスト初期化に失敗,,-
 92101,Internal,domain,21,MathCopyFailed,数学型のコピーに失敗,,mlib_go_t4/pkg/domain/mmath/copy.go; mlib_go_t4/pkg/domain/mmath/vec2.go; mlib_go_t4/pkg/domain/mmath/vec3.go; mlib_go_t4/pkg/domain/mmath/vec4.go; mlib_go_t4/pkg/domain/mmath/quaternion.go; mlib_go_t4/pkg/domain/mmath/mat4.go
 92102,Internal,domain,21,MathLengthMismatch,配列長が一致しない,,-
@@ -42,14 +42,14 @@ ID,Kind,Layer,Module,ErrorName,Summary,Remedy,SourcePaths
 95204,Internal,infra,52,ConfigValueTypeNotSupported,設定値の型が未対応,,mlib_go_t4/pkg/infra/base/config/config.go
 95207,Internal,infra,52,VerboseSinkWriteFailed,VERBOSE書き込みに失敗,,-
 95208,Internal,infra,52,VerboseSinkCloseFailed,VERBOSE出力のクローズに失敗,,-
-15301,Validate,infra,53,FileNotFoundError,ファイルが存在しない,パスを確認して再指定する,-
-15302,Validate,infra,53,FileReadFailed,ファイル読込に失敗,ファイル/権限/エンコードを確認する,-
-15303,Validate,infra,53,ImageDecodeFailed,画像デコードに失敗,画像形式/破損を確認する,-
-15304,Validate,infra,53,IntParseFailed,数値パースに失敗,入力文字列を確認する,-
-15305,Validate,infra,53,LogStreamOpenFailed,ログストリームの作成に失敗,出力先/権限/ディスク容量を確認する,-
-15306,Validate,infra,53,ConsoleSnapshotSaveFailed,ログスナップショット保存に失敗,出力先/権限/ディスク容量を確認する,-
-15307,Validate,infra,53,ImageFormatNotSupported,画像形式が未対応,画像形式/拡張子を確認する,mlib_go_t4/pkg/infra/file/mfile/image.go; mlib_go_t4/pkg/infra/drivers/render/texture_manager.go
-15401,Validate,infra,54,AudioFileNotSpecified,音楽ファイルが指定されていない,音楽ファイルを選択する,mlib_go_t4/pkg/infra/drivers/maudio/audio_player_windows.go
+15301,Validate,infra,53,FileNotFoundError,ファイルが存在しない,パスを確認して再指定してください。絵文字/特殊記号が含まれる場合は英数字のみのパスへ移動してください。,-
+15302,Validate,infra,53,FileReadFailed,ファイル読込に失敗,ファイル/権限/エンコードを確認してください。パスに絵文字/特殊記号がある場合は英数字のみのパスへ移動してください。,-
+15303,Validate,infra,53,ImageDecodeFailed,画像デコードに失敗,画像形式/破損を確認してください。パスに絵文字/特殊記号がある場合は英数字のみのパスへ移動してください。,-
+15304,Validate,infra,53,IntParseFailed,数値パースに失敗,入力文字列を確認してください,-
+15305,Validate,infra,53,LogStreamOpenFailed,ログストリームの作成に失敗,出力先/権限/ディスク容量を確認してください。パスに絵文字/特殊記号がある場合は英数字のみのパスへ保存してください。,-
+15306,Validate,infra,53,ConsoleSnapshotSaveFailed,ログスナップショット保存に失敗,出力先/権限/ディスク容量を確認してください。パスに絵文字/特殊記号がある場合は英数字のみのパスへ保存してください。,-
+15307,Validate,infra,53,ImageFormatNotSupported,画像形式が未対応,画像形式/拡張子を確認してください。パスに絵文字/特殊記号がある場合は英数字のみのパスへ移動してください。,mlib_go_t4/pkg/infra/file/mfile/image.go; mlib_go_t4/pkg/infra/drivers/render/texture_manager.go
+15401,Validate,infra,54,AudioFileNotSpecified,音楽ファイルが指定されていない,音楽ファイルを選択してください,mlib_go_t4/pkg/infra/drivers/maudio/audio_player_windows.go
 95301,Internal,infra,53,IterProcessFailed,並列処理中のエラー,,-
 95401,Internal,infra,54,GlfwInitFailed,GLFWの初期化に失敗,,mlib_go_t4/pkg/infra/app/errors.go
 95402,Internal,infra,54,PanicDetected,panicを検知,,mlib_go_t4/pkg/infra/app/errors.go
@@ -57,6 +57,6 @@ ID,Kind,Layer,Module,ErrorName,Summary,Remedy,SourcePaths
 95501,Internal,infra,55,ControllerWindowInitFailed,Controllerウィンドウ初期化に失敗,,-
 95502,Internal,infra,55,ConsoleViewInitFailed,ConsoleView初期化に失敗,,-
 95503,Internal,infra,55,ProgressBarInitFailed,ProgressBar初期化に失敗,,-
-95504,Internal,infra,55,RepositoryNotConfiguredError,読み込みリポジトリが未設定,cmd でリポジトリを注入する,mlib_go_t4/cmd/ui/tab_page.go
-95505,Validate,infra,55,ModelNotLoadedError,モデルが読み込まれていない,モデルを読み込んでから保存する,mu_model_viewer/pkg/ui/tab_page.go
-95506,Validate,infra,55,SavePathInvalidError,保存先パスが不正,保存先/権限/ファイル名を確認する,mu_model_viewer/pkg/ui/tab_page.go
+95504,Internal,infra,55,RepositoryNotConfiguredError,読み込みリポジトリが未設定,cmd でリポジトリを注入してください,mlib_go_t4/cmd/ui/tab_page.go
+95505,Validate,infra,55,ModelNotLoadedError,モデルが読み込まれていない,モデルを読み込んでから保存してください,mu_model_viewer/pkg/ui/tab_page.go
+95506,Validate,infra,55,SavePathInvalidError,保存先パスが不正,保存先/権限/ファイル名を確認してください。絵文字/特殊記号が含まれる場合は英数字のみのパスに変更してください。,mu_model_viewer/pkg/ui/tab_page.go

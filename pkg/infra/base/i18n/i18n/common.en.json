@@ -1112,11 +1112,11 @@
         "translation": "Invalid save path"
     },
     {
-        "id": "インデックスの定義を確認する",
+        "id": "インデックスの定義を確認してください",
         "translation": "Check the index definition"
     },
     {
-        "id": "前提を満たしてから再実行する",
+        "id": "前提を満たしてから再実行してください",
         "translation": "Satisfy prerequisites and retry"
     },
     {
@@ -1128,11 +1128,11 @@
         "translation": "Change the extension to a supported format"
     },
     {
-        "id": "対応形式/バージョンに変換する",
+        "id": "対応形式/バージョンに変換してください",
         "translation": "Convert to a supported format/version"
     },
     {
-        "id": "対応エンコードで保存する",
+        "id": "対応エンコードで保存してください",
         "translation": "Save with a supported encoding"
     },
     {
@@ -1140,11 +1140,11 @@
         "translation": "Check file format/corruption"
     },
     {
-        "id": "出力内容/文字コードを確認する",
+        "id": "出力内容/文字コードを確認してください",
         "translation": "Check output contents/character encoding"
     },
     {
-        "id": "名称/文字コードを確認する",
+        "id": "名称/文字コードを確認してください",
         "translation": "Check name/character encoding"
     },
     {
@@ -1152,23 +1152,23 @@
         "translation": "Check destination/permissions/disk space"
     },
     {
-        "id": "ファイルパス/配布物を確認する",
+        "id": "ファイルパス/配布物を確認してください",
         "translation": "Check file path/distribution"
     },
     {
-        "id": "シェーダの文法/対応GLSLを確認する",
+        "id": "シェーダの文法/対応GLSLを確認してください",
         "translation": "Check shader syntax/supported GLSL"
     },
     {
-        "id": "シェーダの入出力整合性を確認する",
+        "id": "シェーダの入出力整合性を確認してください",
         "translation": "Check shader input/output consistency"
     },
     {
-        "id": "MSAA/FBO設定を確認する",
+        "id": "MSAA/FBO設定を確認してください",
         "translation": "Check MSAA/FBO settings"
     },
     {
-        "id": "ドライバ/GL状態/描画順序を確認する",
+        "id": "ドライバ/GL状態/描画順序を確認してください",
         "translation": "Check driver/GL state/render order"
     },
     {
@@ -1180,7 +1180,7 @@
         "translation": "Check image format/corruption"
     },
     {
-        "id": "入力文字列を確認する",
+        "id": "入力文字列を確認してください",
         "translation": "Check the input string"
     },
     {
@@ -1188,15 +1188,15 @@
         "translation": "Check image format/extension"
     },
     {
-        "id": "音楽ファイルを選択する",
+        "id": "音楽ファイルを選択してください",
         "translation": "Select an audio file"
     },
     {
-        "id": "cmd でリポジトリを注入する",
+        "id": "cmd でリポジトリを注入してください",
         "translation": "Inject repository via cmd"
     },
     {
-        "id": "モデルを読み込んでから保存する",
+        "id": "モデルを読み込んでから保存してください",
         "translation": "Load the model before saving"
     },
     {
@@ -1222,5 +1222,37 @@
     {
         "id": "panicを検知しました: %s\n%s",
         "translation": "Panic detected: %s\n%s"
+    },
+    {
+        "id": "パスを確認して再指定してください。絵文字/特殊記号が含まれる場合は英数字のみのパスへ移動してください。",
+        "translation": "Please check the path and specify it again. If it contains emoji or special characters, move it to a path with only alphanumerics."
+    },
+    {
+        "id": "ファイル/権限/エンコードを確認してください。パスに絵文字/特殊記号がある場合は英数字のみのパスへ移動してください。",
+        "translation": "Please check the file/permissions/encoding. If the path contains emoji or special characters, move it to a path with only alphanumerics."
+    },
+    {
+        "id": "ファイル形式/破損を確認してください。パスに絵文字/特殊記号がある場合は英数字のみのパスへ移動してください。",
+        "translation": "Please check the file format/corruption. If the path contains emoji or special characters, move it to a path with only alphanumerics."
+    },
+    {
+        "id": "保存先/権限/ファイル名を確認してください。絵文字/特殊記号が含まれる場合は英数字のみのパスに変更してください。",
+        "translation": "Please check the destination/permissions/file name. If it contains emoji or special characters, change to a path with only alphanumerics."
+    },
+    {
+        "id": "出力先/権限/ディスク容量を確認してください。パスに絵文字/特殊記号がある場合は英数字のみのパスへ保存してください。",
+        "translation": "Please check the destination/permissions/disk space. If the path contains emoji or special characters, save to a path with only alphanumerics."
+    },
+    {
+        "id": "拡張子を対応形式に修正してください。パスに絵文字/特殊記号がある場合は英数字のみのパスへ移動してください。",
+        "translation": "Please change the extension to a supported format. If the path contains emoji or special characters, move it to a path with only alphanumerics."
+    },
+    {
+        "id": "画像形式/拡張子を確認してください。パスに絵文字/特殊記号がある場合は英数字のみのパスへ移動してください。",
+        "translation": "Please check the image format/extension. If the path contains emoji or special characters, move it to a path with only alphanumerics."
+    },
+    {
+        "id": "画像形式/破損を確認してください。パスに絵文字/特殊記号がある場合は英数字のみのパスへ移動してください。",
+        "translation": "Please check the image format/corruption. If the path contains emoji or special characters, move it to a path with only alphanumerics."
     }
 ]
