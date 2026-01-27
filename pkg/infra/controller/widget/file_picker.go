@@ -88,8 +88,8 @@ func NewPmdLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II18n,
 	)
 }
 
-// NewPmxXLoadFilePicker はPMX/X読み込み用のFilePickerを生成する。
-func NewPmxXLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
+// NewPmxPmdXLoadFilePicker はPMX/PMD/X読み込み用のFilePickerを生成する。
+func NewPmxPmdXLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
 	return newFilePicker(
 		userConfig,
 		translator,
@@ -102,6 +102,23 @@ func NewPmxXLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II18n
 			{extension: "*.*", description: "All Files (*.*)"},
 		},
 		io_model.NewModelRepository(),
+	)
+}
+
+// NewPmxPmdLoadFilePicker はPMX/PMD読み込み用のFilePickerを生成する。
+func NewPmxPmdLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
+	return newFilePicker(
+		userConfig,
+		translator,
+		historyKey,
+		title,
+		tooltip,
+		onPathChanged,
+		[]filterExtension{
+			{extension: "*.pmx;*.pmd", description: "Pmx/Pmd Files (*.pmx;*.pmd)"},
+			{extension: "*.*", description: "All Files (*.*)"},
+		},
+		io_model.NewPmxPmdRepository(),
 	)
 }
 
@@ -322,6 +339,9 @@ func (fp *FilePicker) Widgets() declarative.Composite {
 			OnEditingFinished: func() {
 				fp.handlePathConfirmed(fp.pathEdit.Text())
 			},
+			OnDropFiles: func(files []string) {
+				fp.handleDropFiles(files)
+			},
 		},
 		declarative.PushButton{
 			AssignTo:    &fp.openPushButton,
@@ -452,6 +472,24 @@ func (fp *FilePicker) handlePathConfirmed(path string) {
 		fp.onPathChanged(fp.window, fp.repository, cleaned)
 	}
 	fp.saveHistoryIfNeeded(cleaned)
+}
+
+// handleDropFiles はドロップされたファイル一覧から読み込み対象を反映する。
+func (fp *FilePicker) handleDropFiles(files []string) {
+	if fp == nil || len(files) == 0 {
+		return
+	}
+	for _, file := range files {
+		cleaned := fp.cleanPath(file)
+		if cleaned == "" {
+			continue
+		}
+		if fp.repository != nil && !fp.repository.CanLoad(cleaned) {
+			continue
+		}
+		fp.handlePathChanged(cleaned)
+		return
+	}
 }
 
 // saveHistoryIfNeeded は履歴保存が可能な場合に保存する。

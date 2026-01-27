@@ -89,7 +89,7 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 		materialView.InvertChecked()
 	})
 
-	pmxLoad11Picker := widget.NewPmxXLoadFilePicker(
+	pmxLoad11Picker := widget.NewPmxPmdXLoadFilePicker(
 		userConfig,
 		translator,
 		"pmx",
@@ -111,7 +111,7 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 		},
 	)
 
-	pmxLoad21Picker := widget.NewPmxXLoadFilePicker(
+	pmxLoad21Picker := widget.NewPmxPmdXLoadFilePicker(
 		userConfig,
 		translator,
 		"pmx",
@@ -263,7 +263,7 @@ func loadModel(logger logging.ILogger, translator i18n.II18n, cw *controller.Con
 	}
 	modelData, ok := data.(*model.PmxModel)
 	if !ok {
-			logLoadFailed(logger, translator, io_common.NewIoFormatNotSupported("モデル形式が不正です", nil))
+		logLoadFailed(logger, translator, io_common.NewIoFormatNotSupported("モデル形式が不正です", nil))
 		if materialView != nil {
 			materialView.ResetRows(nil)
 		}
