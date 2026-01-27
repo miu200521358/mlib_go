@@ -16,11 +16,11 @@ func NewLightFrame(index Frame) *LightFrame {
 }
 
 // Copy はフレームを複製する。
-func (f *LightFrame) Copy() (IBaseFrame, error) {
+func (f *LightFrame) Copy() (LightFrame, error) {
 	if f == nil {
-		return (*LightFrame)(nil), nil
+		return LightFrame{}, nil
 	}
-	copied := &LightFrame{
+	copied := LightFrame{
 		BaseFrame: &BaseFrame{index: f.Index(), Read: f.Read},
 		Position:  f.Position,
 		Color:     f.Color,
@@ -98,10 +98,14 @@ func (l *LightFrames) Clean() {
 }
 
 // Copy はフレーム集合を複製する。
-func (l *LightFrames) Copy() (*LightFrames, error) {
-	return deepCopy(l)
+func (l *LightFrames) Copy() (LightFrames, error) {
+	if l == nil {
+		return LightFrames{}, nil
+	}
+	return deepCopy(*l)
 }
 
+// nilLightFrame は既定の空フレームを返す。
 func nilLightFrame() *LightFrame {
 	return nil
 }

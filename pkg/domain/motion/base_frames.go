@@ -1,8 +1,8 @@
 // 指示: miu200521358
 package motion
 
-// frameOps は補間/曲線分割を行うフレームの内部契約。
-type frameOps[T any] interface {
+// iFrameOps は補間/曲線分割を行うフレームの内部契約。
+type iFrameOps[T any] interface {
 	IBaseFrame
 	lerpFrame(prev T, index Frame) T
 	splitCurve(prev, next T, index Frame)
@@ -10,7 +10,7 @@ type frameOps[T any] interface {
 }
 
 // BaseFrames はフレーム共通の格納を表す。
-type BaseFrames[T frameOps[T]] struct {
+type BaseFrames[T iFrameOps[T]] struct {
 	frames   map[Frame]T
 	store    IFrameIndexStore
 	newFunc  func(frame Frame) T
@@ -18,7 +18,7 @@ type BaseFrames[T frameOps[T]] struct {
 }
 
 // NewBaseFrames はBaseFramesを生成する。
-func NewBaseFrames[T frameOps[T]](newFunc func(frame Frame) T, nullFunc func() T) *BaseFrames[T] {
+func NewBaseFrames[T iFrameOps[T]](newFunc func(frame Frame) T, nullFunc func() T) *BaseFrames[T] {
 	return &BaseFrames[T]{
 		frames:   make(map[Frame]T),
 		store:    NewSortedFrameIndexStore(),
@@ -172,6 +172,7 @@ func (b *BaseFrames[T]) Finalize() {
 	b.store.Finalize()
 }
 
+// appendOrInsert は補間分割の有無に応じてフレームを追加する。
 func (b *BaseFrames[T]) appendOrInsert(frame T, split bool) {
 	if b == nil || isNilValue(frame) {
 		return
@@ -192,6 +193,7 @@ func (b *BaseFrames[T]) appendOrInsert(frame T, split bool) {
 	b.store.Upsert(idx)
 }
 
+// newValue は新規フレームを生成する。
 func (b *BaseFrames[T]) newValue(frame Frame) T {
 	if b == nil || b.newFunc == nil {
 		var zero T
@@ -200,6 +202,7 @@ func (b *BaseFrames[T]) newValue(frame Frame) T {
 	return b.newFunc(frame)
 }
 
+// nullValue は無効時の既定値を返す。
 func (b *BaseFrames[T]) nullValue() T {
 	if b == nil || b.nullFunc == nil {
 		var zero T

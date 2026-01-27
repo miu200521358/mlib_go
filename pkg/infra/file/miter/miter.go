@@ -118,6 +118,7 @@ func GetBlockSize(totalTasks int) (blockSize int, blockCount int) {
 	return blockSize, blockCount
 }
 
+// iterSerial は単一ゴルーチンで順次処理を実行する。
 func iterSerial[T any](allData []T, processFunc func(index int, data T) error, logBlockSize int, logFunc func(iterIndex, allCount int)) error {
 	var err error
 	func() {

@@ -32,11 +32,11 @@ func NewMaxSubStepsFrame(index Frame) *MaxSubStepsFrame {
 }
 
 // Copy はフレームを複製する。
-func (f *MaxSubStepsFrame) Copy() (IBaseFrame, error) {
+func (f *MaxSubStepsFrame) Copy() (MaxSubStepsFrame, error) {
 	if f == nil {
-		return (*MaxSubStepsFrame)(nil), nil
+		return MaxSubStepsFrame{}, nil
 	}
-	copied := &MaxSubStepsFrame{BaseFrame: &BaseFrame{index: f.Index(), Read: f.Read}, MaxSubSteps: f.MaxSubSteps}
+	copied := MaxSubStepsFrame{BaseFrame: &BaseFrame{index: f.Index(), Read: f.Read}, MaxSubSteps: f.MaxSubSteps}
 	return copied, nil
 }
 
@@ -95,8 +95,11 @@ func (m *MaxSubStepsFrames) Get(frame Frame) *MaxSubStepsFrame {
 }
 
 // Copy はフレーム集合を複製する。
-func (m *MaxSubStepsFrames) Copy() (*MaxSubStepsFrames, error) {
-	return deepCopy(m)
+func (m *MaxSubStepsFrames) Copy() (MaxSubStepsFrames, error) {
+	if m == nil {
+		return MaxSubStepsFrames{}, nil
+	}
+	return deepCopy(*m)
 }
 
 // FixedTimeStepFrame は演算頻度フレームを表す。
@@ -119,11 +122,11 @@ func (f *FixedTimeStepFrame) FixedTimeStep() float64 {
 }
 
 // Copy はフレームを複製する。
-func (f *FixedTimeStepFrame) Copy() (IBaseFrame, error) {
+func (f *FixedTimeStepFrame) Copy() (FixedTimeStepFrame, error) {
 	if f == nil {
-		return (*FixedTimeStepFrame)(nil), nil
+		return FixedTimeStepFrame{}, nil
 	}
-	copied := &FixedTimeStepFrame{BaseFrame: &BaseFrame{index: f.Index(), Read: f.Read}, FixedTimeStepNum: f.FixedTimeStepNum}
+	copied := FixedTimeStepFrame{BaseFrame: &BaseFrame{index: f.Index(), Read: f.Read}, FixedTimeStepNum: f.FixedTimeStepNum}
 	return copied, nil
 }
 
@@ -182,8 +185,11 @@ func (m *FixedTimeStepFrames) Get(frame Frame) *FixedTimeStepFrame {
 }
 
 // Copy はフレーム集合を複製する。
-func (m *FixedTimeStepFrames) Copy() (*FixedTimeStepFrames, error) {
-	return deepCopy(m)
+func (m *FixedTimeStepFrames) Copy() (FixedTimeStepFrames, error) {
+	if m == nil {
+		return FixedTimeStepFrames{}, nil
+	}
+	return deepCopy(*m)
 }
 
 // GravityFrame は重力フレームを表す。
@@ -198,11 +204,11 @@ func NewGravityFrame(index Frame) *GravityFrame {
 }
 
 // Copy はフレームを複製する。
-func (f *GravityFrame) Copy() (IBaseFrame, error) {
+func (f *GravityFrame) Copy() (GravityFrame, error) {
 	if f == nil {
-		return (*GravityFrame)(nil), nil
+		return GravityFrame{}, nil
 	}
-	copied := &GravityFrame{
+	copied := GravityFrame{
 		BaseFrame: &BaseFrame{index: f.Index(), Read: f.Read},
 		Gravity:   copyVec3(f.Gravity),
 	}
@@ -264,8 +270,11 @@ func (m *GravityFrames) Get(frame Frame) *GravityFrame {
 }
 
 // Copy はフレーム集合を複製する。
-func (m *GravityFrames) Copy() (*GravityFrames, error) {
-	return deepCopy(m)
+func (m *GravityFrames) Copy() (GravityFrames, error) {
+	if m == nil {
+		return GravityFrames{}, nil
+	}
+	return deepCopy(*m)
 }
 
 // PhysicsResetFrame は物理リセットフレームを表す。
@@ -280,11 +289,11 @@ func NewPhysicsResetFrame(index Frame) *PhysicsResetFrame {
 }
 
 // Copy はフレームを複製する。
-func (f *PhysicsResetFrame) Copy() (IBaseFrame, error) {
+func (f *PhysicsResetFrame) Copy() (PhysicsResetFrame, error) {
 	if f == nil {
-		return (*PhysicsResetFrame)(nil), nil
+		return PhysicsResetFrame{}, nil
 	}
-	copied := &PhysicsResetFrame{BaseFrame: &BaseFrame{index: f.Index(), Read: f.Read}, PhysicsResetType: f.PhysicsResetType}
+	copied := PhysicsResetFrame{BaseFrame: &BaseFrame{index: f.Index(), Read: f.Read}, PhysicsResetType: f.PhysicsResetType}
 	return copied, nil
 }
 
@@ -343,22 +352,29 @@ func (m *PhysicsResetFrames) Get(frame Frame) *PhysicsResetFrame {
 }
 
 // Copy はフレーム集合を複製する。
-func (m *PhysicsResetFrames) Copy() (*PhysicsResetFrames, error) {
-	return deepCopy(m)
+func (m *PhysicsResetFrames) Copy() (PhysicsResetFrames, error) {
+	if m == nil {
+		return PhysicsResetFrames{}, nil
+	}
+	return deepCopy(*m)
 }
 
+// nilMaxSubStepsFrame は既定の空フレームを返す。
 func nilMaxSubStepsFrame() *MaxSubStepsFrame {
 	return nil
 }
 
+// nilFixedTimeStepFrame は既定の空フレームを返す。
 func nilFixedTimeStepFrame() *FixedTimeStepFrame {
 	return nil
 }
 
+// nilGravityFrame は既定の空フレームを返す。
 func nilGravityFrame() *GravityFrame {
 	return nil
 }
 
+// nilPhysicsResetFrame は既定の空フレームを返す。
 func nilPhysicsResetFrame() *PhysicsResetFrame {
 	return nil
 }

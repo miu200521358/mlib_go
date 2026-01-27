@@ -22,9 +22,12 @@ func TestBoneCurvesEvaluateMerge(t *testing.T) {
 // TestBoneCurvesCopy はコピーの独立性を確認する。
 func TestBoneCurvesCopy(t *testing.T) {
 	curves := NewBoneCurves()
-	copied := curves.Copy()
-	if copied == nil || len(copied.Values) != len(curves.Values) {
-		t.Fatalf("Copy failed")
+	copied, err := curves.Copy()
+	if err != nil {
+		t.Fatalf("Copy failed: %v", err)
+	}
+	if len(copied.Values) != len(curves.Values) {
+		t.Fatalf("Copy length mismatch")
 	}
 	copied.Values[0] = 99
 	if curves.Values[0] == 99 {

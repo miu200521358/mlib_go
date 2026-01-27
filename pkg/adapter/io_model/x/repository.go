@@ -163,6 +163,7 @@ func addCenterBone(modelData *model.PmxModel) {
 	modelData.Bones.AppendRaw(bone)
 }
 
+// addDisplaySlot は既定の表示枠を追加する。
 func addDisplaySlot(modelData *model.PmxModel) {
 	if modelData == nil || modelData.Bones == nil {
 		return

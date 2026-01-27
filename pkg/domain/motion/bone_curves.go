@@ -223,20 +223,29 @@ func (c *BoneCurves) Merge(enablePhysics bool) []byte {
 }
 
 // Copy は曲線を複製する。
-func (c *BoneCurves) Copy() *BoneCurves {
+func (c *BoneCurves) Copy() (BoneCurves, error) {
 	if c == nil {
+		return BoneCurves{}, nil
+	}
+	return deepCopy(*c)
+}
+
+// cloneBoneCurves は曲線を複製する（エラーなしの内部用）。
+func cloneBoneCurves(src *BoneCurves) *BoneCurves {
+	if src == nil {
 		return nil
 	}
-	values := append([]byte(nil), c.Values...)
+	values := append([]byte(nil), src.Values...)
 	return &BoneCurves{
-		TranslateX: copyCurve(c.TranslateX),
-		TranslateY: copyCurve(c.TranslateY),
-		TranslateZ: copyCurve(c.TranslateZ),
-		Rotate:     copyCurve(c.Rotate),
+		TranslateX: copyCurve(src.TranslateX),
+		TranslateY: copyCurve(src.TranslateY),
+		TranslateZ: copyCurve(src.TranslateZ),
+		Rotate:     copyCurve(src.Rotate),
 		Values:     values,
 	}
 }
 
+// newCurveByValues は補間曲線を構築する。
 func newCurveByValues(x1, y1, x2, y2 byte) *mmath.Curve {
 	return &mmath.Curve{
 		Start: mmath.Vec2{X: float64(x1), Y: float64(y1)},
@@ -244,6 +253,7 @@ func newCurveByValues(x1, y1, x2, y2 byte) *mmath.Curve {
 	}
 }
 
+// copyCurve は補間曲線を複製する。
 func copyCurve(src *mmath.Curve) *mmath.Curve {
 	if src == nil {
 		return nil
@@ -251,6 +261,7 @@ func copyCurve(src *mmath.Curve) *mmath.Curve {
 	return &mmath.Curve{Start: src.Start, End: src.End}
 }
 
+// curveStartX は曲線開始Xを取得する。
 func curveStartX(curve *mmath.Curve) float64 {
 	if curve == nil {
 		return mmath.NewCurve().Start.X
@@ -258,6 +269,7 @@ func curveStartX(curve *mmath.Curve) float64 {
 	return curve.Start.X
 }
 
+// curveStartY は曲線開始Yを取得する。
 func curveStartY(curve *mmath.Curve) float64 {
 	if curve == nil {
 		return mmath.NewCurve().Start.Y
@@ -265,6 +277,7 @@ func curveStartY(curve *mmath.Curve) float64 {
 	return curve.Start.Y
 }
 
+// curveEndX は曲線終了Xを取得する。
 func curveEndX(curve *mmath.Curve) float64 {
 	if curve == nil {
 		return mmath.NewCurve().End.X
@@ -272,6 +285,7 @@ func curveEndX(curve *mmath.Curve) float64 {
 	return curve.End.X
 }
 
+// curveEndY は曲線終了Yを取得する。
 func curveEndY(curve *mmath.Curve) float64 {
 	if curve == nil {
 		return mmath.NewCurve().End.Y

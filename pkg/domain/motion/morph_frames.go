@@ -19,11 +19,11 @@ func NewMorphFrame(index Frame) *MorphFrame {
 }
 
 // Copy はフレームを複製する。
-func (f *MorphFrame) Copy() (IBaseFrame, error) {
+func (f *MorphFrame) Copy() (MorphFrame, error) {
 	if f == nil {
-		return (*MorphFrame)(nil), nil
+		return MorphFrame{}, nil
 	}
-	copied := &MorphFrame{BaseFrame: &BaseFrame{index: f.Index(), Read: f.Read}, Ratio: f.Ratio}
+	copied := MorphFrame{BaseFrame: &BaseFrame{index: f.Index(), Read: f.Read}, Ratio: f.Ratio}
 	return copied, nil
 }
 
@@ -90,8 +90,11 @@ func (m *MorphNameFrames) ContainsActive() bool {
 }
 
 // Copy はフレーム集合を複製する。
-func (m *MorphNameFrames) Copy() (*MorphNameFrames, error) {
-	return deepCopy(m)
+func (m *MorphNameFrames) Copy() (MorphNameFrames, error) {
+	if m == nil {
+		return MorphNameFrames{}, nil
+	}
+	return deepCopy(*m)
 }
 
 // MorphFrames はモーフ名ごとの集合を表す。
@@ -258,15 +261,19 @@ func (m *MorphFrames) Clean() {
 }
 
 // Copy はモーフ集合を複製する。
-func (m *MorphFrames) Copy() (*MorphFrames, error) {
-	copied, err := deepCopy(m)
+func (m *MorphFrames) Copy() (MorphFrames, error) {
+	if m == nil {
+		return MorphFrames{}, nil
+	}
+	copied, err := deepCopy(*m)
 	if err != nil {
-		return nil, err
+		return MorphFrames{}, err
 	}
 	copied.rebuildNameIndex()
 	return copied, nil
 }
 
+// rebuildNameIndex は名前インデックスを再構築する。
 func (m *MorphFrames) rebuildNameIndex() {
 	m.nameIndex = make(map[string]int, len(m.names))
 	for i, name := range m.names {
@@ -274,6 +281,7 @@ func (m *MorphFrames) rebuildNameIndex() {
 	}
 }
 
+// nilMorphFrame は既定の空フレームを返す。
 func nilMorphFrame() *MorphFrame {
 	return nil
 }

@@ -113,18 +113,26 @@ func (c *CameraCurves) Merge() []byte {
 }
 
 // Copy は曲線を複製する。
-func (c *CameraCurves) Copy() *CameraCurves {
+func (c *CameraCurves) Copy() (CameraCurves, error) {
 	if c == nil {
+		return CameraCurves{}, nil
+	}
+	return deepCopy(*c)
+}
+
+// cloneCameraCurves は曲線を複製する（エラーなしの内部用）。
+func cloneCameraCurves(src *CameraCurves) *CameraCurves {
+	if src == nil {
 		return nil
 	}
-	values := append([]byte(nil), c.Values...)
+	values := append([]byte(nil), src.Values...)
 	return &CameraCurves{
-		TranslateX:  copyCurve(c.TranslateX),
-		TranslateY:  copyCurve(c.TranslateY),
-		TranslateZ:  copyCurve(c.TranslateZ),
-		Rotate:      copyCurve(c.Rotate),
-		Distance:    copyCurve(c.Distance),
-		ViewOfAngle: copyCurve(c.ViewOfAngle),
+		TranslateX:  copyCurve(src.TranslateX),
+		TranslateY:  copyCurve(src.TranslateY),
+		TranslateZ:  copyCurve(src.TranslateZ),
+		Rotate:      copyCurve(src.Rotate),
+		Distance:    copyCurve(src.Distance),
+		ViewOfAngle: copyCurve(src.ViewOfAngle),
 		Values:      values,
 	}
 }

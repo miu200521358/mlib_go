@@ -1153,18 +1153,19 @@ func copyBoneFrameWithIndex(src *motion.BoneFrame, index motion.Frame) *motion.B
 	if src == nil {
 		return motion.NewBoneFrame(index)
 	}
-	copied, _ := src.Copy()
-	bf, ok := copied.(*motion.BoneFrame)
-	if !ok || bf == nil {
+	copied, err := src.Copy()
+	if err != nil {
+		logging.DefaultLogger().Warn("ボーンフレームのコピーに失敗しました: %s", err.Error())
 		return motion.NewBoneFrame(index)
 	}
+	bf := copied
 	read := false
 	if src.BaseFrame != nil {
 		read = src.Read
 	}
 	bf.BaseFrame = motion.NewBaseFrame(index)
 	bf.Read = read
-	return bf
+	return &bf
 }
 
 // applyYStanceRotation は腕ボーンのYスタンス補正を追加する。

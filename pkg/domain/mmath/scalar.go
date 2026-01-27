@@ -9,8 +9,8 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 )
 
-// Number は数値型の制約を表す。
-type Number interface {
+// INumber は数値型の制約を表す。
+type INumber interface {
 	~int | ~int8 | ~int16 | ~int32 | ~int64 |
 		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr |
 		~float32 | ~float64
@@ -26,7 +26,7 @@ func newMathCalculateXFailed() error {
 }
 
 // Sum は合計を返す。
-func Sum[T Number](values []T) T {
+func Sum[T INumber](values []T) T {
 	sum := 0.0
 	for _, v := range values {
 		sum += float64(v)
@@ -35,7 +35,7 @@ func Sum[T Number](values []T) T {
 }
 
 // Ratio は比率配列を返す。
-func Ratio[T Number](total T, values []T) []float64 {
+func Ratio[T INumber](total T, values []T) []float64 {
 	denom := float64(total)
 	if denom == 0 || math.IsNaN(denom) || math.IsInf(denom, 0) {
 		return make([]float64, len(values))
@@ -52,7 +52,7 @@ func Ratio[T Number](total T, values []T) []float64 {
 }
 
 // Effective は無効値を0に補正する。
-func Effective[T Number](v T) T {
+func Effective[T INumber](v T) T {
 	if math.IsNaN(float64(v)) || math.IsInf(float64(v), 0) {
 		return 0
 	}
@@ -73,7 +73,7 @@ func Unique[T comparable](values []T) []T {
 }
 
 // Mean は平均を返す。
-func Mean[T Number](values []T) float64 {
+func Mean[T INumber](values []T) float64 {
 	if len(values) == 0 {
 		return 0
 	}
@@ -92,7 +92,7 @@ func Mean[T Number](values []T) float64 {
 }
 
 // Median は中央値を返す。
-func Median[T Number](values []T) T {
+func Median[T INumber](values []T) T {
 	if len(values) == 0 {
 		var zero T
 		return zero
@@ -118,7 +118,7 @@ func Median[T Number](values []T) T {
 }
 
 // Std は標準偏差を返す。
-func Std[T Number](values []T) float64 {
+func Std[T INumber](values []T) float64 {
 	if len(values) == 0 {
 		return 0
 	}
@@ -146,7 +146,7 @@ func Lerp(v1, v2, t float64) float64 {
 }
 
 // Sign は符号を返す。
-func Sign[T Number](v T) float64 {
+func Sign[T INumber](v T) float64 {
 	if v < 0 {
 		return -1
 	}
@@ -154,7 +154,7 @@ func Sign[T Number](v T) float64 {
 }
 
 // NearEquals は誤差内で等しいか判定する。
-func NearEquals[T Number](v, other T, epsilon float64) bool {
+func NearEquals[T INumber](v, other T, epsilon float64) bool {
 	return math.Abs(float64(v)-float64(other)) <= epsilon
 }
 
@@ -174,7 +174,7 @@ func ThetaToRad(theta float64) float64 {
 }
 
 // Clamped は範囲内に収めた値を返す。
-func Clamped[T Number](v, min, max T) T {
+func Clamped[T INumber](v, min, max T) T {
 	if v < min {
 		return min
 	}
@@ -185,7 +185,7 @@ func Clamped[T Number](v, min, max T) T {
 }
 
 // Clamped01 は0〜1に収めた値を返す。
-func Clamped01[T Number](v T) T {
+func Clamped01[T INumber](v T) T {
 	if v < 0 {
 		return 0
 	}
@@ -209,7 +209,7 @@ func Contains[T comparable](values []T, v T) bool {
 }
 
 // Max は最大値を返す。
-func Max[T Number](arr []T) T {
+func Max[T INumber](arr []T) T {
 	if len(arr) == 0 {
 		return 0
 	}
@@ -223,7 +223,7 @@ func Max[T Number](arr []T) T {
 }
 
 // Min は最小値を返す。
-func Min[T Number](arr []T) T {
+func Min[T INumber](arr []T) T {
 	if len(arr) == 0 {
 		return 0
 	}
@@ -288,7 +288,7 @@ func Mean2DHorizontal(nums [][]float64) []float64 {
 }
 
 // ClampIfVerySmall は微小値を0に丸める。
-func ClampIfVerySmall[T Number](v T) T {
+func ClampIfVerySmall[T INumber](v T) T {
 	epsilon := 1e-6
 	if math.Abs(float64(v)) < epsilon {
 		return 0
@@ -382,13 +382,13 @@ func Flatten[T any](slices2 [][]T) []T {
 }
 
 // Sort は昇順に並び替える。
-func Sort[T Number](values []T) {
+func Sort[T INumber](values []T) {
 	sort.Slice(values, func(i, j int) bool {
 		return values[i] < values[j] || (isNaN(values[i]) && !isNaN(values[j]))
 	})
 }
 
 // isNaN はNaNか判定する。
-func isNaN[T Number](v T) bool {
+func isNaN[T INumber](v T) bool {
 	return math.IsNaN(float64(v))
 }

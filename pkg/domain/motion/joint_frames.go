@@ -24,11 +24,11 @@ func NewJointFrame(index Frame) *JointFrame {
 }
 
 // Copy はフレームを複製する。
-func (f *JointFrame) Copy() (IBaseFrame, error) {
+func (f *JointFrame) Copy() (JointFrame, error) {
 	if f == nil {
-		return (*JointFrame)(nil), nil
+		return JointFrame{}, nil
 	}
-	copied := &JointFrame{
+	copied := JointFrame{
 		BaseFrame:                 &BaseFrame{index: f.Index(), Read: f.Read},
 		TranslationLimitMin:       copyVec3(f.TranslationLimitMin),
 		TranslationLimitMax:       copyVec3(f.TranslationLimitMax),
@@ -103,8 +103,11 @@ func NewJointNameFrames(name string) *JointNameFrames {
 }
 
 // Copy はフレーム集合を複製する。
-func (j *JointNameFrames) Copy() (*JointNameFrames, error) {
-	return deepCopy(j)
+func (j *JointNameFrames) Copy() (JointNameFrames, error) {
+	if j == nil {
+		return JointNameFrames{}, nil
+	}
+	return deepCopy(*j)
 }
 
 // JointFrames はジョイント名ごとの集合を表す。
@@ -236,15 +239,19 @@ func (j *JointFrames) MinFrame() Frame {
 }
 
 // Copy はジョイント集合を複製する。
-func (j *JointFrames) Copy() (*JointFrames, error) {
-	copied, err := deepCopy(j)
+func (j *JointFrames) Copy() (JointFrames, error) {
+	if j == nil {
+		return JointFrames{}, nil
+	}
+	copied, err := deepCopy(*j)
 	if err != nil {
-		return nil, err
+		return JointFrames{}, err
 	}
 	copied.rebuildNameIndex()
 	return copied, nil
 }
 
+// rebuildNameIndex は名前インデックスを再構築する。
 func (j *JointFrames) rebuildNameIndex() {
 	j.nameIndex = make(map[string]int, len(j.names))
 	for i, name := range j.names {
@@ -252,10 +259,12 @@ func (j *JointFrames) rebuildNameIndex() {
 	}
 }
 
+// newJointFrame は既定値のフレームを生成する。
 func newJointFrame(frame Frame) *JointFrame {
 	return nil
 }
 
+// nilJointFrame は既定の空フレームを返す。
 func nilJointFrame() *JointFrame {
 	return nil
 }

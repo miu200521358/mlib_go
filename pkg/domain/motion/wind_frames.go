@@ -15,11 +15,11 @@ func NewWindEnabledFrame(index Frame) *WindEnabledFrame {
 }
 
 // Copy はフレームを複製する。
-func (f *WindEnabledFrame) Copy() (IBaseFrame, error) {
+func (f *WindEnabledFrame) Copy() (WindEnabledFrame, error) {
 	if f == nil {
-		return (*WindEnabledFrame)(nil), nil
+		return WindEnabledFrame{}, nil
 	}
-	copied := &WindEnabledFrame{BaseFrame: &BaseFrame{index: f.Index(), Read: f.Read}, Enabled: f.Enabled}
+	copied := WindEnabledFrame{BaseFrame: &BaseFrame{index: f.Index(), Read: f.Read}, Enabled: f.Enabled}
 	return copied, nil
 }
 
@@ -78,8 +78,11 @@ func (w *WindEnabledFrames) Get(frame Frame) *WindEnabledFrame {
 }
 
 // Copy はフレーム集合を複製する。
-func (w *WindEnabledFrames) Copy() (*WindEnabledFrames, error) {
-	return deepCopy(w)
+func (w *WindEnabledFrames) Copy() (WindEnabledFrames, error) {
+	if w == nil {
+		return WindEnabledFrames{}, nil
+	}
+	return deepCopy(*w)
 }
 
 // WindDirectionFrame は風向きフレームを表す。
@@ -94,11 +97,11 @@ func NewWindDirectionFrame(index Frame) *WindDirectionFrame {
 }
 
 // Copy はフレームを複製する。
-func (f *WindDirectionFrame) Copy() (IBaseFrame, error) {
+func (f *WindDirectionFrame) Copy() (WindDirectionFrame, error) {
 	if f == nil {
-		return (*WindDirectionFrame)(nil), nil
+		return WindDirectionFrame{}, nil
 	}
-	copied := &WindDirectionFrame{BaseFrame: &BaseFrame{index: f.Index(), Read: f.Read}, Direction: copyVec3(f.Direction)}
+	copied := WindDirectionFrame{BaseFrame: &BaseFrame{index: f.Index(), Read: f.Read}, Direction: copyVec3(f.Direction)}
 	return copied, nil
 }
 
@@ -157,8 +160,11 @@ func (w *WindDirectionFrames) Get(frame Frame) *WindDirectionFrame {
 }
 
 // Copy はフレーム集合を複製する。
-func (w *WindDirectionFrames) Copy() (*WindDirectionFrames, error) {
-	return deepCopy(w)
+func (w *WindDirectionFrames) Copy() (WindDirectionFrames, error) {
+	if w == nil {
+		return WindDirectionFrames{}, nil
+	}
+	return deepCopy(*w)
 }
 
 // WindLiftCoeffFrame は風揚力係数フレームを表す。
@@ -181,11 +187,11 @@ func (f *WindLiftCoeffFrame) WindLiftCoeff() float64 {
 }
 
 // Copy はフレームを複製する。
-func (f *WindLiftCoeffFrame) Copy() (IBaseFrame, error) {
+func (f *WindLiftCoeffFrame) Copy() (WindLiftCoeffFrame, error) {
 	if f == nil {
-		return (*WindLiftCoeffFrame)(nil), nil
+		return WindLiftCoeffFrame{}, nil
 	}
-	copied := &WindLiftCoeffFrame{BaseFrame: &BaseFrame{index: f.Index(), Read: f.Read}, LiftCoeff: f.LiftCoeff}
+	copied := WindLiftCoeffFrame{BaseFrame: &BaseFrame{index: f.Index(), Read: f.Read}, LiftCoeff: f.LiftCoeff}
 	return copied, nil
 }
 
@@ -244,8 +250,11 @@ func (w *WindLiftCoeffFrames) Get(frame Frame) *WindLiftCoeffFrame {
 }
 
 // Copy はフレーム集合を複製する。
-func (w *WindLiftCoeffFrames) Copy() (*WindLiftCoeffFrames, error) {
-	return deepCopy(w)
+func (w *WindLiftCoeffFrames) Copy() (WindLiftCoeffFrames, error) {
+	if w == nil {
+		return WindLiftCoeffFrames{}, nil
+	}
+	return deepCopy(*w)
 }
 
 // WindDragCoeffFrame は風抗力係数フレームを表す。
@@ -268,11 +277,11 @@ func (f *WindDragCoeffFrame) WindDragCoeff() float64 {
 }
 
 // Copy はフレームを複製する。
-func (f *WindDragCoeffFrame) Copy() (IBaseFrame, error) {
+func (f *WindDragCoeffFrame) Copy() (WindDragCoeffFrame, error) {
 	if f == nil {
-		return (*WindDragCoeffFrame)(nil), nil
+		return WindDragCoeffFrame{}, nil
 	}
-	copied := &WindDragCoeffFrame{BaseFrame: &BaseFrame{index: f.Index(), Read: f.Read}, DragCoeff: f.DragCoeff}
+	copied := WindDragCoeffFrame{BaseFrame: &BaseFrame{index: f.Index(), Read: f.Read}, DragCoeff: f.DragCoeff}
 	return copied, nil
 }
 
@@ -331,8 +340,11 @@ func (w *WindDragCoeffFrames) Get(frame Frame) *WindDragCoeffFrame {
 }
 
 // Copy はフレーム集合を複製する。
-func (w *WindDragCoeffFrames) Copy() (*WindDragCoeffFrames, error) {
-	return deepCopy(w)
+func (w *WindDragCoeffFrames) Copy() (WindDragCoeffFrames, error) {
+	if w == nil {
+		return WindDragCoeffFrames{}, nil
+	}
+	return deepCopy(*w)
 }
 
 // WindRandomnessFrame は風乱流係数フレームを表す。
@@ -355,11 +367,11 @@ func (f *WindRandomnessFrame) WindRandomness() float64 {
 }
 
 // Copy はフレームを複製する。
-func (f *WindRandomnessFrame) Copy() (IBaseFrame, error) {
+func (f *WindRandomnessFrame) Copy() (WindRandomnessFrame, error) {
 	if f == nil {
-		return (*WindRandomnessFrame)(nil), nil
+		return WindRandomnessFrame{}, nil
 	}
-	copied := &WindRandomnessFrame{BaseFrame: &BaseFrame{index: f.Index(), Read: f.Read}, Randomness: f.Randomness}
+	copied := WindRandomnessFrame{BaseFrame: &BaseFrame{index: f.Index(), Read: f.Read}, Randomness: f.Randomness}
 	return copied, nil
 }
 
@@ -418,8 +430,11 @@ func (w *WindRandomnessFrames) Get(frame Frame) *WindRandomnessFrame {
 }
 
 // Copy はフレーム集合を複製する。
-func (w *WindRandomnessFrames) Copy() (*WindRandomnessFrames, error) {
-	return deepCopy(w)
+func (w *WindRandomnessFrames) Copy() (WindRandomnessFrames, error) {
+	if w == nil {
+		return WindRandomnessFrames{}, nil
+	}
+	return deepCopy(*w)
 }
 
 // WindSpeedFrame は風速フレームを表す。
@@ -442,11 +457,11 @@ func (f *WindSpeedFrame) WindSpeed() float64 {
 }
 
 // Copy はフレームを複製する。
-func (f *WindSpeedFrame) Copy() (IBaseFrame, error) {
+func (f *WindSpeedFrame) Copy() (WindSpeedFrame, error) {
 	if f == nil {
-		return (*WindSpeedFrame)(nil), nil
+		return WindSpeedFrame{}, nil
 	}
-	copied := &WindSpeedFrame{BaseFrame: &BaseFrame{index: f.Index(), Read: f.Read}, Speed: f.Speed}
+	copied := WindSpeedFrame{BaseFrame: &BaseFrame{index: f.Index(), Read: f.Read}, Speed: f.Speed}
 	return copied, nil
 }
 
@@ -505,8 +520,11 @@ func (w *WindSpeedFrames) Get(frame Frame) *WindSpeedFrame {
 }
 
 // Copy はフレーム集合を複製する。
-func (w *WindSpeedFrames) Copy() (*WindSpeedFrames, error) {
-	return deepCopy(w)
+func (w *WindSpeedFrames) Copy() (WindSpeedFrames, error) {
+	if w == nil {
+		return WindSpeedFrames{}, nil
+	}
+	return deepCopy(*w)
 }
 
 // WindTurbulenceFreqHzFrame は風乱流周波数フレームを表す。
@@ -529,11 +547,11 @@ func (f *WindTurbulenceFreqHzFrame) WindTurbulenceFreqHz() float64 {
 }
 
 // Copy はフレームを複製する。
-func (f *WindTurbulenceFreqHzFrame) Copy() (IBaseFrame, error) {
+func (f *WindTurbulenceFreqHzFrame) Copy() (WindTurbulenceFreqHzFrame, error) {
 	if f == nil {
-		return (*WindTurbulenceFreqHzFrame)(nil), nil
+		return WindTurbulenceFreqHzFrame{}, nil
 	}
-	copied := &WindTurbulenceFreqHzFrame{BaseFrame: &BaseFrame{index: f.Index(), Read: f.Read}, TurbulenceFreqHz: f.TurbulenceFreqHz}
+	copied := WindTurbulenceFreqHzFrame{BaseFrame: &BaseFrame{index: f.Index(), Read: f.Read}, TurbulenceFreqHz: f.TurbulenceFreqHz}
 	return copied, nil
 }
 
@@ -592,34 +610,44 @@ func (w *WindTurbulenceFreqHzFrames) Get(frame Frame) *WindTurbulenceFreqHzFrame
 }
 
 // Copy はフレーム集合を複製する。
-func (w *WindTurbulenceFreqHzFrames) Copy() (*WindTurbulenceFreqHzFrames, error) {
-	return deepCopy(w)
+func (w *WindTurbulenceFreqHzFrames) Copy() (WindTurbulenceFreqHzFrames, error) {
+	if w == nil {
+		return WindTurbulenceFreqHzFrames{}, nil
+	}
+	return deepCopy(*w)
 }
 
+// nilWindEnabledFrame は空の風有効化フレームを返す。
 func nilWindEnabledFrame() *WindEnabledFrame {
 	return nil
 }
 
+// nilWindDirectionFrame は空の風向きフレームを返す。
 func nilWindDirectionFrame() *WindDirectionFrame {
 	return nil
 }
 
+// nilWindLiftCoeffFrame は空の揚力係数フレームを返す。
 func nilWindLiftCoeffFrame() *WindLiftCoeffFrame {
 	return nil
 }
 
+// nilWindDragCoeffFrame は空の抗力係数フレームを返す。
 func nilWindDragCoeffFrame() *WindDragCoeffFrame {
 	return nil
 }
 
+// nilWindRandomnessFrame は空の乱流係数フレームを返す。
 func nilWindRandomnessFrame() *WindRandomnessFrame {
 	return nil
 }
 
+// nilWindSpeedFrame は空の風速フレームを返す。
 func nilWindSpeedFrame() *WindSpeedFrame {
 	return nil
 }
 
+// nilWindTurbulenceFreqHzFrame は空の乱流周波数フレームを返す。
 func nilWindTurbulenceFreqHzFrame() *WindTurbulenceFreqHzFrame {
 	return nil
 }

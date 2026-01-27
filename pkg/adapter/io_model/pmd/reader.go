@@ -11,6 +11,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"gonum.org/v1/gonum/spatial/r3"
 )
 
@@ -275,6 +276,10 @@ func (p *pmdReader) readMaterials(modelData *model.PmxModel) error {
 		edgeEnabled := edgeFlag != 0
 		// PMD材質は明示フラグが少ないため、nanoemの判定ロジックに合わせて描画フラグを構築する。
 		drawFlag := model.DRAW_FLAG_DRAWING_SELF_SHADOWS
+		// nanoemのCullingDisabled相当: 透過がある場合は両面描画扱い。
+		if alpha < 1.0 {
+			drawFlag |= model.DRAW_FLAG_DOUBLE_SIDED_DRAWING
+		}
 		if edgeEnabled {
 			drawFlag |= model.DRAW_FLAG_DRAWING_EDGE
 			drawFlag |= model.DRAW_FLAG_GROUND_SHADOW
@@ -343,7 +348,8 @@ func (p *pmdReader) readBones(modelData *model.PmxModel) error {
 			parentIndex = -1
 		}
 		tailIndex := int(tailRaw)
-		if tailRaw == 0xFFFF {
+		if tailRaw == 0xFFFF || tailRaw == 0 {
+			// PMDの接続番号0は表示先なしとして扱う（仕様不明のため決め打ち対応）。
 			tailIndex = -1
 		}
 		bone := &model.Bone{
@@ -413,6 +419,17 @@ func (p *pmdReader) readIk(modelData *model.PmxModel) error {
 		bone, err := modelData.Bones.Get(ikBoneIndex)
 		if err != nil {
 			continue
+		}
+		logger := logging.DefaultLogger()
+		if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_IK) {
+			logger.Verbose(
+				logging.VERBOSE_INDEX_IK,
+				"PMD IK単位角(読み込み直後): bone=%s index=%d raw=%.6f deg(rad換算)=%.6f",
+				bone.Name(),
+				ikBoneIndex,
+				controlWeight,
+				mmath.RadToDeg(controlWeight),
+			)
 		}
 		ikName := bone.Name()
 		leftLegIkAlt := strings.ReplaceAll(model.LEG_IK.Left(), "ＩＫ", "IK")
@@ -491,7 +508,7 @@ func (p *pmdReader) readSkins(modelData *model.PmxModel) error {
 			return wrapParseFailed("PMD表情ベースが存在しません", nil)
 		}
 
-		offsets := make([]model.MorphOffset, 0, vertCount)
+		offsets := make([]model.IMorphOffset, 0, vertCount)
 		for j := 0; j < int(vertCount); j++ {
 			baseIndexRaw, err := p.reader.ReadUint32()
 			if err != nil {

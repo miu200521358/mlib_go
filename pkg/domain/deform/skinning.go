@@ -110,6 +110,7 @@ func vertexMorphDelta(vertex *model.Vertex, morphDeltas *delta.MorphDeltas) *del
 	return morphDeltas.Vertices().Get(vertex.Index())
 }
 
+// isInvalidFloat はNaN/Infの判定を返す。
 func isInvalidFloat(f float64) bool {
 	return math.IsNaN(f) || math.IsInf(f, 0)
 }

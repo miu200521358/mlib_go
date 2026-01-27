@@ -7,6 +7,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/unicode"
 )
@@ -490,7 +491,7 @@ func (s *pmxWriteState) writeBones() error {
 	if err := s.writer.WriteInt32(int32(len(s.boneMapping.newToOld))); err != nil {
 		return io_common.NewIoSaveFailed("PMXボーン数の書き込みに失敗しました", err)
 	}
-	for _, oldIndex := range s.boneMapping.newToOld {
+	for newIndex, oldIndex := range s.boneMapping.newToOld {
 		bone := s.bonesByIndex[oldIndex]
 		if bone == nil {
 			return io_common.NewIoEncodeFailed("PMXボーンがnilです", nil)
@@ -572,6 +573,18 @@ func (s *pmxWriteState) writeBones() error {
 			}
 		}
 		if boneFlag&model.BONE_FLAG_IS_IK != 0 {
+			logger := logging.DefaultLogger()
+			if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_IK) && ik != nil {
+				logger.Verbose(
+					logging.VERBOSE_INDEX_IK,
+					"PMX IK単位角(出力直前): bone=%s oldIndex=%d newIndex=%d raw=%.6f deg(rad換算)=%.6f",
+					bone.Name(),
+					oldIndex,
+					newIndex,
+					ik.UnitRotation.X,
+					mmath.RadToDeg(ik.UnitRotation.X),
+				)
+			}
 			if err := s.writeIk(ik); err != nil {
 				return err
 			}
@@ -680,11 +693,11 @@ func (s *pmxWriteState) writeMorphs() error {
 }
 
 // filterMorphOffsets は参照更新済みのオフセット一覧を返す。
-func (s *pmxWriteState) filterMorphOffsets(morph *model.Morph) []model.MorphOffset {
+func (s *pmxWriteState) filterMorphOffsets(morph *model.Morph) []model.IMorphOffset {
 	if morph == nil {
 		return nil
 	}
-	out := make([]model.MorphOffset, 0, len(morph.Offsets))
+	out := make([]model.IMorphOffset, 0, len(morph.Offsets))
 	for _, offset := range morph.Offsets {
 		switch o := offset.(type) {
 		case *model.GroupMorphOffset:
@@ -707,7 +720,7 @@ func (s *pmxWriteState) filterMorphOffsets(morph *model.Morph) []model.MorphOffs
 }
 
 // writeMorphOffset はモーフオフセットを書き込む。
-func (s *pmxWriteState) writeMorphOffset(morphType model.MorphType, offset model.MorphOffset) error {
+func (s *pmxWriteState) writeMorphOffset(morphType model.MorphType, offset model.IMorphOffset) error {
 	switch morphType {
 	case model.MORPH_TYPE_GROUP:
 		group, ok := offset.(*model.GroupMorphOffset)

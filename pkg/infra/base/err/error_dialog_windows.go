@@ -19,9 +19,9 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
 	sharedi18n "github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
-	"github.com/miu200521358/win"
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
+	"github.com/miu200521358/win"
 )
 
 // ShowErrorDialog は通常エラーのダイアログを表示する。
@@ -166,13 +166,13 @@ func showErrorDialog(appConfig *config.AppConfig, err error, title string, heade
 }
 
 type (
-	errorIDProvider interface {
+	iErrorIDProvider interface {
 		ErrorID() string
 	}
-	errorKindProvider interface {
+	iErrorKindProvider interface {
 		ErrorKind() merr.ErrorKind
 	}
-	errorMessageProvider interface {
+	iErrorMessageProvider interface {
 		MessageKey() string
 		MessageParams() []any
 	}
@@ -263,7 +263,7 @@ func extractErrorID(err error) string {
 	if err == nil {
 		return ""
 	}
-	var provider errorIDProvider
+	var provider iErrorIDProvider
 	if errors.As(err, &provider) {
 		return provider.ErrorID()
 	}
@@ -275,7 +275,7 @@ func extractErrorKind(err error) merr.ErrorKind {
 	if err == nil {
 		return ""
 	}
-	var provider errorKindProvider
+	var provider iErrorKindProvider
 	if errors.As(err, &provider) {
 		return provider.ErrorKind()
 	}
@@ -287,7 +287,7 @@ func extractMessageKey(err error) (string, []any) {
 	if err == nil {
 		return "", nil
 	}
-	var provider errorMessageProvider
+	var provider iErrorMessageProvider
 	if errors.As(err, &provider) {
 		return provider.MessageKey(), provider.MessageParams()
 	}

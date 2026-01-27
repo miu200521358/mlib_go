@@ -38,7 +38,7 @@ type FilePicker struct {
 	filterExtensions  []filterExtension
 	repository        io_common.IFileReader
 	translator        i18n.II18n
-	userConfig        io_commonUserConfig
+	userConfig        iCommonUserConfig
 	pathEdit          *walk.LineEdit
 	nameEdit          *walk.LineEdit
 	openPushButton    *walk.PushButton
@@ -49,13 +49,13 @@ type FilePicker struct {
 	onPathChanged     func(*controller.ControlWindow, io_common.IFileReader, string)
 }
 
-type io_commonUserConfig interface {
+type iCommonUserConfig interface {
 	GetStringSlice(key string) ([]string, error)
 	SetStringSlice(key string, values []string, limit int) error
 }
 
 // NewPmxLoadFilePicker はPMX読み込み用のFilePickerを生成する。
-func NewPmxLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
+func NewPmxLoadFilePicker(userConfig iCommonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
 	return newFilePicker(
 		userConfig,
 		translator,
@@ -72,7 +72,7 @@ func NewPmxLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II18n,
 }
 
 // NewPmdLoadFilePicker はPMD読み込み用のFilePickerを生成する。
-func NewPmdLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
+func NewPmdLoadFilePicker(userConfig iCommonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
 	return newFilePicker(
 		userConfig,
 		translator,
@@ -89,7 +89,7 @@ func NewPmdLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II18n,
 }
 
 // NewPmxPmdXLoadFilePicker はPMX/PMD/X読み込み用のFilePickerを生成する。
-func NewPmxPmdXLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
+func NewPmxPmdXLoadFilePicker(userConfig iCommonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
 	return newFilePicker(
 		userConfig,
 		translator,
@@ -106,7 +106,7 @@ func NewPmxPmdXLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II
 }
 
 // NewPmxPmdLoadFilePicker はPMX/PMD読み込み用のFilePickerを生成する。
-func NewPmxPmdLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
+func NewPmxPmdLoadFilePicker(userConfig iCommonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
 	return newFilePicker(
 		userConfig,
 		translator,
@@ -123,7 +123,7 @@ func NewPmxPmdLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II1
 }
 
 // NewVmdVpdLoadFilePicker はVMD/VPD読み込み用のFilePickerを生成する。
-func NewVmdVpdLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
+func NewVmdVpdLoadFilePicker(userConfig iCommonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
 	return newFilePicker(
 		userConfig,
 		translator,
@@ -140,7 +140,7 @@ func NewVmdVpdLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II1
 }
 
 // NewVmdLoadFilePicker はVMD読み込み用のFilePickerを生成する。
-func NewVmdLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
+func NewVmdLoadFilePicker(userConfig iCommonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
 	return newFilePicker(
 		userConfig,
 		translator,
@@ -157,7 +157,7 @@ func NewVmdLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II18n,
 }
 
 // NewAudioLoadFilePicker は音楽読み込み用のFilePickerを生成する。
-func NewAudioLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
+func NewAudioLoadFilePicker(userConfig iCommonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
 	return newFilePicker(
 		userConfig,
 		translator,
@@ -174,7 +174,7 @@ func NewAudioLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II18
 }
 
 // NewPmxSaveFilePicker はPMX保存用のFilePickerを生成する。
-func NewPmxSaveFilePicker(userConfig io_commonUserConfig, translator i18n.II18n, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
+func NewPmxSaveFilePicker(userConfig iCommonUserConfig, translator i18n.II18n, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
 	return newFilePicker(
 		userConfig,
 		translator,
@@ -191,7 +191,7 @@ func NewPmxSaveFilePicker(userConfig io_commonUserConfig, translator i18n.II18n,
 }
 
 // NewPmdSaveFilePicker はPMD保存用のFilePickerを生成する。
-func NewPmdSaveFilePicker(userConfig io_commonUserConfig, translator i18n.II18n, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
+func NewPmdSaveFilePicker(userConfig iCommonUserConfig, translator i18n.II18n, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
 	return newFilePicker(
 		userConfig,
 		translator,
@@ -208,7 +208,7 @@ func NewPmdSaveFilePicker(userConfig io_commonUserConfig, translator i18n.II18n,
 }
 
 // NewVmdSaveFilePicker はVMD保存用のFilePickerを生成する。
-func NewVmdSaveFilePicker(userConfig io_commonUserConfig, translator i18n.II18n, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
+func NewVmdSaveFilePicker(userConfig iCommonUserConfig, translator i18n.II18n, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
 	return newFilePicker(
 		userConfig,
 		translator,
@@ -225,7 +225,7 @@ func NewVmdSaveFilePicker(userConfig io_commonUserConfig, translator i18n.II18n,
 }
 
 // newFilePicker はFilePickerを生成する。
-func newFilePicker(userConfig io_commonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string,
+func newFilePicker(userConfig iCommonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string,
 	onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string), filterExtensions []filterExtension, repository io_common.IFileReader) *FilePicker {
 	picker := &FilePicker{
 		title:            title,

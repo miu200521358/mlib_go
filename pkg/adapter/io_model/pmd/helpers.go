@@ -95,11 +95,13 @@ func buildTextureSpec(textureName, sphereName string, sphereMode model.SphereMod
 	return base + "*" + sphere
 }
 
+// isSphereTexture はスフィアマップ拡張子か判定する。
 func isSphereTexture(name string) bool {
 	ext := strings.ToLower(filepath.Ext(name))
 	return ext == ".sph" || ext == ".spa"
 }
 
+// sphereModeFromName はスフィア名から計算モードを決定する。
 func sphereModeFromName(name string, fallback model.SphereMode) model.SphereMode {
 	if strings.HasSuffix(strings.ToLower(name), ".spa") {
 		return model.SPHERE_MODE_ADDITION
@@ -107,6 +109,7 @@ func sphereModeFromName(name string, fallback model.SphereMode) model.SphereMode
 	return fallback
 }
 
+// panelFromSkinType はPMDスキン種別からモーフパネルへ変換する。
 func panelFromSkinType(skinType byte) model.MorphPanel {
 	switch skinType {
 	case 1:
@@ -122,6 +125,7 @@ func panelFromSkinType(skinType byte) model.MorphPanel {
 	}
 }
 
+// skinTypeFromPanel はモーフパネルからPMDスキン種別へ変換する。
 func skinTypeFromPanel(panel model.MorphPanel) byte {
 	switch panel {
 	case model.MORPH_PANEL_EYEBROW_LOWER_LEFT:
@@ -137,6 +141,7 @@ func skinTypeFromPanel(panel model.MorphPanel) byte {
 	}
 }
 
+// boneFlagsFromType はPMDボーン種別からボーンフラグを組み立てる。
 func boneFlagsFromType(boneType byte, hasTail bool) model.BoneFlag {
 	flag := model.BONE_FLAG_NONE
 	if hasTail {
@@ -159,6 +164,7 @@ func boneFlagsFromType(boneType byte, hasTail bool) model.BoneFlag {
 	return flag
 }
 
+// boneTypeFromBone はボーン情報からPMDボーン種別を推定する。
 func boneTypeFromBone(bone *model.Bone) byte {
 	if bone == nil {
 		return 0
@@ -181,6 +187,7 @@ func boneTypeFromBone(bone *model.Bone) byte {
 	return 0
 }
 
+// defaultToonFileNames は既定のtoon画像ファイル名一覧を返す。
 func defaultToonFileNames() []string {
 	return []string{
 		"toon01.bmp",

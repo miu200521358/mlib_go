@@ -457,15 +457,16 @@ func (m *VmdMotion) Copy() (VmdMotion, error) {
 	if m == nil {
 		return VmdMotion{}, nil
 	}
-	copied, err := deepCopy(m)
+	copied, err := deepCopy(*m)
 	if err != nil {
 		return VmdMotion{}, err
 	}
 	copied.SetHashPartsFunc(copied.GetHashParts)
 	copied.UpdateRandomHash()
-	return *copied, nil
+	return copied, nil
 }
 
+// uniqueSortedInts は重複を除去して昇順に並べ替えた結果を返す。
 func uniqueSortedInts(values []int) []int {
 	if len(values) == 0 {
 		return nil

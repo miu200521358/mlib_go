@@ -85,6 +85,7 @@ func (p *pmdWriter) Write(modelData *model.PmxModel, opts io_common.SaveOptions)
 	return nil
 }
 
+// prepareState はPMD書き出し用の状態を構築する。
 func (p *pmdWriter) prepareState(modelData *model.PmxModel, opts io_common.SaveOptions) (*pmdWriteState, error) {
 	bonesByIndex := make([]*model.Bone, modelData.Bones.Len())
 	for i := 0; i < len(bonesByIndex); i++ {
@@ -208,6 +209,7 @@ func (p *pmdWriter) prepareState(modelData *model.PmxModel, opts io_common.SaveO
 	}, nil
 }
 
+// writeHeader はPMDヘッダを書き込む。
 func (s *pmdWriteState) writeHeader() error {
 	if err := s.writer.WriteBytes([]byte("Pmd")); err != nil {
 		return io_common.NewIoSaveFailed("PMD署名の書き込みに失敗しました", err)
@@ -224,6 +226,7 @@ func (s *pmdWriteState) writeHeader() error {
 	return nil
 }
 
+// writeVertices は頂点データを書き込む。
 func (s *pmdWriteState) writeVertices() error {
 	vertexCount := s.model.Vertices.Len()
 	if vertexCount > maxUint16 {
@@ -266,6 +269,7 @@ func (s *pmdWriteState) writeVertices() error {
 	return nil
 }
 
+// writeFaces は面データを書き込む。
 func (s *pmdWriteState) writeFaces() error {
 	faceCount := s.model.Faces.Len()
 	faceVertCount := faceCount * 3
@@ -288,6 +292,7 @@ func (s *pmdWriteState) writeFaces() error {
 	return nil
 }
 
+// writeMaterials は材質データを書き込む。
 func (s *pmdWriteState) writeMaterials() error {
 	materials := s.model.Materials.Values()
 	if err := s.writer.WriteUint32(uint32(len(materials))); err != nil {
@@ -340,6 +345,7 @@ func (s *pmdWriteState) writeMaterials() error {
 	return nil
 }
 
+// writeBones はボーンデータを書き込む。
 func (s *pmdWriteState) writeBones() error {
 	boneCount := len(s.boneMapping.newToOld)
 	if boneCount > maxUint16 {
@@ -395,6 +401,7 @@ func (s *pmdWriteState) writeBones() error {
 	return nil
 }
 
+// writeIk はIKデータを書き込む。
 func (s *pmdWriteState) writeIk() error {
 	ikBones := make([]*model.Bone, 0)
 	ikBoneIndexes := make([]int, 0)
@@ -456,6 +463,7 @@ func (s *pmdWriteState) writeIk() error {
 	return nil
 }
 
+// writeSkins はスキンデータを書き込む。
 func (s *pmdWriteState) writeSkins() error {
 	if len(s.supportedMorphs) == 0 {
 		if err := s.writer.WriteUint16(0); err != nil {
@@ -527,6 +535,7 @@ func (s *pmdWriteState) writeSkins() error {
 	return nil
 }
 
+// writeSkinDisplayList はスキン表示枠を書き込む。
 func (s *pmdWriteState) writeSkinDisplayList() error {
 	if len(s.supportedMorphs) == 0 {
 		if err := s.writer.WriteUint8(0); err != nil {
@@ -552,6 +561,7 @@ func (s *pmdWriteState) writeSkinDisplayList() error {
 	return nil
 }
 
+// writeBoneDisplayNames はボーン表示枠名を書き込む。
 func (s *pmdWriteState) writeBoneDisplayNames(names []string) error {
 	if len(names) > math.MaxUint8 {
 		return io_common.NewIoEncodeFailed("PMDボーン枠名数が上限を超えています", nil)
@@ -567,6 +577,7 @@ func (s *pmdWriteState) writeBoneDisplayNames(names []string) error {
 	return nil
 }
 
+// writeBoneDisplayList はボーン表示枠の割当を書き込む。
 func (s *pmdWriteState) writeBoneDisplayList(boneSlotIndexes []int) error {
 	entries := make([]pmdBoneDisplay, 0)
 	rootSlot := s.findRootDisplaySlot()
@@ -616,6 +627,7 @@ func (s *pmdWriteState) writeBoneDisplayList(boneSlotIndexes []int) error {
 	return nil
 }
 
+// writeExtensions は拡張情報を書き込む。
 func (s *pmdWriteState) writeExtensions(boneSlotNames, boneSlotEnglish []string) error {
 	englishEnabled := s.hasEnglishNames(boneSlotEnglish)
 	flag := uint8(0)
@@ -684,6 +696,7 @@ func (s *pmdWriteState) writeExtensions(boneSlotNames, boneSlotEnglish []string)
 	return nil
 }
 
+// writeRigidBodies は剛体データを書き込む。
 func (s *pmdWriteState) writeRigidBodies() error {
 	count := len(s.rigidMapping.newToOld)
 	if err := s.writer.WriteUint32(uint32(count)); err != nil {
@@ -753,6 +766,7 @@ func (s *pmdWriteState) writeRigidBodies() error {
 	return nil
 }
 
+// writeJoints はジョイントデータを書き込む。
 func (s *pmdWriteState) writeJoints() error {
 	joints := make([]*model.Joint, 0)
 	for _, joint := range s.model.Joints.Values() {
@@ -813,6 +827,7 @@ func (s *pmdWriteState) writeJoints() error {
 	return nil
 }
 
+// collectSkinDisplayList はスキン表示枠のインデックス一覧を生成する。
 func (s *pmdWriteState) collectSkinDisplayList() []int {
 	morphSlot := s.findMorphDisplaySlot()
 	indices := make([]int, 0)
@@ -834,6 +849,7 @@ func (s *pmdWriteState) collectSkinDisplayList() []int {
 	return indices
 }
 
+// collectBoneDisplaySlots はボーン表示枠情報を収集する。
 func (s *pmdWriteState) collectBoneDisplaySlots() ([]string, []string, []int) {
 	names := make([]string, 0)
 	english := make([]string, 0)
@@ -864,6 +880,7 @@ func (s *pmdWriteState) collectBoneDisplaySlots() ([]string, []string, []int) {
 	return names, english, indexes
 }
 
+// findMorphDisplaySlot はモーフ表示枠を検索する。
 func (s *pmdWriteState) findMorphDisplaySlot() *model.DisplaySlot {
 	for _, slot := range s.model.DisplaySlots.Values() {
 		if slot == nil {
@@ -886,6 +903,7 @@ func (s *pmdWriteState) findMorphDisplaySlot() *model.DisplaySlot {
 	return nil
 }
 
+// findRootDisplaySlot はルート表示枠を検索する。
 func (s *pmdWriteState) findRootDisplaySlot() *model.DisplaySlot {
 	for _, slot := range s.model.DisplaySlots.Values() {
 		if slot == nil {
@@ -902,6 +920,7 @@ func (s *pmdWriteState) findRootDisplaySlot() *model.DisplaySlot {
 	return nil
 }
 
+// hasEnglishNames は英語名の有無を判定する。
 func (s *pmdWriteState) hasEnglishNames(boneSlotEnglish []string) bool {
 	if s.model.EnglishName != "" || s.model.EnglishComment != "" {
 		return true
@@ -924,6 +943,7 @@ func (s *pmdWriteState) hasEnglishNames(boneSlotEnglish []string) bool {
 	return false
 }
 
+// textureName はPMD書き出し用のテクスチャ名を取得する。
 func (s *pmdWriteState) textureName(index int) string {
 	if index < 0 {
 		return ""
@@ -935,6 +955,7 @@ func (s *pmdWriteState) textureName(index int) string {
 	return tex.Name()
 }
 
+// vertexBoneWeights は頂点のボーン番号/ウェイトをPMD形式で返す。
 func (s *pmdWriteState) vertexBoneWeights(vertex *model.Vertex) (int, int, int) {
 	idx0 := 0
 	idx1 := 0
@@ -980,6 +1001,7 @@ func (s *pmdWriteState) vertexBoneWeights(vertex *model.Vertex) (int, int, int) 
 	return idx0, idx1, weight
 }
 
+// writeFixedString は固定長文字列を書き込む。
 func (s *pmdWriteState) writeFixedString(text string, size int, label string) error {
 	encoded, err := io_common.EncodeShiftJISFixed(text, size)
 	if err != nil {
@@ -991,6 +1013,7 @@ func (s *pmdWriteState) writeFixedString(text string, size int, label string) er
 	return nil
 }
 
+// writeVec2 はVec2を書き込む。
 func (s *pmdWriteState) writeVec2(vec mmath.Vec2, positiveOnly bool) error {
 	if err := s.writer.WriteFloat32(vec.X, 0, positiveOnly); err != nil {
 		return io_common.NewIoSaveFailed("PMDVec2の書き込みに失敗しました", err)
@@ -1001,6 +1024,7 @@ func (s *pmdWriteState) writeVec2(vec mmath.Vec2, positiveOnly bool) error {
 	return nil
 }
 
+// writeVec3 はVec3を書き込む。
 func (s *pmdWriteState) writeVec3(vec mmath.Vec3, positiveOnly bool) error {
 	if err := s.writer.WriteFloat32(vec.X, 0, positiveOnly); err != nil {
 		return io_common.NewIoSaveFailed("PMDVec3の書き込みに失敗しました", err)

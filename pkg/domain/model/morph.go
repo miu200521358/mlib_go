@@ -55,8 +55,8 @@ const (
 	CALC_MODE_ADDITION
 )
 
-// MorphOffset はモーフオフセットを表す。
-type MorphOffset interface {
+// IMorphOffset はモーフオフセットを表す。
+type IMorphOffset interface {
 	MorphType() MorphType
 }
 
@@ -132,7 +132,7 @@ type Morph struct {
 	EnglishName string
 	Panel       MorphPanel
 	MorphType   MorphType
-	Offsets     []MorphOffset
+	Offsets     []IMorphOffset
 	DisplaySlot int
 	IsSystem    bool // システム追加モーフの場合はtrue
 }

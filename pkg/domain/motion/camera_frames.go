@@ -30,15 +30,19 @@ func NewCameraFrame(index Frame) *CameraFrame {
 }
 
 // Copy はフレームを複製する。
-func (f *CameraFrame) Copy() (IBaseFrame, error) {
+func (f *CameraFrame) Copy() (CameraFrame, error) {
 	if f == nil {
-		return (*CameraFrame)(nil), nil
+		return CameraFrame{}, nil
 	}
 	var curves *CameraCurves
 	if f.Curves != nil {
-		curves = f.Curves.Copy()
+		copiedCurves, err := f.Curves.Copy()
+		if err != nil {
+			return CameraFrame{}, err
+		}
+		curves = &copiedCurves
 	}
-	copied := &CameraFrame{
+	copied := CameraFrame{
 		BaseFrame:        &BaseFrame{index: f.Index(), Read: f.Read},
 		Position:         copyVec3(f.Position),
 		Degrees:          copyVec3(f.Degrees),
@@ -98,7 +102,7 @@ func (f *CameraFrame) copyWithIndex(index Frame) *CameraFrame {
 	}
 	var curves *CameraCurves
 	if f.Curves != nil {
-		curves = f.Curves.Copy()
+		curves = cloneCameraCurves(f.Curves)
 	}
 	return &CameraFrame{
 		BaseFrame:        &BaseFrame{index: index, Read: f.Read},
@@ -181,10 +185,14 @@ func (c *CameraFrames) Clean() {
 }
 
 // Copy はフレーム集合を複製する。
-func (c *CameraFrames) Copy() (*CameraFrames, error) {
-	return deepCopy(c)
+func (c *CameraFrames) Copy() (CameraFrames, error) {
+	if c == nil {
+		return CameraFrames{}, nil
+	}
+	return deepCopy(*c)
 }
 
+// nilCameraFrame は既定の空フレームを返す。
 func nilCameraFrame() *CameraFrame {
 	return nil
 }
@@ -198,6 +206,7 @@ func cameraCurveT(prev, now, next Frame, curves *CameraCurves) (float64, float64
 	return curves.Evaluate(prev, now, next)
 }
 
+// isDefaultCameraCurves は既定の補間曲線か判定する。
 func isDefaultCameraCurves(curves *CameraCurves) bool {
 	if curves == nil {
 		return true
@@ -206,6 +215,7 @@ func isDefaultCameraCurves(curves *CameraCurves) bool {
 		isLinearCurve(curves.Rotate) && isLinearCurve(curves.Distance) && isLinearCurve(curves.ViewOfAngle)
 }
 
+// isLinearCurve は線形補間曲線か判定する。
 func isLinearCurve(curve *mmath.Curve) bool {
 	if curve == nil {
 		return true

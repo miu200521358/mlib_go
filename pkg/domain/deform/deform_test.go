@@ -83,17 +83,17 @@ func TestComputeMorphDeltasGroupMaterial(t *testing.T) {
 	m := newTestModel()
 	vertexMorph := &model.Morph{MorphType: model.MORPH_TYPE_VERTEX}
 	vertexMorph.SetName("v")
-	vertexMorph.Offsets = []model.MorphOffset{&model.VertexMorphOffset{VertexIndex: 0, Position: vec3(0, 1, 0)}}
+	vertexMorph.Offsets = []model.IMorphOffset{&model.VertexMorphOffset{VertexIndex: 0, Position: vec3(0, 1, 0)}}
 	m.Morphs.Append(vertexMorph)
 
 	groupMorph := &model.Morph{MorphType: model.MORPH_TYPE_GROUP}
 	groupMorph.SetName("g")
-	groupMorph.Offsets = []model.MorphOffset{&model.GroupMorphOffset{MorphIndex: 0, MorphFactor: 0.5}}
+	groupMorph.Offsets = []model.IMorphOffset{&model.GroupMorphOffset{MorphIndex: 0, MorphFactor: 0.5}}
 	m.Morphs.Append(groupMorph)
 
 	materialMorph := &model.Morph{MorphType: model.MORPH_TYPE_MATERIAL}
 	materialMorph.SetName("m")
-	materialMorph.Offsets = []model.MorphOffset{
+	materialMorph.Offsets = []model.IMorphOffset{
 		&model.MaterialMorphOffset{MaterialIndex: 0, CalcMode: model.CALC_MODE_MULTIPLICATION, Diffuse: mmath.Vec4{X: 2, Y: 2, Z: 2, W: 2}},
 		&model.MaterialMorphOffset{MaterialIndex: 0, CalcMode: model.CALC_MODE_ADDITION, Diffuse: mmath.Vec4{X: 1, Y: 1, Z: 1, W: 1}},
 	}

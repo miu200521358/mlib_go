@@ -28,15 +28,19 @@ func NewBoneFrame(index Frame) *BoneFrame {
 }
 
 // Copy はフレームを複製する。
-func (f *BoneFrame) Copy() (IBaseFrame, error) {
+func (f *BoneFrame) Copy() (BoneFrame, error) {
 	if f == nil {
-		return (*BoneFrame)(nil), nil
+		return BoneFrame{}, nil
 	}
 	var curves *BoneCurves
 	if f.Curves != nil {
-		curves = f.Curves.Copy()
+		copiedCurves, err := f.Curves.Copy()
+		if err != nil {
+			return BoneFrame{}, err
+		}
+		curves = &copiedCurves
 	}
-	copied := &BoneFrame{
+	copied := BoneFrame{
 		BaseFrame:          &BaseFrame{index: f.Index(), Read: f.Read},
 		Position:           copyVec3(f.Position),
 		Rotation:           copyQuaternion(f.Rotation),
@@ -122,7 +126,7 @@ func (f *BoneFrame) copyWithIndex(index Frame) *BoneFrame {
 	}
 	var curves *BoneCurves
 	if f.Curves != nil {
-		curves = f.Curves.Copy()
+		curves = cloneBoneCurves(f.Curves)
 	}
 	return &BoneFrame{
 		BaseFrame:          &BaseFrame{index: index, Read: f.Read},
@@ -237,7 +241,11 @@ func (b *BoneNameFrames) Reduce() (*BoneNameFrames, error) {
 		reduceBf.Position = copyVec3(bf.Position)
 		reduceBf.Rotation = copyQuaternion(bf.Rotation)
 		if bf.Curves != nil {
-			reduceBf.Curves = bf.Curves.Copy()
+			copiedCurves, err := bf.Curves.Copy()
+			if err != nil {
+				return nil, err
+			}
+			reduceBf.Curves = &copiedCurves
 		}
 		reduced.Append(reduceBf)
 	}
@@ -332,8 +340,11 @@ func (b *BoneNameFrames) ContainsActive() bool {
 }
 
 // Copy はフレーム集合を複製する。
-func (b *BoneNameFrames) Copy() (*BoneNameFrames, error) {
-	return deepCopy(b)
+func (b *BoneNameFrames) Copy() (BoneNameFrames, error) {
+	if b == nil {
+		return BoneNameFrames{}, nil
+	}
+	return deepCopy(*b)
 }
 
 // BoneFrames はボーン名ごとの集合を表す。
@@ -500,15 +511,19 @@ func (b *BoneFrames) Clean() {
 }
 
 // Copy はボーン集合を複製する。
-func (b *BoneFrames) Copy() (*BoneFrames, error) {
-	copied, err := deepCopy(b)
+func (b *BoneFrames) Copy() (BoneFrames, error) {
+	if b == nil {
+		return BoneFrames{}, nil
+	}
+	copied, err := deepCopy(*b)
 	if err != nil {
-		return nil, err
+		return BoneFrames{}, err
 	}
 	copied.rebuildNameIndex()
 	return copied, nil
 }
 
+// rebuildNameIndex は名前インデックスを再構築する。
 func (b *BoneFrames) rebuildNameIndex() {
 	b.nameIndex = make(map[string]int, len(b.names))
 	for i, name := range b.names {
@@ -516,6 +531,7 @@ func (b *BoneFrames) rebuildNameIndex() {
 	}
 }
 
+// nilBoneFrame は既定の空フレームを返す。
 func nilBoneFrame() *BoneFrame {
 	return nil
 }
@@ -606,7 +622,11 @@ func (b *BoneNameFrames) reduceRange(startFrame, midFrame, endFrame Frame, xs, y
 		reduceBf.Position = copyVec3(bf.Position)
 		reduceBf.Rotation = copyQuaternion(bf.Rotation)
 		if bf.Curves != nil {
-			reduceBf.Curves = bf.Curves.Copy()
+			copiedCurves, err := bf.Curves.Copy()
+			if err != nil {
+				return 0, err
+			}
+			reduceBf.Curves = &copiedCurves
 		}
 		reduced.Append(reduceBf)
 		return midFrame, nil

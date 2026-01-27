@@ -701,7 +701,7 @@ func (p *pmxReader) readMorphs(modelData *model.PmxModel) error {
 			EnglishName: englishName,
 			Panel:       model.MorphPanel(panel),
 			MorphType:   model.MorphType(morphType),
-			Offsets:     make([]model.MorphOffset, 0, offsetCount),
+			Offsets:     make([]model.IMorphOffset, 0, offsetCount),
 		}
 		morph.SetName(name)
 
@@ -718,7 +718,7 @@ func (p *pmxReader) readMorphs(modelData *model.PmxModel) error {
 }
 
 // readMorphOffset はモーフオフセットを読み込む。
-func (p *pmxReader) readMorphOffset(morphType model.MorphType) (model.MorphOffset, error) {
+func (p *pmxReader) readMorphOffset(morphType model.MorphType) (model.IMorphOffset, error) {
 	switch morphType {
 	case model.MORPH_TYPE_GROUP:
 		idx, err := readSignedIndex(p.reader, p.header.morphIndexSize)

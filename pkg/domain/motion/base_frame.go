@@ -9,7 +9,6 @@ type Frame = mtime.Frame
 // IBaseFrame はフレームの共通インターフェース。
 type IBaseFrame interface {
 	Index() Frame
-	Copy() (IBaseFrame, error)
 }
 
 // BaseFrame は共通フレーム情報を表す。
@@ -32,9 +31,9 @@ func (f *BaseFrame) Index() Frame {
 }
 
 // Copy はフレームを複製する。
-func (f *BaseFrame) Copy() (IBaseFrame, error) {
+func (f *BaseFrame) Copy() (BaseFrame, error) {
 	if f == nil {
-		return (*BaseFrame)(nil), nil
+		return BaseFrame{}, nil
 	}
-	return &BaseFrame{index: f.index, Read: f.Read}, nil
+	return BaseFrame{index: f.index, Read: f.Read}, nil
 }

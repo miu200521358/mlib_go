@@ -226,8 +226,8 @@ func (cw *ControlWindow) Dispose() {
 	cw.closeVerboseSinks()
 }
 
-// infoLineLogger はタイトル付き区切り線ログのI/F。
-type infoLineLogger interface {
+// iInfoLineLogger はタイトル付き区切り線ログのI/F。
+type iInfoLineLogger interface {
 	InfoLineTitle(title, msg string, params ...any)
 }
 
@@ -260,7 +260,7 @@ func (cw *ControlWindow) setConsoleSink(writer io.Writer) {
 // infoLineTitle は区切り線付きタイトルログを出力する。
 func (cw *ControlWindow) infoLineTitle(title, msg string) {
 	logger := cw.loggerOrDefault()
-	if titled, ok := logger.(infoLineLogger); ok {
+	if titled, ok := logger.(iInfoLineLogger); ok {
 		titled.InfoLineTitle(title, msg)
 		return
 	}

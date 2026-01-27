@@ -384,13 +384,13 @@ func (l *Logger) translateKey(key string) string {
 }
 
 type (
-	errorIDProvider interface {
+	iErrorIDProvider interface {
 		ErrorID() string
 	}
-	errorKindProvider interface {
+	iErrorKindProvider interface {
 		ErrorKind() merr.ErrorKind
 	}
-	errorMessageProvider interface {
+	iErrorMessageProvider interface {
 		MessageKey() string
 		MessageParams() []any
 	}
@@ -401,7 +401,7 @@ func extractErrorID(err error) string {
 	if err == nil {
 		return ""
 	}
-	var provider errorIDProvider
+	var provider iErrorIDProvider
 	if errors.As(err, &provider) {
 		return provider.ErrorID()
 	}
@@ -413,7 +413,7 @@ func extractErrorKind(err error) merr.ErrorKind {
 	if err == nil {
 		return ""
 	}
-	var provider errorKindProvider
+	var provider iErrorKindProvider
 	if errors.As(err, &provider) {
 		return provider.ErrorKind()
 	}
@@ -425,7 +425,7 @@ func extractMessageKey(err error) (string, []any) {
 	if err == nil {
 		return "", nil
 	}
-	var provider errorMessageProvider
+	var provider iErrorMessageProvider
 	if errors.As(err, &provider) {
 		return provider.MessageKey(), provider.MessageParams()
 	}

@@ -126,6 +126,7 @@ func (r *vpdReader) readBones(motionData *motion.VmdMotion) error {
 	return nil
 }
 
+// parseBoneStart はボーン開始行から名前を抽出する。
 func parseBoneStart(line string) (string, bool) {
 	idx := strings.Index(line, "{")
 	if idx < 0 {
@@ -138,6 +139,7 @@ func parseBoneStart(line string) (string, bool) {
 	return name, true
 }
 
+// parseVec3 はVPDの位置ベクトルを解析する。
 func parseVec3(x, y, z string) (mmath.Vec3, error) {
 	fx, err := strconv.ParseFloat(x, 64)
 	if err != nil {
@@ -158,6 +160,7 @@ func parseVec3(x, y, z string) (mmath.Vec3, error) {
 	return vec, nil
 }
 
+// parseQuat はVPDの回転クォータニオンを解析する。
 func parseQuat(x, y, z, w string) (mmath.Quaternion, error) {
 	fx, err := strconv.ParseFloat(x, 64)
 	if err != nil {

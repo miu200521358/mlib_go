@@ -139,7 +139,10 @@ func TestBoneMorphDeltaCopy(t *testing.T) {
 	rot := mmath.NewQuaternionFromAxisAngles(mmath.UNIT_Y_VEC3, math.Pi/2)
 	d.FrameRotation = &rot
 
-	cp := d.Copy()
+	cp, err := d.Copy()
+	if err != nil {
+		t.Fatalf("Copy error: %v", err)
+	}
 	pos.X = 2
 	if cp.FramePosition == nil || cp.FramePosition.X != 1 {
 		t.Fatalf("expected copied position")

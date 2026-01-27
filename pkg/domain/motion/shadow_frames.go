@@ -14,11 +14,11 @@ func NewShadowFrame(index Frame) *ShadowFrame {
 }
 
 // Copy はフレームを複製する。
-func (f *ShadowFrame) Copy() (IBaseFrame, error) {
+func (f *ShadowFrame) Copy() (ShadowFrame, error) {
 	if f == nil {
-		return (*ShadowFrame)(nil), nil
+		return ShadowFrame{}, nil
 	}
-	copied := &ShadowFrame{
+	copied := ShadowFrame{
 		BaseFrame:  &BaseFrame{index: f.Index(), Read: f.Read},
 		ShadowMode: f.ShadowMode,
 		Distance:   f.Distance,
@@ -96,10 +96,14 @@ func (s *ShadowFrames) Clean() {
 }
 
 // Copy はフレーム集合を複製する。
-func (s *ShadowFrames) Copy() (*ShadowFrames, error) {
-	return deepCopy(s)
+func (s *ShadowFrames) Copy() (ShadowFrames, error) {
+	if s == nil {
+		return ShadowFrames{}, nil
+	}
+	return deepCopy(*s)
 }
 
+// nilShadowFrame は空のシャドウフレームを返す。
 func nilShadowFrame() *ShadowFrame {
 	return nil
 }

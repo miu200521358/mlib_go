@@ -103,9 +103,9 @@ func (d *BoneMorphDelta) FilledMorphLocalMat() mmath.Mat4 {
 }
 
 // Copy は差分を複製する。
-func (d *BoneMorphDelta) Copy() BoneMorphDelta {
+func (d *BoneMorphDelta) Copy() (BoneMorphDelta, error) {
 	if d == nil {
-		return BoneMorphDelta{}
+		return BoneMorphDelta{}, nil
 	}
 	copyDelta := BoneMorphDelta{BoneIndex: d.BoneIndex}
 	{
@@ -136,7 +136,7 @@ func (d *BoneMorphDelta) Copy() BoneMorphDelta {
 		mat := d.FilledMorphLocalMat()
 		copyDelta.FrameLocalMat = &mat
 	}
-	return copyDelta
+	return copyDelta, nil
 }
 
 // MaterialMorphDelta は材質モーフ差分を表す。

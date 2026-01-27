@@ -435,6 +435,7 @@ func (m Mat4) AxisZ() Vec3 {
 	return Vec3{r3.Vec{X: m[8], Y: m[9], Z: m[10]}}
 }
 
+// mat4Det は4x4行列の行列式を計算する。
 func mat4Det(m Mat4) float64 {
 	a00, a01, a02, a03 := m[0], m[1], m[2], m[3]
 	a10, a11, a12, a13 := m[4], m[5], m[6], m[7]
@@ -457,6 +458,7 @@ func mat4Det(m Mat4) float64 {
 	return b00*b11 - b01*b10 + b02*b09 + b03*b08 - b04*b07 + b05*b06
 }
 
+// mat4Inverse は行列式を利用して逆行列を計算する。
 func mat4Inverse(m Mat4, det float64) (Mat4, bool) {
 	a00, a01, a02, a03 := m[0], m[1], m[2], m[3]
 	a10, a11, a12, a13 := m[4], m[5], m[6], m[7]

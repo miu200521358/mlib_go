@@ -24,8 +24,8 @@ import (
 	"github.com/miu200521358/walk/pkg/walk"
 )
 
-// overrideBoneInserter は不足ボーンの補完を行うI/F。
-type overrideBoneInserter interface {
+// iOverrideBoneInserter は不足ボーンの補完を行うI/F。
+type iOverrideBoneInserter interface {
 	InsertShortageOverrideBones() error
 }
 
@@ -274,7 +274,7 @@ func loadModel(logger logging.ILogger, translator i18n.II18n, cw *controller.Con
 		return
 	}
 	if modelData.Bones != nil {
-		if inserter, ok := any(modelData.Bones).(overrideBoneInserter); ok {
+		if inserter, ok := any(modelData.Bones).(iOverrideBoneInserter); ok {
 			// エラーが出てもスルー
 			inserter.InsertShortageOverrideBones()
 		}
@@ -396,7 +396,7 @@ func translate(translator i18n.II18n, key string) string {
 	return translator.T(key)
 }
 
-type errorIDProvider interface {
+type iErrorIDProvider interface {
 	ErrorID() string
 }
 
@@ -405,7 +405,7 @@ func extractErrorID(err error) string {
 	if err == nil {
 		return ""
 	}
-	var provider errorIDProvider
+	var provider iErrorIDProvider
 	if errors.As(err, &provider) {
 		return provider.ErrorID()
 	}

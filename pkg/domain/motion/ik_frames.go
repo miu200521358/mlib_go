@@ -14,11 +14,11 @@ func NewIkEnabledFrame(index Frame, boneName string) *IkEnabledFrame {
 }
 
 // Copy はフレームを複製する。
-func (f *IkEnabledFrame) Copy() (IBaseFrame, error) {
+func (f *IkEnabledFrame) Copy() (IkEnabledFrame, error) {
 	if f == nil {
-		return (*IkEnabledFrame)(nil), nil
+		return IkEnabledFrame{}, nil
 	}
-	copied := &IkEnabledFrame{
+	copied := IkEnabledFrame{
 		BaseFrame: &BaseFrame{index: f.Index(), Read: f.Read},
 		BoneName:  f.BoneName,
 		Enabled:   f.Enabled,
@@ -66,11 +66,11 @@ func NewIkFrame(index Frame) *IkFrame {
 }
 
 // Copy はフレームを複製する。
-func (f *IkFrame) Copy() (IBaseFrame, error) {
+func (f *IkFrame) Copy() (IkFrame, error) {
 	if f == nil {
-		return (*IkFrame)(nil), nil
+		return IkFrame{}, nil
 	}
-	copied := &IkFrame{
+	copied := IkFrame{
 		BaseFrame: &BaseFrame{index: f.Index(), Read: f.Read},
 		Visible:   f.Visible,
 		IkList:    copyIkList(f.IkList),
@@ -154,14 +154,19 @@ func (i *IkFrames) Clean() {
 }
 
 // Copy はフレーム集合を複製する。
-func (i *IkFrames) Copy() (*IkFrames, error) {
-	return deepCopy(i)
+func (i *IkFrames) Copy() (IkFrames, error) {
+	if i == nil {
+		return IkFrames{}, nil
+	}
+	return deepCopy(*i)
 }
 
+// nilIkFrame は既定の空フレームを返す。
 func nilIkFrame() *IkFrame {
 	return nil
 }
 
+// copyIkList はIK有効リストを複製する。
 func copyIkList(src []*IkEnabledFrame) []*IkEnabledFrame {
 	if len(src) == 0 {
 		return nil
@@ -172,8 +177,12 @@ func copyIkList(src []*IkEnabledFrame) []*IkEnabledFrame {
 			out = append(out, nil)
 			continue
 		}
-		copied, _ := item.Copy()
-		out = append(out, copied.(*IkEnabledFrame))
+		copied := IkEnabledFrame{
+			BaseFrame: &BaseFrame{index: item.Index(), Read: item.Read},
+			BoneName:  item.BoneName,
+			Enabled:   item.Enabled,
+		}
+		out = append(out, &copied)
 	}
 	return out
 }

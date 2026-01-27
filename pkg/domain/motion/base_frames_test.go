@@ -17,11 +17,11 @@ func newDummyFrame(index Frame) *dummyFrame {
 }
 
 // Copy はフレームを複製する。
-func (d *dummyFrame) Copy() (IBaseFrame, error) {
+func (d *dummyFrame) Copy() (dummyFrame, error) {
 	if d == nil {
-		return (*dummyFrame)(nil), nil
+		return dummyFrame{}, nil
 	}
-	copied := &dummyFrame{
+	copied := dummyFrame{
 		BaseFrame:  &BaseFrame{index: d.Index(), Read: d.Read},
 		Value:      d.Value,
 		LerpCount:  d.LerpCount,

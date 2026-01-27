@@ -21,11 +21,11 @@ func NewRigidBodyFrame(index Frame) *RigidBodyFrame {
 }
 
 // Copy はフレームを複製する。
-func (f *RigidBodyFrame) Copy() (IBaseFrame, error) {
+func (f *RigidBodyFrame) Copy() (RigidBodyFrame, error) {
 	if f == nil {
-		return (*RigidBodyFrame)(nil), nil
+		return RigidBodyFrame{}, nil
 	}
-	copied := &RigidBodyFrame{
+	copied := RigidBodyFrame{
 		BaseFrame: &BaseFrame{index: f.Index(), Read: f.Read},
 		Position:  copyVec3(f.Position),
 		Size:      copyVec3(f.Size),
@@ -91,8 +91,11 @@ func NewRigidBodyNameFrames(name string) *RigidBodyNameFrames {
 }
 
 // Copy はフレーム集合を複製する。
-func (r *RigidBodyNameFrames) Copy() (*RigidBodyNameFrames, error) {
-	return deepCopy(r)
+func (r *RigidBodyNameFrames) Copy() (RigidBodyNameFrames, error) {
+	if r == nil {
+		return RigidBodyNameFrames{}, nil
+	}
+	return deepCopy(*r)
 }
 
 // RigidBodyFrames は剛体名ごとの集合を表す。
@@ -224,15 +227,19 @@ func (r *RigidBodyFrames) MinFrame() Frame {
 }
 
 // Copy は剛体集合を複製する。
-func (r *RigidBodyFrames) Copy() (*RigidBodyFrames, error) {
-	copied, err := deepCopy(r)
+func (r *RigidBodyFrames) Copy() (RigidBodyFrames, error) {
+	if r == nil {
+		return RigidBodyFrames{}, nil
+	}
+	copied, err := deepCopy(*r)
 	if err != nil {
-		return nil, err
+		return RigidBodyFrames{}, err
 	}
 	copied.rebuildNameIndex()
 	return copied, nil
 }
 
+// rebuildNameIndex は名前インデックスを再構築する。
 func (r *RigidBodyFrames) rebuildNameIndex() {
 	r.nameIndex = make(map[string]int, len(r.names))
 	for i, name := range r.names {
@@ -240,10 +247,12 @@ func (r *RigidBodyFrames) rebuildNameIndex() {
 	}
 }
 
+// newRigidBodyFrame は既定値のフレームを生成する。
 func newRigidBodyFrame(frame Frame) *RigidBodyFrame {
 	return nil
 }
 
+// nilRigidBodyFrame は既定の空フレームを返す。
 func nilRigidBodyFrame() *RigidBodyFrame {
 	return nil
 }
