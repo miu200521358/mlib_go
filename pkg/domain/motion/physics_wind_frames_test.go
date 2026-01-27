@@ -4,13 +4,13 @@ package motion
 import (
 	"testing"
 
-	"github.com/miu200521358/mlib_go/pkg/adapter/physics_api"
+	"github.com/miu200521358/mlib_go/pkg/shared/contracts/performance"
 )
 
 // TestPhysicsFramesGetDefaults は物理フレームの既定値を確認する。
 func TestPhysicsFramesGetDefaults(t *testing.T) {
 	maxFrames := NewMaxSubStepsFrames()
-	if maxFrames.Get(0).MaxSubSteps != physics_api.PhysicsDefaultMaxSubSteps {
+	if maxFrames.Get(0).MaxSubSteps != performance.DefaultMaxSubSteps {
 		t.Fatalf("MaxSubSteps default")
 	}
 	fixedFrames := NewFixedTimeStepFrames()

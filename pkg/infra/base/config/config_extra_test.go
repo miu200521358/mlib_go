@@ -159,7 +159,10 @@ func TestUserConfigLoadAllVariants(t *testing.T) {
 	withTempRoot(t)
 	store := &UserConfigStore{}
 
-	root := MustAppRootDir()
+	root, err := AppRootDir()
+	if err != nil {
+		t.Fatalf("AppRootDir failed: %v", err)
+	}
 	path := filepath.Join(root, config.UserConfigFileName)
 	if err := os.WriteFile(path, []byte(`{"history":["a","b"]}`), 0644); err != nil {
 		t.Fatalf("seed config failed: %v", err)
@@ -221,7 +224,10 @@ func TestUserConfigSaveStringSlice(t *testing.T) {
 		t.Fatalf("SetStringSlice empty failed: %v", err)
 	}
 
-	root := MustAppRootDir()
+	root, err := AppRootDir()
+	if err != nil {
+		t.Fatalf("AppRootDir failed: %v", err)
+	}
 	path := filepath.Join(root, config.UserConfigFileName)
 	if err := os.WriteFile(path, []byte(`{"path":["c"]}`), 0644); err != nil {
 		t.Fatalf("seed config failed: %v", err)
@@ -254,7 +260,10 @@ func TestUserConfigBoolIntDefaults(t *testing.T) {
 		t.Errorf("Int default failed")
 	}
 
-	root := MustAppRootDir()
+	root, err := AppRootDir()
+	if err != nil {
+		t.Fatalf("AppRootDir failed: %v", err)
+	}
 	path := filepath.Join(root, config.UserConfigFileName)
 	if err := os.WriteFile(path, []byte(`{"num":["bad"]}`), 0644); err != nil {
 		t.Fatalf("seed config failed: %v", err)
@@ -304,23 +313,25 @@ func TestSaveStringSliceErrors(t *testing.T) {
 	}
 }
 
-// TestMustAppRootDirPanic はpanic分岐を確認する。
-func TestMustAppRootDirPanic(t *testing.T) {
+// TestAppRootDirError はAppRootDir失敗時のエラーを確認する。
+func TestAppRootDirError(t *testing.T) {
 	withExecutable(t, func() (string, error) {
 		return "", errors.New("exec error")
 	})
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("MustAppRootDir should panic")
-		}
-	}()
-	_ = MustAppRootDir()
+	if _, err := AppRootDir(); err == nil {
+		t.Fatalf("AppRootDir expected error")
+	} else if ce, ok := err.(*merr.CommonError); !ok || ce.ErrorID() != appRootDirResolveFailedErrorID {
+		t.Fatalf("AppRootDir ErrorID: err=%v", err)
+	}
 }
 
 // TestLoadUserConfigInvalidJSON はパース失敗を確認する。
 func TestLoadUserConfigInvalidJSON(t *testing.T) {
 	withTempRoot(t)
-	root := MustAppRootDir()
+	root, err := AppRootDir()
+	if err != nil {
+		t.Fatalf("AppRootDir failed: %v", err)
+	}
 	path := filepath.Join(root, config.UserConfigFileName)
 	if err := os.WriteFile(path, []byte("{invalid"), 0644); err != nil {
 		t.Fatalf("seed config failed: %v", err)
@@ -336,7 +347,10 @@ func TestLoadUserConfigInvalidJSON(t *testing.T) {
 // TestLoadUserConfigInvalidJSONError はパース失敗時のエラーIDを確認する。
 func TestLoadUserConfigInvalidJSONError(t *testing.T) {
 	withTempRoot(t)
-	root := MustAppRootDir()
+	root, err := AppRootDir()
+	if err != nil {
+		t.Fatalf("AppRootDir failed: %v", err)
+	}
 	path := filepath.Join(root, config.UserConfigFileName)
 	if err := os.WriteFile(path, []byte("{invalid"), 0644); err != nil {
 		t.Fatalf("seed config failed: %v", err)

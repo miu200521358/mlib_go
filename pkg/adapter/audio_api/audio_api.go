@@ -26,21 +26,3 @@ type IAudioPlayer interface {
 	// Path は読み込み済みのパスを返す。
 	Path() string
 }
-
-// AudioFactory は音声プレイヤー生成関数を表す。
-type AudioFactory func() IAudioPlayer
-
-var audioFactory AudioFactory
-
-// RegisterAudioFactory は音声プレイヤー生成関数を登録する。
-func RegisterAudioFactory(factory AudioFactory) {
-	audioFactory = factory
-}
-
-// NewAudioPlayer は登録済みの音声プレイヤーを生成する。
-func NewAudioPlayer() IAudioPlayer {
-	if audioFactory == nil {
-		return nil
-	}
-	return audioFactory()
-}

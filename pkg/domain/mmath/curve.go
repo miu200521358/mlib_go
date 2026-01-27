@@ -9,6 +9,7 @@ import (
 	"gonum.org/v1/gonum/optimize"
 )
 
+// Curve は補間曲線を表す。
 type Curve struct {
 	Start Vec2
 	End   Vec2

@@ -222,7 +222,7 @@ func (m *MaterialModel) Value(row, col int) interface{} {
 		return item.SphereNameText
 	}
 
-	panic("unexpected col")
+	return nil
 }
 
 // Checked はチェック状態を返す。

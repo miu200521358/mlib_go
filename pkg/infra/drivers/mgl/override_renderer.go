@@ -36,7 +36,7 @@ type OverrideRenderer struct {
 
 // NewOverrideRenderer は新しい OverrideRenderer を作成する。
 // isMainWindow が true の場合はメインウィンドウ用として動作する。
-func NewOverrideRenderer(width, height int, program uint32, isMainWindow bool) graphics_api.IOverrideRenderer {
+func NewOverrideRenderer(width, height int, program uint32, isMainWindow bool) *OverrideRenderer {
 	renderer := &OverrideRenderer{
 		width:        width,
 		height:       height,

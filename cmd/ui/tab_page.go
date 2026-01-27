@@ -5,7 +5,6 @@
 package ui
 
 import (
-	"errors"
 	"path/filepath"
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/audio_api"
@@ -19,6 +18,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
 )
@@ -28,8 +28,10 @@ type overrideBoneInserter interface {
 	InsertShortageOverrideBones() error
 }
 
+const repositoryNotConfiguredErrorID = "95504"
+
 // NewTabPages はサンプル用のタブページ群を生成する。
-func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices) []declarative.TabPage {
+func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices, audioPlayer audio_api.IAudioPlayer) []declarative.TabPage {
 	var fileTab *walk.TabPage
 	var materialTab *walk.TabPage
 	var vertexTab *walk.TabPage
@@ -49,7 +51,7 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices)
 	}
 
 	player := widget.NewMotionPlayer(translator)
-	player.SetAudioPlayer(audio_api.NewAudioPlayer(), userConfig)
+	player.SetAudioPlayer(audioPlayer, userConfig)
 
 	materialView := widget.NewMaterialTableView(
 		translator,
@@ -216,8 +218,8 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices)
 }
 
 // NewTabPage はサンプル用のタブページを生成する。
-func NewTabPage(mWidgets *controller.MWidgets, baseServices base.IBaseServices) declarative.TabPage {
-	return NewTabPages(mWidgets, baseServices)[0]
+func NewTabPage(mWidgets *controller.MWidgets, baseServices base.IBaseServices, audioPlayer audio_api.IAudioPlayer) declarative.TabPage {
+	return NewTabPages(mWidgets, baseServices, audioPlayer)[0]
 }
 
 // loadModel はモデル読み込み結果をControlWindowへ反映する。
@@ -236,7 +238,7 @@ func loadModel(logger logging.ILogger, translator i18n.II18n, cw *controller.Con
 		return
 	}
 	if rep == nil {
-		logLoadFailed(logger, translator, errors.New(translate(translator, "モデル読み込みリポジトリがありません")))
+		logLoadFailed(logger, translator, newRepositoryNotConfiguredError(translator, "モデル"))
 		if materialView != nil {
 			materialView.ResetRows(nil)
 		}
@@ -260,7 +262,7 @@ func loadModel(logger logging.ILogger, translator i18n.II18n, cw *controller.Con
 	}
 	modelData, ok := data.(*model.PmxModel)
 	if !ok {
-		logLoadFailed(logger, translator, errors.New(translate(translator, "モデル形式が不正です")))
+		logLoadFailed(logger, translator, io_common.NewIoFormatNotSupported(translate(translator, "モデル形式が不正です"), nil))
 		if materialView != nil {
 			materialView.ResetRows(nil)
 		}
@@ -329,7 +331,7 @@ func loadMotion(logger logging.ILogger, translator i18n.II18n, cw *controller.Co
 		return
 	}
 	if rep == nil {
-		logLoadFailed(logger, translator, errors.New(translate(translator, "モーション読み込みリポジトリがありません")))
+		logLoadFailed(logger, translator, newRepositoryNotConfiguredError(translator, "モーション"))
 		cw.SetMotion(windowIndex, modelIndex, nil)
 		return
 	}
@@ -341,7 +343,7 @@ func loadMotion(logger logging.ILogger, translator i18n.II18n, cw *controller.Co
 	}
 	motionData, ok := data.(*motion.VmdMotion)
 	if !ok {
-		logLoadFailed(logger, translator, errors.New(translate(translator, "モーション形式が不正です")))
+		logLoadFailed(logger, translator, io_common.NewIoFormatNotSupported(translate(translator, "モーション形式が不正です"), nil))
 		cw.SetMotion(windowIndex, modelIndex, nil)
 		return
 	}
@@ -357,6 +359,12 @@ func logLoadFailed(logger logging.ILogger, translator i18n.II18n, err error) {
 		logger = logging.DefaultLogger()
 	}
 	logErrorTitle(logger, translate(translator, "読み込み失敗"), err)
+}
+
+// newRepositoryNotConfiguredError は読み込みリポジトリ未設定エラーを生成する。
+func newRepositoryNotConfiguredError(translator i18n.II18n, target string) error {
+	message := translate(translator, target+"読み込みリポジトリがありません")
+	return merr.NewCommonError(repositoryNotConfiguredErrorID, merr.ErrorKindInternal, message, nil)
 }
 
 // logErrorTitle はタイトル付きエラーを出力する。

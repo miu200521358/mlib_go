@@ -2,11 +2,11 @@
 package hashable
 
 import (
+	"crypto/rand"
+	"encoding/binary"
 	"fmt"
 	"hash/fnv"
-	"math/rand"
 	"strconv"
-	"sync"
 	"time"
 )
 
@@ -33,11 +33,6 @@ type HashableBase struct {
 	hash        string
 	partsFunc   func() string
 }
-
-var (
-	randMu  sync.Mutex
-	randGen = rand.New(rand.NewSource(time.Now().UnixNano()))
-)
 
 // NewHashableBase はHashableBaseを生成する。
 func NewHashableBase(name, path string) *HashableBase {
@@ -112,8 +107,18 @@ func (hb *HashableBase) UpdateHash() {
 
 // UpdateRandomHash は再読込用にランダム値を設定する。
 func (hb *HashableBase) UpdateRandomHash() {
-	randMu.Lock()
-	value := randGen.Int63()
-	randMu.Unlock()
+	value, err := randomInt63()
+	if err != nil {
+		value = time.Now().UnixNano()
+	}
 	hb.hash = strconv.FormatInt(value, 10)
+}
+
+// randomInt63 は乱数をint64で返す。
+func randomInt63() (int64, error) {
+	var buf [8]byte
+	if _, err := rand.Read(buf[:]); err != nil {
+		return 0, err
+	}
+	return int64(binary.LittleEndian.Uint64(buf[:])), nil
 }

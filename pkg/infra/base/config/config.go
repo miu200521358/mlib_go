@@ -72,7 +72,7 @@ type ConfigStore struct {
 }
 
 // NewConfigStore は設定ストアを生成する。
-func NewConfigStore(appConfig *config.AppConfig, userConfig config.IUserConfig) config.IConfigStore {
+func NewConfigStore(appConfig *config.AppConfig, userConfig config.IUserConfig) *ConfigStore {
 	return &ConfigStore{appConfig: appConfig, userConfig: userConfig}
 }
 
@@ -96,7 +96,7 @@ var userConfigOnce sync.Once
 var userConfigSingleton *UserConfigStore
 
 // NewUserConfigStore はユーザー設定ストアを返す（シングルトン）。
-func NewUserConfigStore() config.IUserConfig {
+func NewUserConfigStore() *UserConfigStore {
 	userConfigOnce.Do(func() {
 		userConfigSingleton = &UserConfigStore{}
 	})
@@ -358,15 +358,6 @@ func AppRootDir() (string, error) {
 		return "", newAppRootDirResolveFailed(err)
 	}
 	return root, nil
-}
-
-// MustAppRootDir はアプリルートをpanic付きで返す。
-func MustAppRootDir() string {
-	root, err := AppRootDir()
-	if err != nil {
-		panic(err)
-	}
-	return root
 }
 
 // LoadAppConfig は埋め込み設定を読み込む。

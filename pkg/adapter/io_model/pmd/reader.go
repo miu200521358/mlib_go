@@ -83,6 +83,7 @@ func (p *pmdReader) Read(modelData *model.PmxModel) error {
 	return nil
 }
 
+// readHeader はPMDヘッダーを読み込む。
 func (p *pmdReader) readHeader(modelData *model.PmxModel) error {
 	signature, err := p.reader.ReadBytes(3)
 	if err != nil {
@@ -111,6 +112,7 @@ func (p *pmdReader) readHeader(modelData *model.PmxModel) error {
 	return nil
 }
 
+// readVertices は頂点データを読み込む。
 func (p *pmdReader) readVertices(modelData *model.PmxModel) error {
 	count, err := p.reader.ReadUint32()
 	if err != nil {
@@ -186,6 +188,7 @@ func (p *pmdReader) readVertices(modelData *model.PmxModel) error {
 	return nil
 }
 
+// readFaces は面データを読み込む。
 func (p *pmdReader) readFaces(modelData *model.PmxModel) error {
 	count, err := p.reader.ReadUint32()
 	if err != nil {
@@ -213,6 +216,7 @@ func (p *pmdReader) readFaces(modelData *model.PmxModel) error {
 	return nil
 }
 
+// readMaterials は材質データを読み込む。
 func (p *pmdReader) readMaterials(modelData *model.PmxModel) error {
 	count, err := p.reader.ReadUint32()
 	if err != nil {
@@ -301,6 +305,7 @@ func (p *pmdReader) readMaterials(modelData *model.PmxModel) error {
 	return nil
 }
 
+// readBones はボーンデータを読み込む。
 func (p *pmdReader) readBones(modelData *model.PmxModel) error {
 	count, err := p.reader.ReadUint16()
 	if err != nil {
@@ -360,6 +365,7 @@ func (p *pmdReader) readBones(modelData *model.PmxModel) error {
 	return nil
 }
 
+// readIk はIKデータを読み込む。
 func (p *pmdReader) readIk(modelData *model.PmxModel) error {
 	count, err := p.reader.ReadUint16()
 	if err != nil {
@@ -440,6 +446,7 @@ func (p *pmdReader) readIk(modelData *model.PmxModel) error {
 	return nil
 }
 
+// readSkins は表情データを読み込む。
 func (p *pmdReader) readSkins(modelData *model.PmxModel) error {
 	count, err := p.reader.ReadUint16()
 	if err != nil {
@@ -514,6 +521,7 @@ func (p *pmdReader) readSkins(modelData *model.PmxModel) error {
 	return nil
 }
 
+// readSkinDisplayList は表情表示リストを読み込む。
 func (p *pmdReader) readSkinDisplayList() error {
 	count, err := p.reader.ReadUint8()
 	if err != nil {
@@ -530,6 +538,7 @@ func (p *pmdReader) readSkinDisplayList() error {
 	return nil
 }
 
+// readBoneDisplayNames はボーン表示枠名を読み込む。
 func (p *pmdReader) readBoneDisplayNames() error {
 	count, err := p.reader.ReadUint8()
 	if err != nil {
@@ -546,6 +555,7 @@ func (p *pmdReader) readBoneDisplayNames() error {
 	return nil
 }
 
+// readBoneDisplayList はボーン表示枠の参照を読み込む。
 func (p *pmdReader) readBoneDisplayList() error {
 	count, err := p.reader.ReadUint32()
 	if err != nil {
@@ -566,6 +576,7 @@ func (p *pmdReader) readBoneDisplayList() error {
 	return nil
 }
 
+// readExtensions は拡張領域を読み込む。
 func (p *pmdReader) readExtensions(modelData *model.PmxModel) error {
 	flag, err := p.reader.ReadUint8()
 	if err != nil {
@@ -798,6 +809,7 @@ func (p *pmdReader) readExtensions(modelData *model.PmxModel) error {
 	return nil
 }
 
+// buildDisplaySlots は表示枠情報を構築する。
 func (p *pmdReader) buildDisplaySlots(modelData *model.PmxModel) {
 	if modelData == nil || modelData.DisplaySlots == nil {
 		return
@@ -853,6 +865,7 @@ func (p *pmdReader) buildDisplaySlots(modelData *model.PmxModel) {
 	}
 }
 
+// findOrAppendTexture はテクスチャの検索・追加を行う。
 func (p *pmdReader) findOrAppendTexture(modelData *model.PmxModel, name string) int {
 	if name == "" {
 		return -1
@@ -868,6 +881,7 @@ func (p *pmdReader) findOrAppendTexture(modelData *model.PmxModel, name string) 
 	return idx
 }
 
+// readFixedString は固定長文字列を読み込む。
 func (p *pmdReader) readFixedString(size int, label string) (string, error) {
 	raw, err := p.reader.ReadBytes(size)
 	if err != nil {
@@ -880,26 +894,32 @@ func (p *pmdReader) readFixedString(size int, label string) (string, error) {
 	return text, nil
 }
 
+// nearVersion はPMDバージョンが近似一致か判定する。
 func nearVersion(value, expected float64) bool {
 	return math.Abs(value-expected) < 0.01
 }
 
+// isEOF はEOFエラーか判定する。
 func isEOF(err error) bool {
 	return errors.Is(err, io.EOF) || errors.Is(err, io.ErrUnexpectedEOF)
 }
 
+// wrapParseFailed は解析失敗エラーを生成する。
 func wrapParseFailed(message string, err error) error {
 	return io_common.NewIoParseFailed(message, err)
 }
 
+// wrapFormatNotSupported は形式未対応エラーを生成する。
 func wrapFormatNotSupported(message string, err error) error {
 	return io_common.NewIoFormatNotSupported(message, err)
 }
 
+// wrapEncodingUnknown は未知エンコードエラーを生成する。
 func wrapEncodingUnknown(message string, err error) error {
 	return io_common.NewIoEncodingUnknown(message, err)
 }
 
+// wrapEncodeFailed はエンコード失敗エラーを生成する。
 func wrapEncodeFailed(message string, err error) error {
 	return io_common.NewIoEncodeFailed(message, err)
 }

@@ -2,8 +2,8 @@
 package motion
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/adapter/physics_api"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/shared/contracts/performance"
 )
 
 // PhysicsResetType は物理リセット種別を表す。
@@ -28,7 +28,7 @@ type MaxSubStepsFrame struct {
 
 // NewMaxSubStepsFrame はMaxSubStepsFrameを生成する。
 func NewMaxSubStepsFrame(index Frame) *MaxSubStepsFrame {
-	return &MaxSubStepsFrame{BaseFrame: NewBaseFrame(index), MaxSubSteps: physics_api.PhysicsDefaultMaxSubSteps}
+	return &MaxSubStepsFrame{BaseFrame: NewBaseFrame(index), MaxSubSteps: performance.DefaultMaxSubSteps}
 }
 
 // Copy はフレームを複製する。

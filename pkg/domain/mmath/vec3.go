@@ -12,6 +12,7 @@ import (
 	"gonum.org/v1/gonum/spatial/r3"
 )
 
+// Vec3 は3次元ベクトルを表す。
 type Vec3 struct {
 	r3.Vec
 }

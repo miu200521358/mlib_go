@@ -4,6 +4,8 @@ package merrors
 import (
 	"errors"
 	"testing"
+
+	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 )
 
 func TestIndexOutOfRangeError(t *testing.T) {
@@ -51,6 +53,19 @@ func TestParentNotFoundError(t *testing.T) {
 	var nilErr *ParentNotFoundError
 	if nilErr.Error() != "" {
 		t.Fatalf("nil Error should be empty")
+	}
+}
+
+func TestInvalidIndexError(t *testing.T) {
+	err := NewInvalidIndexError(3)
+	if err == nil {
+		t.Fatalf("NewInvalidIndexError should not return nil")
+	}
+	if err.Error() == "" {
+		t.Fatalf("Error should not be empty")
+	}
+	if ce, ok := any(err).(*merr.CommonError); !ok || ce.ErrorID() != invalidIndexErrorID {
+		t.Fatalf("InvalidIndexError ErrorID: err=%v", err)
 	}
 }
 

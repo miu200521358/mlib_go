@@ -4,13 +4,13 @@ package mdeform
 import (
 	"strings"
 
-	"github.com/miu200521358/mlib_go/pkg/adapter/physics_api"
 	"github.com/miu200521358/mlib_go/pkg/domain/deform"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"github.com/miu200521358/mlib_go/pkg/shared/state"
+	"github.com/miu200521358/mlib_go/pkg/usecase/port/physics"
 )
 
 // DeformStage は変形ステージを表す。
@@ -82,7 +82,7 @@ func RebuildBeforePhysics(
 
 // BuildForPhysics は物理用の剛体更新を行う。
 func BuildForPhysics(
-	core physics_api.IPhysicsCore,
+	core physics.IPhysicsCore,
 	modelIndex int,
 	modelData *model.PmxModel,
 	deltas *delta.VmdDeltas,
@@ -121,7 +121,7 @@ func BuildForPhysics(
 
 // BuildAfterPhysics は物理結果を反映し、物理後変形を行う。
 func BuildAfterPhysics(
-	core physics_api.IPhysicsCore,
+	core physics.IPhysicsCore,
 	physicsEnabled bool,
 	modelIndex int,
 	modelData *model.PmxModel,
@@ -282,7 +282,7 @@ func enableIk(opts *DeformOptions) bool {
 }
 
 // updateRigidBodyShapeMass は剛体形状と質量を差分に応じて更新する。
-func updateRigidBodyShapeMass(core physics_api.IPhysicsCore, modelIndex int, modelData *model.PmxModel, physicsDeltas *delta.PhysicsDeltas) {
+func updateRigidBodyShapeMass(core physics.IPhysicsCore, modelIndex int, modelData *model.PmxModel, physicsDeltas *delta.PhysicsDeltas) {
 	if core == nil || modelData == nil || physicsDeltas == nil || physicsDeltas.RigidBodies == nil {
 		return
 	}

@@ -9,16 +9,18 @@ import (
 	"time"
 
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
-	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 )
 
+// verboseFileSink は冗長ログ出力をファイルへ書き込む。
 type verboseFileSink struct {
 	mu       sync.Mutex
 	file     *os.File
 	writeErr error
 }
 
+// WriteLine は1行分のログを書き込む。
 func (s *verboseFileSink) WriteLine(text string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -34,6 +36,7 @@ func (s *verboseFileSink) WriteLine(text string) {
 	}
 }
 
+// Close はログストリームを閉じる。
 func (s *verboseFileSink) Close() error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -92,6 +95,7 @@ func SaveConsoleSnapshot(userConfig config.IUserConfig, label string, text strin
 	return path, nil
 }
 
+// logFileName はログファイル名を生成する。
 func logFileName(label string) string {
 	stamp := time.Now().Format("20060102_150405")
 	if label == "" {

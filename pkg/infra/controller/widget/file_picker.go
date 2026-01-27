@@ -151,7 +151,7 @@ func NewAudioLoadFilePicker(userConfig io_commonUserConfig, translator i18n.II18
 			{extension: "*.wav;*.mp3", description: "Audio Files (*.wav;*.mp3)"},
 			{extension: "*.*", description: "All Files (*.*)"},
 		},
-		io_audio.NewAudioRepository(),
+		io_audio.NewAudioRepository(translator),
 	)
 }
 

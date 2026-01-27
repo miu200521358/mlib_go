@@ -51,9 +51,15 @@ func loadImage(path string, displayName string, open imageOpenFunc) (image.Image
 			return nil, err
 		}
 		img, err := loadImageByExtension(reader, ext)
-		_ = reader.Close()
+		closeErr := reader.Close()
 		if err == nil {
+			if closeErr != nil {
+				return img, wrapImageCloseError(displayName, closeErr)
+			}
 			return img, nil
+		}
+		if closeErr != nil {
+			err = errors.Join(err, wrapImageCloseError(displayName, closeErr))
 		}
 		lastErr = err
 	}
@@ -62,13 +68,19 @@ func loadImage(path string, displayName string, open imageOpenFunc) (image.Image
 	if err != nil {
 		return nil, err
 	}
-	defer reader.Close()
 	img, _, err := image.Decode(reader)
+	closeErr := reader.Close()
 	if err != nil {
 		if lastErr == nil {
 			lastErr = err
 		}
+		if closeErr != nil {
+			lastErr = errors.Join(lastErr, wrapImageCloseError(displayName, closeErr))
+		}
 		return nil, merr.NewImagePackageError("画像のデコードに失敗しました: "+displayName, lastErr)
+	}
+	if closeErr != nil {
+		return img, wrapImageCloseError(displayName, closeErr)
 	}
 	return img, nil
 }
@@ -114,4 +126,9 @@ func loadImageByExtension(reader io.Reader, ext string) (image.Image, error) {
 	default:
 		return nil, errUnsupportedImageFormat
 	}
+}
+
+// wrapImageCloseError は画像ファイルのクローズ失敗を共通エラーで包む。
+func wrapImageCloseError(displayName string, cause error) error {
+	return merr.NewOsPackageError("画像ファイルのクローズに失敗しました: "+displayName, cause)
 }

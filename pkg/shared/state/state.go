@@ -5,8 +5,8 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/miu200521358/mlib_go/pkg/adapter/physics_api"
 	"github.com/miu200521358/mlib_go/pkg/shared/contracts/mtime"
+	"github.com/miu200521358/mlib_go/pkg/shared/contracts/performance"
 	"github.com/miu200521358/mlib_go/pkg/shared/hashable"
 )
 
@@ -243,21 +243,21 @@ type SharedState struct {
 }
 
 // NewSharedState は共有状態を生成する。
-func NewSharedState(viewerCount int) ISharedState {
+func NewSharedState(viewerCount int) *SharedState {
 	ss := &SharedState{
-		viewerWindowHandles: make([]atomic.Int32, viewerCount),
-		viewerWindowReady:   make([]atomic.Bool, viewerCount),
-		viewerWindowFocused: make([]atomic.Bool, viewerCount),
-		models:              make([][]atomic.Value, viewerCount),
-		motions:             make([][]atomic.Value, viewerCount),
-		selectedIndexes:     make([][]atomic.Value, viewerCount),
+		viewerWindowHandles:   make([]atomic.Int32, viewerCount),
+		viewerWindowReady:     make([]atomic.Bool, viewerCount),
+		viewerWindowFocused:   make([]atomic.Bool, viewerCount),
+		models:                make([][]atomic.Value, viewerCount),
+		motions:               make([][]atomic.Value, viewerCount),
+		selectedIndexes:       make([][]atomic.Value, viewerCount),
 		selectedVertexIndexes: make([][]atomic.Value, viewerCount),
-		deltaSaveEnabled:    make([]atomic.Bool, viewerCount),
-		deltaSaveIndexes:    make([]atomic.Int32, viewerCount),
-		deltaMotions:        make([][][]atomic.Value, viewerCount),
-		physicsWorldMotions: make([]atomic.Value, viewerCount),
-		physicsModelMotions: make([][]atomic.Value, viewerCount),
-		windMotions:         make([]atomic.Value, viewerCount),
+		deltaSaveEnabled:      make([]atomic.Bool, viewerCount),
+		deltaSaveIndexes:      make([]atomic.Int32, viewerCount),
+		deltaMotions:          make([][][]atomic.Value, viewerCount),
+		physicsWorldMotions:   make([]atomic.Value, viewerCount),
+		physicsModelMotions:   make([][]atomic.Value, viewerCount),
+		windMotions:           make([]atomic.Value, viewerCount),
 	}
 
 	ss.frameValue.Store(mtime.Frame(0))
@@ -1008,7 +1008,7 @@ func newDefaultPhysicsWorldMotion() IStateMotion {
 	m := &defaultMotion{
 		HashableBase:  base,
 		Gravity:       -9.8,
-		MaxSubSteps:   physics_api.PhysicsDefaultMaxSubSteps,
+		MaxSubSteps:   performance.DefaultMaxSubSteps,
 		FixedTimeStep: 60,
 		WindEnabled:   false,
 		WindDirection: [3]float32{0, 0, 0},

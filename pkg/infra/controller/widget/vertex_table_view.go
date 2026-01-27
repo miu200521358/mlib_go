@@ -178,13 +178,13 @@ func normalizeSelectionIndexes(indexes []int) []int {
 
 // VertexItem は頂点の表示行を表す。
 type VertexItem struct {
-	Index         int
-	PositionText  string
-	MaterialText  string
-	Weight1Text   string
-	Weight2Text   string
-	Weight3Text   string
-	Weight4Text   string
+	Index        int
+	PositionText string
+	MaterialText string
+	Weight1Text  string
+	Weight2Text  string
+	Weight3Text  string
+	Weight4Text  string
 }
 
 // VertexModel は頂点テーブルのモデルを表す。
@@ -217,7 +217,7 @@ func (m *VertexModel) Value(row, col int) interface{} {
 	case 6:
 		return item.Weight4Text
 	}
-	panic("unexpected col")
+	return nil
 }
 
 // ResetRows は選択頂点行を再構築する。

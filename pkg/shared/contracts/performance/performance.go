@@ -9,6 +9,11 @@ const (
 	APPLY_TIMING_USER_SELECT ApplyTiming = iota
 )
 
+const (
+	// DefaultMaxSubSteps は物理シミュレーションの既定最大サブステップ数。
+	DefaultMaxSubSteps = 5
+)
+
 // PerformancePolicy は性能方針を表す。
 type PerformancePolicy struct {
 	RealtimePreferred  bool

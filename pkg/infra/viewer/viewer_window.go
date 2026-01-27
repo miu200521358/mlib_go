@@ -22,6 +22,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
+	"github.com/miu200521358/mlib_go/pkg/infra/drivers/mbullet"
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/render"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
@@ -64,7 +65,7 @@ type ViewerWindow struct {
 	title       string
 	list        *ViewerManager
 	shader      graphics_api.IShader
-	physics     physics_api.IPhysics
+	physics     *mbullet.PhysicsEngine
 
 	tooltipRenderer               *mgl.TooltipRenderer
 	boneHighlighter               *mgl.BoneHighlighter
@@ -86,15 +87,15 @@ type ViewerWindow struct {
 	vmdDeltas          []*delta.VmdDeltas
 	physicsModelHashes []string
 
-	leftButtonPressed            bool
-	middleButtonPressed          bool
-	rightButtonPressed           bool
-	shiftPressed                 bool
-	ctrlPressed                  bool
-	updatedPrevCursor            bool
-	prevCursorPos                mmath.Vec2
-	cursorX                      float64
-	cursorY                      float64
+	leftButtonPressed                     bool
+	middleButtonPressed                   bool
+	rightButtonPressed                    bool
+	shiftPressed                          bool
+	ctrlPressed                           bool
+	updatedPrevCursor                     bool
+	prevCursorPos                         mmath.Vec2
+	cursorX                               float64
+	cursorY                               float64
 	leftCursorWindowPositions             map[mmath.Vec2]float32
 	leftCursorRemoveWindowPositions       map[mmath.Vec2]float32
 	leftCursorWorldHistoryPositions       []*mmath.Vec3
@@ -146,24 +147,24 @@ func newViewerWindow(windowIndex int, title string, width, height, positionX, po
 	}
 
 	gravity := resolveInitialGravity(list, windowIndex)
-	physics := physics_api.NewPhysics(&gravity)
+	physics := mbullet.NewPhysicsEngine(&gravity)
 
 	vw := &ViewerWindow{
-		Window:                        glWindow,
-		windowIndex:                   windowIndex,
-		title:                         title,
-		list:                          list,
-		shader:                        shader,
-		physics:                       physics,
-		tooltipRenderer:               tooltipRenderer,
-		boneHighlighter:               mgl.NewBoneHighlighter(),
-		rigidBodyHighlighter:          mgl.NewRigidBodyHighlighter(),
-		modelRenderers:                make([]*render.ModelRenderer, 0),
-		motions:                       make([]*motion.VmdMotion, 0),
-		vmdDeltas:                     make([]*delta.VmdDeltas, 0),
-		physicsModelHashes:            make([]string, 0),
-		selectedVertexHoverIndex:      -1,
-		selectedVertexHoverModelIndex: -1,
+		Window:                                glWindow,
+		windowIndex:                           windowIndex,
+		title:                                 title,
+		list:                                  list,
+		shader:                                shader,
+		physics:                               physics,
+		tooltipRenderer:                       tooltipRenderer,
+		boneHighlighter:                       mgl.NewBoneHighlighter(),
+		rigidBodyHighlighter:                  mgl.NewRigidBodyHighlighter(),
+		modelRenderers:                        make([]*render.ModelRenderer, 0),
+		motions:                               make([]*motion.VmdMotion, 0),
+		vmdDeltas:                             make([]*delta.VmdDeltas, 0),
+		physicsModelHashes:                    make([]string, 0),
+		selectedVertexHoverIndex:              -1,
+		selectedVertexHoverModelIndex:         -1,
 		leftCursorWindowPositions:             make(map[mmath.Vec2]float32),
 		leftCursorRemoveWindowPositions:       make(map[mmath.Vec2]float32),
 		leftCursorWorldHistoryPositions:       make([]*mmath.Vec3, 0),

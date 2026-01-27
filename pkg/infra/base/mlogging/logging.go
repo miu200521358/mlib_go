@@ -353,20 +353,26 @@ type logSink struct {
 
 // Write はログを書き込む。
 func (s *logSink) Write(p []byte) (int, error) {
-	s.textWrite(p)
-	return len(p), nil
+	return s.textWrite(p)
 }
 
 // textWrite は出力とバッファ更新を行う。
-func (s *logSink) textWrite(p []byte) {
+func (s *logSink) textWrite(p []byte) (int, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	var writeErr error
 	if s.sink != nil {
-		_, _ = s.sink.Write(p)
+		if _, err := s.sink.Write(p); err != nil {
+			writeErr = err
+		}
 	}
 	if s.buffer != nil {
 		s.buffer.appendText(string(p))
 	}
+	if writeErr != nil {
+		return len(p), writeErr
+	}
+	return len(p), nil
 }
 
 // dumpAllGoroutines は全ゴルーチンのスタックを取得する。

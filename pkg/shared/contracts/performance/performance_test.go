@@ -29,3 +29,10 @@ func TestDefaultPerformancePolicy(t *testing.T) {
 		t.Errorf("ApplyTiming: got=%v", DEFAULT_PERFORMANCE_POLICY.ApplyTiming)
 	}
 }
+
+// TestDefaultMaxSubSteps は既定の最大サブステップ数を確認する。
+func TestDefaultMaxSubSteps(t *testing.T) {
+	if DefaultMaxSubSteps != 5 {
+		t.Errorf("DefaultMaxSubSteps: got=%v", DefaultMaxSubSteps)
+	}
+}

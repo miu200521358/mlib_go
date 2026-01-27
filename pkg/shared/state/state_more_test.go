@@ -212,7 +212,7 @@ func TestSharedStateModelsAndSelections(t *testing.T) {
 		t.Errorf("SelectedVertexIndexes should be cloned")
 	}
 
-	impl := ss.(*SharedState)
+	impl := ss
 	impl.models[0] = make([]atomic.Value, 2)
 	impl.motions[0] = make([]atomic.Value, 1)
 	if impl.MotionCount(0) != 2 {

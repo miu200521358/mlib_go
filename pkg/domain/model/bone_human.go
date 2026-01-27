@@ -2,7 +2,6 @@
 package model
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -783,7 +782,7 @@ func (bones *BoneCollection) GetThumb(direction BoneDirection, idx int) (*Bone, 
 		return bones.GetByName(THUMB2.StringFromDirection(direction))
 	}
 
-	return nil, errors.New("invalid idx")
+	return nil, merrors.NewInvalidIndexError(idx)
 }
 
 // CreateThumb0 親指0作成
@@ -858,7 +857,7 @@ func (bones *BoneCollection) GetIndex(direction BoneDirection, idx int) (*Bone, 
 		return bones.GetByName(INDEX3.StringFromDirection(direction))
 	}
 
-	return nil, errors.New("invalid idx")
+	return nil, merrors.NewInvalidIndexError(idx)
 }
 
 // GetIndexTail 人差し指先先取得
@@ -905,7 +904,7 @@ func (bones *BoneCollection) GetMiddle(direction BoneDirection, idx int) (*Bone,
 		return bones.GetByName(MIDDLE3.StringFromDirection(direction))
 	}
 
-	return nil, errors.New("invalid idx")
+	return nil, merrors.NewInvalidIndexError(idx)
 }
 
 // GetMiddleTail 中指先先取得
@@ -951,7 +950,7 @@ func (bones *BoneCollection) GetRing(direction BoneDirection, idx int) (*Bone, e
 		return bones.GetByName(RING3.StringFromDirection(direction))
 	}
 
-	return nil, errors.New("invalid idx")
+	return nil, merrors.NewInvalidIndexError(idx)
 }
 
 // GetRingTail 薬指先先取得
@@ -998,7 +997,7 @@ func (bones *BoneCollection) GetPinky(direction BoneDirection, idx int) (*Bone, 
 		return bones.GetByName(PINKY3.StringFromDirection(direction))
 	}
 
-	return nil, errors.New("invalid idx")
+	return nil, merrors.NewInvalidIndexError(idx)
 }
 
 // GetPinkyTail 小指先先取得

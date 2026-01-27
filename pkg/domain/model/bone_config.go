@@ -89,6 +89,7 @@ const (
 	CATEGORY_FITTING_ONLY_MOVE BoneCategory = iota
 )
 
+// BoneConfig は標準ボーン構成の設定を表す。
 type BoneConfig struct {
 	// 親ボーン名候補リスト
 	ParentBoneNames []StandardBoneName

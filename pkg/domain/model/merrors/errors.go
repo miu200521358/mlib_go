@@ -4,6 +4,8 @@ package merrors
 import (
 	"errors"
 	"fmt"
+
+	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 )
 
 // IndexOutOfRangeError はインデックス範囲外エラーを表す。
@@ -119,6 +121,15 @@ func (e *ParentNotFoundError) Error() string {
 func IsParentNotFoundError(err error) bool {
 	var target *ParentNotFoundError
 	return errors.As(err, &target)
+}
+
+const (
+	invalidIndexErrorID = "12201"
+)
+
+// NewInvalidIndexError は無効なインデックスエラーを生成する。
+func NewInvalidIndexError(index int) *merr.CommonError {
+	return merr.NewCommonError(invalidIndexErrorID, merr.ErrorKindValidate, fmt.Sprintf("invalid index: %d", index), nil)
 }
 
 // ModelCopyFailed はモデルコピー失敗を表す。

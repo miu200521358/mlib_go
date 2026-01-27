@@ -389,8 +389,13 @@ func (mp *MotionPlayer) startAudioPlayback(frame mtime.Frame) {
 	if !mp.isAudioReady() {
 		return
 	}
-	_ = mp.seekAudioByFrame(frame)
-	_ = mp.audioPlayer.Play()
+	logger := logging.DefaultLogger()
+	if err := mp.seekAudioByFrame(frame); err != nil {
+		logger.Error(mp.t("音声シークに失敗しました: %s"), err.Error())
+	}
+	if err := mp.audioPlayer.Play(); err != nil {
+		logger.Error(mp.t("音声再生に失敗しました: %s"), err.Error())
+	}
 }
 
 // pauseAudioPlayback は音声再生を一時停止する。
@@ -398,7 +403,10 @@ func (mp *MotionPlayer) pauseAudioPlayback() {
 	if !mp.isAudioReady() {
 		return
 	}
-	_ = mp.audioPlayer.Pause()
+	logger := logging.DefaultLogger()
+	if err := mp.audioPlayer.Pause(); err != nil {
+		logger.Error(mp.t("音声一時停止に失敗しました: %s"), err.Error())
+	}
 }
 
 // seekAudioByFrame はフレームに合わせて音声位置を調整する。
@@ -416,8 +424,13 @@ func (mp *MotionPlayer) syncAudioOnLoop(currentFrame, prevFrame mtime.Frame) {
 		return
 	}
 	if currentFrame < prevFrame {
-		_ = mp.seekAudioByFrame(currentFrame)
-		_ = mp.audioPlayer.Play()
+		logger := logging.DefaultLogger()
+		if err := mp.seekAudioByFrame(currentFrame); err != nil {
+			logger.Error(mp.t("音声シークに失敗しました: %s"), err.Error())
+		}
+		if err := mp.audioPlayer.Play(); err != nil {
+			logger.Error(mp.t("音声再生に失敗しました: %s"), err.Error())
+		}
 	}
 }
 

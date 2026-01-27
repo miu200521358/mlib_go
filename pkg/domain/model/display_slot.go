@@ -56,6 +56,7 @@ func (d *DisplaySlot) SetName(name string) {
 	d.name = name
 }
 
+// NewRootDisplaySlot はルート表示枠を生成する。
 func NewRootDisplaySlot() *DisplaySlot {
 	return &DisplaySlot{
 		index:       0,
@@ -66,6 +67,7 @@ func NewRootDisplaySlot() *DisplaySlot {
 	}
 }
 
+// NewMorphDisplaySlot はモーフ表示枠を生成する。
 func NewMorphDisplaySlot() *DisplaySlot {
 	return &DisplaySlot{
 		index:       1,

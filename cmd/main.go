@@ -13,9 +13,6 @@ import (
 	"github.com/miu200521358/walk/pkg/walk"
 
 	"github.com/miu200521358/mlib_go/cmd/ui"
-	"github.com/miu200521358/mlib_go/pkg/adapter/audio_api"
-	"github.com/miu200521358/mlib_go/pkg/adapter/physics_api"
-	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/infra/app"
 	"github.com/miu200521358/mlib_go/pkg/infra/base/config"
 	"github.com/miu200521358/mlib_go/pkg/infra/base/err"
@@ -23,7 +20,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/infra/base/mlogging"
 	"github.com/miu200521358/mlib_go/pkg/infra/controller"
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/maudio"
-	"github.com/miu200521358/mlib_go/pkg/infra/drivers/mbullet"
 	"github.com/miu200521358/mlib_go/pkg/infra/viewer"
 	"github.com/miu200521358/mlib_go/pkg/shared/base"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
@@ -68,10 +64,7 @@ func main() {
 		I18nService:   i18n.Default(),
 		LoggerService: logger,
 	}
-	physics_api.RegisterPhysicsFactory(func(gravity *mmath.Vec3) physics_api.IPhysics {
-		return mbullet.NewPhysicsEngine(gravity)
-	})
-	audio_api.RegisterAudioFactory(maudio.NewAudioPlayer)
+	audioPlayer := maudio.NewAudioPlayer()
 
 	iconImage, iconErr := config.LoadAppIconImage(appFiles, appConfig)
 	if iconErr != nil {
@@ -85,12 +78,7 @@ func main() {
 		}
 	}
 
-	shared := state.NewSharedState(viewerCount)
-	sharedState, ok := shared.(*state.SharedState)
-	if !ok {
-		err.ShowFatalErrorDialog(appConfig, fmt.Errorf(i18n.T("共有状態の初期化に失敗しました")))
-		return
-	}
+	sharedState := state.NewSharedState(viewerCount)
 
 	widths, heights, positionXs, positionYs := app.GetCenterSizeAndWidth(appConfig, viewerCount)
 
@@ -113,7 +101,7 @@ func main() {
 				sharedState,
 				baseServices,
 				ui.NewMenuItems(baseServices.I18n(), baseServices.Logger()),
-				ui.NewTabPages(widgets, baseServices),
+				ui.NewTabPages(widgets, baseServices, audioPlayer),
 				widths[0], heights[0], positionXs[0], positionYs[0], viewerCount,
 			)
 			if controlWindowErr != nil {

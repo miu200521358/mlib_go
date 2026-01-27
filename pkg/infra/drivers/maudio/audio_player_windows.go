@@ -12,7 +12,6 @@ import (
 	"sync/atomic"
 	"unsafe"
 
-	"github.com/miu200521358/mlib_go/pkg/adapter/audio_api"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 	"golang.org/x/sys/windows"
@@ -42,7 +41,7 @@ type AudioPlayer struct {
 }
 
 // NewAudioPlayer は音声プレイヤーを生成する。
-func NewAudioPlayer() audio_api.IAudioPlayer {
+func NewAudioPlayer() *AudioPlayer {
 	player := &AudioPlayer{volume: 50}
 	return player
 }

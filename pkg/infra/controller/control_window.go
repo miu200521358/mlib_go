@@ -1029,7 +1029,9 @@ func (cw *ControlWindow) saveUserBool(key string, value bool) {
 	if cw.userConfig == nil {
 		return
 	}
-	_ = cw.userConfig.SetBool(key, value)
+	if err := cw.userConfig.SetBool(key, value); err != nil {
+		logging.DefaultLogger().Error(cw.t("設定の保存に失敗しました: %s"), err.Error())
+	}
 }
 
 // saveUserInt はユーザー設定のint値を保存する。
@@ -1037,7 +1039,9 @@ func (cw *ControlWindow) saveUserInt(key string, value int) {
 	if cw.userConfig == nil {
 		return
 	}
-	_ = cw.userConfig.SetInt(key, value)
+	if err := cw.userConfig.SetInt(key, value); err != nil {
+		logging.DefaultLogger().Error(cw.t("設定の保存に失敗しました: %s"), err.Error())
+	}
 }
 
 // setDisplayFlag は表示フラグを反映する。

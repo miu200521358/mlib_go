@@ -1,5 +1,6 @@
 ID,Kind,Layer,Module,ErrorName,Summary,Remedy,SourcePaths
 20001,NotFound,domain,00,NameNotFoundError,名前解決に失敗,,-
+12201,Validate,domain,22,InvalidIndexError,インデックスが無効,インデックスの定義を確認する,mlib_go_t4/pkg/domain/model/bone_human.go
 22201,NotFound,domain,22,ParentNotFoundError,親要素が見つからない,,-
 92202,Internal,domain,22,IndexOutOfRangeError,インデックスが範囲外,,-
 92203,Internal,domain,22,NameConflictError,名称が既存要素と衝突,,-
@@ -51,3 +52,6 @@ ID,Kind,Layer,Module,ErrorName,Summary,Remedy,SourcePaths
 95501,Internal,infra,55,ControllerWindowInitFailed,Controllerウィンドウ初期化に失敗,,-
 95502,Internal,infra,55,ConsoleViewInitFailed,ConsoleView初期化に失敗,,-
 95503,Internal,infra,55,ProgressBarInitFailed,ProgressBar初期化に失敗,,-
+95504,Internal,infra,55,RepositoryNotConfiguredError,読み込みリポジトリが未設定,cmd でリポジトリを注入する,mlib_go_t4/cmd/ui/tab_page.go
+95505,Validate,infra,55,ModelNotLoadedError,モデルが読み込まれていない,モデルを読み込んでから保存する,mu_model_viewer/pkg/ui/tab_page.go
+95506,Validate,infra,55,SavePathInvalidError,保存先パスが不正,保存先/権限/ファイル名を確認する,mu_model_viewer/pkg/ui/tab_page.go
