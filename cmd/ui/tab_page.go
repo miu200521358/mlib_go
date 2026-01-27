@@ -10,7 +10,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/adapter/audio_api"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
-	"github.com/miu200521358/mlib_go/pkg/domain/motion"
 	"github.com/miu200521358/mlib_go/pkg/infra/controller"
 	"github.com/miu200521358/mlib_go/pkg/infra/controller/widget"
 	"github.com/miu200521358/mlib_go/pkg/infra/file/mfile"
@@ -19,16 +18,10 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
+	"github.com/miu200521358/mlib_go/pkg/usecase"
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
 )
-
-// iOverrideBoneInserter は不足ボーンの補完を行うI/F。
-type iOverrideBoneInserter interface {
-	InsertShortageOverrideBones() error
-}
-
-const repositoryNotConfiguredErrorID = "95504"
 
 // NewTabPages はサンプル用のタブページ群を生成する。
 func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices, audioPlayer audio_api.IAudioPlayer) []declarative.TabPage {
@@ -237,18 +230,7 @@ func loadModel(logger logging.ILogger, translator i18n.II18n, cw *controller.Con
 		cw.SetModel(windowIndex, modelIndex, nil)
 		return
 	}
-	if rep == nil {
-		logLoadFailed(logger, translator, newRepositoryNotConfiguredError("モデル"))
-		if materialView != nil {
-			materialView.ResetRows(nil)
-		}
-		if vertexView != nil {
-			vertexView.ResetRows(nil)
-		}
-		cw.SetModel(windowIndex, modelIndex, nil)
-		return
-	}
-	data, err := rep.Load(path)
+	modelData, err := usecase.LoadModel(rep, path)
 	if err != nil {
 		logLoadFailed(logger, translator, err)
 		if materialView != nil {
@@ -259,24 +241,6 @@ func loadModel(logger logging.ILogger, translator i18n.II18n, cw *controller.Con
 		}
 		cw.SetModel(windowIndex, modelIndex, nil)
 		return
-	}
-	modelData, ok := data.(*model.PmxModel)
-	if !ok {
-		logLoadFailed(logger, translator, io_common.NewIoFormatNotSupported("モデル形式が不正です", nil))
-		if materialView != nil {
-			materialView.ResetRows(nil)
-		}
-		if vertexView != nil {
-			vertexView.ResetRows(nil)
-		}
-		cw.SetModel(windowIndex, modelIndex, nil)
-		return
-	}
-	if modelData.Bones != nil {
-		if inserter, ok := any(modelData.Bones).(iOverrideBoneInserter); ok {
-			// エラーが出てもスルー
-			inserter.InsertShortageOverrideBones()
-		}
 	}
 	if materialView != nil {
 		validateModelTextures(modelData)
@@ -330,20 +294,9 @@ func loadMotion(logger logging.ILogger, translator i18n.II18n, cw *controller.Co
 		cw.SetMotion(windowIndex, modelIndex, nil)
 		return
 	}
-	if rep == nil {
-		logLoadFailed(logger, translator, newRepositoryNotConfiguredError("モーション"))
-		cw.SetMotion(windowIndex, modelIndex, nil)
-		return
-	}
-	data, err := rep.Load(path)
+	motionData, err := usecase.LoadMotion(rep, path)
 	if err != nil {
 		logLoadFailed(logger, translator, err)
-		cw.SetMotion(windowIndex, modelIndex, nil)
-		return
-	}
-	motionData, ok := data.(*motion.VmdMotion)
-	if !ok {
-		logLoadFailed(logger, translator, io_common.NewIoFormatNotSupported("モーション形式が不正です", nil))
 		cw.SetMotion(windowIndex, modelIndex, nil)
 		return
 	}
@@ -359,18 +312,6 @@ func logLoadFailed(logger logging.ILogger, translator i18n.II18n, err error) {
 		logger = logging.DefaultLogger()
 	}
 	logErrorTitle(logger, i18n.TranslateOrMark(translator, "読み込み失敗"), err)
-}
-
-// newRepositoryNotConfiguredError は読み込みリポジトリ未設定エラーを生成する。
-func newRepositoryNotConfiguredError(target string) error {
-	switch target {
-	case "モデル":
-		return merr.NewCommonError(repositoryNotConfiguredErrorID, merr.ErrorKindInternal, "モデル読み込みリポジトリがありません", nil)
-	case "モーション":
-		return merr.NewCommonError(repositoryNotConfiguredErrorID, merr.ErrorKindInternal, "モーション読み込みリポジトリがありません", nil)
-	default:
-		return merr.NewCommonError(repositoryNotConfiguredErrorID, merr.ErrorKindInternal, "読み込みリポジトリがありません: %s", nil, target)
-	}
 }
 
 // logErrorTitle はタイトル付きエラーを出力する。
