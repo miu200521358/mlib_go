@@ -9,6 +9,7 @@ import (
 	"gonum.org/v1/gonum/spatial/r3"
 )
 
+// Mat4 は4x4行列を表す。
 type Mat4 [16]float64
 
 var (

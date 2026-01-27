@@ -1,3 +1,6 @@
+//go:build windows
+// +build windows
+
 // 指示: miu200521358
 package deform
 

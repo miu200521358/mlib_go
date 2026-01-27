@@ -10,6 +10,7 @@ import (
 	"gonum.org/v1/gonum/spatial/r3"
 )
 
+// Quaternion はクォータニオンを表す。
 type Quaternion struct {
 	quat.Number
 }

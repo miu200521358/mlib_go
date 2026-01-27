@@ -7,6 +7,7 @@ import (
 	"math"
 )
 
+// Vec2 は2次元ベクトルを表す。
 type Vec2 struct {
 	X float64 `json:"x"`
 	Y float64 `json:"y"`
@@ -383,4 +384,3 @@ func angleFromCosVec2(val float64) float64 {
 	}
 	return math.Acos(val)
 }
-

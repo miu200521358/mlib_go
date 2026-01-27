@@ -1005,7 +1005,7 @@ func (bones *BoneCollection) GetPinkyTail(direction BoneDirection) (*Bone, error
 	return bones.GetByName(PINKY_TAIL.StringFromDirection(direction))
 }
 
-// CreateLittleTail 親指先先作成
+// CreatePinkyTail 小指先先作成
 func (bones *BoneCollection) CreatePinkyTail(direction BoneDirection) (*Bone, error) {
 	bone := NewBoneByName(PINKY_TAIL.StringFromDirection(direction))
 	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE

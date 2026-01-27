@@ -117,6 +117,7 @@ func (m *PmxModel) Copy() (PmxModel, error) {
 	return copied, nil
 }
 
+// CreateDefaultDisplaySlots は既定の表示枠を生成する。
 func (m *PmxModel) CreateDefaultDisplaySlots() {
 	if m.DisplaySlots != nil && m.DisplaySlots.Len() > 0 {
 		return

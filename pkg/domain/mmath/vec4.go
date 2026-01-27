@@ -9,6 +9,7 @@ import (
 	"gonum.org/v1/gonum/spatial/r3"
 )
 
+// Vec4 は4次元ベクトルを表す。
 type Vec4 struct {
 	X float64 `json:"x"`
 	Y float64 `json:"y"`
@@ -435,4 +436,3 @@ func (v Vec4) Round(threshold float64) Vec4 {
 		Round(v.W, threshold),
 	}
 }
-

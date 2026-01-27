@@ -14,22 +14,27 @@ type testItem struct {
 	valid bool
 }
 
+// Index はインデックスを返す。
 func (t *testItem) Index() int {
 	return t.index
 }
 
+// SetIndex はインデックスを設定する。
 func (t *testItem) SetIndex(index int) {
 	t.index = index
 }
 
+// IsValid は有効か判定する。
 func (t *testItem) IsValid() bool {
 	return t != nil && t.index >= 0 && t.valid
 }
 
+// Name は名前を返す。
 func (t *testItem) Name() string {
 	return t.name
 }
 
+// SetName は名前を設定する。
 func (t *testItem) SetName(name string) {
 	t.name = name
 }
