@@ -360,10 +360,15 @@ func (p *pmdReader) readBones(modelData *model.PmxModel) error {
 			BoneFlag:    boneFlagsFromType(boneType, tailIndex >= 0),
 		}
 		bone.SetName(name)
-		if boneType == 4 || boneType == 5 {
+		if boneType == 5 {
 			if ikParentRaw != 0xFFFF {
 				bone.EffectIndex = int(ikParentRaw)
 				bone.EffectFactor = 1.0
+			}
+		} else if boneType == 9 {
+			if tailIndex >= 0 {
+				bone.EffectIndex = tailIndex
+				bone.EffectFactor = float64(ikParentRaw) * 0.01
 			}
 		}
 		modelData.Bones.AppendRaw(bone)
@@ -469,15 +474,28 @@ func applyPmdBoneLayerOverrides(modelData *model.PmxModel) {
 	if modelData == nil || modelData.Bones == nil {
 		return
 	}
-	// PMDには変形階層がないため、IKとIKターゲットは+1で補正する（決め打ち）。
+	// PMDには変形階層がないため、足IK/つま先IKとその子を+1補正する（決め打ち）。
+	children := make(map[int][]int)
+	for _, bone := range modelData.Bones.Values() {
+		if bone == nil || bone.ParentIndex < 0 {
+			continue
+		}
+		children[bone.ParentIndex] = append(children[bone.ParentIndex], bone.Index())
+	}
+	updated := make(map[int]struct{})
 	for _, bone := range modelData.Bones.Values() {
 		if bone == nil || bone.Ik == nil {
 			continue
 		}
-		bone.Layer += 1
-		target, err := modelData.Bones.Get(bone.Ik.BoneIndex)
-		if err == nil && target != nil {
-			target.Layer += 1
+		if !isLegOrToeIkBoneName(bone.Name()) {
+			continue
+		}
+		applyPmdLayerIncrement(modelData, updated, bone.Index(), bone.Ik.BoneIndex)
+		for _, link := range bone.Ik.Links {
+			applyPmdLayerIncrement(modelData, updated, link.BoneIndex, bone.Ik.BoneIndex)
+		}
+		for _, childIndex := range children[bone.Index()] {
+			applyPmdLayerIncrement(modelData, updated, childIndex, bone.Ik.BoneIndex)
 		}
 	}
 	// 右目/左目とその先は+2で補正する（決め打ち）。
@@ -495,6 +513,58 @@ func applyPmdBoneLayerOverrides(modelData *model.PmxModel) {
 			}
 		}
 	}
+}
+
+// applyPmdLayerIncrement はPMDの変形階層補正を反映する。
+func applyPmdLayerIncrement(modelData *model.PmxModel, updated map[int]struct{}, boneIndex int, targetIndex int) {
+	if modelData == nil || updated == nil || boneIndex < 0 {
+		return
+	}
+	if boneIndex == targetIndex {
+		return
+	}
+	if _, ok := updated[boneIndex]; ok {
+		return
+	}
+	bone, err := modelData.Bones.Get(boneIndex)
+	if err != nil || bone == nil {
+		return
+	}
+	if isAnkleBoneName(bone.Name()) {
+		return
+	}
+	bone.Layer += 1
+	updated[boneIndex] = struct{}{}
+}
+
+// isLegOrToeIkBoneName は足IK/つま先IKか判定する。
+func isLegOrToeIkBoneName(name string) bool {
+	if name == "" {
+		return false
+	}
+	leftLegIkAlt := strings.ReplaceAll(model.LEG_IK.Left(), "ＩＫ", "IK")
+	rightLegIkAlt := strings.ReplaceAll(model.LEG_IK.Right(), "ＩＫ", "IK")
+	leftToeIkAlt := strings.ReplaceAll(model.TOE_IK.Left(), "ＩＫ", "IK")
+	rightToeIkAlt := strings.ReplaceAll(model.TOE_IK.Right(), "ＩＫ", "IK")
+	return name == model.LEG_IK.Left() ||
+		name == model.LEG_IK.Right() ||
+		name == leftLegIkAlt ||
+		name == rightLegIkAlt ||
+		name == model.TOE_IK.Left() ||
+		name == model.TOE_IK.Right() ||
+		name == leftToeIkAlt ||
+		name == rightToeIkAlt
+}
+
+// isAnkleBoneName は足首ボーン名か判定する。
+func isAnkleBoneName(name string) bool {
+	if name == "" {
+		return false
+	}
+	if name == model.ANKLE.Left() || name == model.ANKLE.Right() {
+		return true
+	}
+	return strings.Contains(name, "足首")
 }
 
 // readSkins は表情データを読み込む。

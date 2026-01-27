@@ -2,6 +2,7 @@
 package deform
 
 import (
+	"fmt"
 	"math"
 	"slices"
 	"sort"
@@ -1485,19 +1486,60 @@ func applyIkForBone(
 	if ikTargetIndex < 0 {
 		return
 	}
-	loopCount := max(ikBone.Ik.LoopCount, 1)
+	baseLoopCount := max(ikBone.Ik.LoopCount, 1)
+	loopCount := baseLoopCount
 	targetBeforeIk := isTargetBeforeIk(deformBoneIndexes, ikTargetIndex, ikBone.Index())
 	if targetBeforeIk {
 		loopCount++
 	}
 
 	isSingleIk := len(ikBone.Ik.Links) == 1
+	var targetBone *model.Bone
+	targetName := ""
+	if resolved, err := modelData.Bones.Get(ikTargetIndex); err == nil && resolved != nil {
+		targetBone = resolved
+		targetName = resolved.Name()
+	}
+	logIkDebugf(debugCtx, "IK開始: bone=%s(%d) target=%s(%d) links=%d loop=%d(base=%d) targetBeforeIk=%t single=%t removeTwist=%t",
+		ikBone.Name(), ikBone.Index(), targetName, ikTargetIndex, len(ikBone.Ik.Links), loopCount, baseLoopCount, targetBeforeIk, isSingleIk, removeTwist,
+	)
+	logIkDebugf(debugCtx, "IKボーン情報: %s", ikDebugBoneInfo(ikBone))
+	if targetBone != nil {
+		logIkDebugf(debugCtx, "ターゲット情報: %s", ikDebugBoneInfo(targetBone))
+	}
+	ikOrderPos := ikDebugOrderPosition(deformBoneIndexes, ikBone.Index())
+	targetOrderPos := ikDebugOrderPosition(deformBoneIndexes, ikTargetIndex)
+	logIkDebugf(debugCtx, "変形順序(layer->index): total=%d ikPos=%d targetPos=%d", len(deformBoneIndexes), ikOrderPos, targetOrderPos)
+	unitRot := ikBone.Ik.UnitRotation
+	logIkDebugf(debugCtx, "UnitRotation(ファイル値): raw=%s deg=%s", unitRot.String(), unitRot.RadToDeg().String())
+	for linkIndex, link := range ikBone.Ik.Links {
+		linkName := ""
+		var linkBone *model.Bone
+		if resolved, err := modelData.Bones.Get(link.BoneIndex); err == nil && resolved != nil {
+			linkBone = resolved
+			linkName = resolved.Name()
+		}
+		linkOrderPos := ikDebugOrderPosition(deformBoneIndexes, link.BoneIndex)
+		logIkDebugf(debugCtx, "Link[%d] info: bone=%s(%d) orderPos=%d %s",
+			linkIndex, linkName, link.BoneIndex, linkOrderPos, ikDebugBoneInfo(linkBone),
+		)
+		logIkDebugf(debugCtx, "Link[%d] limit: angleLimit=%t localAngleLimit=%t min=%s max=%s localMin=%s localMax=%s",
+			linkIndex, link.AngleLimit, link.LocalAngleLimit,
+			link.MinAngleLimit.String(), link.MaxAngleLimit.String(),
+			link.LocalMinAngleLimit.String(), link.LocalMaxAngleLimit.String(),
+		)
+		logIkDebugf(debugCtx, "Link[%d] deg: min=%s max=%s localMin=%s localMax=%s",
+			linkIndex, link.MinAngleLimit.RadToDeg().String(), link.MaxAngleLimit.RadToDeg().String(),
+			link.LocalMinAngleLimit.RadToDeg().String(), link.LocalMaxAngleLimit.RadToDeg().String(),
+		)
+	}
 	ikDelta := boneDeltas.Get(ikBone.Index())
 	if ikDelta == nil {
 		ikDelta = delta.NewBoneDelta(ikBone, frame)
 	}
 	ikPos := ikDelta.FilledGlobalPosition()
 	ikOnPos := ikPos
+	logIkDebugf(debugCtx, "初期IK位置: %s", ikPos.String())
 	useToeIk := false
 	if targetBeforeIk && len(ikBone.Ik.Links) == 1 && isToeIkBone(ikBone) && motionData != nil {
 		if targetBone, err := modelData.Bones.Get(ikTargetIndex); err == nil && targetBone != nil {
@@ -1584,14 +1626,23 @@ func applyIkForBone(
 			localDist := ikTargetLocalPos.Distance(ikLocalPos)
 			logIkDebugf(debugCtx, "localPos: target=%s ik=%s dist=%.8f", ikTargetLocalPos.String(), ikLocalPos.String(), localDist)
 
-			unitRad := ikBone.Ik.UnitRotation.X * float64(linkIndex+1)
+			unitBase := ikBone.Ik.UnitRotation.X
+			unitRad := unitBase * float64(linkIndex+1)
 			linkDot := ikTargetLocalPos.Dot(ikLocalPos)
 			originalLinkAngle := math.Acos(mmath.Clamped(linkDot, -1, 1))
 			linkAngle := originalLinkAngle
 			if linkAngle > unitRad {
 				linkAngle = unitRad
 			}
-			logIkDebugf(debugCtx, "回転角度: unitRad=%.8f original=%.8f linkAngle=%.8f", unitRad, originalLinkAngle, linkAngle)
+			logIkDebugf(
+				debugCtx,
+				"回転角度: unitBase=%.8f multiplier=%d unitRad=%.8f original=%.8f linkAngle=%.8f",
+				unitBase,
+				linkIndex+1,
+				unitRad,
+				originalLinkAngle,
+				linkAngle,
+			)
 			axisOriginal := ikTargetLocalPos.Cross(ikLocalPos).Normalized()
 			limitedAxis := axisOriginal
 			if (!isSingleIk || linkAngle > mmath.Gimbal1Rad) && (link.AngleLimit || link.LocalAngleLimit) {
@@ -1617,6 +1668,10 @@ func applyIkForBone(
 				LocalAxes:       localAxes(modelData, linkBone),
 				Debug:           debugCtx,
 			}
+			logIkDebugf(debugCtx, "FixedAxis=%s ChildAxis=%s LocalAxes(X=%s Y=%s Z=%s)",
+				stepInput.FixedAxis.String(), stepInput.ChildAxis.String(),
+				stepInput.LocalAxes.X.String(), stepInput.LocalAxes.Y.String(), stepInput.LocalAxes.Z.String(),
+			)
 			stepResult := calcIkStep(stepInput)
 			if stepResult.ValidRotation {
 				originalIkQuat := mmath.NewQuaternionFromAxisAngles(axisOriginal, originalLinkAngle)
@@ -1727,6 +1782,43 @@ func isTargetBeforeIk(indexes []int, targetIndex, ikIndex int) bool {
 		return false
 	}
 	return targetPos < ikPos
+}
+
+// ikDebugOrderPosition は変形順序内の位置を返す。
+func ikDebugOrderPosition(indexes []int, targetIndex int) int {
+	if len(indexes) == 0 || targetIndex < 0 {
+		return -1
+	}
+	return slices.Index(indexes, targetIndex)
+}
+
+// ikDebugBoneInfo はIKデバッグ用のボーン情報を文字列化して返す。
+func ikDebugBoneInfo(bone *model.Bone) string {
+	if bone == nil {
+		return "nil"
+	}
+	tailInfo := fmt.Sprintf("tailIndex=%d", bone.TailIndex)
+	if bone.BoneFlag&model.BONE_FLAG_TAIL_IS_BONE == 0 {
+		tailInfo = fmt.Sprintf("tailPos=%s", bone.TailPosition.String())
+	}
+	isIk := bone.BoneFlag&model.BONE_FLAG_IS_IK != 0
+	isAfterPhysics := bone.BoneFlag&model.BONE_FLAG_IS_AFTER_PHYSICS_DEFORM != 0
+	hasFixedAxis := bone.BoneFlag&model.BONE_FLAG_HAS_FIXED_AXIS != 0
+	hasLocalAxis := bone.BoneFlag&model.BONE_FLAG_HAS_LOCAL_AXIS != 0
+	return fmt.Sprintf(
+		"name=%s index=%d layer=%d parent=%d %s flag=0x%04x ik=%t afterPhysics=%t fixedAxis=%t localAxis=%t pos=%s",
+		bone.Name(),
+		bone.Index(),
+		bone.Layer,
+		bone.ParentIndex,
+		tailInfo,
+		int(bone.BoneFlag),
+		isIk,
+		isAfterPhysics,
+		hasFixedAxis,
+		hasLocalAxis,
+		bone.Position.String(),
+	)
 }
 
 // isToeIkBone はつま先IKボーンか判定する。

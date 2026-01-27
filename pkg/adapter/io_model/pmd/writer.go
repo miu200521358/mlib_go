@@ -386,11 +386,20 @@ func (s *pmdWriteState) writeBones() error {
 			return io_common.NewIoSaveFailed("PMDボーン種別の書き込みに失敗しました", err)
 		}
 		ikParentValue := uint16(0)
-		if boneType == 4 || boneType == 5 {
+		if boneType == 5 {
 			mapped := s.boneMapping.mapIndex(bone.EffectIndex)
 			if mapped >= 0 {
 				ikParentValue = uint16(mapped)
 			}
+		} else if boneType == 9 {
+			weight := int(math.Round(bone.EffectFactor * 100.0))
+			if weight < 0 {
+				weight = 0
+			}
+			if weight > maxUint16 {
+				weight = maxUint16
+			}
+			ikParentValue = uint16(weight)
 		}
 		if err := s.writer.WriteUint16(ikParentValue); err != nil {
 			return io_common.NewIoSaveFailed("PMDボーンIK親の書き込みに失敗しました", err)

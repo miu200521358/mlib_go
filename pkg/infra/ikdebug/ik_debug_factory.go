@@ -86,6 +86,7 @@ func (f *Factory) NewIkDebugSession(input deform.IkDebugSessionInput) deform.IIk
 		logger:           logger,
 		frame:            input.Frame,
 		ikBoneName:       input.IkBoneName,
+		orderIndex:       input.OrderIndex,
 		logFile:          logFile,
 		logWriter:        bufio.NewWriter(logFile),
 		ikMotion:         motion.NewVmdMotion(ikMotionPath),
@@ -93,6 +94,8 @@ func (f *Factory) NewIkDebugSession(input deform.IkDebugSessionInput) deform.IIk
 		logFileName:      filepath.Base(logPath),
 		ikMotionFileName: filepath.Base(ikMotionPath),
 		globalFileName:   filepath.Base(globalMotionPath),
+		modelFileName:    baseNameOrEmpty(input.ModelPath),
+		motionFileName:   baseNameOrEmpty(input.MotionPath),
 	}
 	sess.writeHeader(modelName, motionName)
 	return sess
@@ -103,6 +106,7 @@ type session struct {
 	logger           logging.ILogger
 	frame            motion.Frame
 	ikBoneName       string
+	orderIndex       int
 	logFile          *os.File
 	logWriter        *bufio.Writer
 	ikMotion         *motion.VmdMotion
@@ -110,6 +114,8 @@ type session struct {
 	logFileName      string
 	ikMotionFileName string
 	globalFileName   string
+	modelFileName    string
+	motionFileName   string
 }
 
 // AppendIkRotation はIKデバッグ用の回転フレームを追加する。
@@ -183,11 +189,20 @@ func (s *session) writeHeader(modelName string, motionName string) {
 		"----------------------------------------",
 		fmt.Sprintf("IKデバッグログ: bone=%s frame=%v", s.ikBoneName, s.frame),
 		fmt.Sprintf("model=%s motion=%s", modelName, motionName),
+		fmt.Sprintf("orderIndex=%02d", s.orderIndex),
+	}
+	if s.modelFileName != "" {
+		lines = append(lines, fmt.Sprintf("modelFile=%s", s.modelFileName))
+	}
+	if s.motionFileName != "" {
+		lines = append(lines, fmt.Sprintf("motionFile=%s", s.motionFileName))
+	}
+	lines = append(lines,
 		fmt.Sprintf("ikMotion=%s", s.ikMotionFileName),
 		fmt.Sprintf("globalMotion=%s", s.globalFileName),
 		fmt.Sprintf("log=%s", s.logFileName),
 		"----------------------------------------",
-	}
+	)
 	for _, line := range lines {
 		if _, err := s.logWriter.WriteString(line + "\n"); err != nil && s.logger != nil {
 			s.logger.Error("IK冗長ログ: ヘッダ出力に失敗しました: %v", err)
@@ -200,6 +215,14 @@ func (s *session) writeHeader(modelName string, motionName string) {
 func nameFromPath(path string) string {
 	_, name, _ := mfile.SplitPath(path)
 	return name
+}
+
+// baseNameOrEmpty はパスの末尾要素を返す。
+func baseNameOrEmpty(path string) string {
+	if path == "" {
+		return ""
+	}
+	return filepath.Base(path)
 }
 
 // sanitizeLabel はファイル名に使えない文字を置換する。

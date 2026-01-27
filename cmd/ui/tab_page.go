@@ -7,6 +7,8 @@ package ui
 import (
 	"github.com/miu200521358/mlib_go/pkg/adapter/audio_api"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
+	"github.com/miu200521358/mlib_go/pkg/domain/model"
+	"github.com/miu200521358/mlib_go/pkg/domain/motion"
 	"github.com/miu200521358/mlib_go/pkg/infra/controller"
 	"github.com/miu200521358/mlib_go/pkg/infra/controller/widget"
 	"github.com/miu200521358/mlib_go/pkg/infra/file/mfile"
@@ -16,6 +18,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 	"github.com/miu200521358/mlib_go/pkg/usecase"
+	portio "github.com/miu200521358/mlib_go/pkg/usecase/port/io"
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
 )
@@ -227,7 +230,11 @@ func loadModel(logger logging.ILogger, translator i18n.II18n, cw *controller.Con
 		cw.SetModel(windowIndex, modelIndex, nil)
 		return
 	}
-	modelData, err := usecase.LoadModel(rep, path)
+	var validator portio.ITextureValidator
+	if materialView != nil {
+		validator = mfile.NewTextureValidator()
+	}
+	result, err := usecase.LoadModelWithValidation(rep, path, validator)
 	if err != nil {
 		logLoadFailed(logger, translator, err)
 		if materialView != nil {
@@ -239,8 +246,23 @@ func loadModel(logger logging.ILogger, translator i18n.II18n, cw *controller.Con
 		cw.SetModel(windowIndex, modelIndex, nil)
 		return
 	}
+	modelData := (*model.PmxModel)(nil)
+	validation := (*usecase.TextureValidationResult)(nil)
+	if result != nil {
+		modelData = result.Model
+		validation = result.Validation
+	}
+	if modelData == nil {
+		if materialView != nil {
+			materialView.ResetRows(nil)
+		}
+		if vertexView != nil {
+			vertexView.ResetRows(nil)
+		}
+		cw.SetModel(windowIndex, modelIndex, nil)
+		return
+	}
 	if materialView != nil {
-		validation := usecase.ValidateModelTextures(modelData, mfile.NewTextureValidator())
 		logTextureValidationErrors(logger, validation)
 		materialView.ResetRows(modelData)
 	}
@@ -259,14 +281,24 @@ func loadMotion(logger logging.ILogger, translator i18n.II18n, cw *controller.Co
 		cw.SetMotion(windowIndex, modelIndex, nil)
 		return
 	}
-	motionData, err := usecase.LoadMotion(rep, path)
+	motionResult, err := usecase.LoadMotionWithMeta(rep, path)
 	if err != nil {
 		logLoadFailed(logger, translator, err)
 		cw.SetMotion(windowIndex, modelIndex, nil)
 		return
 	}
+	motionData := (*motion.VmdMotion)(nil)
+	maxFrame := motion.Frame(0)
+	if motionResult != nil {
+		motionData = motionResult.Motion
+		maxFrame = motionResult.MaxFrame
+	}
+	if motionData == nil {
+		cw.SetMotion(windowIndex, modelIndex, nil)
+		return
+	}
 	if player != nil {
-		player.Reset(motionData.MaxFrame())
+		player.Reset(maxFrame)
 	}
 	cw.SetMotion(windowIndex, modelIndex, motionData)
 }

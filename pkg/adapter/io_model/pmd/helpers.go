@@ -152,12 +152,16 @@ func boneFlagsFromType(boneType byte, hasTail bool) model.BoneFlag {
 		flag |= model.BONE_FLAG_CAN_ROTATE | model.BONE_FLAG_CAN_TRANSLATE | model.BONE_FLAG_CAN_MANIPULATE | model.BONE_FLAG_IS_VISIBLE
 	case 2:
 		flag |= model.BONE_FLAG_CAN_ROTATE | model.BONE_FLAG_CAN_TRANSLATE | model.BONE_FLAG_CAN_MANIPULATE | model.BONE_FLAG_IS_VISIBLE | model.BONE_FLAG_IS_IK
-	case 4, 5:
+	case 4:
+		flag |= model.BONE_FLAG_CAN_ROTATE | model.BONE_FLAG_CAN_MANIPULATE | model.BONE_FLAG_IS_VISIBLE
+	case 5:
 		flag |= model.BONE_FLAG_CAN_ROTATE | model.BONE_FLAG_CAN_MANIPULATE | model.BONE_FLAG_IS_VISIBLE | model.BONE_FLAG_IS_EXTERNAL_ROTATION
 	case 7:
 		flag |= model.BONE_FLAG_CAN_ROTATE
-	case 8, 9:
+	case 8:
 		flag |= model.BONE_FLAG_CAN_ROTATE | model.BONE_FLAG_CAN_MANIPULATE | model.BONE_FLAG_IS_VISIBLE
+	case 9:
+		flag |= model.BONE_FLAG_CAN_ROTATE | model.BONE_FLAG_CAN_MANIPULATE | model.BONE_FLAG_IS_EXTERNAL_ROTATION
 	default:
 		flag |= model.BONE_FLAG_CAN_ROTATE | model.BONE_FLAG_CAN_MANIPULATE | model.BONE_FLAG_IS_VISIBLE
 	}
@@ -173,10 +177,13 @@ func boneTypeFromBone(bone *model.Bone) byte {
 		return 2
 	}
 	if bone.BoneFlag&model.BONE_FLAG_IS_EXTERNAL_ROTATION != 0 {
+		if bone.EffectFactor != 1.0 {
+			return 9
+		}
 		return 5
 	}
 	if bone.BoneFlag&model.BONE_FLAG_IS_EXTERNAL_TRANSLATION != 0 {
-		return 4
+		return 1
 	}
 	if bone.BoneFlag&model.BONE_FLAG_CAN_TRANSLATE != 0 {
 		return 1
