@@ -870,5 +870,357 @@
     {
         "id": "コントローラーウィンドウの初期化に失敗しました",
         "translation": "初始化控制器窗口失败"
+    },
+    {
+        "id": "名前解決に失敗",
+        "translation": "名称解析失败"
+    },
+    {
+        "id": "インデックスが無効",
+        "translation": "索引无效"
+    },
+    {
+        "id": "親要素が見つからない",
+        "translation": "找不到父元素"
+    },
+    {
+        "id": "インデックスが範囲外",
+        "translation": "索引超出范围"
+    },
+    {
+        "id": "名称が既存要素と衝突",
+        "translation": "名称与现有元素冲突"
+    },
+    {
+        "id": "名称が一致しない",
+        "translation": "名称不一致"
+    },
+    {
+        "id": "不変条件違反/NaNなどプログラム的異常",
+        "translation": "违反不变条件/NaN等程序异常"
+    },
+    {
+        "id": "osパッケージでエラーが発生",
+        "translation": "os 包发生错误"
+    },
+    {
+        "id": "jsonパッケージでエラーが発生",
+        "translation": "json 包发生错误"
+    },
+    {
+        "id": "imageパッケージでエラーが発生",
+        "translation": "image 包发生错误"
+    },
+    {
+        "id": "io/fsパッケージでエラーが発生",
+        "translation": "io/fs 包发生错误"
+    },
+    {
+        "id": "go-deepcopyパッケージでエラーが発生",
+        "translation": "go-deepcopy 包发生错误"
+    },
+    {
+        "id": "前提不足で処理開始できない",
+        "translation": "前提条件不足，无法开始处理"
+    },
+    {
+        "id": "入力ファイルが存在しない",
+        "translation": "输入文件不存在"
+    },
+    {
+        "id": "拡張子が不正",
+        "translation": "扩展名无效"
+    },
+    {
+        "id": "形式/バージョンが非対応",
+        "translation": "格式/版本不受支持"
+    },
+    {
+        "id": "未知のエンコード方式",
+        "translation": "未知的编码方式"
+    },
+    {
+        "id": "ファイル内容の解析に失敗",
+        "translation": "解析文件内容失败"
+    },
+    {
+        "id": "出力データのエンコードに失敗",
+        "translation": "输出数据编码失败"
+    },
+    {
+        "id": "名前のエンコードに失敗",
+        "translation": "名称编码失败"
+    },
+    {
+        "id": "ファイル保存に失敗",
+        "translation": "文件保存失败"
+    },
+    {
+        "id": "ユーザー中止で終了処理へ移行",
+        "translation": "用户取消，进入结束处理"
+    },
+    {
+        "id": "シェーダソース読込に失敗",
+        "translation": "读取着色器源失败"
+    },
+    {
+        "id": "シェーダのコンパイルに失敗",
+        "translation": "着色器编译失败"
+    },
+    {
+        "id": "シェーダのリンクに失敗",
+        "translation": "着色器链接失败"
+    },
+    {
+        "id": "Framebufferが不完全",
+        "translation": "Framebuffer 不完整"
+    },
+    {
+        "id": "OpenGLエラーが発生",
+        "translation": "发生 OpenGL 错误"
+    },
+    {
+        "id": "OpenGLコンテキスト初期化に失敗",
+        "translation": "OpenGL 上下文初始化失败"
+    },
+    {
+        "id": "数学型のコピーに失敗",
+        "translation": "数学类型复制失败"
+    },
+    {
+        "id": "配列長が一致しない",
+        "translation": "数组长度不一致"
+    },
+    {
+        "id": "CalculateXに失敗",
+        "translation": "CalculateX 失败"
+    },
+    {
+        "id": "Quaternion.Logに失敗",
+        "translation": "Quaternion.Log 失败"
+    },
+    {
+        "id": "平面との交点計算に失敗",
+        "translation": "与平面的交点计算失败"
+    },
+    {
+        "id": "曲線フィットに失敗",
+        "translation": "曲线拟合失败"
+    },
+    {
+        "id": "モデルコピーに失敗",
+        "translation": "模型复制失败"
+    },
+    {
+        "id": "モーションコピーに失敗",
+        "translation": "动作复制失败"
+    },
+    {
+        "id": "エラー基底型",
+        "translation": "错误基底类型"
+    },
+    {
+        "id": "app_config.json読込に失敗",
+        "translation": "读取 app_config.json 失败"
+    },
+    {
+        "id": "user_config.json保存に失敗",
+        "translation": "保存 user_config.json 失败"
+    },
+    {
+        "id": "アプリルート取得に失敗",
+        "translation": "获取应用根目录失败"
+    },
+    {
+        "id": "設定値の型が未対応",
+        "translation": "不支持的配置值类型"
+    },
+    {
+        "id": "VERBOSE書き込みに失敗",
+        "translation": "VERBOSE 写入失败"
+    },
+    {
+        "id": "VERBOSE出力のクローズに失敗",
+        "translation": "关闭 VERBOSE 输出失败"
+    },
+    {
+        "id": "ファイルが存在しない",
+        "translation": "文件不存在"
+    },
+    {
+        "id": "ファイル読込に失敗",
+        "translation": "读取文件失败"
+    },
+    {
+        "id": "画像デコードに失敗",
+        "translation": "图像解码失败"
+    },
+    {
+        "id": "数値パースに失敗",
+        "translation": "数值解析失败"
+    },
+    {
+        "id": "ログストリームの作成に失敗",
+        "translation": "创建日志流失败"
+    },
+    {
+        "id": "ログスナップショット保存に失敗",
+        "translation": "保存日志快照失败"
+    },
+    {
+        "id": "画像形式が未対応",
+        "translation": "不支持的图像格式"
+    },
+    {
+        "id": "音楽ファイルが指定されていない",
+        "translation": "未指定音频文件"
+    },
+    {
+        "id": "並列処理中のエラー",
+        "translation": "并行处理期间发生错误"
+    },
+    {
+        "id": "GLFWの初期化に失敗",
+        "translation": "GLFW 初始化失败"
+    },
+    {
+        "id": "panicを検知",
+        "translation": "检测到 panic"
+    },
+    {
+        "id": "Controllerウィンドウ初期化に失敗",
+        "translation": "Controller 窗口初始化失败"
+    },
+    {
+        "id": "ConsoleView初期化に失敗",
+        "translation": "ConsoleView 初始化失败"
+    },
+    {
+        "id": "ProgressBar初期化に失敗",
+        "translation": "ProgressBar 初始化失败"
+    },
+    {
+        "id": "読み込みリポジトリが未設定",
+        "translation": "加载存储库未配置"
+    },
+    {
+        "id": "モデルが読み込まれていない",
+        "translation": "模型未加载"
+    },
+    {
+        "id": "保存先パスが不正",
+        "translation": "保存路径无效"
+    },
+    {
+        "id": "インデックスの定義を確認する",
+        "translation": "确认索引定义"
+    },
+    {
+        "id": "前提を満たしてから再実行する",
+        "translation": "满足前提条件后重试"
+    },
+    {
+        "id": "パスを確認して再指定する",
+        "translation": "检查路径并重新指定"
+    },
+    {
+        "id": "拡張子を対応形式に修正する",
+        "translation": "将扩展名改为受支持的格式"
+    },
+    {
+        "id": "対応形式/バージョンに変換する",
+        "translation": "转换为受支持的格式/版本"
+    },
+    {
+        "id": "対応エンコードで保存する",
+        "translation": "使用受支持的编码保存"
+    },
+    {
+        "id": "ファイル形式/破損を確認する",
+        "translation": "检查文件格式/是否损坏"
+    },
+    {
+        "id": "出力内容/文字コードを確認する",
+        "translation": "检查输出内容/字符编码"
+    },
+    {
+        "id": "名称/文字コードを確認する",
+        "translation": "检查名称/字符编码"
+    },
+    {
+        "id": "出力先/権限/ディスク容量を確認する",
+        "translation": "检查输出位置/权限/磁盘容量"
+    },
+    {
+        "id": "ファイルパス/配布物を確認する",
+        "translation": "检查文件路径/配布内容"
+    },
+    {
+        "id": "シェーダの文法/対応GLSLを確認する",
+        "translation": "检查着色器语法/支持的GLSL"
+    },
+    {
+        "id": "シェーダの入出力整合性を確認する",
+        "translation": "检查着色器输入/输出一致性"
+    },
+    {
+        "id": "MSAA/FBO設定を確認する",
+        "translation": "检查 MSAA/FBO 设置"
+    },
+    {
+        "id": "ドライバ/GL状態/描画順序を確認する",
+        "translation": "检查驱动/GL状态/绘制顺序"
+    },
+    {
+        "id": "ファイル/権限/エンコードを確認する",
+        "translation": "检查文件/权限/编码"
+    },
+    {
+        "id": "画像形式/破損を確認する",
+        "translation": "检查图像格式/是否损坏"
+    },
+    {
+        "id": "入力文字列を確認する",
+        "translation": "检查输入字符串"
+    },
+    {
+        "id": "画像形式/拡張子を確認する",
+        "translation": "检查图像格式/扩展名"
+    },
+    {
+        "id": "音楽ファイルを選択する",
+        "translation": "选择音频文件"
+    },
+    {
+        "id": "cmd でリポジトリを注入する",
+        "translation": "通过 cmd 注入存储库"
+    },
+    {
+        "id": "モデルを読み込んでから保存する",
+        "translation": "先加载模型再保存"
+    },
+    {
+        "id": "保存先/権限/ファイル名を確認する",
+        "translation": "检查保存位置/权限/文件名"
+    },
+    {
+        "id": "エラーID",
+        "translation": "错误ID"
+    },
+    {
+        "id": "対処方法",
+        "translation": "处理方法"
+    },
+    {
+        "id": "詳細",
+        "translation": "详细"
+    },
+    {
+        "id": "読み込みリポジトリがありません: %s",
+        "translation": "读取存储库不存在：%s"
+    },
+    {
+        "id": "panicを検知しました: %s\n%s",
+        "translation": "检测到 panic：%s\n%s"
     }
 ]

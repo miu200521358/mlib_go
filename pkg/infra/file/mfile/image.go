@@ -26,7 +26,7 @@ func LoadImage(path string) (image.Image, error) {
 	open := func() (io.ReadCloser, error) {
 		file, err := os.Open(path)
 		if err != nil {
-			return nil, merr.NewOsPackageError("画像ファイルの読み込みに失敗しました: "+baseName, err)
+			return nil, merr.NewOsPackageError("画像ファイルの読み込みに失敗しました: %s", err, baseName)
 		}
 		return file, nil
 	}
@@ -36,13 +36,13 @@ func LoadImage(path string) (image.Image, error) {
 // imageOpenFunc は画像データを取得する関数型。
 type imageOpenFunc func() (io.ReadCloser, error)
 
-var errUnsupportedImageFormat = errors.New("unsupported image format")
+const imageFormatNotSupportedErrorID = "15307"
 
 // loadImage は拡張子候補に従って画像を読み込む。
 func loadImage(path string, displayName string, open imageOpenFunc) (image.Image, error) {
 	candidates := imageExtensionCandidates(path)
 	if len(candidates) == 0 {
-		return nil, merr.NewImagePackageError("未対応の画像形式です: "+displayName, nil)
+		return nil, merr.NewCommonError(imageFormatNotSupportedErrorID, merr.ErrorKindValidate, "画像形式が未対応です: %s", nil, displayName)
 	}
 	var lastErr error
 	for _, ext := range candidates {
@@ -77,7 +77,7 @@ func loadImage(path string, displayName string, open imageOpenFunc) (image.Image
 		if closeErr != nil {
 			lastErr = errors.Join(lastErr, wrapImageCloseError(displayName, closeErr))
 		}
-		return nil, merr.NewImagePackageError("画像のデコードに失敗しました: "+displayName, lastErr)
+		return nil, merr.NewImagePackageError("画像のデコードに失敗しました: %s", lastErr, displayName)
 	}
 	if closeErr != nil {
 		return img, wrapImageCloseError(displayName, closeErr)
@@ -124,11 +124,11 @@ func loadImageByExtension(reader io.Reader, ext string) (image.Image, error) {
 	case "bmp":
 		return bmp.Decode(reader)
 	default:
-		return nil, errUnsupportedImageFormat
+		return nil, merr.NewCommonError(imageFormatNotSupportedErrorID, merr.ErrorKindValidate, "画像形式が未対応です: %s", nil, ext)
 	}
 }
 
 // wrapImageCloseError は画像ファイルのクローズ失敗を共通エラーで包む。
 func wrapImageCloseError(displayName string, cause error) error {
-	return merr.NewOsPackageError("画像ファイルのクローズに失敗しました: "+displayName, cause)
+	return merr.NewOsPackageError("画像ファイルのクローズに失敗しました: %s", cause, displayName)
 }

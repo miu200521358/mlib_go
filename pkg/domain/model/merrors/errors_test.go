@@ -39,9 +39,12 @@ func TestNameErrors(t *testing.T) {
 }
 
 func TestParentNotFoundError(t *testing.T) {
-	err := NewParentNotFoundError("parent", "parent missing")
+	err := NewParentNotFoundError("parent", []string{"parent missing"})
 	if err.Parent != "parent" {
 		t.Fatalf("unexpected parent: %s", err.Parent)
+	}
+	if len(err.Candidates) != 1 || err.Candidates[0] != "parent missing" {
+		t.Fatalf("unexpected candidates: %+v", err.Candidates)
 	}
 	if err.Error() == "" {
 		t.Fatalf("Error should not be empty")

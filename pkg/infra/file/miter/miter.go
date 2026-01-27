@@ -45,7 +45,7 @@ func IterParallelByList[T any](allData []T, blockSize int, logBlockSize int,
 					if e, ok := r.(error); ok {
 						errMsg = e.Error()
 					}
-					errChan <- newIterProcessFailed("panicを検知しました", fmt.Errorf("panic: %s\n%s", errMsg, stackTrace))
+					errChan <- newIterProcessFailed("panicを検知しました: %s\n%s", nil, errMsg, string(stackTrace))
 					cancel()
 				}
 			}()
@@ -128,7 +128,7 @@ func iterSerial[T any](allData []T, processFunc func(index int, data T) error, l
 				if e, ok := r.(error); ok {
 					errMsg = e.Error()
 				}
-				err = newIterProcessFailed("panicを検知しました", fmt.Errorf("panic: %s\n%s", errMsg, stackTrace))
+				err = newIterProcessFailed("panicを検知しました: %s\n%s", nil, errMsg, string(stackTrace))
 			}
 		}()
 		for i := range allData {

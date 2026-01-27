@@ -34,21 +34,21 @@ func ReadText(path string) (string, error) {
 	info, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return "", newFileNotFound("ファイルが存在しません: "+path, nil)
+			return "", newFileNotFound("ファイルが存在しません: %s", nil, path)
 		}
 		return "", newFileReadFailed("ファイル確認に失敗しました", merr.NewOsPackageError("os.Statに失敗しました", err))
 	}
 	if info.IsDir() {
-		return "", newFileNotFound("ファイルが存在しません: "+path, nil)
+		return "", newFileNotFound("ファイルが存在しません: %s", nil, path)
 	}
 	file, err := os.Open(path)
 	if err != nil {
-		return "", newFileReadFailed("ファイルを開けません: "+path, merr.NewOsPackageError("os.Openに失敗しました", err))
+		return "", newFileReadFailed("ファイルを開けません: %s", merr.NewOsPackageError("os.Openに失敗しました", err), path)
 	}
 	defer file.Close()
 	content, err := io.ReadAll(file)
 	if err != nil {
-		return "", newFileReadFailed("ファイル読込に失敗しました: "+path, merr.NewOsPackageError("io.ReadAllに失敗しました", err))
+		return "", newFileReadFailed("ファイル読込に失敗しました: %s", merr.NewOsPackageError("io.ReadAllに失敗しました", err), path)
 	}
 	return string(content), nil
 }

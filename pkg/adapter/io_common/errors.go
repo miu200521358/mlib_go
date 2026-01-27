@@ -20,42 +20,42 @@ const (
 
 // NewIoFileNotFound は入力ファイル不存在エラーを生成する。
 func NewIoFileNotFound(path string, cause error) error {
-	message := "入力ファイルが存在しません: " + filepath.Base(path)
-	return merr.NewCommonError(ioFileNotFoundErrorID, merr.ErrorKindValidate, message, cause)
+	message := "入力ファイルが存在しない: %s"
+	return merr.NewCommonError(ioFileNotFoundErrorID, merr.ErrorKindValidate, message, cause, filepath.Base(path))
 }
 
 // NewIoExtInvalid は拡張子不正エラーを生成する。
 func NewIoExtInvalid(path string, cause error) error {
-	message := "拡張子が不正です: " + filepath.Base(path)
-	return merr.NewCommonError(ioExtInvalidErrorID, merr.ErrorKindValidate, message, cause)
+	message := "拡張子が不正です: %s"
+	return merr.NewCommonError(ioExtInvalidErrorID, merr.ErrorKindValidate, message, cause, filepath.Base(path))
 }
 
 // NewIoFormatNotSupported は形式未対応エラーを生成する。
-func NewIoFormatNotSupported(message string, cause error) error {
-	return merr.NewCommonError(ioFormatNotSupportedErrorID, merr.ErrorKindValidate, message, cause)
+func NewIoFormatNotSupported(message string, cause error, params ...any) error {
+	return merr.NewCommonError(ioFormatNotSupportedErrorID, merr.ErrorKindValidate, message, cause, params...)
 }
 
 // NewIoEncodingUnknown は未知エンコードエラーを生成する。
-func NewIoEncodingUnknown(message string, cause error) error {
-	return merr.NewCommonError(ioEncodingUnknownErrorID, merr.ErrorKindValidate, message, cause)
+func NewIoEncodingUnknown(message string, cause error, params ...any) error {
+	return merr.NewCommonError(ioEncodingUnknownErrorID, merr.ErrorKindValidate, message, cause, params...)
 }
 
 // NewIoParseFailed は解析失敗エラーを生成する。
-func NewIoParseFailed(message string, cause error) error {
-	return merr.NewCommonError(ioParseFailedErrorID, merr.ErrorKindValidate, message, cause)
+func NewIoParseFailed(message string, cause error, params ...any) error {
+	return merr.NewCommonError(ioParseFailedErrorID, merr.ErrorKindValidate, message, cause, params...)
 }
 
 // NewIoEncodeFailed はエンコード失敗エラーを生成する。
-func NewIoEncodeFailed(message string, cause error) error {
-	return merr.NewCommonError(ioEncodeFailedErrorID, merr.ErrorKindValidate, message, cause)
+func NewIoEncodeFailed(message string, cause error, params ...any) error {
+	return merr.NewCommonError(ioEncodeFailedErrorID, merr.ErrorKindValidate, message, cause, params...)
 }
 
 // NewIoNameEncodeFailed は名前エンコード失敗エラーを生成する。
-func NewIoNameEncodeFailed(message string, cause error) error {
-	return merr.NewCommonError(ioNameEncodeFailedErrorID, merr.ErrorKindValidate, message, cause)
+func NewIoNameEncodeFailed(message string, cause error, params ...any) error {
+	return merr.NewCommonError(ioNameEncodeFailedErrorID, merr.ErrorKindValidate, message, cause, params...)
 }
 
 // NewIoSaveFailed は保存失敗エラーを生成する。
-func NewIoSaveFailed(message string, cause error) error {
-	return merr.NewCommonError(ioSaveFailedErrorID, merr.ErrorKindValidate, message, cause)
+func NewIoSaveFailed(message string, cause error, params ...any) error {
+	return merr.NewCommonError(ioSaveFailedErrorID, merr.ErrorKindValidate, message, cause, params...)
 }

@@ -870,5 +870,357 @@
     {
         "id": "コントローラーウィンドウの初期化に失敗しました",
         "translation": "Failed to initialize controller window"
+    },
+    {
+        "id": "名前解決に失敗",
+        "translation": "Name resolution failed"
+    },
+    {
+        "id": "インデックスが無効",
+        "translation": "Invalid index"
+    },
+    {
+        "id": "親要素が見つからない",
+        "translation": "Parent element not found"
+    },
+    {
+        "id": "インデックスが範囲外",
+        "translation": "Index out of range"
+    },
+    {
+        "id": "名称が既存要素と衝突",
+        "translation": "Name conflicts with existing element"
+    },
+    {
+        "id": "名称が一致しない",
+        "translation": "Name does not match"
+    },
+    {
+        "id": "不変条件違反/NaNなどプログラム的異常",
+        "translation": "Invariant violation / NaN or other programmatic anomaly"
+    },
+    {
+        "id": "osパッケージでエラーが発生",
+        "translation": "Error occurred in os package"
+    },
+    {
+        "id": "jsonパッケージでエラーが発生",
+        "translation": "Error occurred in json package"
+    },
+    {
+        "id": "imageパッケージでエラーが発生",
+        "translation": "Error occurred in image package"
+    },
+    {
+        "id": "io/fsパッケージでエラーが発生",
+        "translation": "Error occurred in io/fs package"
+    },
+    {
+        "id": "go-deepcopyパッケージでエラーが発生",
+        "translation": "Error occurred in go-deepcopy package"
+    },
+    {
+        "id": "前提不足で処理開始できない",
+        "translation": "Cannot start processing due to missing prerequisites"
+    },
+    {
+        "id": "入力ファイルが存在しない",
+        "translation": "Input file does not exist"
+    },
+    {
+        "id": "拡張子が不正",
+        "translation": "Invalid file extension"
+    },
+    {
+        "id": "形式/バージョンが非対応",
+        "translation": "Unsupported format/version"
+    },
+    {
+        "id": "未知のエンコード方式",
+        "translation": "Unknown encoding"
+    },
+    {
+        "id": "ファイル内容の解析に失敗",
+        "translation": "Failed to parse file contents"
+    },
+    {
+        "id": "出力データのエンコードに失敗",
+        "translation": "Failed to encode output data"
+    },
+    {
+        "id": "名前のエンコードに失敗",
+        "translation": "Failed to encode name"
+    },
+    {
+        "id": "ファイル保存に失敗",
+        "translation": "Failed to save file"
+    },
+    {
+        "id": "ユーザー中止で終了処理へ移行",
+        "translation": "Transitioning to termination due to user cancellation"
+    },
+    {
+        "id": "シェーダソース読込に失敗",
+        "translation": "Failed to load shader source"
+    },
+    {
+        "id": "シェーダのコンパイルに失敗",
+        "translation": "Failed to compile shader"
+    },
+    {
+        "id": "シェーダのリンクに失敗",
+        "translation": "Failed to link shader"
+    },
+    {
+        "id": "Framebufferが不完全",
+        "translation": "Framebuffer is incomplete"
+    },
+    {
+        "id": "OpenGLエラーが発生",
+        "translation": "OpenGL error occurred"
+    },
+    {
+        "id": "OpenGLコンテキスト初期化に失敗",
+        "translation": "Failed to initialize OpenGL context"
+    },
+    {
+        "id": "数学型のコピーに失敗",
+        "translation": "Failed to copy math type"
+    },
+    {
+        "id": "配列長が一致しない",
+        "translation": "Array lengths do not match"
+    },
+    {
+        "id": "CalculateXに失敗",
+        "translation": "CalculateX failed"
+    },
+    {
+        "id": "Quaternion.Logに失敗",
+        "translation": "Quaternion.Log failed"
+    },
+    {
+        "id": "平面との交点計算に失敗",
+        "translation": "Failed to compute intersection with plane"
+    },
+    {
+        "id": "曲線フィットに失敗",
+        "translation": "Curve fitting failed"
+    },
+    {
+        "id": "モデルコピーに失敗",
+        "translation": "Failed to copy model"
+    },
+    {
+        "id": "モーションコピーに失敗",
+        "translation": "Failed to copy motion"
+    },
+    {
+        "id": "エラー基底型",
+        "translation": "Base error type"
+    },
+    {
+        "id": "app_config.json読込に失敗",
+        "translation": "Failed to load app_config.json"
+    },
+    {
+        "id": "user_config.json保存に失敗",
+        "translation": "Failed to save user_config.json"
+    },
+    {
+        "id": "アプリルート取得に失敗",
+        "translation": "Failed to resolve app root"
+    },
+    {
+        "id": "設定値の型が未対応",
+        "translation": "Unsupported config value type"
+    },
+    {
+        "id": "VERBOSE書き込みに失敗",
+        "translation": "Failed to write VERBOSE output"
+    },
+    {
+        "id": "VERBOSE出力のクローズに失敗",
+        "translation": "Failed to close VERBOSE output"
+    },
+    {
+        "id": "ファイルが存在しない",
+        "translation": "File does not exist"
+    },
+    {
+        "id": "ファイル読込に失敗",
+        "translation": "Failed to read file"
+    },
+    {
+        "id": "画像デコードに失敗",
+        "translation": "Failed to decode image"
+    },
+    {
+        "id": "数値パースに失敗",
+        "translation": "Failed to parse number"
+    },
+    {
+        "id": "ログストリームの作成に失敗",
+        "translation": "Failed to create log stream"
+    },
+    {
+        "id": "ログスナップショット保存に失敗",
+        "translation": "Failed to save log snapshot"
+    },
+    {
+        "id": "画像形式が未対応",
+        "translation": "Unsupported image format"
+    },
+    {
+        "id": "音楽ファイルが指定されていない",
+        "translation": "No audio file specified"
+    },
+    {
+        "id": "並列処理中のエラー",
+        "translation": "Error during parallel processing"
+    },
+    {
+        "id": "GLFWの初期化に失敗",
+        "translation": "Failed to initialize GLFW"
+    },
+    {
+        "id": "panicを検知",
+        "translation": "Panic detected"
+    },
+    {
+        "id": "Controllerウィンドウ初期化に失敗",
+        "translation": "Failed to initialize Controller window"
+    },
+    {
+        "id": "ConsoleView初期化に失敗",
+        "translation": "Failed to initialize ConsoleView"
+    },
+    {
+        "id": "ProgressBar初期化に失敗",
+        "translation": "Failed to initialize ProgressBar"
+    },
+    {
+        "id": "読み込みリポジトリが未設定",
+        "translation": "Load repository is not configured"
+    },
+    {
+        "id": "モデルが読み込まれていない",
+        "translation": "Model is not loaded"
+    },
+    {
+        "id": "保存先パスが不正",
+        "translation": "Invalid save path"
+    },
+    {
+        "id": "インデックスの定義を確認する",
+        "translation": "Check the index definition"
+    },
+    {
+        "id": "前提を満たしてから再実行する",
+        "translation": "Satisfy prerequisites and retry"
+    },
+    {
+        "id": "パスを確認して再指定する",
+        "translation": "Check the path and specify again"
+    },
+    {
+        "id": "拡張子を対応形式に修正する",
+        "translation": "Change the extension to a supported format"
+    },
+    {
+        "id": "対応形式/バージョンに変換する",
+        "translation": "Convert to a supported format/version"
+    },
+    {
+        "id": "対応エンコードで保存する",
+        "translation": "Save with a supported encoding"
+    },
+    {
+        "id": "ファイル形式/破損を確認する",
+        "translation": "Check file format/corruption"
+    },
+    {
+        "id": "出力内容/文字コードを確認する",
+        "translation": "Check output contents/character encoding"
+    },
+    {
+        "id": "名称/文字コードを確認する",
+        "translation": "Check name/character encoding"
+    },
+    {
+        "id": "出力先/権限/ディスク容量を確認する",
+        "translation": "Check destination/permissions/disk space"
+    },
+    {
+        "id": "ファイルパス/配布物を確認する",
+        "translation": "Check file path/distribution"
+    },
+    {
+        "id": "シェーダの文法/対応GLSLを確認する",
+        "translation": "Check shader syntax/supported GLSL"
+    },
+    {
+        "id": "シェーダの入出力整合性を確認する",
+        "translation": "Check shader input/output consistency"
+    },
+    {
+        "id": "MSAA/FBO設定を確認する",
+        "translation": "Check MSAA/FBO settings"
+    },
+    {
+        "id": "ドライバ/GL状態/描画順序を確認する",
+        "translation": "Check driver/GL state/render order"
+    },
+    {
+        "id": "ファイル/権限/エンコードを確認する",
+        "translation": "Check file/permissions/encoding"
+    },
+    {
+        "id": "画像形式/破損を確認する",
+        "translation": "Check image format/corruption"
+    },
+    {
+        "id": "入力文字列を確認する",
+        "translation": "Check the input string"
+    },
+    {
+        "id": "画像形式/拡張子を確認する",
+        "translation": "Check image format/extension"
+    },
+    {
+        "id": "音楽ファイルを選択する",
+        "translation": "Select an audio file"
+    },
+    {
+        "id": "cmd でリポジトリを注入する",
+        "translation": "Inject repository via cmd"
+    },
+    {
+        "id": "モデルを読み込んでから保存する",
+        "translation": "Load the model before saving"
+    },
+    {
+        "id": "保存先/権限/ファイル名を確認する",
+        "translation": "Check destination/permissions/file name"
+    },
+    {
+        "id": "エラーID",
+        "translation": "Error ID"
+    },
+    {
+        "id": "対処方法",
+        "translation": "Remedy"
+    },
+    {
+        "id": "詳細",
+        "translation": "Details"
+    },
+    {
+        "id": "読み込みリポジトリがありません: %s",
+        "translation": "Load repository is missing: %s"
+    },
+    {
+        "id": "panicを検知しました: %s\n%s",
+        "translation": "Panic detected: %s\n%s"
     }
 ]

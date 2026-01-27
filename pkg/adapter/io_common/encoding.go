@@ -3,7 +3,6 @@ package io_common
 
 import (
 	"bytes"
-	"fmt"
 
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/japanese"
@@ -33,9 +32,9 @@ func DecodePmxText(primary encoding.Encoding, raw []byte) (string, error) {
 		lastErr = err
 	}
 	if lastErr == nil {
-		lastErr = fmt.Errorf("エンコードの判定に失敗しました")
+		return "", NewIoEncodingUnknown("エンコードの判定に失敗しました", nil)
 	}
-	return "", lastErr
+	return "", NewIoEncodingUnknown("エンコードの判定に失敗しました", lastErr)
 }
 
 // DecodeShiftJISFixed はShift-JIS固定長文字列をデコードする。

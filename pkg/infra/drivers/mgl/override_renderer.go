@@ -5,12 +5,10 @@
 package mgl
 
 import (
-	"fmt"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.3-core/gl"
 	"github.com/miu200521358/mlib_go/pkg/adapter/graphics_api"
-	"github.com/miu200521358/mlib_go/pkg/infra/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 )
 
@@ -105,8 +103,9 @@ func (m *OverrideRenderer) initFBOAndTexture() {
 	status := gl.CheckFramebufferStatus(gl.FRAMEBUFFER)
 	if status != gl.FRAMEBUFFER_COMPLETE {
 		m.initErr = graphics_api.NewFramebufferIncomplete(
-			fmt.Sprintf(i18n.T("オーバーライド用フレームバッファが不完全です: %s"), getFrameBufferStatusString(status)),
+			"オーバーライド用フレームバッファが不完全です: %s",
 			nil,
+			getFrameBufferStatusString(status),
 		)
 		logging.DefaultLogger().Warn("オーバーライドFBOの初期化に失敗しました: %v", m.initErr)
 	}

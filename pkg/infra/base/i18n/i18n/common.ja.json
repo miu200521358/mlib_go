@@ -870,5 +870,357 @@
     {
         "id": "コントローラーウィンドウの初期化に失敗しました",
         "translation": "コントローラーウィンドウの初期化に失敗しました"
+    },
+    {
+        "id": "名前解決に失敗",
+        "translation": "名前解決に失敗"
+    },
+    {
+        "id": "インデックスが無効",
+        "translation": "インデックスが無効"
+    },
+    {
+        "id": "親要素が見つからない",
+        "translation": "親要素が見つからない"
+    },
+    {
+        "id": "インデックスが範囲外",
+        "translation": "インデックスが範囲外"
+    },
+    {
+        "id": "名称が既存要素と衝突",
+        "translation": "名称が既存要素と衝突"
+    },
+    {
+        "id": "名称が一致しない",
+        "translation": "名称が一致しない"
+    },
+    {
+        "id": "不変条件違反/NaNなどプログラム的異常",
+        "translation": "不変条件違反/NaNなどプログラム的異常"
+    },
+    {
+        "id": "osパッケージでエラーが発生",
+        "translation": "osパッケージでエラーが発生"
+    },
+    {
+        "id": "jsonパッケージでエラーが発生",
+        "translation": "jsonパッケージでエラーが発生"
+    },
+    {
+        "id": "imageパッケージでエラーが発生",
+        "translation": "imageパッケージでエラーが発生"
+    },
+    {
+        "id": "io/fsパッケージでエラーが発生",
+        "translation": "io/fsパッケージでエラーが発生"
+    },
+    {
+        "id": "go-deepcopyパッケージでエラーが発生",
+        "translation": "go-deepcopyパッケージでエラーが発生"
+    },
+    {
+        "id": "前提不足で処理開始できない",
+        "translation": "前提不足で処理開始できない"
+    },
+    {
+        "id": "入力ファイルが存在しない",
+        "translation": "入力ファイルが存在しない"
+    },
+    {
+        "id": "拡張子が不正",
+        "translation": "拡張子が不正"
+    },
+    {
+        "id": "形式/バージョンが非対応",
+        "translation": "形式/バージョンが非対応"
+    },
+    {
+        "id": "未知のエンコード方式",
+        "translation": "未知のエンコード方式"
+    },
+    {
+        "id": "ファイル内容の解析に失敗",
+        "translation": "ファイル内容の解析に失敗"
+    },
+    {
+        "id": "出力データのエンコードに失敗",
+        "translation": "出力データのエンコードに失敗"
+    },
+    {
+        "id": "名前のエンコードに失敗",
+        "translation": "名前のエンコードに失敗"
+    },
+    {
+        "id": "ファイル保存に失敗",
+        "translation": "ファイル保存に失敗"
+    },
+    {
+        "id": "ユーザー中止で終了処理へ移行",
+        "translation": "ユーザー中止で終了処理へ移行"
+    },
+    {
+        "id": "シェーダソース読込に失敗",
+        "translation": "シェーダソース読込に失敗"
+    },
+    {
+        "id": "シェーダのコンパイルに失敗",
+        "translation": "シェーダのコンパイルに失敗"
+    },
+    {
+        "id": "シェーダのリンクに失敗",
+        "translation": "シェーダのリンクに失敗"
+    },
+    {
+        "id": "Framebufferが不完全",
+        "translation": "Framebufferが不完全"
+    },
+    {
+        "id": "OpenGLエラーが発生",
+        "translation": "OpenGLエラーが発生"
+    },
+    {
+        "id": "OpenGLコンテキスト初期化に失敗",
+        "translation": "OpenGLコンテキスト初期化に失敗"
+    },
+    {
+        "id": "数学型のコピーに失敗",
+        "translation": "数学型のコピーに失敗"
+    },
+    {
+        "id": "配列長が一致しない",
+        "translation": "配列長が一致しない"
+    },
+    {
+        "id": "CalculateXに失敗",
+        "translation": "CalculateXに失敗"
+    },
+    {
+        "id": "Quaternion.Logに失敗",
+        "translation": "Quaternion.Logに失敗"
+    },
+    {
+        "id": "平面との交点計算に失敗",
+        "translation": "平面との交点計算に失敗"
+    },
+    {
+        "id": "曲線フィットに失敗",
+        "translation": "曲線フィットに失敗"
+    },
+    {
+        "id": "モデルコピーに失敗",
+        "translation": "モデルコピーに失敗"
+    },
+    {
+        "id": "モーションコピーに失敗",
+        "translation": "モーションコピーに失敗"
+    },
+    {
+        "id": "エラー基底型",
+        "translation": "エラー基底型"
+    },
+    {
+        "id": "app_config.json読込に失敗",
+        "translation": "app_config.json読込に失敗"
+    },
+    {
+        "id": "user_config.json保存に失敗",
+        "translation": "user_config.json保存に失敗"
+    },
+    {
+        "id": "アプリルート取得に失敗",
+        "translation": "アプリルート取得に失敗"
+    },
+    {
+        "id": "設定値の型が未対応",
+        "translation": "設定値の型が未対応"
+    },
+    {
+        "id": "VERBOSE書き込みに失敗",
+        "translation": "VERBOSE書き込みに失敗"
+    },
+    {
+        "id": "VERBOSE出力のクローズに失敗",
+        "translation": "VERBOSE出力のクローズに失敗"
+    },
+    {
+        "id": "ファイルが存在しない",
+        "translation": "ファイルが存在しない"
+    },
+    {
+        "id": "ファイル読込に失敗",
+        "translation": "ファイル読込に失敗"
+    },
+    {
+        "id": "画像デコードに失敗",
+        "translation": "画像デコードに失敗"
+    },
+    {
+        "id": "数値パースに失敗",
+        "translation": "数値パースに失敗"
+    },
+    {
+        "id": "ログストリームの作成に失敗",
+        "translation": "ログストリームの作成に失敗"
+    },
+    {
+        "id": "ログスナップショット保存に失敗",
+        "translation": "ログスナップショット保存に失敗"
+    },
+    {
+        "id": "画像形式が未対応",
+        "translation": "画像形式が未対応"
+    },
+    {
+        "id": "音楽ファイルが指定されていない",
+        "translation": "音楽ファイルが指定されていない"
+    },
+    {
+        "id": "並列処理中のエラー",
+        "translation": "並列処理中のエラー"
+    },
+    {
+        "id": "GLFWの初期化に失敗",
+        "translation": "GLFWの初期化に失敗"
+    },
+    {
+        "id": "panicを検知",
+        "translation": "panicを検知"
+    },
+    {
+        "id": "Controllerウィンドウ初期化に失敗",
+        "translation": "Controllerウィンドウ初期化に失敗"
+    },
+    {
+        "id": "ConsoleView初期化に失敗",
+        "translation": "ConsoleView初期化に失敗"
+    },
+    {
+        "id": "ProgressBar初期化に失敗",
+        "translation": "ProgressBar初期化に失敗"
+    },
+    {
+        "id": "読み込みリポジトリが未設定",
+        "translation": "読み込みリポジトリが未設定"
+    },
+    {
+        "id": "モデルが読み込まれていない",
+        "translation": "モデルが読み込まれていない"
+    },
+    {
+        "id": "保存先パスが不正",
+        "translation": "保存先パスが不正"
+    },
+    {
+        "id": "インデックスの定義を確認する",
+        "translation": "インデックスの定義を確認する"
+    },
+    {
+        "id": "前提を満たしてから再実行する",
+        "translation": "前提を満たしてから再実行する"
+    },
+    {
+        "id": "パスを確認して再指定する",
+        "translation": "パスを確認して再指定する"
+    },
+    {
+        "id": "拡張子を対応形式に修正する",
+        "translation": "拡張子を対応形式に修正する"
+    },
+    {
+        "id": "対応形式/バージョンに変換する",
+        "translation": "対応形式/バージョンに変換する"
+    },
+    {
+        "id": "対応エンコードで保存する",
+        "translation": "対応エンコードで保存する"
+    },
+    {
+        "id": "ファイル形式/破損を確認する",
+        "translation": "ファイル形式/破損を確認する"
+    },
+    {
+        "id": "出力内容/文字コードを確認する",
+        "translation": "出力内容/文字コードを確認する"
+    },
+    {
+        "id": "名称/文字コードを確認する",
+        "translation": "名称/文字コードを確認する"
+    },
+    {
+        "id": "出力先/権限/ディスク容量を確認する",
+        "translation": "出力先/権限/ディスク容量を確認する"
+    },
+    {
+        "id": "ファイルパス/配布物を確認する",
+        "translation": "ファイルパス/配布物を確認する"
+    },
+    {
+        "id": "シェーダの文法/対応GLSLを確認する",
+        "translation": "シェーダの文法/対応GLSLを確認する"
+    },
+    {
+        "id": "シェーダの入出力整合性を確認する",
+        "translation": "シェーダの入出力整合性を確認する"
+    },
+    {
+        "id": "MSAA/FBO設定を確認する",
+        "translation": "MSAA/FBO設定を確認する"
+    },
+    {
+        "id": "ドライバ/GL状態/描画順序を確認する",
+        "translation": "ドライバ/GL状態/描画順序を確認する"
+    },
+    {
+        "id": "ファイル/権限/エンコードを確認する",
+        "translation": "ファイル/権限/エンコードを確認する"
+    },
+    {
+        "id": "画像形式/破損を確認する",
+        "translation": "画像形式/破損を確認する"
+    },
+    {
+        "id": "入力文字列を確認する",
+        "translation": "入力文字列を確認する"
+    },
+    {
+        "id": "画像形式/拡張子を確認する",
+        "translation": "画像形式/拡張子を確認する"
+    },
+    {
+        "id": "音楽ファイルを選択する",
+        "translation": "音楽ファイルを選択する"
+    },
+    {
+        "id": "cmd でリポジトリを注入する",
+        "translation": "cmd でリポジトリを注入する"
+    },
+    {
+        "id": "モデルを読み込んでから保存する",
+        "translation": "モデルを読み込んでから保存する"
+    },
+    {
+        "id": "保存先/権限/ファイル名を確認する",
+        "translation": "保存先/権限/ファイル名を確認する"
+    },
+    {
+        "id": "エラーID",
+        "translation": "エラーID"
+    },
+    {
+        "id": "対処方法",
+        "translation": "対処方法"
+    },
+    {
+        "id": "詳細",
+        "translation": "詳細"
+    },
+    {
+        "id": "読み込みリポジトリがありません: %s",
+        "translation": "読み込みリポジトリがありません: %s"
+    },
+    {
+        "id": "panicを検知しました: %s\n%s",
+        "translation": "panicを検知しました: %s\n%s"
     }
 ]

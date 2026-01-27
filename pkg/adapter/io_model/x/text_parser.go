@@ -205,7 +205,7 @@ func newTextParser(r io.Reader) (*textParser, error) {
 // Parse はXテキストを解析する。
 func (p *textParser) Parse(modelData *model.PmxModel) error {
 	if modelData == nil {
-		return fmt.Errorf("Xモデルがnilです")
+		return newParseFailed("Xモデルがnilです")
 	}
 	p.model = modelData
 	return p.parseTextXFile()
@@ -230,7 +230,7 @@ func (p *textParser) next() textToken {
 func (p *textParser) expect(typ tokenType) (textToken, error) {
 	t := p.next()
 	if t.typ != typ {
-		return t, fmt.Errorf("expected %v got %v (%s)", typ, t.typ, t.val)
+		return t, newParseFailed("トークン種別が不正です: expected=%v actual=%v (%s)", typ, t.typ, t.val)
 	}
 	return t, nil
 }
@@ -279,7 +279,7 @@ func (p *textParser) parseTextTemplateDefinition() error {
 	}
 	guidTok := p.next()
 	if guidTok.typ != tokAngleBracketed {
-		return fmt.Errorf("テンプレート定義のGUIDが不正です")
+		return newParseFailed("テンプレート定義のGUIDが不正です")
 	}
 	braceCount := 1
 	for braceCount > 0 {
@@ -290,7 +290,7 @@ func (p *textParser) parseTextTemplateDefinition() error {
 		case tokRCurly:
 			braceCount--
 		case tokEOF:
-			return fmt.Errorf("テンプレート定義が未完です")
+			return newParseFailed("テンプレート定義が未完です")
 		}
 	}
 	return nil
@@ -358,7 +358,7 @@ func (p *textParser) parseString() (string, error) {
 	case tokString, tokIdentifier:
 		return t.val, nil
 	default:
-		return "", fmt.Errorf("文字列の読み取りに失敗しました")
+		return "", newParseFailed("文字列の読み取りに失敗しました")
 	}
 }
 
@@ -581,7 +581,7 @@ func (p *textParser) parseMeshFaceIndexes() ([]int, error) {
 		return nil, err
 	}
 	if count < 3 {
-		return nil, fmt.Errorf("Meshの面頂点数が不足しています")
+		return nil, newParseFailed("Meshの面頂点数が不足しています")
 	}
 	if _, err := p.expect(tokSemicolon); err != nil {
 		return nil, err
@@ -610,7 +610,7 @@ func (p *textParser) parseMeshMaterialList() error {
 		return err
 	}
 	if nMaterials < 0 {
-		return fmt.Errorf("MeshMaterialListの材質数が不正です")
+		return newParseFailed("MeshMaterialListの材質数が不正です")
 	}
 	if _, err := p.expect(tokSemicolon); err != nil {
 		return err
@@ -620,16 +620,16 @@ func (p *textParser) parseMeshMaterialList() error {
 		return err
 	}
 	if nFaceIdx < 0 {
-		return fmt.Errorf("MeshMaterialListの面数が不正です")
+		return newParseFailed("MeshMaterialListの面数が不正です")
 	}
 	if _, err := p.expect(tokSemicolon); err != nil {
 		return err
 	}
 	if p.meshCtx == nil {
-		return fmt.Errorf("MeshMaterialListがMesh外で検出されました")
+		return newParseFailed("MeshMaterialListがMesh外で検出されました")
 	}
 	if nFaceIdx != len(p.meshCtx.faceGroups) {
-		return fmt.Errorf("MeshMaterialListの面数が不正です")
+		return newParseFailed("MeshMaterialListの面数が不正です")
 	}
 	facesByMaterial := make([][][]*model.Face, nMaterials)
 	for i := 0; i < nMaterials; i++ {
@@ -641,7 +641,7 @@ func (p *textParser) parseMeshMaterialList() error {
 			return err
 		}
 		if matIdx < 0 || matIdx >= nMaterials {
-			return fmt.Errorf("MeshMaterialListの材質番号が不正です")
+			return newParseFailed("MeshMaterialListの材質番号が不正です")
 		}
 		facesByMaterial[matIdx] = append(facesByMaterial[matIdx], p.meshCtx.faceGroups[i])
 	}
@@ -819,7 +819,7 @@ func (p *textParser) parseMeshTextureCoords() error {
 // parseMeshNormals は法線情報を読み取る。
 func (p *textParser) parseMeshNormals() error {
 	if p.meshCtx == nil {
-		return fmt.Errorf("MeshNormalsの頂点コンテキストが不正です")
+		return newParseFailed("MeshNormalsの頂点コンテキストが不正です")
 	}
 	if _, err := p.expect(tokLCurly); err != nil {
 		return err
@@ -885,7 +885,7 @@ func (p *textParser) skipTextUnknownTemplate() error {
 		case tokRCurly:
 			braceCount--
 		case tokEOF:
-			return fmt.Errorf("テンプレートの終端が不正です")
+			return newParseFailed("テンプレートの終端が不正です")
 		}
 	}
 	return nil

@@ -3,6 +3,7 @@ package mlogging
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 )
 
 const maxConsoleLines = 10000
@@ -213,8 +215,19 @@ func (l *Logger) ErrorTitle(title string, err error, msg string, params ...any) 
 	}
 	log.Printf("********** %s **********", title)
 	if err != nil {
-		log.Printf("Error Message: %s", err.Error())
-		log.Printf("Stack Trace:\n%s", dumpAllGoroutines())
+		// ErrorID/対処法/スタックの制御はエラー種別で分岐する。
+		errID := extractErrorID(err)
+		if errID != "" {
+			log.Printf("%s: %s", l.translateKey("エラーID"), errID)
+		}
+		log.Printf("Error Message: %s", l.formatErrorMessage(err))
+		if extractErrorKind(err) == merr.ErrorKindValidate {
+			if remedy := l.formatErrorRemedy(errID); remedy != "" {
+				log.Printf("%s: %s", l.translateKey("対処方法"), remedy)
+			}
+		} else {
+			log.Printf("Stack Trace:\n%s", dumpAllGoroutines())
+		}
 	}
 	if msg != "" {
 		log.Printf(l.formatMessage(logging.LOG_LEVEL_ERROR, msg), params...)
@@ -228,8 +241,19 @@ func (l *Logger) FatalTitle(title string, err error, msg string, params ...any) 
 	}
 	log.Printf("!!!!!!!!!! %s !!!!!!!!!!", title)
 	if err != nil {
-		log.Printf("Error Message: %s", err.Error())
-		log.Printf("Stack Trace:\n%s", dumpAllGoroutines())
+		// ErrorID/対処法/スタックの制御はエラー種別で分岐する。
+		errID := extractErrorID(err)
+		if errID != "" {
+			log.Printf("%s: %s", l.translateKey("エラーID"), errID)
+		}
+		log.Printf("Error Message: %s", l.formatErrorMessage(err))
+		if extractErrorKind(err) == merr.ErrorKindValidate {
+			if remedy := l.formatErrorRemedy(errID); remedy != "" {
+				log.Printf("%s: %s", l.translateKey("対処方法"), remedy)
+			}
+		} else {
+			log.Printf("Stack Trace:\n%s", dumpAllGoroutines())
+		}
 	}
 	if msg != "" {
 		log.Printf(l.formatMessage(logging.LOG_LEVEL_FATAL, msg), params...)
@@ -288,13 +312,135 @@ func (l *Logger) formatMessage(level logging.LogLevel, msg string) string {
 	if level < logging.LOG_LEVEL_INFO {
 		return msg
 	}
+	return l.translateKey(msg)
+}
+
+// formatErrorMessage はエラーのメッセージキーを翻訳して返す。
+func (l *Logger) formatErrorMessage(err error) string {
+	summary := l.formatErrorSummary(err)
+	detail := l.formatErrorDetail(err)
+	if summary == "" {
+		if detail != "" {
+			return detail
+		}
+		if err == nil {
+			return ""
+		}
+		return err.Error()
+	}
+	if detail == "" || detail == summary {
+		return summary
+	}
+	return summary + "\n" + fmt.Sprintf("%s: %s", l.translateKey("詳細"), detail)
+}
+
+// formatErrorRemedy はエラー管理表から対処法メッセージを取得する。
+func (l *Logger) formatErrorRemedy(errID string) string {
+	rec, err := merr.FindRecord(errID)
+	if err != nil || rec == nil || rec.Remedy == "" {
+		return ""
+	}
+	return l.translateKey(rec.Remedy)
+}
+
+// formatErrorSummary はエラー管理表のSummaryを翻訳して返す。
+func (l *Logger) formatErrorSummary(err error) string {
+	rec, err := merr.FindRecord(extractErrorID(err))
+	if err != nil || rec == nil || rec.Summary == "" {
+		return ""
+	}
+	return l.translateKey(rec.Summary)
+}
+
+// formatErrorDetail はエラーのメッセージキーを翻訳して返す。
+func (l *Logger) formatErrorDetail(err error) string {
+	key, params := extractMessageKey(err)
+	if key == "" {
+		return ""
+	}
+	text := l.translateKey(key)
+	if len(params) > 0 {
+		return fmt.Sprintf(text, params...)
+	}
+	return text
+}
+
+// translateKey は翻訳済みのキーを返し、欠落時はキー自身を返す。
+func (l *Logger) translateKey(key string) string {
+	if key == "" {
+		return ""
+	}
 	l.mu.Lock()
 	translator := l.translator
 	l.mu.Unlock()
-	if translator == nil {
-		return msg
+	if translator == nil || !translator.IsReady() {
+		return key
 	}
-	return translator.T(msg)
+	out := translator.T(key)
+	if isMissingTranslation(out, key) {
+		return key
+	}
+	return out
+}
+
+type (
+	errorIDProvider interface {
+		ErrorID() string
+	}
+	errorKindProvider interface {
+		ErrorKind() merr.ErrorKind
+	}
+	errorMessageProvider interface {
+		MessageKey() string
+		MessageParams() []any
+	}
+)
+
+// extractErrorID はエラーIDを取得する。
+func extractErrorID(err error) string {
+	if err == nil {
+		return ""
+	}
+	var provider errorIDProvider
+	if errors.As(err, &provider) {
+		return provider.ErrorID()
+	}
+	return ""
+}
+
+// extractErrorKind はエラー種別を取得する。
+func extractErrorKind(err error) merr.ErrorKind {
+	if err == nil {
+		return ""
+	}
+	var provider errorKindProvider
+	if errors.As(err, &provider) {
+		return provider.ErrorKind()
+	}
+	return ""
+}
+
+// extractMessageKey はメッセージキーとパラメータを取得する。
+func extractMessageKey(err error) (string, []any) {
+	if err == nil {
+		return "", nil
+	}
+	var provider errorMessageProvider
+	if errors.As(err, &provider) {
+		return provider.MessageKey(), provider.MessageParams()
+	}
+	return "", nil
+}
+
+// isMissingTranslation は未定義キーの表示か判定する。
+func isMissingTranslation(text string, key string) bool {
+	if text == "●●"+key+"●●" {
+		return true
+	}
+	if text == "▼▼"+key+"▼▼" {
+		return true
+	}
+	return false
 }
 
 // messageBuffer はログバッファを保持する。

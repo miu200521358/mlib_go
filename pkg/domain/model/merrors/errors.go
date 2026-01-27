@@ -3,25 +3,44 @@ package merrors
 
 import (
 	"errors"
-	"fmt"
+	"strings"
 
 	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 )
 
+const (
+	invalidIndexErrorID     = "12201"
+	nameNotFoundErrorID     = "20001"
+	parentNotFoundErrorID   = "22201"
+	indexOutOfRangeErrorID  = "92202"
+	nameConflictErrorID     = "92203"
+	nameMismatchErrorID     = "92204"
+	modelCopyFailedErrorID  = "92201"
+)
+
 // IndexOutOfRangeError はインデックス範囲外エラーを表す。
 type IndexOutOfRangeError struct {
+	*merr.CommonError
 	Index  int
 	Length int
 }
 
 // NewIndexOutOfRangeError は IndexOutOfRangeError を生成する。
 func NewIndexOutOfRangeError(index, length int) *IndexOutOfRangeError {
-	return &IndexOutOfRangeError{Index: index, Length: length}
+	message := "インデックスが範囲外です: index=%d length=%d"
+	return &IndexOutOfRangeError{
+		CommonError: merr.NewCommonError(indexOutOfRangeErrorID, merr.ErrorKindInternal, message, nil, index, length),
+		Index:       index,
+		Length:      length,
+	}
 }
 
 // Error はエラーメッセージを返す。
 func (e *IndexOutOfRangeError) Error() string {
-	return fmt.Sprintf("index out of range: index=%d length=%d", e.Index, e.Length)
+	if e == nil || e.CommonError == nil {
+		return ""
+	}
+	return e.CommonError.Error()
 }
 
 // IsIndexOutOfRangeError は err が IndexOutOfRangeError か判定する。
@@ -32,17 +51,25 @@ func IsIndexOutOfRangeError(err error) bool {
 
 // NameNotFoundError は名前未検出エラーを表す。
 type NameNotFoundError struct {
+	*merr.CommonError
 	Name string
 }
 
 // NewNameNotFoundError は NameNotFoundError を生成する。
 func NewNameNotFoundError(name string) *NameNotFoundError {
-	return &NameNotFoundError{Name: name}
+	message := "名前が見つかりません: %s"
+	return &NameNotFoundError{
+		CommonError: merr.NewCommonError(nameNotFoundErrorID, merr.ErrorKindNotFound, message, nil, name),
+		Name:        name,
+	}
 }
 
 // Error はエラーメッセージを返す。
 func (e *NameNotFoundError) Error() string {
-	return fmt.Sprintf("name not found: %s", e.Name)
+	if e == nil || e.CommonError == nil {
+		return ""
+	}
+	return e.CommonError.Error()
 }
 
 // IsNameNotFoundError は err が NameNotFoundError か判定する。
@@ -53,17 +80,25 @@ func IsNameNotFoundError(err error) bool {
 
 // NameConflictError は名前衝突エラーを表す。
 type NameConflictError struct {
+	*merr.CommonError
 	Name string
 }
 
 // NewNameConflictError は NameConflictError を生成する。
 func NewNameConflictError(name string) *NameConflictError {
-	return &NameConflictError{Name: name}
+	message := "名称が既存要素と衝突しました: %s"
+	return &NameConflictError{
+		CommonError: merr.NewCommonError(nameConflictErrorID, merr.ErrorKindInternal, message, nil, name),
+		Name:        name,
+	}
 }
 
 // Error はエラーメッセージを返す。
 func (e *NameConflictError) Error() string {
-	return fmt.Sprintf("name conflict: %s", e.Name)
+	if e == nil || e.CommonError == nil {
+		return ""
+	}
+	return e.CommonError.Error()
 }
 
 // IsNameConflictError は err が NameConflictError か判定する。
@@ -74,6 +109,7 @@ func IsNameConflictError(err error) bool {
 
 // NameMismatchError は更新時の名前不一致エラーを表す。
 type NameMismatchError struct {
+	*merr.CommonError
 	Index    int
 	Expected string
 	Actual   string
@@ -81,12 +117,21 @@ type NameMismatchError struct {
 
 // NewNameMismatchError は NameMismatchError を生成する。
 func NewNameMismatchError(index int, expected, actual string) *NameMismatchError {
-	return &NameMismatchError{Index: index, Expected: expected, Actual: actual}
+	message := "名称が一致しません: index=%d expected=%s actual=%s"
+	return &NameMismatchError{
+		CommonError: merr.NewCommonError(nameMismatchErrorID, merr.ErrorKindInternal, message, nil, index, expected, actual),
+		Index:       index,
+		Expected:    expected,
+		Actual:      actual,
+	}
 }
 
 // Error はエラーメッセージを返す。
 func (e *NameMismatchError) Error() string {
-	return fmt.Sprintf("name mismatch: index=%d expected=%s actual=%s", e.Index, e.Expected, e.Actual)
+	if e == nil || e.CommonError == nil {
+		return ""
+	}
+	return e.CommonError.Error()
 }
 
 // IsNameMismatchError は err が NameMismatchError か判定する。
@@ -97,24 +142,31 @@ func IsNameMismatchError(err error) bool {
 
 // ParentNotFoundError は親ボーン未検出エラーを表す。
 type ParentNotFoundError struct {
-	Parent  string
-	Message string
+	*merr.CommonError
+	Parent     string
+	Candidates []string
 }
 
 // NewParentNotFoundError は ParentNotFoundError を生成する。
-func NewParentNotFoundError(parent, message string) *ParentNotFoundError {
-	return &ParentNotFoundError{Parent: parent, Message: message}
+func NewParentNotFoundError(parent string, candidates []string) *ParentNotFoundError {
+	message := "親要素が見つかりません: %s"
+	detail := parent
+	if len(candidates) > 0 {
+		detail = strings.Join(candidates, ",")
+	}
+	return &ParentNotFoundError{
+		CommonError: merr.NewCommonError(parentNotFoundErrorID, merr.ErrorKindNotFound, message, nil, detail),
+		Parent:      parent,
+		Candidates:  candidates,
+	}
 }
 
 // Error はエラーメッセージを返す。
 func (e *ParentNotFoundError) Error() string {
-	if e == nil {
+	if e == nil || e.CommonError == nil {
 		return ""
 	}
-	if e.Message != "" {
-		return e.Message
-	}
-	return fmt.Sprintf("parent not found: %s", e.Parent)
+	return e.CommonError.Error()
 }
 
 // IsParentNotFoundError は err が ParentNotFoundError か判定する。
@@ -123,39 +175,36 @@ func IsParentNotFoundError(err error) bool {
 	return errors.As(err, &target)
 }
 
-const (
-	invalidIndexErrorID = "12201"
-)
-
 // NewInvalidIndexError は無効なインデックスエラーを生成する。
 func NewInvalidIndexError(index int) *merr.CommonError {
-	return merr.NewCommonError(invalidIndexErrorID, merr.ErrorKindValidate, fmt.Sprintf("invalid index: %d", index), nil)
+	return merr.NewCommonError(invalidIndexErrorID, merr.ErrorKindValidate, "インデックスが無効です: %d", nil, index)
 }
 
 // ModelCopyFailed はモデルコピー失敗を表す。
 type ModelCopyFailed struct {
-	Cause error
+	*merr.CommonError
 }
 
 // NewModelCopyFailed は ModelCopyFailed を生成する。
 func NewModelCopyFailed(cause error) *ModelCopyFailed {
-	return &ModelCopyFailed{Cause: cause}
+	message := "モデルコピーに失敗"
+	return &ModelCopyFailed{CommonError: merr.NewCommonError(modelCopyFailedErrorID, merr.ErrorKindInternal, message, cause)}
 }
 
 // Error はエラーメッセージを返す。
 func (e *ModelCopyFailed) Error() string {
-	if e == nil {
+	if e == nil || e.CommonError == nil {
 		return ""
 	}
-	return fmt.Sprintf("model copy failed: %v", e.Cause)
+	return e.CommonError.Error()
 }
 
 // Unwrap は元の原因エラーを返す。
 func (e *ModelCopyFailed) Unwrap() error {
-	if e == nil {
+	if e == nil || e.CommonError == nil {
 		return nil
 	}
-	return e.Cause
+	return e.CommonError.Unwrap()
 }
 
 // IsModelCopyFailed は err が ModelCopyFailed か判定する。

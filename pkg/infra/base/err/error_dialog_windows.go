@@ -6,6 +6,8 @@ package err
 
 import (
 	"embed"
+	"errors"
+	"fmt"
 	"image/png"
 	"os"
 	"os/exec"
@@ -15,6 +17,8 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/infra/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
+	sharedi18n "github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 	"github.com/miu200521358/win"
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
@@ -30,13 +34,15 @@ func ShowFatalErrorDialog(appConfig *config.AppConfig, err error) bool {
 	return showErrorDialog(appConfig, err, i18n.T("予期せぬエラーが発生しました"), i18n.T("予期せぬエラーヘッダー"), true)
 }
 
+// BuildErrorText はエラー本文を生成して返す。
+func BuildErrorText(err error) string {
+	return buildErrorText(i18n.Default(), err)
+}
+
 // showErrorDialog はエラーダイアログの表示を行う。
 func showErrorDialog(appConfig *config.AppConfig, err error, title string, header string, terminate bool) bool {
 	message := replaceAppInfo(header, appConfig)
-	errText := ""
-	if err != nil {
-		errText = err.Error()
-	}
+	errText := buildErrorText(i18n.Default(), err)
 	text := message
 	if errText != "" {
 		text += "\n\n" + errText
@@ -157,6 +163,146 @@ func showErrorDialog(appConfig *config.AppConfig, err error, title string, heade
 		os.Exit(1)
 	}
 	return true
+}
+
+type (
+	errorIDProvider interface {
+		ErrorID() string
+	}
+	errorKindProvider interface {
+		ErrorKind() merr.ErrorKind
+	}
+	errorMessageProvider interface {
+		MessageKey() string
+		MessageParams() []any
+	}
+)
+
+// buildErrorText はエラーダイアログ向けの本文を生成する。
+func buildErrorText(translator sharedi18n.II18n, err error) string {
+	if err == nil {
+		return ""
+	}
+	errID := extractErrorID(err)
+	msg := formatErrorMessage(translator, err)
+	if msg == "" {
+		msg = err.Error()
+	}
+	if errID != "" {
+		msg = fmt.Sprintf("%s: %s\n%s", translateKey(translator, "エラーID"), errID, msg)
+	}
+	if extractErrorKind(err) == merr.ErrorKindValidate {
+		if remedy := formatErrorRemedy(translator, errID); remedy != "" {
+			msg += "\n\n" + fmt.Sprintf("%s:\n%s", translateKey(translator, "対処方法"), remedy)
+		}
+	}
+	return msg
+}
+
+// formatErrorMessage はエラーのメッセージキーを翻訳して返す。
+func formatErrorMessage(translator sharedi18n.II18n, err error) string {
+	summary := formatErrorSummary(translator, err)
+	detail := formatErrorDetail(translator, err)
+	if summary == "" {
+		return detail
+	}
+	if detail == "" || detail == summary {
+		return summary
+	}
+	return summary + "\n" + fmt.Sprintf("%s: %s", translateKey(translator, "詳細"), detail)
+}
+
+// formatErrorRemedy はエラー管理表から対処法メッセージを取得する。
+func formatErrorRemedy(translator sharedi18n.II18n, errID string) string {
+	rec, err := merr.FindRecord(errID)
+	if err != nil || rec == nil || rec.Remedy == "" {
+		return ""
+	}
+	return translateKey(translator, rec.Remedy)
+}
+
+// formatErrorSummary はエラー管理表のSummaryを翻訳して返す。
+func formatErrorSummary(translator sharedi18n.II18n, err error) string {
+	rec, err := merr.FindRecord(extractErrorID(err))
+	if err != nil || rec == nil || rec.Summary == "" {
+		return ""
+	}
+	return translateKey(translator, rec.Summary)
+}
+
+// formatErrorDetail はエラーのメッセージキーを翻訳して返す。
+func formatErrorDetail(translator sharedi18n.II18n, err error) string {
+	key, params := extractMessageKey(err)
+	if key == "" {
+		return ""
+	}
+	text := translateKey(translator, key)
+	if len(params) > 0 {
+		return fmt.Sprintf(text, params...)
+	}
+	return text
+}
+
+// translateKey は翻訳済みのキーを返し、欠落時はキー自身を返す。
+func translateKey(translator sharedi18n.II18n, key string) string {
+	if key == "" {
+		return ""
+	}
+	if translator == nil || !translator.IsReady() {
+		return key
+	}
+	out := translator.T(key)
+	if isMissingTranslation(out, key) {
+		return key
+	}
+	return out
+}
+
+// extractErrorID はエラーIDを取得する。
+func extractErrorID(err error) string {
+	if err == nil {
+		return ""
+	}
+	var provider errorIDProvider
+	if errors.As(err, &provider) {
+		return provider.ErrorID()
+	}
+	return ""
+}
+
+// extractErrorKind はエラー種別を取得する。
+func extractErrorKind(err error) merr.ErrorKind {
+	if err == nil {
+		return ""
+	}
+	var provider errorKindProvider
+	if errors.As(err, &provider) {
+		return provider.ErrorKind()
+	}
+	return ""
+}
+
+// extractMessageKey はメッセージキーとパラメータを取得する。
+func extractMessageKey(err error) (string, []any) {
+	if err == nil {
+		return "", nil
+	}
+	var provider errorMessageProvider
+	if errors.As(err, &provider) {
+		return provider.MessageKey(), provider.MessageParams()
+	}
+	return "", nil
+}
+
+// isMissingTranslation は未定義キーの表示か判定する。
+func isMissingTranslation(text string, key string) bool {
+	if text == "●●"+key+"●●" {
+		return true
+	}
+	if text == "▼▼"+key+"▼▼" {
+		return true
+	}
+	return false
 }
 
 //go:embed *.png

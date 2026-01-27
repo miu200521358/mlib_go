@@ -2,7 +2,6 @@
 package pmx
 
 import (
-	"fmt"
 	"io"
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
@@ -1034,7 +1033,7 @@ func encodeText(enc encoding.Encoding, text string) ([]byte, error) {
 		return []byte{}, nil
 	}
 	if enc == nil {
-		return nil, fmt.Errorf("encoding is nil")
+		return nil, io_common.NewIoEncodeFailed("エンコード設定が未指定です", nil)
 	}
 	return enc.NewEncoder().Bytes([]byte(text))
 }

@@ -2,7 +2,6 @@
 package model
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
@@ -43,7 +42,7 @@ func (bones *BoneCollection) CreateGroove() (*Bone, error) {
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			GROOVE.String(),
-			fmt.Sprintf("parent bone not found: %s", []string{CENTER.String()}),
+			[]string{CENTER.String()},
 		)
 	}
 
@@ -75,7 +74,7 @@ func (bones *BoneCollection) CreateBodyAxis() (*Bone, error) {
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			BODY_AXIS.String(),
-			fmt.Sprintf("parent bone not found: %s", []string{LEG.Left(), LEG.Right()}),
+			[]string{LEG.Left(), LEG.Right()},
 		)
 	}
 
@@ -107,7 +106,7 @@ func (bones *BoneCollection) CreateWaist() (*Bone, error) {
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			WAIST.String(),
-			fmt.Sprintf("parent bone not found: %s", []string{UPPER.String(), LOWER.String()}),
+			[]string{UPPER.String(), LOWER.String()},
 		)
 
 	}
@@ -140,7 +139,7 @@ func (bones *BoneCollection) CreateTrunkRoot() (*Bone, error) {
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			TRUNK_ROOT.String(),
-			fmt.Sprintf("parent bone not found: %s", []string{UPPER.String(), LOWER.String()}),
+			[]string{UPPER.String(), LOWER.String()},
 		)
 
 	}
@@ -168,7 +167,7 @@ func (bones *BoneCollection) CreateLowerRoot() (*Bone, error) {
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			LOWER_ROOT.String(),
-			fmt.Sprintf("parent bone not found: %s", []string{LOWER.String()}),
+			[]string{LOWER.String()},
 		)
 	}
 
@@ -210,7 +209,7 @@ func (bones *BoneCollection) CreateLegCenter() (*Bone, error) {
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			LEG_CENTER.String(),
-			fmt.Sprintf("parent bone not found: %s", []string{LEG.Left(), LEG.Right()}),
+			[]string{LEG.Left(), LEG.Right()},
 		)
 
 	}
@@ -238,7 +237,7 @@ func (bones *BoneCollection) CreateUpperRoot() (*Bone, error) {
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			UPPER_ROOT.String(),
-			fmt.Sprintf("parent bone not found: %s", []string{UPPER.String()}),
+			[]string{UPPER.String()},
 		)
 	}
 
@@ -280,7 +279,7 @@ func (bones *BoneCollection) CreateUpper2() (*Bone, error) {
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			UPPER2.String(),
-			fmt.Sprintf("parent bone not found: %s", []string{UPPER.String(), NECK.String()}),
+			[]string{UPPER.String(), NECK.String()},
 		)
 	}
 
@@ -318,7 +317,7 @@ func (bones *BoneCollection) CreateNeckRoot() (*Bone, error) {
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			NECK_ROOT.String(),
-			fmt.Sprintf("parent bone not found: %s", []string{ARM.Left(), ARM.Right()}),
+			[]string{ARM.Left(), ARM.Right()},
 		)
 	}
 
@@ -350,7 +349,7 @@ func (bones *BoneCollection) CreateNeck() (*Bone, error) {
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			NECK.String(),
-			fmt.Sprintf("parent bone not found: %s", []string{ARM.Left(), ARM.Right()}),
+			[]string{ARM.Left(), ARM.Right()},
 		)
 
 	}
@@ -387,7 +386,7 @@ func (bones *BoneCollection) CreateHead() (*Bone, error) {
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			HEAD.String(),
-			fmt.Sprintf("parent bone not found: %s", []string{NECK.String()}),
+			[]string{NECK.String()},
 		)
 	}
 
@@ -422,7 +421,7 @@ func (bones *BoneCollection) CreateHeadTail() (*Bone, error) {
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			HEAD_TAIL.String(),
-			fmt.Sprintf("parent bone not found: %s", []string{NECK.String(), HEAD.String()}),
+			[]string{NECK.String(), HEAD.String()},
 		)
 	}
 
@@ -458,7 +457,7 @@ func (bones *BoneCollection) CreateShoulderRoot(direction BoneDirection) (*Bone,
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			SHOULDER_ROOT.StringFromDirection(direction),
-			fmt.Sprintf("parent bone not found: %s", []string{SHOULDER.StringFromDirection(direction)}),
+			[]string{SHOULDER.StringFromDirection(direction)},
 		)
 	}
 
@@ -486,7 +485,7 @@ func (bones *BoneCollection) CreateShoulderP(direction BoneDirection) (*Bone, er
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			SHOULDER_P.StringFromDirection(direction),
-			fmt.Sprintf("parent bone not found: %s", []string{SHOULDER.StringFromDirection(direction)}),
+			[]string{SHOULDER.StringFromDirection(direction)},
 		)
 	}
 
@@ -516,7 +515,7 @@ func (bones *BoneCollection) CreateShoulderC(direction BoneDirection) (*Bone, er
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			SHOULDER_C.StringFromDirection(direction),
-			fmt.Sprintf("parent bone not found: %s", []string{SHOULDER.StringFromDirection(direction)}),
+			[]string{SHOULDER.StringFromDirection(direction)},
 		)
 	}
 
@@ -560,8 +559,8 @@ func (bones *BoneCollection) CreateArmTwist(direction BoneDirection) (*Bone, err
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			ARM_TWIST.StringFromDirection(direction),
-			fmt.Sprintf("parent bone not found: %s", []string{
-				ARM.StringFromDirection(direction), ELBOW.StringFromDirection(direction)}),
+			[]string{
+				ARM.StringFromDirection(direction), ELBOW.StringFromDirection(direction)},
 		)
 	}
 
@@ -611,8 +610,8 @@ func (bones *BoneCollection) CreateArmTwistChild(direction BoneDirection, idx in
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			ARM_TWIST.StringFromDirectionAndIdx(direction, idx),
-			fmt.Sprintf("parent bone not found: %s", []string{
-				ARM.StringFromDirection(direction), ELBOW.StringFromDirection(direction)}),
+			[]string{
+				ARM.StringFromDirection(direction), ELBOW.StringFromDirection(direction)},
 		)
 	}
 
@@ -656,8 +655,8 @@ func (bones *BoneCollection) CreateWristTwist(direction BoneDirection) (*Bone, e
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			WRIST_TWIST.StringFromDirection(direction),
-			fmt.Sprintf("parent bone not found: %s", []string{
-				ELBOW.StringFromDirection(direction), WRIST.StringFromDirection(direction)}),
+			[]string{
+				ELBOW.StringFromDirection(direction), WRIST.StringFromDirection(direction)},
 		)
 
 	}
@@ -708,8 +707,8 @@ func (bones *BoneCollection) CreateWristTwistChild(direction BoneDirection, idx 
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			WRIST_TWIST.StringFromDirectionAndIdx(direction, idx),
-			fmt.Sprintf("parent bone not found: %s", []string{
-				ELBOW.StringFromDirection(direction), WRIST.StringFromDirection(direction)}),
+			[]string{
+				ELBOW.StringFromDirection(direction), WRIST.StringFromDirection(direction)},
 		)
 
 	}
@@ -801,8 +800,8 @@ func (bones *BoneCollection) CreateThumb0(direction BoneDirection) (*Bone, error
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			THUMB0.StringFromDirection(direction),
-			fmt.Sprintf("parent bone not found: %s", []string{
-				WRIST.StringFromDirection(direction), THUMB1.StringFromDirection(direction)}),
+			[]string{
+				WRIST.StringFromDirection(direction), THUMB1.StringFromDirection(direction)},
 		)
 	}
 
@@ -834,8 +833,8 @@ func (bones *BoneCollection) CreateThumbTail(direction BoneDirection) (*Bone, er
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			THUMB_TAIL.StringFromDirection(direction),
-			fmt.Sprintf("parent bone not found: %s", []string{
-				THUMB1.StringFromDirection(direction), THUMB2.StringFromDirection(direction)}),
+			[]string{
+				THUMB1.StringFromDirection(direction), THUMB2.StringFromDirection(direction)},
 		)
 
 	}
@@ -882,8 +881,8 @@ func (bones *BoneCollection) CreateIndexTail(direction BoneDirection) (*Bone, er
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			INDEX_TAIL.StringFromDirection(direction),
-			fmt.Sprintf("parent bone not found: %s", []string{
-				INDEX1.StringFromDirection(direction), INDEX2.StringFromDirection(direction)}),
+			[]string{
+				INDEX1.StringFromDirection(direction), INDEX2.StringFromDirection(direction)},
 		)
 	}
 
@@ -929,7 +928,7 @@ func (bones *BoneCollection) CreateMiddleTail(direction BoneDirection) (*Bone, e
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			MIDDLE_TAIL.StringFromDirection(direction),
-			fmt.Sprintf("parent bone not found: %s", []string{MIDDLE1.StringFromDirection(direction), MIDDLE2.StringFromDirection(direction)}),
+			[]string{MIDDLE1.StringFromDirection(direction), MIDDLE2.StringFromDirection(direction)},
 		)
 	}
 
@@ -975,8 +974,8 @@ func (bones *BoneCollection) CreateRingTail(direction BoneDirection) (*Bone, err
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			RING_TAIL.StringFromDirection(direction),
-			fmt.Sprintf("parent bone not found: %s", []string{
-				RING1.StringFromDirection(direction), RING2.StringFromDirection(direction)}),
+			[]string{
+				RING1.StringFromDirection(direction), RING2.StringFromDirection(direction)},
 		)
 	}
 
@@ -1022,8 +1021,8 @@ func (bones *BoneCollection) CreatePinkyTail(direction BoneDirection) (*Bone, er
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			PINKY_TAIL.StringFromDirection(direction),
-			fmt.Sprintf("parent bone not found: %s", []string{
-				PINKY1.StringFromDirection(direction), PINKY2.StringFromDirection(direction)}),
+			[]string{
+				PINKY1.StringFromDirection(direction), PINKY2.StringFromDirection(direction)},
 		)
 	}
 
@@ -1058,7 +1057,7 @@ func (bones *BoneCollection) CreateWaistCancel(direction BoneDirection) (*Bone, 
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			WAIST_CANCEL.StringFromDirection(direction),
-			fmt.Sprintf("parent bone not found: %s", []string{WAIST.String()}),
+			[]string{WAIST.String()},
 		)
 	}
 
@@ -1081,7 +1080,7 @@ func (bones *BoneCollection) CreateLegRoot(direction BoneDirection) (*Bone, erro
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			LEG_ROOT.StringFromDirection(direction),
-			fmt.Sprintf("parent bone not found: %s", []string{LEG.StringFromDirection(direction)}),
+			[]string{LEG.StringFromDirection(direction)},
 		)
 	}
 
@@ -1114,7 +1113,7 @@ func (bones *BoneCollection) CreateHip(direction BoneDirection) (*Bone, error) {
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			HIP.StringFromDirection(direction),
-			fmt.Sprintf("parent bone not found: %s", []string{LOWER.String(), LEG.StringFromDirection(direction)}),
+			[]string{LOWER.String(), LEG.StringFromDirection(direction)},
 		)
 	}
 
@@ -1162,7 +1161,7 @@ func (bones *BoneCollection) CreateHeel(direction BoneDirection) (*Bone, error) 
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			HEEL.StringFromDirection(direction),
-			fmt.Sprintf("parent bone not found: %s", []string{ANKLE.StringFromDirection(direction)}),
+			[]string{ANKLE.StringFromDirection(direction)},
 		)
 	}
 
@@ -1188,7 +1187,7 @@ func (bones *BoneCollection) CreateToeT(direction BoneDirection) (*Bone, error) 
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			TOE_T.StringFromDirection(direction),
-			fmt.Sprintf("parent bone not found: %s", []string{TOE_IK.StringFromDirection(direction)}),
+			[]string{TOE_IK.StringFromDirection(direction)},
 		)
 	}
 
@@ -1233,7 +1232,7 @@ func (bones *BoneCollection) CreateToeP(direction BoneDirection) (*Bone, error) 
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			TOE_P.StringFromDirection(direction),
-			fmt.Sprintf("parent bone not found: %s", []string{TOE_T.StringFromDirection(direction)}),
+			[]string{TOE_T.StringFromDirection(direction)},
 		)
 	}
 	return bone, nil
@@ -1268,7 +1267,7 @@ func (bones *BoneCollection) CreateToeC(direction BoneDirection) (*Bone, error) 
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			TOE_C.StringFromDirection(direction),
-			fmt.Sprintf("parent bone not found: %s", []string{TOE_T.StringFromDirection(direction)}),
+			[]string{TOE_T.StringFromDirection(direction)},
 		)
 	}
 
@@ -1294,7 +1293,7 @@ func (bones *BoneCollection) CreateLegD(direction BoneDirection) (*Bone, error) 
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			LEG_D.StringFromDirection(direction),
-			fmt.Sprintf("parent bone not found: %s", []string{LEG.StringFromDirection(direction)}),
+			[]string{LEG.StringFromDirection(direction)},
 		)
 	}
 
@@ -1327,7 +1326,7 @@ func (bones *BoneCollection) CreateKneeD(direction BoneDirection) (*Bone, error)
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			KNEE_D.StringFromDirection(direction),
-			fmt.Sprintf("parent bone not found: %s", []string{KNEE.StringFromDirection(direction)}),
+			[]string{KNEE.StringFromDirection(direction)},
 		)
 	}
 
@@ -1360,7 +1359,7 @@ func (bones *BoneCollection) CreateAnkleD(direction BoneDirection) (*Bone, error
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			ANKLE_D.StringFromDirection(direction),
-			fmt.Sprintf("parent bone not found: %s", []string{ANKLE.StringFromDirection(direction)}),
+			[]string{ANKLE.StringFromDirection(direction)},
 		)
 	}
 
@@ -1399,7 +1398,7 @@ func (bones *BoneCollection) CreateAnkleDGround(direction BoneDirection) (*Bone,
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			ANKLE_GROUND.StringFromDirection(direction),
-			fmt.Sprintf("parent bone not found: %s", []string{ANKLE.StringFromDirection(direction)}),
+			[]string{ANKLE.StringFromDirection(direction)},
 		)
 	}
 
@@ -1434,7 +1433,7 @@ func (bones *BoneCollection) CreateHeelD(direction BoneDirection) (*Bone, error)
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			HEEL_D.StringFromDirection(direction),
-			fmt.Sprintf("parent bone not found: %s", []string{HEEL.StringFromDirection(direction)}),
+			[]string{HEEL.StringFromDirection(direction)},
 		)
 	}
 
@@ -1463,8 +1462,8 @@ func (bones *BoneCollection) CreateToeEx(direction BoneDirection) (*Bone, error)
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			TOE_EX.StringFromDirection(direction),
-			fmt.Sprintf("parent bone not found: %s", []string{
-				ANKLE.StringFromDirection(direction), TOE_T.StringFromDirection(direction)}),
+			[]string{
+				ANKLE.StringFromDirection(direction), TOE_T.StringFromDirection(direction)},
 		)
 
 	}
@@ -1502,7 +1501,7 @@ func (bones *BoneCollection) CreateToeTD(direction BoneDirection) (*Bone, error)
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			TOE_T_D.StringFromDirection(direction),
-			fmt.Sprintf("parent bone not found: %s", []string{TOE_T.StringFromDirection(direction)}),
+			[]string{TOE_T.StringFromDirection(direction)},
 		)
 	}
 
@@ -1536,7 +1535,7 @@ func (bones *BoneCollection) CreateToePD(direction BoneDirection) (*Bone, error)
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			TOE_P_D.StringFromDirection(direction),
-			fmt.Sprintf("parent bone not found: %s", []string{TOE_P.StringFromDirection(direction)}),
+			[]string{TOE_P.StringFromDirection(direction)},
 		)
 	}
 
@@ -1559,7 +1558,7 @@ func (bones *BoneCollection) CreateToeCD(direction BoneDirection) (*Bone, error)
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			TOE_C_D.StringFromDirection(direction),
-			fmt.Sprintf("parent bone not found: %s", []string{TOE_C.StringFromDirection(direction)}),
+			[]string{TOE_C.StringFromDirection(direction)},
 		)
 	}
 	bone.Position.Y = 0.0
@@ -1597,7 +1596,7 @@ func (bones *BoneCollection) CreateLegIkParent(direction BoneDirection) (*Bone, 
 	} else {
 		return nil, merrors.NewParentNotFoundError(
 			LEG_IK_PARENT.StringFromDirection(direction),
-			fmt.Sprintf("parent bone not found: %s", []string{LEG_IK.StringFromDirection(direction)}),
+			[]string{LEG_IK.StringFromDirection(direction)},
 		)
 	}
 

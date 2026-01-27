@@ -983,10 +983,10 @@ func (s *pmdWriteState) vertexBoneWeights(vertex *model.Vertex) (int, int, int) 
 func (s *pmdWriteState) writeFixedString(text string, size int, label string) error {
 	encoded, err := io_common.EncodeShiftJISFixed(text, size)
 	if err != nil {
-		return io_common.NewIoNameEncodeFailed(label+"のエンコードに失敗しました", err)
+		return io_common.NewIoNameEncodeFailed("名称のエンコードに失敗しました: %s", err, label)
 	}
 	if err := s.writer.WriteBytes(encoded); err != nil {
-		return io_common.NewIoSaveFailed(label+"の書き込みに失敗しました", err)
+		return io_common.NewIoSaveFailed("名称の書き込みに失敗しました: %s", err, label)
 	}
 	return nil
 }

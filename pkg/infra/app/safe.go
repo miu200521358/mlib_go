@@ -23,8 +23,7 @@ func SafeExecute(appConfig *config.AppConfig, f func()) {
 			} else {
 				errMsg = fmt.Sprintf("%v", r)
 			}
-			runErr := fmt.Errorf("panic: %s\n%s", errMsg, string(stackTrace))
-			err.ShowFatalErrorDialog(appConfig, runErr)
+			err.ShowFatalErrorDialog(appConfig, NewPanicDetected(errMsg, string(stackTrace)))
 		}
 	}()
 

@@ -217,8 +217,9 @@ func (m *MsaaBuffer) Resize(width, height int) {
 
 	if status := gl.CheckFramebufferStatus(gl.FRAMEBUFFER); status != gl.FRAMEBUFFER_COMPLETE {
 		m.initErr = graphics_api.NewFramebufferIncomplete(
-			"MSAAのフレームバッファが不完全です: "+getFrameBufferStatusString(status),
+			"MSAAのフレームバッファが不完全です: %s",
 			nil,
+			getFrameBufferStatusString(status),
 		)
 	}
 
@@ -235,8 +236,9 @@ func (m *MsaaBuffer) Resize(width, height int) {
 
 	if status := gl.CheckFramebufferStatus(gl.FRAMEBUFFER); status != gl.FRAMEBUFFER_COMPLETE {
 		m.initErr = graphics_api.NewFramebufferIncomplete(
-			"MSAA解決用フレームバッファが不完全です: "+getFrameBufferStatusString(status),
+			"MSAA解決用フレームバッファが不完全です: %s",
 			nil,
+			getFrameBufferStatusString(status),
 		)
 	}
 

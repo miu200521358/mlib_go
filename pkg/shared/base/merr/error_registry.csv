@@ -48,7 +48,12 @@ ID,Kind,Layer,Module,ErrorName,Summary,Remedy,SourcePaths
 15304,Validate,infra,53,IntParseFailed,数値パースに失敗,入力文字列を確認する,-
 15305,Validate,infra,53,LogStreamOpenFailed,ログストリームの作成に失敗,出力先/権限/ディスク容量を確認する,-
 15306,Validate,infra,53,ConsoleSnapshotSaveFailed,ログスナップショット保存に失敗,出力先/権限/ディスク容量を確認する,-
+15307,Validate,infra,53,ImageFormatNotSupported,画像形式が未対応,画像形式/拡張子を確認する,mlib_go_t4/pkg/infra/file/mfile/image.go; mlib_go_t4/pkg/infra/drivers/render/texture_manager.go
+15401,Validate,infra,54,AudioFileNotSpecified,音楽ファイルが指定されていない,音楽ファイルを選択する,mlib_go_t4/pkg/infra/drivers/maudio/audio_player_windows.go
 95301,Internal,infra,53,IterProcessFailed,並列処理中のエラー,,-
+95401,Internal,infra,54,GlfwInitFailed,GLFWの初期化に失敗,,mlib_go_t4/pkg/infra/app/errors.go
+95402,Internal,infra,54,PanicDetected,panicを検知,,mlib_go_t4/pkg/infra/app/errors.go
+95403,Internal,infra,54,SharedStateInitFailed,共有状態の初期化に失敗しました,,mlib_go_t4/pkg/infra/app/errors.go; mu_model_viewer/cmd/main.go; mu_motion_viewer/cmd/main.go
 95501,Internal,infra,55,ControllerWindowInitFailed,Controllerウィンドウ初期化に失敗,,-
 95502,Internal,infra,55,ConsoleViewInitFailed,ConsoleView初期化に失敗,,-
 95503,Internal,infra,55,ProgressBarInitFailed,ProgressBar初期化に失敗,,-

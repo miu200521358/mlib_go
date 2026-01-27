@@ -15,7 +15,6 @@ import (
 	"github.com/miu200521358/mlib_go/cmd/ui"
 	"github.com/miu200521358/mlib_go/pkg/infra/app"
 	"github.com/miu200521358/mlib_go/pkg/infra/base/err"
-	"github.com/miu200521358/mlib_go/pkg/infra/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/infra/controller"
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/maudio"
 	"github.com/miu200521358/mlib_go/pkg/infra/viewer"
@@ -97,7 +96,7 @@ func main() {
 	}()
 
 	if glfwErr := glfw.Init(); glfwErr != nil {
-		err.ShowFatalErrorDialog(appConfig, fmt.Errorf(i18n.T("GLFWの初期化に失敗しました: %w"), glfwErr))
+		err.ShowFatalErrorDialog(appConfig, app.NewGlfwInitFailed(glfwErr))
 		return
 	}
 

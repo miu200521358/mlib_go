@@ -6,7 +6,6 @@ package mgl
 
 import (
 	"embed"
-	"errors"
 	"io/fs"
 	"strings"
 
@@ -29,7 +28,7 @@ func NewShaderSourceLoader() *ShaderSourceLoader {
 func (l *ShaderSourceLoader) LoadSource(path string) (string, error) {
 	bytes, err := fs.ReadFile(glslFiles, path)
 	if err != nil {
-		return "", graphics_api.NewShaderSourceLoadFailed("シェーダーソースの読み込みに失敗しました: "+path, err)
+		return "", graphics_api.NewShaderSourceLoadFailed("シェーダーソースの読み込みに失敗しました: %s", err, path)
 	}
 	return string(bytes), nil
 }
@@ -54,8 +53,10 @@ func (l *ShaderSourceLoader) Compile(name, source string, shaderType uint32) (ui
 		gl.DeleteShader(shader)
 
 		return 0, graphics_api.NewShaderCompileFailed(
-			"シェーダーコンパイルに失敗しました: "+name+" ("+strings.TrimRight(log, "\x00")+")",
-			errors.New(strings.TrimRight(log, "\x00")),
+			"シェーダーコンパイルに失敗しました: %s (%s)",
+			nil,
+			name,
+			strings.TrimRight(log, "\x00"),
 		)
 	}
 
@@ -100,8 +101,9 @@ func (l *ShaderSourceLoader) CreateProgram(vertexPath, fragmentPath string) (uin
 		gl.DeleteProgram(program)
 
 		return 0, graphics_api.NewShaderLinkFailed(
-			"シェーダーリンクに失敗しました ("+strings.TrimRight(log, "\x00")+")",
-			errors.New(strings.TrimRight(log, "\x00")),
+			"シェーダーリンクに失敗しました: %s",
+			nil,
+			strings.TrimRight(log, "\x00"),
 		)
 	}
 

@@ -7,7 +7,6 @@ package mgl
 import (
 	"github.com/go-gl/gl/v4.3-core/gl"
 	"github.com/miu200521358/mlib_go/pkg/adapter/graphics_api"
-	"github.com/miu200521358/mlib_go/pkg/infra/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 )
 
@@ -47,7 +46,7 @@ func (m *IntermediateMsaaBuffer) init() {
 	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, m.msaaDepthBuffer)
 
 	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
-		m.initErr = graphics_api.NewFramebufferIncomplete(i18n.T("中間MSAAのマルチサンプルFBOが不完全です"), nil)
+		m.initErr = graphics_api.NewFramebufferIncomplete("中間MSAAのマルチサンプルFBOが不完全です", nil)
 		logging.DefaultLogger().Warn("中間MSAAのマルチサンプルFBOが不完全です")
 	}
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
@@ -68,7 +67,7 @@ func (m *IntermediateMsaaBuffer) init() {
 	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, m.intermediateDepthTexture, 0)
 
 	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
-		m.initErr = graphics_api.NewFramebufferIncomplete(i18n.T("中間MSAAの中間FBOが不完全です"), nil)
+		m.initErr = graphics_api.NewFramebufferIncomplete("中間MSAAの中間FBOが不完全です", nil)
 		logging.DefaultLogger().Warn("中間MSAAの中間FBOが不完全です")
 	}
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)

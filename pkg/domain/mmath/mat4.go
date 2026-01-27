@@ -13,18 +13,21 @@ import (
 type Mat4 [16]float64
 
 var (
+	// ZERO_MAT4 はゼロ行列。
 	ZERO_MAT4 = Mat4{
 		0, 0, 0, 0,
 		0, 0, 0, 0,
 		0, 0, 0, 0,
 		0, 0, 0, 0,
 	}
+	// IDENT_MAT4 は単位行列。
 	IDENT_MAT4 = Mat4{
 		1, 0, 0, 0,
 		0, 1, 0, 0,
 		0, 0, 1, 0,
 		0, 0, 0, 1,
 	}
+	// IDENT_SCALE_MAT4 はスケール成分のみの単位行列。
 	IDENT_SCALE_MAT4 = Mat4{
 		1, 0, 0, 0,
 		0, 1, 0, 0,

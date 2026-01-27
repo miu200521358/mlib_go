@@ -1,11 +1,7 @@
 // 指示: miu200521358
 package pmx
 
-import (
-	"fmt"
-
-	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
-)
+import "github.com/miu200521358/mlib_go/pkg/adapter/io_common"
 
 // readIndex はバイトサイズに応じたインデックスを読み込む。
 func readIndex(reader *io_common.BinaryReader, size byte, signed bool) (int, error) {
@@ -28,7 +24,7 @@ func readIndex(reader *io_common.BinaryReader, size byte, signed bool) (int, err
 		value, err := reader.ReadInt32()
 		return int(value), err
 	default:
-		return 0, fmt.Errorf("unsupported index size: %d", size)
+		return 0, io_common.NewIoFormatNotSupported("インデックスサイズが未対応です: %d", nil, size)
 	}
 }
 
@@ -58,7 +54,7 @@ func writeIndex(writer *io_common.BinaryWriter, size byte, signed bool, value in
 	case 4:
 		return writer.WriteInt32(int32(value))
 	default:
-		return fmt.Errorf("unsupported index size: %d", size)
+		return io_common.NewIoFormatNotSupported("インデックスサイズが未対応です: %d", nil, size)
 	}
 }
 

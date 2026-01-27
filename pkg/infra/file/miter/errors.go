@@ -8,6 +8,6 @@ const (
 )
 
 // newIterProcessFailed は並列処理失敗エラーを生成する。
-func newIterProcessFailed(message string, cause error) error {
-	return merr.NewCommonError(iterProcessFailedErrorID, merr.ErrorKindInternal, message, cause)
+func newIterProcessFailed(message string, cause error, params ...any) error {
+	return merr.NewCommonError(iterProcessFailedErrorID, merr.ErrorKindInternal, message, cause, params...)
 }

@@ -10,6 +10,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
+	baseerr "github.com/miu200521358/mlib_go/pkg/infra/base/err"
 	"github.com/miu200521358/mlib_go/pkg/infra/file/mfile"
 	"github.com/miu200521358/mlib_go/pkg/shared/base"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
@@ -751,7 +752,7 @@ func (cw *ControlWindow) onChangeLanguage(lang i18n.LangCode) {
 	}
 	if _, err := cw.translator.SetLang(lang); err != nil {
 		cw.loggerOrDefault().Error(cw.t("言語設定の保存に失敗しました: %s"), err.Error())
-		walk.MsgBox(cw, cw.t("言語変更"), err.Error(), walk.MsgBoxIconError)
+		walk.MsgBox(cw, cw.t("言語変更"), baseerr.BuildErrorText(err), walk.MsgBoxIconError)
 		return
 	}
 	cw.shared.SetClosed(true)
@@ -960,7 +961,7 @@ func (cw *ControlWindow) triggerSaveLog() {
 	path, err := mfile.SaveConsoleSnapshot(cw.userConfig, "console", text)
 	if err != nil {
 		cw.loggerOrDefault().Error(cw.t("ログ保存に失敗しました: %s"), err.Error())
-		walk.MsgBox(cw, cw.t("ログ保存"), err.Error(), walk.MsgBoxIconError)
+		walk.MsgBox(cw, cw.t("ログ保存"), baseerr.BuildErrorText(err), walk.MsgBoxIconError)
 		return
 	}
 	cw.loggerOrDefault().Info(cw.t("ログを保存しました: %s"), path)

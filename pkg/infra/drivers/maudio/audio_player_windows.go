@@ -20,6 +20,7 @@ import (
 const (
 	mciVolumeMin = 0
 	mciVolumeMax = 1000
+	audioFileNotSpecifiedErrorID = "15401"
 )
 
 var (
@@ -52,7 +53,7 @@ func (p *AudioPlayer) Load(path string) error {
 	defer p.mu.Unlock()
 
 	if strings.TrimSpace(path) == "" {
-		return merr.NewCommonError(merr.OsPackageErrorID, merr.ErrorKindValidate, "音楽ファイルが指定されていません", nil)
+		return merr.NewCommonError(audioFileNotSpecifiedErrorID, merr.ErrorKindValidate, "音楽ファイルが指定されていない", nil)
 	}
 
 	baseName := filepath.Base(path)
@@ -67,14 +68,14 @@ func (p *AudioPlayer) Load(path string) error {
 	cmd := buildOpenCommand(path, alias)
 	if err := sendMciCommand(cmd); err != nil {
 		p.logVerbose("音楽ロード失敗: file=%s alias=%s err=%s", baseName, alias, err.Error())
-		return wrapMciError("音楽ファイルの読み込みに失敗しました: "+filepath.Base(path), err)
+		return wrapMciError("音楽ファイルの読み込みに失敗しました: %s", err, filepath.Base(path))
 	}
 
 	p.logVerbose("音楽設定: time_format=milliseconds file=%s alias=%s", baseName, alias)
 	if err := sendMciCommand(fmt.Sprintf("set %s time format milliseconds", alias)); err != nil {
 		_ = sendMciCommand(fmt.Sprintf("close %s", alias))
 		p.logVerbose("音楽設定失敗: file=%s alias=%s err=%s", baseName, alias, err.Error())
-		return wrapMciError("音楽ファイルの再生設定に失敗しました: "+filepath.Base(path), err)
+		return wrapMciError("音楽ファイルの再生設定に失敗しました: %s", err, filepath.Base(path))
 	}
 
 	p.alias = alias
@@ -112,7 +113,7 @@ func (p *AudioPlayer) Play() error {
 	p.logVerbose("音楽再生開始: file=%s alias=%s", filepath.Base(p.path), p.alias)
 	if err := sendMciCommand(fmt.Sprintf("play %s", p.alias)); err != nil {
 		p.logVerbose("音楽再生失敗: file=%s alias=%s err=%s", filepath.Base(p.path), p.alias, err.Error())
-		return wrapMciError("音楽ファイルの再生に失敗しました: "+filepath.Base(p.path), err)
+		return wrapMciError("音楽ファイルの再生に失敗しました: %s", err, filepath.Base(p.path))
 	}
 	p.playing = true
 	return nil
@@ -129,7 +130,7 @@ func (p *AudioPlayer) Pause() error {
 	p.logVerbose("音楽一時停止: file=%s alias=%s", filepath.Base(p.path), p.alias)
 	if err := sendMciCommand(fmt.Sprintf("pause %s", p.alias)); err != nil {
 		p.logVerbose("音楽一時停止失敗: file=%s alias=%s err=%s", filepath.Base(p.path), p.alias, err.Error())
-		return wrapMciError("音楽ファイルの一時停止に失敗しました: "+filepath.Base(p.path), err)
+		return wrapMciError("音楽ファイルの一時停止に失敗しました: %s", err, filepath.Base(p.path))
 	}
 	p.playing = false
 	return nil
@@ -146,11 +147,11 @@ func (p *AudioPlayer) Stop() error {
 	p.logVerbose("音楽停止: file=%s alias=%s", filepath.Base(p.path), p.alias)
 	if err := sendMciCommand(fmt.Sprintf("stop %s", p.alias)); err != nil {
 		p.logVerbose("音楽停止失敗: file=%s alias=%s err=%s", filepath.Base(p.path), p.alias, err.Error())
-		return wrapMciError("音楽ファイルの停止に失敗しました: "+filepath.Base(p.path), err)
+		return wrapMciError("音楽ファイルの停止に失敗しました: %s", err, filepath.Base(p.path))
 	}
 	if err := sendMciCommand(fmt.Sprintf("seek %s to start", p.alias)); err != nil {
 		p.logVerbose("音楽シーク失敗: file=%s alias=%s err=%s", filepath.Base(p.path), p.alias, err.Error())
-		return wrapMciError("音楽ファイルのシークに失敗しました: "+filepath.Base(p.path), err)
+		return wrapMciError("音楽ファイルのシークに失敗しました: %s", err, filepath.Base(p.path))
 	}
 	p.playing = false
 	return nil
@@ -175,12 +176,12 @@ func (p *AudioPlayer) Seek(seconds float64) error {
 	p.logVerbose("音楽シーク: file=%s alias=%s ms=%d", filepath.Base(p.path), p.alias, ms)
 	if err := sendMciCommand(fmt.Sprintf("seek %s to %d", p.alias, ms)); err != nil {
 		p.logVerbose("音楽シーク失敗: file=%s alias=%s err=%s", filepath.Base(p.path), p.alias, err.Error())
-		return wrapMciError("音楽ファイルのシークに失敗しました: "+filepath.Base(p.path), err)
+		return wrapMciError("音楽ファイルのシークに失敗しました: %s", err, filepath.Base(p.path))
 	}
 	if wasPlaying {
 		if err := sendMciCommand(fmt.Sprintf("play %s", p.alias)); err != nil {
 			p.logVerbose("音楽再生失敗: file=%s alias=%s err=%s", filepath.Base(p.path), p.alias, err.Error())
-			return wrapMciError("音楽ファイルの再生に失敗しました: "+filepath.Base(p.path), err)
+			return wrapMciError("音楽ファイルの再生に失敗しました: %s", err, filepath.Base(p.path))
 		}
 		p.playing = true
 	}
@@ -240,11 +241,11 @@ func (p *AudioPlayer) closeLocked() error {
 	p.logVerbose("音楽クローズ開始: file=%s alias=%s", filepath.Base(p.path), p.alias)
 	if err := sendMciCommand(fmt.Sprintf("stop %s", p.alias)); err != nil {
 		p.logVerbose("音楽停止失敗: file=%s alias=%s err=%s", filepath.Base(p.path), p.alias, err.Error())
-		return wrapMciError("音楽ファイルの停止に失敗しました: "+filepath.Base(p.path), err)
+		return wrapMciError("音楽ファイルの停止に失敗しました: %s", err, filepath.Base(p.path))
 	}
 	if err := sendMciCommand(fmt.Sprintf("close %s", p.alias)); err != nil {
 		p.logVerbose("音楽クローズ失敗: file=%s alias=%s err=%s", filepath.Base(p.path), p.alias, err.Error())
-		return wrapMciError("音楽ファイルのクローズに失敗しました: "+filepath.Base(p.path), err)
+		return wrapMciError("音楽ファイルのクローズに失敗しました: %s", err, filepath.Base(p.path))
 	}
 	alias := p.alias
 	p.loaded = false
@@ -330,7 +331,7 @@ func setWaveOutVolume(volume int) error {
 	if ret == 0 {
 		return nil
 	}
-	return merr.NewOsPackageError(fmt.Sprintf("音量設定に失敗しました: code=%d", ret), nil)
+	return merr.NewOsPackageError("音量設定に失敗しました: code=%d", nil, ret)
 }
 
 // buildWaveOutVolume は0-100の音量をwaveOut用の左右同一値に変換する。
@@ -357,9 +358,9 @@ func sendMciCommand(command string) error {
 func mciError(code uint32) error {
 	message := mciErrorText(code)
 	if message == "" {
-		message = "MCIエラーが発生しました"
+		return merr.NewOsPackageError("MCIエラーが発生しました", nil)
 	}
-	return merr.NewOsPackageError(message, nil)
+	return merr.NewOsPackageError("MCIエラーが発生しました: %s", nil, message)
 }
 
 // mciErrorText はMCIエラー文字列を取得する。
@@ -373,9 +374,6 @@ func mciErrorText(code uint32) string {
 }
 
 // wrapMciError はMCIエラーを共通エラーに包む。
-func wrapMciError(message string, cause error) error {
-	if cause == nil {
-		return merr.NewOsPackageError(message, nil)
-	}
-	return merr.NewOsPackageError(message, cause)
+func wrapMciError(message string, cause error, params ...any) error {
+	return merr.NewOsPackageError(message, cause, params...)
 }

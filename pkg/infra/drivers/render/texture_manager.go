@@ -7,7 +7,6 @@ package render
 import (
 	"bytes"
 	"embed"
-	"errors"
 	"fmt"
 	"image"
 	"image/draw"
@@ -25,7 +24,6 @@ import (
 	"github.com/miu200521358/dds/pkg/dds"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
-	"github.com/miu200521358/mlib_go/pkg/infra/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 	"golang.org/x/image/bmp"
@@ -200,7 +198,7 @@ func (tm *TextureManager) LoadToonTextures(windowIndex int) error {
 		}
 		image := convertToNRGBA(img)
 		if image == nil {
-			return merr.NewImagePackageError(fmt.Sprintf(i18n.T("トゥーンテクスチャの変換に失敗しました: %s"), filePath), nil)
+			return merr.NewImagePackageError("トゥーンテクスチャの変換に失敗しました: %s", nil, filePath)
 		}
 
 		toonGl.bind()
@@ -252,7 +250,7 @@ func (tm *TextureManager) Delete() {
 // loadTextureGl は単一テクスチャをOpenGL向けにロードする。
 func (tm *TextureManager) loadTextureGl(windowIndex int, texture *model.Texture, modelPath string) (*textureGl, error) {
 	if texture == nil || texture.Name() == "" {
-		return nil, merr.NewImagePackageError(i18n.T("テクスチャ名が不正です"), nil)
+		return nil, merr.NewImagePackageError("テクスチャ名が不正です", nil)
 	}
 	displayName := filepath.Base(texture.Name())
 
@@ -271,7 +269,7 @@ func (tm *TextureManager) loadTextureGl(windowIndex int, texture *model.Texture,
 	}
 	image := convertToNRGBA(img)
 	if image == nil {
-		return texGl, merr.NewImagePackageError(fmt.Sprintf(i18n.T("テクスチャの変換に失敗しました: %s"), displayName), nil)
+		return texGl, merr.NewImagePackageError("テクスチャの変換に失敗しました: %s", nil, displayName)
 	}
 
 	texGl.IsGeneratedMipmap =
@@ -297,7 +295,7 @@ func (tm *TextureManager) loadTextureGl(windowIndex int, texture *model.Texture,
 	if texGl.IsGeneratedMipmap {
 		gl.GenerateMipmap(gl.TEXTURE_2D)
 	} else {
-		logging.DefaultLogger().Debug(i18n.T("ミップマップ生成エラー: %s"), displayName)
+		logging.DefaultLogger().Debug("ミップマップ生成エラー: %s", displayName)
 	}
 
 	texGl.unbind()
@@ -344,13 +342,13 @@ func (texGl *textureGl) setTextureUnit(windowIndex int) {
 // imageOpenFunc は画像データを取得する関数型。
 type imageOpenFunc func() (io.ReadCloser, error)
 
-var errUnsupportedImageFormat = errors.New("unsupported image format")
+const imageFormatNotSupportedErrorID = "15307"
 
 // loadImageFromResources は埋め込みFSから画像を読み込む。
 func loadImageFromResources(resources embed.FS, fileName string) (image.Image, error) {
 	data, err := fs.ReadFile(resources, fileName)
 	if err != nil {
-		return nil, merr.NewFsPackageError(fmt.Sprintf(i18n.T("トゥーンテクスチャの読み込みに失敗しました: %s"), fileName), err)
+		return nil, merr.NewFsPackageError("トゥーンテクスチャの読み込みに失敗しました: %s", err, fileName)
 	}
 	open := func() (io.ReadCloser, error) {
 		return io.NopCloser(bytes.NewReader(data)), nil
@@ -364,7 +362,7 @@ func loadImageFromFile(path string) (image.Image, error) {
 	open := func() (io.ReadCloser, error) {
 		file, err := os.Open(path)
 		if err != nil {
-			return nil, merr.NewOsPackageError(fmt.Sprintf(i18n.T("テクスチャファイルの読み込みに失敗しました: %s"), baseName), err)
+			return nil, merr.NewOsPackageError("テクスチャファイルの読み込みに失敗しました: %s", err, baseName)
 		}
 		return file, nil
 	}
@@ -375,7 +373,7 @@ func loadImageFromFile(path string) (image.Image, error) {
 func loadImage(path string, displayName string, open imageOpenFunc) (image.Image, error) {
 	candidates := imageExtensionCandidates(path)
 	if len(candidates) == 0 {
-		return nil, merr.NewImagePackageError(fmt.Sprintf(i18n.T("未対応の画像形式です: %s"), displayName), nil)
+		return nil, merr.NewCommonError(imageFormatNotSupportedErrorID, merr.ErrorKindValidate, "画像形式が未対応です: %s", nil, displayName)
 	}
 	var lastErr error
 	for _, ext := range candidates {
@@ -401,7 +399,7 @@ func loadImage(path string, displayName string, open imageOpenFunc) (image.Image
 		if lastErr == nil {
 			lastErr = err
 		}
-		return nil, merr.NewImagePackageError(fmt.Sprintf(i18n.T("テクスチャのデコードに失敗しました: %s"), displayName), lastErr)
+		return nil, merr.NewImagePackageError("テクスチャのデコードに失敗しました: %s", lastErr, displayName)
 	}
 	return img, nil
 }
@@ -445,7 +443,7 @@ func loadImageByExtension(reader io.Reader, ext string) (image.Image, error) {
 	case "bmp":
 		return bmp.Decode(reader)
 	default:
-		return nil, errUnsupportedImageFormat
+		return nil, merr.NewCommonError(imageFormatNotSupportedErrorID, merr.ErrorKindValidate, "画像形式が未対応です: %s", nil, ext)
 	}
 }
 

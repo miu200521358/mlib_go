@@ -3,7 +3,6 @@ package x
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -200,17 +199,17 @@ func applyMeshNormals(modelData *model.PmxModel, meshCtx *meshContext) error {
 // applyMeshNormalsByMapping はMeshNormalsの面インデックスを使って法線を算出する。
 func applyMeshNormalsByMapping(modelData *model.PmxModel, meshCtx *meshContext, vertexCount int) error {
 	if len(meshCtx.faceIndexGroups) == 0 {
-		return fmt.Errorf("MeshNormalsの面情報が不足しています")
+		return newParseFailed("MeshNormalsの面情報が不足しています")
 	}
 	if len(meshCtx.normalFaceIndexes) != len(meshCtx.faceIndexGroups) {
-		return fmt.Errorf("MeshNormalsの面数が不正です")
+		return newParseFailed("MeshNormalsの面数が不正です")
 	}
 
 	accumulated := make([]mmath.Vec3, vertexCount)
 	for faceIdx, faceIndexes := range meshCtx.faceIndexGroups {
 		normalIndexes := meshCtx.normalFaceIndexes[faceIdx]
 		if len(normalIndexes) < len(faceIndexes) {
-			return fmt.Errorf("MeshNormalsの面頂点数が不足しています")
+			return newParseFailed("MeshNormalsの面頂点数が不足しています")
 		}
 		// 取り込んだ面頂点より多い法線が来た場合は、幾何の簡略化に合わせて切り詰める。
 		if len(normalIndexes) > len(faceIndexes) {
@@ -219,11 +218,11 @@ func applyMeshNormalsByMapping(modelData *model.PmxModel, meshCtx *meshContext, 
 		for i, vertexIndex := range faceIndexes {
 			local := vertexIndex - meshCtx.vertexOffset
 			if local < 0 || local >= vertexCount {
-				return fmt.Errorf("MeshNormalsの頂点番号が不正です")
+				return newParseFailed("MeshNormalsの頂点番号が不正です")
 			}
 			normalIndex := normalIndexes[i]
 			if normalIndex < 0 || normalIndex >= len(meshCtx.normals) {
-				return fmt.Errorf("MeshNormalsの法線番号が不正です")
+				return newParseFailed("MeshNormalsの法線番号が不正です")
 			}
 			accumulated[local].Add(meshCtx.normals[normalIndex])
 		}
@@ -275,7 +274,7 @@ func applyMeshNormalsFromFaces(modelData *model.PmxModel, meshCtx *meshContext, 
 			for _, vertexIndex := range face.VertexIndexes {
 				local := vertexIndex - meshCtx.vertexOffset
 				if local < 0 || local >= vertexCount {
-					return fmt.Errorf("Meshの頂点番号が不正です")
+					return newParseFailed("Meshの頂点番号が不正です")
 				}
 				accumulated[local].Add(faceNormal)
 			}

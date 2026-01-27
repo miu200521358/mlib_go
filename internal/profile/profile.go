@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_model/pmx"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_motion/vmd"
 	"github.com/miu200521358/mlib_go/pkg/domain/deform"
@@ -101,7 +102,7 @@ func loadVmd(path string) (*motion.VmdMotion, error) {
 	}
 	motionData, ok := data.(*motion.VmdMotion)
 	if !ok || motionData == nil {
-		return nil, fmt.Errorf("VMD読み込み結果が不正です")
+		return nil, io_common.NewIoParseFailed("VMD読み込み結果が不正です", nil)
 	}
 	return motionData, nil
 }
@@ -115,7 +116,7 @@ func loadPmx(path string) (*model.PmxModel, error) {
 	}
 	modelData, ok := data.(*model.PmxModel)
 	if !ok || modelData == nil {
-		return nil, fmt.Errorf("PMX読み込み結果が不正です")
+		return nil, io_common.NewIoParseFailed("PMX読み込み結果が不正です", nil)
 	}
 	return modelData, nil
 }

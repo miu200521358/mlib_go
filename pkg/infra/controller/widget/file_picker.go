@@ -15,6 +15,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_model/pmx"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_motion"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_motion/vmd"
+	baseerr "github.com/miu200521358/mlib_go/pkg/infra/base/err"
 	"github.com/miu200521358/mlib_go/pkg/infra/controller"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
@@ -380,7 +381,7 @@ func (fp *FilePicker) showOpenDialog() {
 	fd.InitialDirPath = fp.resolveInitialDir()
 	ok, err := fd.ShowOpen(fp.window)
 	if err != nil {
-		walk.MsgBox(fp.window, fp.t("読み込み失敗"), err.Error(), walk.MsgBoxIconError)
+		walk.MsgBox(fp.window, fp.t("読み込み失敗"), baseerr.BuildErrorText(err), walk.MsgBoxIconError)
 		return
 	}
 	if !ok {
@@ -398,7 +399,7 @@ func (fp *FilePicker) showSaveDialog() {
 	fd.InitialDirPath = fp.resolveInitialDir()
 	ok, err := fd.ShowSave(fp.window)
 	if err != nil {
-		walk.MsgBox(fp.window, fp.t("保存失敗"), err.Error(), walk.MsgBoxIconError)
+		walk.MsgBox(fp.window, fp.t("保存失敗"), baseerr.BuildErrorText(err), walk.MsgBoxIconError)
 		return
 	}
 	if !ok {

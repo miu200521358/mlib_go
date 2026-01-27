@@ -220,11 +220,11 @@ func normalizeLang(lang LangCode) LangCode {
 func loadMessages(files fs.FS, path string) (map[string]string, error) {
 	data, err := fs.ReadFile(files, path)
 	if err != nil {
-		return nil, merr.NewFsPackageError("i18nメッセージ読込に失敗しました: "+path, err)
+		return nil, merr.NewFsPackageError("i18nメッセージ読込に失敗しました: %s", err, path)
 	}
 	var entries []messageEntry
 	if err := json.Unmarshal(data, &entries); err != nil {
-		return nil, merr.NewJsonPackageError("i18nメッセージ解析に失敗しました: "+path, err)
+		return nil, merr.NewJsonPackageError("i18nメッセージ解析に失敗しました: %s", err, path)
 	}
 	out := make(map[string]string, len(entries))
 	for _, e := range entries {

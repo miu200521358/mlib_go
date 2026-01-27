@@ -4,7 +4,6 @@ package x
 import (
 	"bytes"
 	"encoding/binary"
-	"fmt"
 	"io"
 	"math"
 
@@ -98,7 +97,7 @@ func (p *binaryParser) Parse() error {
 				return err
 			}
 		default:
-			return fmt.Errorf("Xバイナリのトークンが不正です: %d", tok)
+			return newParseFailed("Xバイナリのトークンが不正です: %d", tok)
 		}
 	}
 }
@@ -106,7 +105,7 @@ func (p *binaryParser) Parse() error {
 // parseHeader はヘッダを解析する。
 func (p *binaryParser) parseHeader() error {
 	if len(p.data) < 16 {
-		return fmt.Errorf("Xバイナリヘッダが不足しています")
+		return newParseFailed("Xバイナリヘッダが不足しています")
 	}
 	floatSize := string(p.data[12:16])
 	if floatSize == "0032" {
@@ -131,7 +130,7 @@ func (p *binaryParser) getToken() (binaryTokenType, error) {
 // readDWORD はDWORDを読み取る。
 func (p *binaryParser) readDWORD() (uint32, error) {
 	if p.pos > len(p.data)-4 {
-		return 0, fmt.Errorf("DWORD読み取りでバッファが不足しています")
+		return 0, newParseFailed("DWORD読み取りでバッファが不足しています")
 	}
 	value := binary.LittleEndian.Uint32(p.data[p.pos:])
 	p.pos += 4
@@ -141,7 +140,7 @@ func (p *binaryParser) readDWORD() (uint32, error) {
 // readFloat は浮動小数点を読み取る。
 func (p *binaryParser) readFloat() (float64, error) {
 	if p.pos > len(p.data)-p.floatSize {
-		return 0, fmt.Errorf("float読み取りでバッファが不足しています")
+		return 0, newParseFailed("float読み取りでバッファが不足しています")
 	}
 	if p.floatSize == 4 {
 		bits := binary.LittleEndian.Uint32(p.data[p.pos:])
@@ -156,7 +155,7 @@ func (p *binaryParser) readFloat() (float64, error) {
 // readBytes は指定数のバイト列を読み取る。
 func (p *binaryParser) readBytes(count int) ([]byte, error) {
 	if p.pos > len(p.data)-count {
-		return nil, fmt.Errorf("bytes読み取りでバッファが不足しています")
+		return nil, newParseFailed("bytes読み取りでバッファが不足しています")
 	}
 	buf := make([]byte, count)
 	copy(buf, p.data[p.pos:p.pos+count])
@@ -171,7 +170,7 @@ func (p *binaryParser) readName() (string, error) {
 		return "", err
 	}
 	if tok != tokenName {
-		return "", fmt.Errorf("NAMEトークンが不正です: %d", tok)
+		return "", newParseFailed("NAMEトークンが不正です: %d", tok)
 	}
 	count, err := p.readDWORD()
 	if err != nil {
@@ -196,7 +195,7 @@ func (p *binaryParser) readString() (string, error) {
 		return "", err
 	}
 	if tok != tokenString {
-		return "", fmt.Errorf("STRINGトークンが不正です: %d", tok)
+		return "", newParseFailed("STRINGトークンが不正です: %d", tok)
 	}
 	count, err := p.readDWORD()
 	if err != nil {
@@ -211,7 +210,7 @@ func (p *binaryParser) readString() (string, error) {
 		return "", err
 	}
 	if term != tokenSemicolon && term != tokenComma {
-		return "", fmt.Errorf("STRING終端トークンが不正です: %d", term)
+		return "", newParseFailed("STRING終端トークンが不正です: %d", term)
 	}
 	decoded, err := decodeShiftJIS(buf)
 	if err != nil {
@@ -249,7 +248,7 @@ func (p *binaryParser) parseObject(objectName string) error {
 		return err
 	}
 	if braceTok != tokenOBrace {
-		return fmt.Errorf("オブジェクト開始が不正です: %d", braceTok)
+		return newParseFailed("オブジェクト開始が不正です: %d", braceTok)
 	}
 	peek, err := p.getToken()
 	if err != nil {
@@ -316,7 +315,7 @@ func (p *binaryParser) parseObject(objectName string) error {
 				return err
 			}
 		default:
-			return fmt.Errorf("オブジェクト解析中のトークンが不正です: %d", tok)
+			return newParseFailed("オブジェクト解析中のトークンが不正です: %d", tok)
 		}
 	}
 }
@@ -328,7 +327,7 @@ func (p *binaryParser) parseDataReference() error {
 		return err
 	}
 	if tok != tokenOBrace {
-		return fmt.Errorf("参照開始トークンが不正です: %d", tok)
+		return newParseFailed("参照開始トークンが不正です: %d", tok)
 	}
 	nameTok, err := p.getToken()
 	if err != nil {
@@ -357,7 +356,7 @@ func (p *binaryParser) parseDataReference() error {
 		return err
 	}
 	if closeTok != tokenCBrace {
-		return fmt.Errorf("参照終了トークンが不正です: %d", closeTok)
+		return newParseFailed("参照終了トークンが不正です: %d", closeTok)
 	}
 	return nil
 }
@@ -379,18 +378,18 @@ func (p *binaryParser) parseDataList(objectName string) error {
 	case tokenString:
 		return p.parseStringList(objectName)
 	default:
-		return fmt.Errorf("データリストのトークンが不正です: %d", tok)
+		return newParseFailed("データリストのトークンが不正です: %d", tok)
 	}
 }
 
 // parseMeshFaceIndexGroups は面情報の整数リストを頂点インデックス配列へ変換する。
 func (p *binaryParser) parseMeshFaceIndexGroups(list []uint32, base int, objectName string) ([][]int, error) {
 	if len(list) < 1 {
-		return nil, fmt.Errorf("%sの面情報が不足しています", objectName)
+		return nil, newParseFailed("%sの面情報が不足しています", objectName)
 	}
 	faceCount := int(list[0])
 	if faceCount < 0 {
-		return nil, fmt.Errorf("%sの面数が不正です", objectName)
+		return nil, newParseFailed("%sの面数が不正です", objectName)
 	}
 
 	// 可変長フォーマットを優先し、合わない場合は従来の固定長フォーマットにフォールバックする。
@@ -423,13 +422,13 @@ func (p *binaryParser) parseMeshFaceIndexGroups(list []uint32, base int, objectN
 	}
 
 	if 1+faceCount*4 > len(list) {
-		return nil, fmt.Errorf("%sの面情報が不足しています", objectName)
+		return nil, newParseFailed("%sの面情報が不足しています", objectName)
 	}
 	faceIndexes = make([][]int, 0, faceCount)
 	for i := 0; i < faceCount; i++ {
 		pos := 1 + i*4
 		if pos+3 >= len(list) {
-			return nil, fmt.Errorf("%sの面情報が不足しています", objectName)
+			return nil, newParseFailed("%sの面情報が不足しています", objectName)
 		}
 		indexes := []int{
 			int(list[pos+1]) + base,
@@ -448,7 +447,7 @@ func (p *binaryParser) readIntegerList(objectName string) ([]uint32, error) {
 		return nil, err
 	}
 	if tok != tokenIntegerList {
-		return nil, fmt.Errorf("INTEGER_LISTトークンが不正です: %d", tok)
+		return nil, newParseFailed("INTEGER_LISTトークンが不正です: %d", tok)
 	}
 	count, err := p.readDWORD()
 	if err != nil {
@@ -466,7 +465,7 @@ func (p *binaryParser) readIntegerList(objectName string) ([]uint32, error) {
 	switch objectName {
 	case "Mesh":
 		if p.meshCtx == nil {
-			return nil, fmt.Errorf("Meshの頂点コンテキストが不正です")
+			return nil, newParseFailed("Meshの頂点コンテキストが不正です")
 		}
 		faceIndexGroups, err := p.parseMeshFaceIndexGroups(list, p.meshCtx.vertexOffset, "Mesh")
 		if err != nil {
@@ -493,7 +492,7 @@ func (p *binaryParser) readIntegerList(objectName string) ([]uint32, error) {
 		}
 	case "MeshMaterialList":
 		if len(list) < 2 {
-			return nil, fmt.Errorf("MeshMaterialListの情報が不足しています")
+			return nil, newParseFailed("MeshMaterialListの情報が不足しています")
 		}
 		matCount := int(list[0])
 		faceCount := int(list[1])
@@ -502,7 +501,7 @@ func (p *binaryParser) readIntegerList(objectName string) ([]uint32, error) {
 			p.model.Materials.AppendRaw(material)
 		}
 		if 2+faceCount > len(list) {
-			return nil, fmt.Errorf("MeshMaterialListの面数が不正です")
+			return nil, newParseFailed("MeshMaterialListの面数が不正です")
 		}
 		for i := 0; i < faceCount; i++ {
 			matIdx := int(list[2+i])
@@ -520,7 +519,7 @@ func (p *binaryParser) readIntegerList(objectName string) ([]uint32, error) {
 		}
 	case "MeshNormals":
 		if p.meshCtx == nil {
-			return nil, fmt.Errorf("MeshNormalsの頂点コンテキストが不正です")
+			return nil, newParseFailed("MeshNormalsの頂点コンテキストが不正です")
 		}
 		normalFaceIndexes, err := p.parseMeshFaceIndexGroups(list, 0, "MeshNormals")
 		if err != nil {
@@ -539,7 +538,7 @@ func (p *binaryParser) readFloatList(objectName string) ([]float64, error) {
 		return nil, err
 	}
 	if tok != tokenFloatList {
-		return nil, fmt.Errorf("FLOAT_LISTトークンが不正です: %d", tok)
+		return nil, newParseFailed("FLOAT_LISTトークンが不正です: %d", tok)
 	}
 	count, err := p.readDWORD()
 	if err != nil {
@@ -557,10 +556,10 @@ func (p *binaryParser) readFloatList(objectName string) ([]float64, error) {
 	switch objectName {
 	case "Mesh":
 		if p.meshCtx == nil {
-			return nil, fmt.Errorf("Meshの頂点コンテキストが不正です")
+			return nil, newParseFailed("Meshの頂点コンテキストが不正です")
 		}
 		if len(list)%3 != 0 {
-			return nil, fmt.Errorf("Meshの頂点数が不正です")
+			return nil, newParseFailed("Meshの頂点数が不正です")
 		}
 		p.meshCtx.vertexCount = len(list) / 3
 		for i := 0; i+2 < len(list); i += 3 {
@@ -576,10 +575,10 @@ func (p *binaryParser) readFloatList(objectName string) ([]float64, error) {
 		}
 	case "MeshNormals":
 		if p.meshCtx == nil {
-			return nil, fmt.Errorf("MeshNormalsの頂点コンテキストが不正です")
+			return nil, newParseFailed("MeshNormalsの頂点コンテキストが不正です")
 		}
 		if len(list)%3 != 0 {
-			return nil, fmt.Errorf("MeshNormalsの頂点数が不正です")
+			return nil, newParseFailed("MeshNormalsの頂点数が不正です")
 		}
 		normals := make([]mmath.Vec3, 0, len(list)/3)
 		for i := 0; i+2 < len(list); i += 3 {
@@ -588,7 +587,7 @@ func (p *binaryParser) readFloatList(objectName string) ([]float64, error) {
 		p.meshCtx.normals = normals
 	case "MeshTextureCoords":
 		if p.meshCtx == nil {
-			return nil, fmt.Errorf("MeshTextureCoordsの頂点コンテキストが不正です")
+			return nil, newParseFailed("MeshTextureCoordsの頂点コンテキストが不正です")
 		}
 		for i := 0; i+1 < len(list); i += 2 {
 			vidx := i / 2
@@ -623,7 +622,7 @@ func (p *binaryParser) parseStringList(objectName string) error {
 			return err
 		}
 		if stringTok != tokenString {
-			return fmt.Errorf("STRINGトークンが不正です: %d", stringTok)
+			return newParseFailed("STRINGトークンが不正です: %d", stringTok)
 		}
 		p.pos -= 2
 		text, err := p.readString()
@@ -682,7 +681,7 @@ func (p *binaryParser) skipGuid() error {
 		return err
 	}
 	if tok != tokenGuid {
-		return fmt.Errorf("GUIDトークンが不正です: %d", tok)
+		return newParseFailed("GUIDトークンが不正です: %d", tok)
 	}
 	if _, err := p.readBytes(16); err != nil {
 		return err
@@ -696,7 +695,7 @@ func (p *binaryParser) skipTemplateDefinition() error {
 		return err
 	}
 	if tok, err := p.getToken(); err != nil || tok != tokenOBrace {
-		return fmt.Errorf("テンプレート開始トークンが不正です")
+		return newParseFailed("テンプレート開始トークンが不正です")
 	}
 	if err := p.skipGuid(); err != nil {
 		return err
@@ -713,7 +712,7 @@ func (p *binaryParser) skipTemplateDefinition() error {
 		case tokenCBrace:
 			braceCount--
 		case tokenEOF:
-			return fmt.Errorf("テンプレート定義が未完です")
+			return newParseFailed("テンプレート定義が未完です")
 		}
 	}
 	return nil

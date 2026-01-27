@@ -2,7 +2,6 @@
 package pmx
 
 import (
-	"fmt"
 	"io"
 	"math"
 
@@ -1103,7 +1102,7 @@ func resolveEncoding(encodeType byte) (encoding.Encoding, error) {
 	case 1:
 		return unicode.UTF8, nil
 	default:
-		return nil, fmt.Errorf("unknown encode type: %d", encodeType)
+		return nil, io_common.NewIoFormatNotSupported("エンコード種別が未対応です: %d", nil, encodeType)
 	}
 }
 

@@ -6,7 +6,6 @@ import (
 	"embed"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"image"
 	"image/png"
 	"io/fs"
@@ -41,8 +40,8 @@ const (
 )
 
 // newInternalError は内部エラーとして共通委譲エラーを生成する。
-func newInternalError(id string, message string, cause error) error {
-	return merr.NewCommonError(id, merr.ErrorKindInternal, message, cause)
+func newInternalError(id string, message string, cause error, params ...any) error {
+	return merr.NewCommonError(id, merr.ErrorKindInternal, message, cause, params...)
 }
 
 // newAppConfigLoadFailed はアプリ設定の読込失敗エラーを生成する。
@@ -61,8 +60,8 @@ func newAppRootDirResolveFailed(cause error) error {
 }
 
 // newConfigValueTypeNotSupported は設定値の型未対応エラーを生成する。
-func newConfigValueTypeNotSupported(message string) error {
-	return newInternalError(configValueTypeNotSupportedErrorID, message, nil)
+func newConfigValueTypeNotSupported(message string, params ...any) error {
+	return newInternalError(configValueTypeNotSupportedErrorID, message, nil, params...)
 }
 
 // ConfigStore は設定ストアの実装。
@@ -132,7 +131,7 @@ func (u *UserConfigStore) Set(key string, value any) error {
 	case int:
 		return u.SetInt(key, v)
 	default:
-		return newConfigValueTypeNotSupported(fmt.Sprintf("未対応の設定値型です: %T", value))
+		return newConfigValueTypeNotSupported("未対応の設定値型です: %T", value)
 	}
 }
 
@@ -262,7 +261,7 @@ func (u *UserConfigStore) loadAll(key string) ([]string, map[string]any, error) 
 	case []string:
 		return list, configMap, nil
 	default:
-		return []string{}, map[string]any{}, newConfigValueTypeNotSupported("user_config.jsonの値が未対応です: " + key)
+		return []string{}, map[string]any{}, newConfigValueTypeNotSupported("user_config.jsonの値が未対応です: %s", key)
 	}
 }
 
@@ -313,7 +312,7 @@ func (u *UserConfigStore) saveStringSlice(key string, values []string, limit int
 	}
 	path := filepath.Join(root, config.UserConfigFileName)
 	if err := writeFile(path, data, 0644); err != nil {
-		cause := merr.NewOsPackageError("user_config.jsonの書き込みに失敗しました: "+path, err)
+		cause := merr.NewOsPackageError("user_config.jsonの書き込みに失敗しました: %s", err, path)
 		return newUserConfigSaveFailed("user_config.jsonの保存に失敗しました", cause)
 	}
 	return nil
@@ -329,7 +328,7 @@ func loadUserConfig() (map[string]any, error) {
 	data, err := readFile(path)
 	if err != nil {
 		if !errors.Is(err, os.ErrNotExist) {
-			return map[string]any{}, merr.NewOsPackageError("user_config.jsonの読込に失敗しました: "+path, err)
+			return map[string]any{}, merr.NewOsPackageError("user_config.jsonの読込に失敗しました: %s", err, path)
 		}
 		path = filepath.Join(root, config.UserConfigLegacyFileName)
 		data, err = readFile(path)
@@ -337,13 +336,13 @@ func loadUserConfig() (map[string]any, error) {
 			if errors.Is(err, os.ErrNotExist) {
 				return map[string]any{}, nil
 			}
-			return map[string]any{}, merr.NewOsPackageError("history.jsonの読込に失敗しました: "+path, err)
+			return map[string]any{}, merr.NewOsPackageError("history.jsonの読込に失敗しました: %s", err, path)
 		}
 	}
 
 	configMap := make(map[string]any)
 	if err := json.Unmarshal(data, &configMap); err != nil {
-		return map[string]any{}, merr.NewJsonPackageError("設定JSONの解析に失敗しました: "+path, err)
+		return map[string]any{}, merr.NewJsonPackageError("設定JSONの解析に失敗しました: %s", err, path)
 	}
 	return configMap, nil
 }
@@ -379,12 +378,12 @@ func LoadAppIconImage(appFiles fs.FS, appConfig *config.AppConfig) (image.Image,
 	}
 	iconBytes, err := fs.ReadFile(appFiles, iconPath)
 	if err != nil {
-		cause := merr.NewFsPackageError("アプリアイコンの読込に失敗しました: "+iconPath, err)
+		cause := merr.NewFsPackageError("アプリアイコンの読込に失敗しました: %s", err, iconPath)
 		return nil, newAppConfigLoadFailed("アプリアイコンの読込に失敗しました", cause)
 	}
 	iconImage, err := png.Decode(bytes.NewReader(iconBytes))
 	if err != nil {
-		cause := merr.NewImagePackageError("アプリアイコンのデコードに失敗しました: "+iconPath, err)
+		cause := merr.NewImagePackageError("アプリアイコンのデコードに失敗しました: %s", err, iconPath)
 		return nil, newAppConfigLoadFailed("アプリアイコンのデコードに失敗しました", cause)
 	}
 	return iconImage, nil
@@ -394,12 +393,12 @@ func LoadAppIconImage(appFiles fs.FS, appConfig *config.AppConfig) (image.Image,
 func loadAppConfigFS(appFiles fs.FS) (*config.AppConfig, error) {
 	data, err := fs.ReadFile(appFiles, config.AppConfigFilePath)
 	if err != nil {
-		cause := merr.NewFsPackageError("app_config.jsonの読込に失敗しました: "+config.AppConfigFilePath, err)
+		cause := merr.NewFsPackageError("app_config.jsonの読込に失敗しました: %s", err, config.AppConfigFilePath)
 		return nil, newAppConfigLoadFailed("app_config.jsonの読込に失敗しました", cause)
 	}
 	var cfg config.AppConfig
 	if err := json.Unmarshal(data, &cfg); err != nil {
-		cause := merr.NewJsonPackageError("app_config.jsonの解析に失敗しました: "+config.AppConfigFilePath, err)
+		cause := merr.NewJsonPackageError("app_config.jsonの解析に失敗しました: %s", err, config.AppConfigFilePath)
 		return nil, newAppConfigLoadFailed("app_config.jsonの解析に失敗しました", cause)
 	}
 
@@ -411,11 +410,11 @@ func loadAppConfigFS(appFiles fs.FS) (*config.AppConfig, error) {
 	if iconPath != "" {
 		iconBytes, err := fs.ReadFile(appFiles, iconPath)
 		if err != nil {
-			cause := merr.NewFsPackageError("アプリアイコンの読込に失敗しました: "+iconPath, err)
+			cause := merr.NewFsPackageError("アプリアイコンの読込に失敗しました: %s", err, iconPath)
 			return nil, newAppConfigLoadFailed("アプリアイコンの読込に失敗しました", cause)
 		}
 		if _, err := png.Decode(bytes.NewReader(iconBytes)); err != nil {
-			cause := merr.NewImagePackageError("アプリアイコンのデコードに失敗しました: "+iconPath, err)
+			cause := merr.NewImagePackageError("アプリアイコンのデコードに失敗しました: %s", err, iconPath)
 			return nil, newAppConfigLoadFailed("アプリアイコンのデコードに失敗しました", cause)
 		}
 	}

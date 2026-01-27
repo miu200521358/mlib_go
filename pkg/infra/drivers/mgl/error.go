@@ -63,8 +63,10 @@ func getOpenGLErrorString(errCode uint32) string {
 func CheckGLError() error {
 	if errCode := gl.GetError(); errCode != gl.NO_ERROR {
 		return graphics_api.NewOpenGLError(
-			fmt.Sprintf("OpenGL error: %v - %s", errCode, getOpenGLErrorString(errCode)),
+			"OpenGLエラーが発生しました: code=%d detail=%s",
 			nil,
+			errCode,
+			getOpenGLErrorString(errCode),
 		)
 	}
 	return nil

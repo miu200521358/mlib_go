@@ -12,26 +12,26 @@ const (
 )
 
 // newFileNotFound はファイル未検出エラーを生成する。
-func newFileNotFound(message string, cause error) error {
-	return merr.NewCommonError(fileNotFoundErrorID, merr.ErrorKindValidate, message, cause)
+func newFileNotFound(message string, cause error, params ...any) error {
+	return merr.NewCommonError(fileNotFoundErrorID, merr.ErrorKindValidate, message, cause, params...)
 }
 
 // newFileReadFailed はファイル読込失敗エラーを生成する。
-func newFileReadFailed(message string, cause error) error {
-	return merr.NewCommonError(fileReadFailedErrorID, merr.ErrorKindValidate, message, cause)
+func newFileReadFailed(message string, cause error, params ...any) error {
+	return merr.NewCommonError(fileReadFailedErrorID, merr.ErrorKindValidate, message, cause, params...)
 }
 
 // newImageDecodeFailed は画像デコード失敗エラーを生成する。
-func newImageDecodeFailed(message string, cause error) error {
-	return merr.NewCommonError(imageDecodeFailedErrorID, merr.ErrorKindValidate, message, cause)
+func newImageDecodeFailed(message string, cause error, params ...any) error {
+	return merr.NewCommonError(imageDecodeFailedErrorID, merr.ErrorKindValidate, message, cause, params...)
 }
 
 // newLogStreamOpenFailed はログストリーム生成失敗エラーを生成する。
-func newLogStreamOpenFailed(message string, cause error) error {
-	return merr.NewCommonError(logStreamOpenFailedErrorID, merr.ErrorKindValidate, message, cause)
+func newLogStreamOpenFailed(message string, cause error, params ...any) error {
+	return merr.NewCommonError(logStreamOpenFailedErrorID, merr.ErrorKindValidate, message, cause, params...)
 }
 
 // newConsoleSnapshotSaveFailed はコンソールスナップショット保存失敗エラーを生成する。
-func newConsoleSnapshotSaveFailed(message string, cause error) error {
-	return merr.NewCommonError(consoleSnapshotSaveErrorID, merr.ErrorKindValidate, message, cause)
+func newConsoleSnapshotSaveFailed(message string, cause error, params ...any) error {
+	return merr.NewCommonError(consoleSnapshotSaveErrorID, merr.ErrorKindValidate, message, cause, params...)
 }

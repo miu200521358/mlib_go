@@ -5,6 +5,7 @@
 package ui
 
 import (
+	"errors"
 	"path/filepath"
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/audio_api"
@@ -262,7 +263,7 @@ func loadModel(logger logging.ILogger, translator i18n.II18n, cw *controller.Con
 	}
 	modelData, ok := data.(*model.PmxModel)
 	if !ok {
-		logLoadFailed(logger, translator, io_common.NewIoFormatNotSupported(translate(translator, "モデル形式が不正です"), nil))
+			logLoadFailed(logger, translator, io_common.NewIoFormatNotSupported("モデル形式が不正です", nil))
 		if materialView != nil {
 			materialView.ResetRows(nil)
 		}
@@ -343,7 +344,7 @@ func loadMotion(logger logging.ILogger, translator i18n.II18n, cw *controller.Co
 	}
 	motionData, ok := data.(*motion.VmdMotion)
 	if !ok {
-		logLoadFailed(logger, translator, io_common.NewIoFormatNotSupported(translate(translator, "モーション形式が不正です"), nil))
+		logLoadFailed(logger, translator, io_common.NewIoFormatNotSupported("モーション形式が不正です", nil))
 		cw.SetMotion(windowIndex, modelIndex, nil)
 		return
 	}
@@ -363,8 +364,7 @@ func logLoadFailed(logger logging.ILogger, translator i18n.II18n, err error) {
 
 // newRepositoryNotConfiguredError は読み込みリポジトリ未設定エラーを生成する。
 func newRepositoryNotConfiguredError(translator i18n.II18n, target string) error {
-	message := translate(translator, target+"読み込みリポジトリがありません")
-	return merr.NewCommonError(repositoryNotConfiguredErrorID, merr.ErrorKindInternal, message, nil)
+	return merr.NewCommonError(repositoryNotConfiguredErrorID, merr.ErrorKindInternal, "読み込みリポジトリがありません: %s", nil, target)
 }
 
 // logErrorTitle はタイトル付きエラーを出力する。
@@ -378,7 +378,14 @@ func logErrorTitle(logger logging.ILogger, title string, err error) {
 		titled.ErrorTitle(title, err, "")
 		return
 	}
-	logger.Error("%s: %s", title, err.Error())
+	errText := ""
+	if err != nil {
+		errText = err.Error()
+		if errID := extractErrorID(err); errID != "" {
+			errText = "エラーID: " + errID + "\n" + errText
+		}
+	}
+	logger.Error("%s: %s", title, errText)
 }
 
 // translate は翻訳済み文言を返す。
@@ -387,4 +394,20 @@ func translate(translator i18n.II18n, key string) string {
 		return "●●" + key + "●●"
 	}
 	return translator.T(key)
+}
+
+type errorIDProvider interface {
+	ErrorID() string
+}
+
+// extractErrorID はエラーからErrorIDを取得する。
+func extractErrorID(err error) string {
+	if err == nil {
+		return ""
+	}
+	var provider errorIDProvider
+	if errors.As(err, &provider) {
+		return provider.ErrorID()
+	}
+	return ""
 }
