@@ -28,10 +28,10 @@ func NewMenuItems(translator i18n.II18n, logger logging.ILogger) []declarative.M
 				if lineLogger, ok := logger.(interface {
 					InfoLine(msg string, params ...any)
 				}); ok {
-					lineLogger.InfoLine(t("サンプルヘルプ"))
+					lineLogger.InfoLine("サンプルヘルプ")
 					return
 				}
-				logger.Info(t("サンプルヘルプ"))
+				logger.Info("サンプルヘルプ")
 			},
 		},
 		declarative.Action{
@@ -40,10 +40,10 @@ func NewMenuItems(translator i18n.II18n, logger logging.ILogger) []declarative.M
 				if lineLogger, ok := logger.(interface {
 					InfoLine(msg string, params ...any)
 				}); ok {
-					lineLogger.InfoLine(t("材質ビュー説明"))
+					lineLogger.InfoLine("材質ビュー説明")
 					return
 				}
-				logger.Info(t("材質ビュー説明"))
+				logger.Info("材質ビュー説明")
 			},
 		},
 		declarative.Action{
@@ -52,10 +52,10 @@ func NewMenuItems(translator i18n.II18n, logger logging.ILogger) []declarative.M
 				if lineLogger, ok := logger.(interface {
 					InfoLine(msg string, params ...any)
 				}); ok {
-					lineLogger.InfoLine(t("頂点ビュー説明"))
+					lineLogger.InfoLine("頂点ビュー説明")
 					return
 				}
-				logger.Info(t("頂点ビュー説明"))
+				logger.Info("頂点ビュー説明")
 			},
 		},
 	}

@@ -48,7 +48,7 @@ func (m *IntermediateMsaaBuffer) init() {
 
 	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
 		m.initErr = graphics_api.NewFramebufferIncomplete(i18n.T("中間MSAAのマルチサンプルFBOが不完全です"), nil)
-		logging.DefaultLogger().Warn(i18n.T("中間MSAAのマルチサンプルFBOが不完全です"))
+		logging.DefaultLogger().Warn("中間MSAAのマルチサンプルFBOが不完全です")
 	}
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 
@@ -69,7 +69,7 @@ func (m *IntermediateMsaaBuffer) init() {
 
 	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
 		m.initErr = graphics_api.NewFramebufferIncomplete(i18n.T("中間MSAAの中間FBOが不完全です"), nil)
-		logging.DefaultLogger().Warn(i18n.T("中間MSAAの中間FBOが不完全です"))
+		logging.DefaultLogger().Warn("中間MSAAの中間FBOが不完全です")
 	}
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 }

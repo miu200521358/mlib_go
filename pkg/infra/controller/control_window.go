@@ -1161,7 +1161,7 @@ func (cw *ControlWindow) enableVerbose(index logging.VerboseIndex, label string)
 	if _, ok := cw.verboseSinks[index]; !ok {
 		_, sink, err := mfile.OpenVerboseLogStream(cw.userConfig, label)
 		if err != nil {
-			logger.Error(cw.t("冗長ログの開始に失敗しました: %s"), err.Error())
+			logger.Error("冗長ログの開始に失敗しました: %s", err.Error())
 			return
 		}
 		cw.verboseSinks[index] = sink

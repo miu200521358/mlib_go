@@ -391,10 +391,10 @@ func (mp *MotionPlayer) startAudioPlayback(frame mtime.Frame) {
 	}
 	logger := logging.DefaultLogger()
 	if err := mp.seekAudioByFrame(frame); err != nil {
-		logger.Error(mp.t("音声シークに失敗しました: %s"), err.Error())
+		logger.Error("音声シークに失敗しました: %s", err.Error())
 	}
 	if err := mp.audioPlayer.Play(); err != nil {
-		logger.Error(mp.t("音声再生に失敗しました: %s"), err.Error())
+		logger.Error("音声再生に失敗しました: %s", err.Error())
 	}
 }
 
@@ -405,7 +405,7 @@ func (mp *MotionPlayer) pauseAudioPlayback() {
 	}
 	logger := logging.DefaultLogger()
 	if err := mp.audioPlayer.Pause(); err != nil {
-		logger.Error(mp.t("音声一時停止に失敗しました: %s"), err.Error())
+		logger.Error("音声一時停止に失敗しました: %s", err.Error())
 	}
 }
 
@@ -426,10 +426,10 @@ func (mp *MotionPlayer) syncAudioOnLoop(currentFrame, prevFrame mtime.Frame) {
 	if currentFrame < prevFrame {
 		logger := logging.DefaultLogger()
 		if err := mp.seekAudioByFrame(currentFrame); err != nil {
-			logger.Error(mp.t("音声シークに失敗しました: %s"), err.Error())
+			logger.Error("音声シークに失敗しました: %s", err.Error())
 		}
 		if err := mp.audioPlayer.Play(); err != nil {
-			logger.Error(mp.t("音声再生に失敗しました: %s"), err.Error())
+			logger.Error("音声再生に失敗しました: %s", err.Error())
 		}
 	}
 }
@@ -441,7 +441,7 @@ func (mp *MotionPlayer) onAudioPathChanged(_ *controller.ControlWindow, _ io_com
 	}
 	if err := mp.audioPlayer.Load(path); err != nil {
 		logger := logging.DefaultLogger()
-		logger.Error(mp.t("音楽ファイル読み込み失敗: %s"), err.Error())
+		logger.Error("音楽ファイル読み込み失敗: %s", err.Error())
 		controller.Beep()
 		return
 	}
@@ -463,7 +463,7 @@ func (mp *MotionPlayer) handleVolumeChanged() {
 	if mp.audioPlayer != nil {
 		if err := mp.audioPlayer.SetVolume(volume); err != nil {
 			logger := logging.DefaultLogger()
-			logger.Error(mp.t("音量設定に失敗しました: %s"), err.Error())
+			logger.Error("音量設定に失敗しました: %s", err.Error())
 			controller.Beep()
 		}
 	}

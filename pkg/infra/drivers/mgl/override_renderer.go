@@ -108,7 +108,7 @@ func (m *OverrideRenderer) initFBOAndTexture() {
 			fmt.Sprintf(i18n.T("オーバーライド用フレームバッファが不完全です: %s"), getFrameBufferStatusString(status)),
 			nil,
 		)
-		logging.DefaultLogger().Warn(i18n.T("オーバーライドFBOの初期化に失敗しました: %v"), m.initErr)
+		logging.DefaultLogger().Warn("オーバーライドFBOの初期化に失敗しました: %v", m.initErr)
 	}
 	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 }
@@ -164,7 +164,7 @@ func (m *OverrideRenderer) Unbind() {
 func (m *OverrideRenderer) Resolve() {
 	if m.sharedTextureID == nil || *m.sharedTextureID == 0 {
 		if !m.warnedMissingSharedTexture {
-			logging.DefaultLogger().Warn(i18n.T("共有テクスチャが未設定のためオーバーライド合成をスキップします"))
+			logging.DefaultLogger().Warn("共有テクスチャが未設定のためオーバーライド合成をスキップします")
 			m.warnedMissingSharedTexture = true
 		}
 		return

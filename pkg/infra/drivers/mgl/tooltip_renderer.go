@@ -12,7 +12,6 @@ import (
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.3-core/gl"
-	"github.com/miu200521358/mlib_go/pkg/infra/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/basicfont"
@@ -50,7 +49,7 @@ func NewTooltipRenderer() (*TooltipRenderer, error) {
 	// NotoSansJP-Light.ttfを埋め込みフォントから読み込み
 	tt, err := opentype.Parse(notoSansJP)
 	if err != nil {
-		logging.DefaultLogger().Warn(i18n.T("NotoSansJPフォントの読み込みに失敗しました: %v"), err)
+		logging.DefaultLogger().Warn("NotoSansJPフォントの読み込みに失敗しました: %v", err)
 		face = fallbackFace
 	} else {
 		f, err := opentype.NewFace(tt, &opentype.FaceOptions{
@@ -59,7 +58,7 @@ func NewTooltipRenderer() (*TooltipRenderer, error) {
 			Hinting: font.HintingFull,
 		})
 		if err != nil {
-			logging.DefaultLogger().Warn(i18n.T("NotoSansJPフォントの初期化に失敗しました: %v"), err)
+			logging.DefaultLogger().Warn("NotoSansJPフォントの初期化に失敗しました: %v", err)
 			face = fallbackFace
 		} else {
 			face = f

@@ -469,7 +469,7 @@ func (fp *FilePicker) saveHistoryIfNeeded(path string) {
 	values = dedupe(values)
 	if err := fp.userConfig.SetStringSlice(fp.historyKey, values, 50); err != nil {
 		logger := logging.DefaultLogger()
-		logger.Warn(fp.t("履歴保存に失敗しました: %s"), err.Error())
+		logger.Warn("履歴保存に失敗しました: %s", err.Error())
 	}
 }
 
@@ -511,7 +511,7 @@ func (fp *FilePicker) openHistoryDialog() {
 		values, err = fp.userConfig.GetStringSlice(fp.historyKey)
 		if err != nil {
 			logger := logging.DefaultLogger()
-			logger.Warn(fp.t("履歴読込に失敗しました"))
+			logger.Warn("履歴読込に失敗しました")
 			values = []string{}
 		}
 	}

@@ -8,7 +8,6 @@ import (
 	"github.com/go-gl/gl/v4.3-core/gl"
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/graphics_api"
-	"github.com/miu200521358/mlib_go/pkg/infra/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/mbullet/bt"
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/mgl"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
@@ -68,7 +67,7 @@ func (ddl *mDebugDrawLiner) drawDebugLines(shader graphics_api.IShader, isDrawRi
 	program := shader.Program(graphics_api.ProgramTypePhysics)
 	if program == 0 {
 		// シェーダー未初期化時は描画しない。
-		logging.DefaultLogger().Error(i18n.T("物理デバッグシェーダーが未初期化のため描画をスキップしました"))
+		logging.DefaultLogger().Error("物理デバッグシェーダーが未初期化のため描画をスキップしました")
 		return
 	}
 	gl.UseProgram(program)

@@ -13,7 +13,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/graphics_api"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/infra/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"gonum.org/v1/gonum/spatial/r3"
 )
@@ -104,7 +103,7 @@ func (f *ShaderFactory) CreateShader(width, height int) (graphics_api.IShader, e
 
 	msaa := NewMsaaBuffer(width, height)
 	if err := msaaInitError(msaa); err != nil {
-		logging.DefaultLogger().Error(i18n.T("MSAA初期化エラー: %v"), err)
+		logging.DefaultLogger().Error("MSAA初期化エラー: %v", err)
 		msaa.Delete()
 		return nil, err
 	}
@@ -135,7 +134,7 @@ func (f *ShaderFactory) CreateShader(width, height int) (graphics_api.IShader, e
 		isMainWindow,
 	)
 	if err := overrideInitError(shader.overrideRenderer); err != nil {
-		logging.DefaultLogger().Error(i18n.T("オーバーライド描画の初期化エラー: %v"), err)
+		logging.DefaultLogger().Error("オーバーライド描画の初期化エラー: %v", err)
 		shader.Cleanup()
 		return nil, err
 	}
@@ -148,7 +147,7 @@ func (s *Shader) initializePrograms() error {
 	for programType, config := range SHADER_PROGRAM_CONFIGS {
 		program, err := s.shaderLoader.CreateProgram(config.VertexShader, config.FragmentShader)
 		if err != nil {
-			logging.DefaultLogger().Error(i18n.T("シェーダープログラム生成に失敗: %v (%v)"), programType, err)
+			logging.DefaultLogger().Error("シェーダープログラム生成に失敗: %v (%v)", programType, err)
 			s.cleanupPrograms()
 			return err
 		}

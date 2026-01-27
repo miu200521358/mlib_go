@@ -21,7 +21,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
-	"github.com/miu200521358/mlib_go/pkg/infra/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/shared/base"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
@@ -177,14 +176,14 @@ func (vl *ViewerManager) startViewerProfile(logger logging.ILogger) {
 	file, displayPath, fullPath, err := vl.createViewerProfileFile()
 	if err != nil {
 		if logger != nil {
-			logger.Error(i18n.T("ビューワープロファイル開始に失敗しました: %s"), sanitizeProfileError(err, fullPath, displayPath))
+			logger.Error("ビューワープロファイル開始に失敗しました: %s", sanitizeProfileError(err, fullPath, displayPath))
 		}
 		return
 	}
 	if err := pprof.StartCPUProfile(file); err != nil {
 		_ = file.Close()
 		if logger != nil {
-			logger.Error(i18n.T("ビューワープロファイル開始に失敗しました: %s"), sanitizeProfileError(err, fullPath, displayPath))
+			logger.Error("ビューワープロファイル開始に失敗しました: %s", sanitizeProfileError(err, fullPath, displayPath))
 		}
 		return
 	}
@@ -192,7 +191,7 @@ func (vl *ViewerManager) startViewerProfile(logger logging.ILogger) {
 	vl.viewerProfilePath = displayPath
 	vl.viewerProfileActive = true
 	if logger != nil {
-		logger.Info(i18n.T("ビューワープロファイル開始: %s"), displayPath)
+		logger.Info("ビューワープロファイル開始: %s", displayPath)
 	}
 }
 
@@ -204,12 +203,12 @@ func (vl *ViewerManager) stopViewerProfile(logger logging.ILogger) {
 	pprof.StopCPUProfile()
 	if vl.viewerProfileFile != nil {
 		if err := vl.viewerProfileFile.Close(); err != nil && logger != nil {
-			logger.Error(i18n.T("ビューワープロファイル保存に失敗しました: %s"), sanitizeProfileError(err, "", vl.viewerProfilePath))
+			logger.Error("ビューワープロファイル保存に失敗しました: %s", sanitizeProfileError(err, "", vl.viewerProfilePath))
 		}
 		vl.viewerProfileFile = nil
 	}
 	if logger != nil && vl.viewerProfilePath != "" {
-		logger.Info(i18n.T("ビューワープロファイル出力: %s"), vl.viewerProfilePath)
+		logger.Info("ビューワープロファイル出力: %s", vl.viewerProfilePath)
 	}
 	vl.viewerProfileActive = false
 	vl.viewerProfilePath = ""

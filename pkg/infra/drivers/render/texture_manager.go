@@ -133,12 +133,12 @@ func (tm *TextureManager) LoadAllTextures(windowIndex int, textures *model.Textu
 			if loadErr == nil {
 				loadErr = err
 			}
-			logging.DefaultLogger().Warn(i18n.T("テクスチャ読み込みに失敗しました: %v"), err)
+			logging.DefaultLogger().Warn("テクスチャ読み込みに失敗しました: %v", err)
 			continue
 		}
 		idx := texture.Index()
 		if idx < 0 || idx >= len(tm.textures) {
-			logging.DefaultLogger().Warn(i18n.T("テクスチャインデックスが範囲外です: %d"), idx)
+			logging.DefaultLogger().Warn("テクスチャインデックスが範囲外です: %d", idx)
 			continue
 		}
 		tm.textures[idx] = texGl
