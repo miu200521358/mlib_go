@@ -460,7 +460,41 @@ func (p *pmdReader) readIk(modelData *model.PmxModel) error {
 		bone.Ik = ik
 		bone.BoneFlag |= model.BONE_FLAG_IS_IK
 	}
+	applyPmdBoneLayerOverrides(modelData)
 	return nil
+}
+
+// applyPmdBoneLayerOverrides はPMDの変形階層を決め打ちで補正する。
+func applyPmdBoneLayerOverrides(modelData *model.PmxModel) {
+	if modelData == nil || modelData.Bones == nil {
+		return
+	}
+	// PMDには変形階層がないため、IKとIKターゲットは+1で補正する（決め打ち）。
+	for _, bone := range modelData.Bones.Values() {
+		if bone == nil || bone.Ik == nil {
+			continue
+		}
+		bone.Layer += 1
+		target, err := modelData.Bones.Get(bone.Ik.BoneIndex)
+		if err == nil && target != nil {
+			target.Layer += 1
+		}
+	}
+	// 右目/左目とその先は+2で補正する（決め打ち）。
+	for _, dir := range []model.BoneDirection{model.BONE_DIRECTION_RIGHT, model.BONE_DIRECTION_LEFT} {
+		name := model.EYE.StringFromDirection(dir)
+		eye, err := modelData.Bones.GetByName(name)
+		if err != nil || eye == nil {
+			continue
+		}
+		eye.Layer += 2
+		if eye.BoneFlag&model.BONE_FLAG_TAIL_IS_BONE != 0 && eye.TailIndex >= 0 {
+			tail, tailErr := modelData.Bones.Get(eye.TailIndex)
+			if tailErr == nil && tail != nil {
+				tail.Layer += 2
+			}
+		}
+	}
 }
 
 // readSkins は表情データを読み込む。
