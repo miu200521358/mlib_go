@@ -25,6 +25,7 @@ type IkSolveInput struct {
 	AxisZ         mmath.Vec3
 	Loop          int
 	LoopCount     int
+	Debug         *IkDebugContext
 }
 
 // IkSolveStepInput はIK計算1ステップの入力を表す。
@@ -44,30 +45,30 @@ type IkSolveStepInput struct {
 	FixedAxis       mmath.Vec3
 	ChildAxis       mmath.Vec3
 	LocalAxes       IkLocalAxes
+	Debug           *IkDebugContext
 }
 
-// SolveIk は角度制限を適用した回転を返す。
-func SolveIk(input IkSolveInput) mmath.Quaternion {
-	ikMat := input.TotalIkQuat.ToMat4()
-	minLimit := input.MinAngleLimit
-	maxLimit := input.MaxAngleLimit
-	switch {
-	case minLimit.X > -math.Pi/2 && maxLimit.X < math.Pi/2:
-		return solveIkAxisX(ikMat, input)
-	case minLimit.Y > -math.Pi/2 && maxLimit.Y < math.Pi/2:
-		return solveIkAxisY(ikMat, input)
-	default:
-		return solveIkAxisZ(ikMat, input)
-	}
+// ikStepResult はIK計算1ステップの中間結果を表す。
+type ikStepResult struct {
+	IkQuat        mmath.Quaternion
+	TotalIkQuat   mmath.Quaternion
+	Result        mmath.Quaternion
+	ValidRotation bool
 }
 
-// SolveIkStep はIK計算1ステップの回転を返す。
-func SolveIkStep(input IkSolveStepInput) mmath.Quaternion {
+// calcIkStep はIK計算1ステップの中間回転を算出する。
+func calcIkStep(input IkSolveStepInput) ikStepResult {
 	linkAngle := input.LinkAngle
 	axis := input.LimitedAxis
 	// 回転軸が不正または角度がゼロなら、回転を適用せず現状維持する。
 	if isInvalidFloat(linkAngle) || isInvalidVec3(axis) || axis.IsZero() || linkAngle == 0 {
-		return input.LinkRotation
+		logIkDebugf(input.Debug, "IK回転スキップ: angle=%.8f axis=%v", linkAngle, axis)
+		return ikStepResult{
+			IkQuat:        mmath.NewQuaternion(),
+			TotalIkQuat:   input.LinkRotation,
+			Result:        input.LinkRotation,
+			ValidRotation: false,
+		}
 	}
 
 	var ikQuat mmath.Quaternion
@@ -90,6 +91,15 @@ func SolveIkStep(input IkSolveStepInput) mmath.Quaternion {
 	}
 
 	totalIkQuat := input.LinkRotation.Muled(ikQuat)
+	return ikStepResult{
+		IkQuat:        ikQuat,
+		TotalIkQuat:   totalIkQuat,
+		ValidRotation: true,
+	}
+}
+
+// applyIkLimit は角度制限を適用した回転を返す。
+func applyIkLimit(totalIkQuat mmath.Quaternion, input IkSolveStepInput) mmath.Quaternion {
 	if input.AngleLimit {
 		return SolveIk(IkSolveInput{
 			TotalIkQuat:   totalIkQuat,
@@ -100,6 +110,7 @@ func SolveIkStep(input IkSolveStepInput) mmath.Quaternion {
 			AxisZ:         mmath.UNIT_Z_VEC3,
 			Loop:          input.Loop,
 			LoopCount:     input.LoopCount,
+			Debug:         input.Debug,
 		})
 	}
 	if input.LocalAngleLimit {
@@ -112,9 +123,43 @@ func SolveIkStep(input IkSolveStepInput) mmath.Quaternion {
 			AxisZ:         input.LocalAxes.Z,
 			Loop:          input.Loop,
 			LoopCount:     input.LoopCount,
+			Debug:         input.Debug,
 		})
 	}
 	return totalIkQuat
+}
+
+// solveIkStep はIK計算1ステップの回転を返す。
+func solveIkStep(input IkSolveStepInput) ikStepResult {
+	step := calcIkStep(input)
+	if !step.ValidRotation {
+		return step
+	}
+	step.Result = applyIkLimit(step.TotalIkQuat, input)
+	return step
+}
+
+// SolveIk は角度制限を適用した回転を返す。
+func SolveIk(input IkSolveInput) mmath.Quaternion {
+	ikMat := input.TotalIkQuat.ToMat4()
+	minLimit := input.MinAngleLimit
+	maxLimit := input.MaxAngleLimit
+	switch {
+	case minLimit.X > -math.Pi/2 && maxLimit.X < math.Pi/2:
+		logIkDebugf(input.Debug, "角度制限: X軸回転順")
+		return solveIkAxisX(ikMat, input)
+	case minLimit.Y > -math.Pi/2 && maxLimit.Y < math.Pi/2:
+		logIkDebugf(input.Debug, "角度制限: Y軸回転順")
+		return solveIkAxisY(ikMat, input)
+	default:
+		logIkDebugf(input.Debug, "角度制限: Z軸回転順")
+		return solveIkAxisZ(ikMat, input)
+	}
+}
+
+// SolveIkStep はIK計算1ステップの回転を返す。
+func SolveIkStep(input IkSolveStepInput) mmath.Quaternion {
+	return solveIkStep(input).Result
 }
 
 // getLinkAxis はリンク回転軸を返す。
@@ -166,12 +211,14 @@ func solveIkAxisX(ikMat mmath.Mat4, input IkSolveInput) mmath.Quaternion {
 	fX := math.Asin(fSX)
 	fCX := math.Cos(fX)
 	if math.Abs(fX) > mmath.Gimbal1Rad {
+		original := fX
 		if fX < 0 {
 			fX = -mmath.Gimbal1Rad
 		} else {
 			fX = mmath.Gimbal1Rad
 		}
 		fCX = math.Cos(fX)
+		logIkDebugf(input.Debug, "ジンバル補正(X): fX=%.8f -> %.8f", original, fX)
 	}
 	fCXInv := 1.0 / fCX
 	fSY := ikMat.AxisZ().X * fCXInv
@@ -181,9 +228,9 @@ func solveIkAxisX(ikMat mmath.Mat4, input IkSolveInput) mmath.Quaternion {
 	fCZ := ikMat.AxisY().Y * fCXInv
 	fZ := math.Atan2(fSZ, fCZ)
 
-	fX = getIkAxisValue(fX, input.MinAngleLimit.X, input.MaxAngleLimit.X, input.Loop, input.LoopCount)
-	fY = getIkAxisValue(fY, input.MinAngleLimit.Y, input.MaxAngleLimit.Y, input.Loop, input.LoopCount)
-	fZ = getIkAxisValue(fZ, input.MinAngleLimit.Z, input.MaxAngleLimit.Z, input.Loop, input.LoopCount)
+	fX = getIkAxisValue(fX, input.MinAngleLimit.X, input.MaxAngleLimit.X, input.Loop, input.LoopCount, "X軸制限-X", input.Debug)
+	fY = getIkAxisValue(fY, input.MinAngleLimit.Y, input.MaxAngleLimit.Y, input.Loop, input.LoopCount, "X軸制限-Y", input.Debug)
+	fZ = getIkAxisValue(fZ, input.MinAngleLimit.Z, input.MaxAngleLimit.Z, input.Loop, input.LoopCount, "X軸制限-Z", input.Debug)
 
 	xQuat := mmath.NewQuaternionFromAxisAngles(input.AxisX, fX)
 	yQuat := mmath.NewQuaternionFromAxisAngles(input.AxisY, fY)
@@ -197,12 +244,14 @@ func solveIkAxisY(ikMat mmath.Mat4, input IkSolveInput) mmath.Quaternion {
 	fY := math.Asin(fSY)
 	fCY := math.Cos(fY)
 	if math.Abs(fY) > mmath.Gimbal1Rad {
+		original := fY
 		if fY < 0 {
 			fY = -mmath.Gimbal1Rad
 		} else {
 			fY = mmath.Gimbal1Rad
 		}
 		fCY = math.Cos(fY)
+		logIkDebugf(input.Debug, "ジンバル補正(Y): fY=%.8f -> %.8f", original, fY)
 	}
 	fCYInv := 1.0 / fCY
 	fSX := ikMat.AxisY().Z * fCYInv
@@ -212,9 +261,9 @@ func solveIkAxisY(ikMat mmath.Mat4, input IkSolveInput) mmath.Quaternion {
 	fCZ := ikMat.AxisX().X * fCYInv
 	fZ := math.Atan2(fSZ, fCZ)
 
-	fX = getIkAxisValue(fX, input.MinAngleLimit.X, input.MaxAngleLimit.X, input.Loop, input.LoopCount)
-	fY = getIkAxisValue(fY, input.MinAngleLimit.Y, input.MaxAngleLimit.Y, input.Loop, input.LoopCount)
-	fZ = getIkAxisValue(fZ, input.MinAngleLimit.Z, input.MaxAngleLimit.Z, input.Loop, input.LoopCount)
+	fX = getIkAxisValue(fX, input.MinAngleLimit.X, input.MaxAngleLimit.X, input.Loop, input.LoopCount, "Y軸制限-X", input.Debug)
+	fY = getIkAxisValue(fY, input.MinAngleLimit.Y, input.MaxAngleLimit.Y, input.Loop, input.LoopCount, "Y軸制限-Y", input.Debug)
+	fZ = getIkAxisValue(fZ, input.MinAngleLimit.Z, input.MaxAngleLimit.Z, input.Loop, input.LoopCount, "Y軸制限-Z", input.Debug)
 
 	xQuat := mmath.NewQuaternionFromAxisAngles(input.AxisX, fX)
 	yQuat := mmath.NewQuaternionFromAxisAngles(input.AxisY, fY)
@@ -228,12 +277,14 @@ func solveIkAxisZ(ikMat mmath.Mat4, input IkSolveInput) mmath.Quaternion {
 	fZ := math.Asin(fSZ)
 	fCZ := math.Cos(fZ)
 	if math.Abs(fZ) > mmath.Gimbal1Rad {
+		original := fZ
 		if fZ < 0 {
 			fZ = -mmath.Gimbal1Rad
 		} else {
 			fZ = mmath.Gimbal1Rad
 		}
 		fCZ = math.Cos(fZ)
+		logIkDebugf(input.Debug, "ジンバル補正(Z): fZ=%.8f -> %.8f", original, fZ)
 	}
 	fCZInv := 1.0 / fCZ
 	fSX := ikMat.AxisY().Z * fCZInv
@@ -243,9 +294,9 @@ func solveIkAxisZ(ikMat mmath.Mat4, input IkSolveInput) mmath.Quaternion {
 	fCY := ikMat.AxisZ().X * fCZInv
 	fY := math.Atan2(fSY, fCY)
 
-	fX = getIkAxisValue(fX, input.MinAngleLimit.X, input.MaxAngleLimit.X, input.Loop, input.LoopCount)
-	fY = getIkAxisValue(fY, input.MinAngleLimit.Y, input.MaxAngleLimit.Y, input.Loop, input.LoopCount)
-	fZ = getIkAxisValue(fZ, input.MinAngleLimit.Z, input.MaxAngleLimit.Z, input.Loop, input.LoopCount)
+	fX = getIkAxisValue(fX, input.MinAngleLimit.X, input.MaxAngleLimit.X, input.Loop, input.LoopCount, "Z軸制限-X", input.Debug)
+	fY = getIkAxisValue(fY, input.MinAngleLimit.Y, input.MaxAngleLimit.Y, input.Loop, input.LoopCount, "Z軸制限-Y", input.Debug)
+	fZ = getIkAxisValue(fZ, input.MinAngleLimit.Z, input.MaxAngleLimit.Z, input.Loop, input.LoopCount, "Z軸制限-Z", input.Debug)
 
 	xQuat := mmath.NewQuaternionFromAxisAngles(input.AxisX, fX)
 	yQuat := mmath.NewQuaternionFromAxisAngles(input.AxisY, fY)
@@ -254,21 +305,26 @@ func solveIkAxisZ(ikMat mmath.Mat4, input IkSolveInput) mmath.Quaternion {
 }
 
 // getIkAxisValue は角度制限を反映する。
-func getIkAxisValue(fV, minAngle, maxAngle float64, loop, loopCount int) float64 {
+func getIkAxisValue(fV, minAngle, maxAngle float64, loop, loopCount int, axisName string, debug *IkDebugContext) float64 {
 	isInLoop := float64(loop) < float64(loopCount)/2.0
+	logIkDebugf(debug, "角度制限(%s): loop=%d inLoop=%t", axisName, loop, isInLoop)
 	if fV < minAngle {
 		tf := 2*minAngle - fV
 		if tf <= maxAngle && isInLoop {
+			logIkDebugf(debug, "角度制限(%s): min反射 fV=%.8f -> %.8f", axisName, fV, tf)
 			fV = tf
 		} else {
+			logIkDebugf(debug, "角度制限(%s): minクランプ fV=%.8f -> %.8f", axisName, fV, minAngle)
 			fV = minAngle
 		}
 	}
 	if fV > maxAngle {
 		tf := 2*maxAngle - fV
 		if tf >= minAngle && isInLoop {
+			logIkDebugf(debug, "角度制限(%s): max反射 fV=%.8f -> %.8f", axisName, fV, tf)
 			fV = tf
 		} else {
+			logIkDebugf(debug, "角度制限(%s): maxクランプ fV=%.8f -> %.8f", axisName, fV, maxAngle)
 			fV = maxAngle
 		}
 	}

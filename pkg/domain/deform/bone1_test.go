@@ -4170,6 +4170,7 @@ func computeBoneDeltas(
 		includeIk,
 		afterPhysics,
 		removeTwist,
+		nil,
 	)
 	applyBoneMatricesWithIndexes(modelData, boneDeltas, indexes)
 	return boneDeltas, indexes

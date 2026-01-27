@@ -25,6 +25,7 @@ func ComputeBoneDeltas(
 	includeIk bool,
 	afterPhysics bool,
 	removeTwist bool,
+	ikDebugFactory IIkDebugFactory,
 ) (*delta.BoneDeltas, []int) {
 	if modelData == nil {
 		return delta.NewBoneDeltas(nil), nil
@@ -125,7 +126,7 @@ func ComputeBoneDeltas(
 
 	if includeIk {
 		applyBoneMatricesWithIndexes(modelData, boneDeltas, deformBoneIndexes)
-		applyIkDeltas(modelData, motionData, boneDeltas, frame, deformBoneIndexes, removeTwist)
+		applyIkDeltas(modelData, motionData, boneDeltas, frame, deformBoneIndexes, removeTwist, ikDebugFactory)
 		applyBoneMatricesWithIndexes(modelData, boneDeltas, deformBoneIndexes)
 	}
 
@@ -449,6 +450,59 @@ func collectIkChainIndexes(modelData *model.PmxModel, ikBone *model.Bone) []int 
 	}
 	sortBoneIndexes(modelData, out)
 	return out
+}
+
+// buildIkDebugOrder はIKボーンのデバッグ出力順を返す。
+func buildIkDebugOrder(modelData *model.PmxModel, deformBoneIndexes []int) map[int]int {
+	if modelData == nil || modelData.Bones == nil {
+		return nil
+	}
+	ikSet := make(map[int]struct{})
+	for _, idx := range deformBoneIndexes {
+		bone, err := modelData.Bones.Get(idx)
+		if err != nil || bone == nil || !boneIsIk(bone) {
+			continue
+		}
+		ikSet[idx] = struct{}{}
+	}
+	if len(ikSet) == 0 {
+		return nil
+	}
+	children := make(map[int][]int, len(ikSet))
+	roots := make([]int, 0)
+	for idx := range ikSet {
+		bone, err := modelData.Bones.Get(idx)
+		if err != nil || bone == nil {
+			continue
+		}
+		parentIndex := bone.ParentIndex
+		if _, ok := ikSet[parentIndex]; ok {
+			children[parentIndex] = append(children[parentIndex], idx)
+			continue
+		}
+		roots = append(roots, idx)
+	}
+	sort.Ints(roots)
+	for parent := range children {
+		sort.Ints(children[parent])
+	}
+	order := make(map[int]int, len(ikSet))
+	orderIndex := 1
+	var walk func(index int)
+	walk = func(index int) {
+		order[index] = orderIndex
+		orderIndex++
+		if childIndexes, ok := children[index]; ok {
+			for _, childIndex := range childIndexes {
+				walk(childIndex)
+			}
+		}
+	}
+	// 親→子→兄弟の順で並ぶように深さ優先で採番する。
+	for _, root := range roots {
+		walk(root)
+	}
+	return order
 }
 
 // collectDescendantFlags は開始ボーン以下をフラグ化する。
@@ -1323,6 +1377,7 @@ func applyIkDeltas(
 	frame motion.Frame,
 	deformBoneIndexes []int,
 	removeTwist bool,
+	ikDebugFactory IIkDebugFactory,
 ) {
 	if modelData == nil || boneDeltas == nil {
 		return
@@ -1330,6 +1385,10 @@ func applyIkDeltas(
 	effectorChildren := buildEffectorChildrenSlice(modelData)
 	children := buildChildRelations(modelData)
 	scratch := newIkScratch(modelData, deformBoneIndexes)
+	var ikDebugOrder map[int]int
+	if ikDebugFactory != nil {
+		ikDebugOrder = buildIkDebugOrder(modelData, deformBoneIndexes)
+	}
 	ikFrame := getIkFrame(motionData, frame)
 	for _, boneIndex := range deformBoneIndexes {
 		bone, err := modelData.Bones.Get(boneIndex)
@@ -1349,7 +1408,12 @@ func applyIkDeltas(
 			d.SetGlobalIkOffMatrix(off)
 			boneDeltas.Update(d)
 		}
-		applyIkForBone(modelData, motionData, boneDeltas, bone, frame, deformBoneIndexes, effectorChildren, children, scratch, removeTwist)
+		orderIndex := 0
+		if ikDebugOrder != nil {
+			orderIndex = ikDebugOrder[bone.Index()]
+		}
+		debugCtx := newIkDebugContext(ikDebugFactory, modelData, motionData, frame, bone, orderIndex)
+		applyIkForBone(modelData, motionData, boneDeltas, bone, frame, deformBoneIndexes, effectorChildren, children, scratch, removeTwist, debugCtx)
 	}
 }
 
@@ -1408,7 +1472,9 @@ func applyIkForBone(
 	children [][]int,
 	scratch *ikScratch,
 	removeTwist bool,
+	debugCtx *IkDebugContext,
 ) {
+	defer closeIkDebugContext(debugCtx)
 	if modelData == nil || boneDeltas == nil || ikBone == nil || ikBone.Ik == nil {
 		return
 	}
@@ -1435,7 +1501,7 @@ func applyIkForBone(
 	useToeIk := false
 	if targetBeforeIk && len(ikBone.Ik.Links) == 1 && isToeIkBone(ikBone) && motionData != nil {
 		if targetBone, err := modelData.Bones.Get(ikTargetIndex); err == nil && targetBone != nil {
-			ikOffDeltas, ikIndexes := ComputeBoneDeltas(modelData, motionData, frame, []string{targetBone.Name()}, false, false, false)
+			ikOffDeltas, ikIndexes := ComputeBoneDeltas(modelData, motionData, frame, []string{targetBone.Name()}, false, false, false, nil)
 			applyBoneMatricesWithIndexes(modelData, ikOffDeltas, ikIndexes)
 			if ikOffDeltas != nil {
 				if targetDelta := ikOffDeltas.Get(ikTargetIndex); targetDelta != nil {
@@ -1444,6 +1510,12 @@ func applyIkForBone(
 				}
 			}
 		}
+	}
+	if useToeIk {
+		logIkDebugf(debugCtx, "つま先IK: IK OFF位置を使用")
+		appendGlobalPositions(debugCtx, []ikDebugPosition{
+			{Name: ikBone.Name(), Position: ikPos},
+		})
 	}
 
 	if scratch == nil {
@@ -1467,36 +1539,67 @@ func applyIkForBone(
 			if linkDelta == nil {
 				linkDelta = delta.NewBoneDelta(linkBone, frame)
 			}
-			linkQuat := linkDelta.FilledTotalRotation()
-
-			if useToeIk && loop == 1 && linkIndex == 0 {
-				ikPos = ikOnPos
+			if debugCtx != nil {
+				debugCtx.LinkBoneName = linkBone.Name()
 			}
+			logIkDebugf(debugCtx, "IK計算開始: loop=%d linkIndex=%d", loop, linkIndex)
+			linkQuat := linkDelta.FilledTotalRotation()
+			appendIkRotation(debugCtx, linkBone.Name(), linkQuat)
+			logIkDebugf(debugCtx, "linkQuat=%s deg=%s", linkQuat.String(), linkQuat.ToMMDDegrees().String())
 
 			ikTargetDelta := boneDeltas.Get(ikTargetIndex)
 			if ikTargetDelta == nil {
 				continue
 			}
 			ikTargetPos := ikTargetDelta.FilledGlobalPosition()
+			targetName := ""
+			if ikTargetDelta.Bone != nil {
+				targetName = ikTargetDelta.Bone.Name()
+			}
+			positions := []ikDebugPosition{{Name: ikBone.Name(), Position: ikPos}}
+			if targetName != "" {
+				positions = append(positions, ikDebugPosition{Name: targetName, Position: ikTargetPos})
+			}
+			appendGlobalPositions(debugCtx, positions)
+			logIkDebugf(debugCtx, "globalPos: ik=%s target=%s link=%s", ikPos.String(), ikTargetPos.String(), linkDelta.FilledGlobalPosition().String())
 			linkGlobal := linkDelta.FilledGlobalMatrix()
 			linkInv := linkGlobal.Inverted()
+			if useToeIk && loop == 1 && linkIndex == 0 {
+				ikPos = ikOnPos
+				toePositions := []ikDebugPosition{
+					{Name: linkBone.Name(), Position: linkDelta.FilledGlobalPosition()},
+					{Name: ikBone.Name(), Position: ikPos},
+				}
+				if targetName != "" {
+					toePositions = append(toePositions, ikDebugPosition{Name: targetName, Position: ikTargetPos})
+				}
+				appendGlobalPositions(debugCtx, toePositions)
+				logIkDebugf(debugCtx, "つま先IK: IK ON位置へ戻す")
+			}
 			ikTargetLocalPos := linkInv.MulVec3(ikTargetPos).Normalized()
 			ikLocalPos := linkInv.MulVec3(ikPos).Normalized()
 			if ikTargetLocalPos.Length() == 0 || ikLocalPos.Length() == 0 {
 				continue
 			}
+			localDist := ikTargetLocalPos.Distance(ikLocalPos)
+			logIkDebugf(debugCtx, "localPos: target=%s ik=%s dist=%.8f", ikTargetLocalPos.String(), ikLocalPos.String(), localDist)
 
 			unitRad := ikBone.Ik.UnitRotation.X * float64(linkIndex+1)
-			linkAngle := mmath.VectorToRadian(ikTargetLocalPos, ikLocalPos)
+			linkDot := ikTargetLocalPos.Dot(ikLocalPos)
+			originalLinkAngle := math.Acos(mmath.Clamped(linkDot, -1, 1))
+			linkAngle := originalLinkAngle
 			if linkAngle > unitRad {
 				linkAngle = unitRad
 			}
-			limitedAxis := ikTargetLocalPos.Cross(ikLocalPos).Normalized()
+			logIkDebugf(debugCtx, "回転角度: unitRad=%.8f original=%.8f linkAngle=%.8f", unitRad, originalLinkAngle, linkAngle)
+			axisOriginal := ikTargetLocalPos.Cross(ikLocalPos).Normalized()
+			limitedAxis := axisOriginal
 			if (!isSingleIk || linkAngle > mmath.Gimbal1Rad) && (link.AngleLimit || link.LocalAngleLimit) {
 				limitedAxis = getLinkAxis(link, ikTargetLocalPos, ikLocalPos)
 			}
+			logIkDebugf(debugCtx, "回転軸: limited=%s original=%s", limitedAxis.String(), axisOriginal.String())
 
-			resultQuat := SolveIkStep(IkSolveStepInput{
+			stepInput := IkSolveStepInput{
 				LinkRotation:    linkQuat,
 				LimitedAxis:     limitedAxis,
 				LinkAngle:       linkAngle,
@@ -1512,10 +1615,31 @@ func applyIkForBone(
 				FixedAxis:       fixedAxisOrZero(linkBone),
 				ChildAxis:       boneChildDirection(modelData, linkBone),
 				LocalAxes:       localAxes(modelData, linkBone),
-			})
+				Debug:           debugCtx,
+			}
+			stepResult := calcIkStep(stepInput)
+			if stepResult.ValidRotation {
+				originalIkQuat := mmath.NewQuaternionFromAxisAngles(axisOriginal, originalLinkAngle)
+				originalTotalIkQuat := linkQuat.Muled(originalIkQuat)
+				appendIkRotation(debugCtx, linkBone.Name(), originalTotalIkQuat)
+				logIkDebugf(debugCtx, "originalTotalIkQuat=%s deg=%s", originalTotalIkQuat.String(), originalTotalIkQuat.ToMMDDegrees().String())
+				appendIkRotation(debugCtx, linkBone.Name(), stepResult.TotalIkQuat)
+				logIkDebugf(debugCtx, "totalIkQuat=%s deg=%s", stepResult.TotalIkQuat.String(), stepResult.TotalIkQuat.ToMMDDegrees().String())
+				logIkDebugf(debugCtx, "originalIkQuat=%s deg=%s", originalIkQuat.String(), originalIkQuat.ToMMDDegrees().String())
+				logIkDebugf(debugCtx, "ikQuat=%s deg=%s", stepResult.IkQuat.String(), stepResult.IkQuat.ToMMDDegrees().String())
+				stepResult.Result = applyIkLimit(stepResult.TotalIkQuat, stepInput)
+			} else {
+				logIkDebugf(debugCtx, "IK回転なし: linkRotationを維持")
+			}
+			resultQuat := stepResult.Result
 
 			if linkDelta.FrameMorphRotation != nil && !linkDelta.FrameMorphRotation.IsIdent() {
 				resultQuat = resultQuat.Muled(linkDelta.FrameMorphRotation.Inverted())
+			}
+			if boneHasFixedAxis(linkBone) {
+				fixedRot := resultQuat.ToFixedAxisRotation(linkBone.FixedAxis.Normalized())
+				appendIkRotation(debugCtx, linkBone.Name(), fixedRot)
+				logIkDebugf(debugCtx, "固定軸補正後=%s deg=%s", fixedRot.String(), fixedRot.ToMMDDegrees().String())
 			}
 			rot := resultQuat
 			linkDelta.FrameRotation = &rot
@@ -1537,6 +1661,9 @@ func applyIkForBone(
 			}
 			globalRecalc = buildRecalcIndexesByOrderFlags(orderByRank, globalUpdatedFlags, globalRecalc)
 			applyGlobalMatricesWithIndexes(modelData, boneDeltas, globalRecalc)
+			finalRot := linkDelta.FilledTotalRotation()
+			appendIkRotation(debugCtx, linkBone.Name(), finalRot)
+			logIkDebugf(debugCtx, "結果回転=%s deg=%s", finalRot.String(), finalRot.ToMMDDegrees().String())
 			resetFlagsByList(unitUpdatedFlags, unitUpdatedList)
 			unitUpdatedList = unitUpdatedList[:0]
 			resetFlagsByList(globalUpdatedFlags, globalUpdatedList)
@@ -1544,7 +1671,9 @@ func applyIkForBone(
 		}
 
 		threshold := ikTargetDistance(boneDeltas, ikBone.Index(), ikTargetIndex)
+		logIkDebugf(debugCtx, "収束判定: distance=%.8f", threshold)
 		if threshold <= 1e-5 {
+			logIkDebugf(debugCtx, "収束終了")
 			break
 		}
 	}

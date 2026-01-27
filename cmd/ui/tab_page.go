@@ -5,7 +5,6 @@
 package ui
 
 import (
-	"errors"
 	"path/filepath"
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/audio_api"
@@ -56,7 +55,7 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 
 	materialView := widget.NewMaterialTableView(
 		translator,
-		translate(translator, "材質ビュー説明"),
+		i18n.TranslateOrMark(translator, "材質ビュー説明"),
 		func(cw *controller.ControlWindow, indexes []int) {
 			if cw == nil {
 				return
@@ -66,11 +65,11 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 	)
 	vertexView := widget.NewVertexTableView(
 		translator,
-		translate(translator, "頂点ビュー説明"),
+		i18n.TranslateOrMark(translator, "頂点ビュー説明"),
 	)
 
 	allMaterialButton := widget.NewMPushButton()
-	allMaterialButton.SetLabel(translate(translator, "全"))
+	allMaterialButton.SetLabel(i18n.TranslateOrMark(translator, "全"))
 	allMaterialButton.SetMinSize(declarative.Size{Width: 50})
 	allMaterialButton.SetOnClicked(func(cw *controller.ControlWindow) {
 		if materialView == nil {
@@ -80,7 +79,7 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 	})
 
 	invertMaterialButton := widget.NewMPushButton()
-	invertMaterialButton.SetLabel(translate(translator, "反"))
+	invertMaterialButton.SetLabel(i18n.TranslateOrMark(translator, "反"))
 	invertMaterialButton.SetMinSize(declarative.Size{Width: 50})
 	invertMaterialButton.SetOnClicked(func(cw *controller.ControlWindow) {
 		if materialView == nil {
@@ -92,9 +91,9 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 	pmxLoad11Picker := widget.NewPmxPmdXLoadFilePicker(
 		userConfig,
 		translator,
-		"pmx",
-		translate(translator, "モデルファイル1-1"),
-		translate(translator, "モデルファイルを選択してください"),
+		config.UserConfigKeyPmxHistory,
+		i18n.TranslateOrMark(translator, "モデルファイル1-1"),
+		i18n.TranslateOrMark(translator, "モデルファイルを選択してください"),
 		func(cw *controller.ControlWindow, rep io_common.IFileReader, path string) {
 			loadModel(logger, translator, cw, rep, path, materialView, vertexView, 0, 0)
 		},
@@ -103,9 +102,9 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 	vmdLoad11Picker := widget.NewVmdVpdLoadFilePicker(
 		userConfig,
 		translator,
-		"vmd",
-		translate(translator, "モーションファイル1-1"),
-		translate(translator, "モーションファイルを選択してください"),
+		config.UserConfigKeyVmdHistory,
+		i18n.TranslateOrMark(translator, "モーションファイル1-1"),
+		i18n.TranslateOrMark(translator, "モーションファイルを選択してください"),
 		func(cw *controller.ControlWindow, rep io_common.IFileReader, path string) {
 			loadMotion(logger, translator, cw, rep, player, path, 0, 0)
 		},
@@ -114,9 +113,9 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 	pmxLoad21Picker := widget.NewPmxPmdXLoadFilePicker(
 		userConfig,
 		translator,
-		"pmx",
-		translate(translator, "モデルファイル2-1"),
-		translate(translator, "モデルファイルを選択してください"),
+		config.UserConfigKeyPmxHistory,
+		i18n.TranslateOrMark(translator, "モデルファイル2-1"),
+		i18n.TranslateOrMark(translator, "モデルファイルを選択してください"),
 		func(cw *controller.ControlWindow, rep io_common.IFileReader, path string) {
 			loadModel(logger, translator, cw, rep, path, nil, nil, 1, 0)
 		},
@@ -125,9 +124,9 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 	vmdLoad21Picker := widget.NewVmdVpdLoadFilePicker(
 		userConfig,
 		translator,
-		"vmd",
-		translate(translator, "モーションファイル2-1"),
-		translate(translator, "モーションファイルを選択してください"),
+		config.UserConfigKeyVmdHistory,
+		i18n.TranslateOrMark(translator, "モーションファイル2-1"),
+		i18n.TranslateOrMark(translator, "モーションファイルを選択してください"),
 		func(cw *controller.ControlWindow, rep io_common.IFileReader, path string) {
 			loadMotion(logger, translator, cw, rep, player, path, 1, 0)
 		},
@@ -151,7 +150,7 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 	})
 
 	fileTabPage := declarative.TabPage{
-		Title:    translate(translator, "ファイル"),
+		Title:    i18n.TranslateOrMark(translator, "ファイル"),
 		AssignTo: &fileTab,
 		Layout:   declarative.VBox{},
 		Background: declarative.SolidColorBrush{
@@ -161,7 +160,7 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 			declarative.Composite{
 				Layout: declarative.VBox{},
 				Children: []declarative.Widget{
-					declarative.TextLabel{Text: translate(translator, "表示用モデル設定説明")},
+					declarative.TextLabel{Text: i18n.TranslateOrMark(translator, "表示用モデル設定説明")},
 					pmxLoad11Picker.Widgets(),
 					vmdLoad11Picker.Widgets(),
 					declarative.VSeparator{},
@@ -176,7 +175,7 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 	}
 
 	materialTabPage := declarative.TabPage{
-		Title:    translate(translator, "材質ビュー"),
+		Title:    i18n.TranslateOrMark(translator, "材質ビュー"),
 		AssignTo: &materialTab,
 		Layout:   declarative.VBox{},
 		Background: declarative.SolidColorBrush{
@@ -186,7 +185,7 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 			declarative.Composite{
 				Layout: declarative.HBox{},
 				Children: []declarative.Widget{
-					declarative.TextLabel{Text: translate(translator, "材質ビュー")},
+					declarative.TextLabel{Text: i18n.TranslateOrMark(translator, "材質ビュー")},
 					declarative.HSpacer{},
 					allMaterialButton.Widgets(),
 					invertMaterialButton.Widgets(),
@@ -197,7 +196,7 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 	}
 
 	vertexTabPage := declarative.TabPage{
-		Title:    translate(translator, "頂点ビュー"),
+		Title:    i18n.TranslateOrMark(translator, "頂点ビュー"),
 		AssignTo: &vertexTab,
 		Layout:   declarative.VBox{},
 		Background: declarative.SolidColorBrush{
@@ -207,7 +206,7 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 			declarative.Composite{
 				Layout: declarative.HBox{},
 				Children: []declarative.Widget{
-					declarative.TextLabel{Text: translate(translator, "頂点ビュー")},
+					declarative.TextLabel{Text: i18n.TranslateOrMark(translator, "頂点ビュー")},
 					declarative.HSpacer{},
 				},
 			},
@@ -239,7 +238,7 @@ func loadModel(logger logging.ILogger, translator i18n.II18n, cw *controller.Con
 		return
 	}
 	if rep == nil {
-		logLoadFailed(logger, translator, newRepositoryNotConfiguredError(translator, "モデル"))
+		logLoadFailed(logger, translator, newRepositoryNotConfiguredError("モデル"))
 		if materialView != nil {
 			materialView.ResetRows(nil)
 		}
@@ -332,7 +331,7 @@ func loadMotion(logger logging.ILogger, translator i18n.II18n, cw *controller.Co
 		return
 	}
 	if rep == nil {
-		logLoadFailed(logger, translator, newRepositoryNotConfiguredError(translator, "モーション"))
+		logLoadFailed(logger, translator, newRepositoryNotConfiguredError("モーション"))
 		cw.SetMotion(windowIndex, modelIndex, nil)
 		return
 	}
@@ -359,12 +358,19 @@ func logLoadFailed(logger logging.ILogger, translator i18n.II18n, err error) {
 	if logger == nil {
 		logger = logging.DefaultLogger()
 	}
-	logErrorTitle(logger, translate(translator, "読み込み失敗"), err)
+	logErrorTitle(logger, i18n.TranslateOrMark(translator, "読み込み失敗"), err)
 }
 
 // newRepositoryNotConfiguredError は読み込みリポジトリ未設定エラーを生成する。
-func newRepositoryNotConfiguredError(translator i18n.II18n, target string) error {
-	return merr.NewCommonError(repositoryNotConfiguredErrorID, merr.ErrorKindInternal, "読み込みリポジトリがありません: %s", nil, target)
+func newRepositoryNotConfiguredError(target string) error {
+	switch target {
+	case "モデル":
+		return merr.NewCommonError(repositoryNotConfiguredErrorID, merr.ErrorKindInternal, "モデル読み込みリポジトリがありません", nil)
+	case "モーション":
+		return merr.NewCommonError(repositoryNotConfiguredErrorID, merr.ErrorKindInternal, "モーション読み込みリポジトリがありません", nil)
+	default:
+		return merr.NewCommonError(repositoryNotConfiguredErrorID, merr.ErrorKindInternal, "読み込みリポジトリがありません: %s", nil, target)
+	}
 }
 
 // logErrorTitle はタイトル付きエラーを出力する。
@@ -381,33 +387,9 @@ func logErrorTitle(logger logging.ILogger, title string, err error) {
 	errText := ""
 	if err != nil {
 		errText = err.Error()
-		if errID := extractErrorID(err); errID != "" {
+		if errID := merr.ExtractErrorID(err); errID != "" {
 			errText = "エラーID: " + errID + "\n" + errText
 		}
 	}
 	logger.Error("%s: %s", title, errText)
-}
-
-// translate は翻訳済み文言を返す。
-func translate(translator i18n.II18n, key string) string {
-	if translator == nil || !translator.IsReady() {
-		return "●●" + key + "●●"
-	}
-	return translator.T(key)
-}
-
-type iErrorIDProvider interface {
-	ErrorID() string
-}
-
-// extractErrorID はエラーからErrorIDを取得する。
-func extractErrorID(err error) string {
-	if err == nil {
-		return ""
-	}
-	var provider iErrorIDProvider
-	if errors.As(err, &provider) {
-		return provider.ErrorID()
-	}
-	return ""
 }

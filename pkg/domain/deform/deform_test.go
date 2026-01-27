@@ -147,11 +147,11 @@ func TestApplyBoneMatrices(t *testing.T) {
 func TestIkAxisValue(t *testing.T) {
 	minLimit := -0.5
 	maxLimit := 0.5
-	v := getIkAxisValue(-1.0, minLimit, maxLimit, 0, 4)
+	v := getIkAxisValue(-1.0, minLimit, maxLimit, 0, 4, "test", nil)
 	if math.Abs(v) > 1e-6 {
 		t.Fatalf("expected reflected value")
 	}
-	v = getIkAxisValue(-1.0, minLimit, maxLimit, 3, 4)
+	v = getIkAxisValue(-1.0, minLimit, maxLimit, 3, 4, "test", nil)
 	if math.Abs(v-minLimit) > 1e-6 {
 		t.Fatalf("expected clamped value")
 	}

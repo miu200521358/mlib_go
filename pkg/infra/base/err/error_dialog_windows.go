@@ -166,9 +166,6 @@ func showErrorDialog(appConfig *config.AppConfig, err error, title string, heade
 }
 
 type (
-	iErrorIDProvider interface {
-		ErrorID() string
-	}
 	iErrorKindProvider interface {
 		ErrorKind() merr.ErrorKind
 	}
@@ -183,7 +180,7 @@ func buildErrorText(translator sharedi18n.II18n, err error) string {
 	if err == nil {
 		return ""
 	}
-	errID := extractErrorID(err)
+	errID := merr.ExtractErrorID(err)
 	msg := formatErrorMessage(translator, err)
 	if msg == "" {
 		msg = err.Error()
@@ -223,7 +220,7 @@ func formatErrorRemedy(translator sharedi18n.II18n, errID string) string {
 
 // formatErrorSummary はエラー管理表のSummaryを翻訳して返す。
 func formatErrorSummary(translator sharedi18n.II18n, err error) string {
-	rec, err := merr.FindRecord(extractErrorID(err))
+	rec, err := merr.FindRecord(merr.ExtractErrorID(err))
 	if err != nil || rec == nil || rec.Summary == "" {
 		return ""
 	}
@@ -256,18 +253,6 @@ func translateKey(translator sharedi18n.II18n, key string) string {
 		return key
 	}
 	return out
-}
-
-// extractErrorID はエラーIDを取得する。
-func extractErrorID(err error) string {
-	if err == nil {
-		return ""
-	}
-	var provider iErrorIDProvider
-	if errors.As(err, &provider) {
-		return provider.ErrorID()
-	}
-	return ""
 }
 
 // extractErrorKind はエラー種別を取得する。

@@ -30,6 +30,7 @@ type DeformOptions struct {
 	TargetBoneNames []string
 	EnableIK        bool
 	EnablePhysics   bool
+	IkDebugFactory  deform.IIkDebugFactory
 }
 
 // BuildBeforePhysics は物理前の変形差分を構築する。
@@ -50,9 +51,10 @@ func BuildBeforePhysics(
 	deltas := ensureVmdDeltas(modelData, motionHash, base, frame)
 	deformNames := targetBoneNames(opts)
 	includeIk := enableIk(opts)
+	debugFactory := ikDebugFactory(opts)
 
 	deltas.Morphs = deform.ComputeMorphDeltas(modelData, motionData, frame, nil)
-	boneDeltas, _ := deform.ComputeBoneDeltas(modelData, motionData, frame, deformNames, includeIk, false, false)
+	boneDeltas, _ := deform.ComputeBoneDeltas(modelData, motionData, frame, deformNames, includeIk, false, false, debugFactory)
 	deltas.Bones = boneDeltas
 	return deltas
 }
@@ -73,9 +75,10 @@ func RebuildBeforePhysics(
 	deltas.Bones = delta.NewBoneDeltas(modelData.Bones)
 	deformNames := targetBoneNames(opts)
 	includeIk := enableIk(opts)
+	debugFactory := ikDebugFactory(opts)
 
 	deltas.Morphs = deform.ComputeMorphDeltas(modelData, motionData, frame, nil)
-	boneDeltas, _ := deform.ComputeBoneDeltas(modelData, motionData, frame, deformNames, includeIk, false, false)
+	boneDeltas, _ := deform.ComputeBoneDeltas(modelData, motionData, frame, deformNames, includeIk, false, false, debugFactory)
 	deltas.Bones = boneDeltas
 	return deltas
 }
@@ -279,6 +282,14 @@ func enableIk(opts *DeformOptions) bool {
 		return true
 	}
 	return opts.EnableIK
+}
+
+// ikDebugFactory はIKデバッグ出力I/Fを返す。
+func ikDebugFactory(opts *DeformOptions) deform.IIkDebugFactory {
+	if opts == nil {
+		return nil
+	}
+	return opts.IkDebugFactory
 }
 
 // updateRigidBodyShapeMass は剛体形状と質量を差分に応じて更新する。

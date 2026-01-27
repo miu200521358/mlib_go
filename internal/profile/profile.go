@@ -58,7 +58,7 @@ func main() {
 		if i%100 == 0 {
 			log.Printf("frame: %d", i)
 		}
-		boneDeltas, _ := deform.ComputeBoneDeltas(modelData, motionData, motion.Frame(i), nil, *includeIk, false, *removeTwist)
+		boneDeltas, _ := deform.ComputeBoneDeltas(modelData, motionData, motion.Frame(i), nil, *includeIk, false, *removeTwist, nil)
 		deform.ApplyBoneMatrices(modelData, boneDeltas)
 	}
 }

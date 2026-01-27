@@ -25,3 +25,11 @@ type II18n interface {
 	T(key string) string
 	TWithLang(lang LangCode, key string) string
 }
+
+// TranslateOrMark は翻訳済み文言を返し、未準備時はキーを強調して返す。
+func TranslateOrMark(translator II18n, key string) string {
+	if translator == nil || !translator.IsReady() {
+		return "●●" + key + "●●"
+	}
+	return translator.T(key)
+}

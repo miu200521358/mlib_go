@@ -1254,5 +1254,213 @@
     {
         "id": "画像形式/破損を確認してください。パスに絵文字/特殊記号がある場合は英数字のみのパスへ移動してください。",
         "translation": "Please check the image format/corruption. If the path contains emoji or special characters, move it to a path with only alphanumerics."
+    },
+    {
+        "id": "CalculateXに失敗しました",
+        "translation": "Failed to calculate X"
+    },
+    {
+        "id": "MCIエラーが発生しました",
+        "translation": "An MCI error occurred"
+    },
+    {
+        "id": "MCIエラーが発生しました: %s",
+        "translation": "An MCI error occurred: %s"
+    },
+    {
+        "id": "Quaternion.Logに失敗しました",
+        "translation": "Quaternion.Log failed"
+    },
+    {
+        "id": "app_config.jsonの解析に失敗しました: %s",
+        "translation": "Failed to parse app_config.json: %s"
+    },
+    {
+        "id": "app_config.jsonの読込に失敗しました: %s",
+        "translation": "Failed to read app_config.json: %s"
+    },
+    {
+        "id": "file.Closeに失敗しました",
+        "translation": "file.Close failed"
+    },
+    {
+        "id": "file.WriteStringに失敗しました",
+        "translation": "file.WriteString failed"
+    },
+    {
+        "id": "history.jsonの読込に失敗しました: %s",
+        "translation": "Failed to read history.json: %s"
+    },
+    {
+        "id": "i18nメッセージ解析に失敗しました: %s",
+        "translation": "Failed to parse i18n messages: %s"
+    },
+    {
+        "id": "i18nメッセージ読込に失敗しました: %s",
+        "translation": "Failed to read i18n messages: %s"
+    },
+    {
+        "id": "io.ReadAllに失敗しました",
+        "translation": "io.ReadAll failed"
+    },
+    {
+        "id": "os.Createに失敗しました",
+        "translation": "os.Create failed"
+    },
+    {
+        "id": "os.Executableに失敗しました",
+        "translation": "os.Executable failed"
+    },
+    {
+        "id": "os.MkdirAllに失敗しました",
+        "translation": "os.MkdirAll failed"
+    },
+    {
+        "id": "os.Openに失敗しました",
+        "translation": "os.Open failed"
+    },
+    {
+        "id": "os.Statに失敗しました",
+        "translation": "os.Stat failed"
+    },
+    {
+        "id": "os.WriteFileに失敗しました",
+        "translation": "os.WriteFile failed"
+    },
+    {
+        "id": "user_config.jsonの保存用JSON生成に失敗しました",
+        "translation": "Failed to generate JSON for saving user_config.json"
+    },
+    {
+        "id": "user_config.jsonの書き込みに失敗しました: %s",
+        "translation": "Failed to write user_config.json: %s"
+    },
+    {
+        "id": "user_config.jsonの読込に失敗しました: %s",
+        "translation": "Failed to read user_config.json: %s"
+    },
+    {
+        "id": "アプリアイコンのデコードに失敗しました: %s",
+        "translation": "Failed to decode app icon: %s"
+    },
+    {
+        "id": "インデックスが無効です: %d",
+        "translation": "Invalid index: %d"
+    },
+    {
+        "id": "平面との交点計算に失敗しました",
+        "translation": "Failed to compute intersection with plane"
+    },
+    {
+        "id": "曲線フィットに失敗しました",
+        "translation": "Curve fitting failed"
+    },
+    {
+        "id": "画像のデコードに失敗しました: %s",
+        "translation": "Failed to decode image: %s"
+    },
+    {
+        "id": "画像ファイルのクローズに失敗しました: %s",
+        "translation": "Failed to close image file: %s"
+    },
+    {
+        "id": "画像ファイルの読み込みに失敗しました: %s",
+        "translation": "Failed to load image file: %s"
+    },
+    {
+        "id": "画像形式が未対応です: %s",
+        "translation": "Unsupported image format: %s"
+    },
+    {
+        "id": "設定JSONの解析に失敗しました: %s",
+        "translation": "Failed to parse settings JSON: %s"
+    },
+    {
+        "id": "音量設定に失敗しました: code=%d",
+        "translation": "Failed to set volume: code=%d"
+    },
+    {
+        "id": "音声シークに失敗しました: %s",
+        "translation": "Failed to seek audio: %s"
+    },
+    {
+        "id": "音声再生に失敗しました: %s",
+        "translation": "Failed to play audio: %s"
+    },
+    {
+        "id": "音声一時停止に失敗しました: %s",
+        "translation": "Failed to pause audio: %s"
+    },
+    {
+        "id": "ボーンフレームのコピーに失敗しました: %s",
+        "translation": "Failed to copy bone frames: %s"
+    },
+    {
+        "id": "描画用モデルの複製に失敗しました: %v",
+        "translation": "Failed to duplicate render model: %v"
+    },
+    {
+        "id": "Framebuffer is not complete: %v",
+        "translation": "Framebuffer is not complete: %v"
+    },
+    {
+        "id": "#",
+        "translation": "#"
+    },
+    {
+        "id": "No.",
+        "translation": "No."
+    },
+    {
+        "id": "Toon",
+        "translation": "Toon"
+    },
+    {
+        "id": "OK",
+        "translation": "OK"
+    },
+    {
+        "id": "キャンセル",
+        "translation": "Cancel"
+    },
+    {
+        "id": "%s %s",
+        "translation": "%s %s"
+    },
+    {
+        "id": "%s: %s",
+        "translation": "%s: %s"
+    },
+    {
+        "id": "---------------------------------",
+        "translation": "---------------------------------"
+    },
+    {
+        "id": "■■■■■ %s ■■■■■",
+        "translation": "■■■■■ %s ■■■■■"
+    },
+    {
+        "id": "~~~~~~~~~~ %s ~~~~~~~~~~",
+        "translation": "~~~~~~~~~~ %s ~~~~~~~~~~"
+    },
+    {
+        "id": "********** %s **********",
+        "translation": "********** %s **********"
+    },
+    {
+        "id": "!!!!!!!!!! %s !!!!!!!!!!",
+        "translation": "!!!!!!!!!! %s !!!!!!!!!!"
+    },
+    {
+        "id": "エラーメッセージ: %s",
+        "translation": "Error Message: %s"
+    },
+    {
+        "id": "スタックトレース:\n%s",
+        "translation": "Stack Trace:\n%s"
+    },
+    {
+        "id": "設定の保存に失敗しました: %s",
+        "translation": "Failed to save settings: %s"
     }
 ]

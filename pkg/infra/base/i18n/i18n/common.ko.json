@@ -1254,5 +1254,213 @@
     {
         "id": "画像形式/破損を確認してください。パスに絵文字/特殊記号がある場合は英数字のみのパスへ移動してください。",
         "translation": "이미지 형식/손상을 확인해주세요. 경로에 이모지/특수문자가 있으면 영숫자만 있는 경로로 이동해주세요."
+    },
+    {
+        "id": "CalculateXに失敗しました",
+        "translation": "X 계산에 실패했습니다"
+    },
+    {
+        "id": "MCIエラーが発生しました",
+        "translation": "MCI 오류가 발생했습니다"
+    },
+    {
+        "id": "MCIエラーが発生しました: %s",
+        "translation": "MCI 오류가 발생했습니다: %s"
+    },
+    {
+        "id": "Quaternion.Logに失敗しました",
+        "translation": "Quaternion.Log에 실패했습니다"
+    },
+    {
+        "id": "app_config.jsonの解析に失敗しました: %s",
+        "translation": "app_config.json 파싱에 실패했습니다: %s"
+    },
+    {
+        "id": "app_config.jsonの読込に失敗しました: %s",
+        "translation": "app_config.json 읽기에 실패했습니다: %s"
+    },
+    {
+        "id": "file.Closeに失敗しました",
+        "translation": "file.Close에 실패했습니다"
+    },
+    {
+        "id": "file.WriteStringに失敗しました",
+        "translation": "file.WriteString에 실패했습니다"
+    },
+    {
+        "id": "history.jsonの読込に失敗しました: %s",
+        "translation": "history.json 읽기에 실패했습니다: %s"
+    },
+    {
+        "id": "i18nメッセージ解析に失敗しました: %s",
+        "translation": "i18n 메시지 파싱에 실패했습니다: %s"
+    },
+    {
+        "id": "i18nメッセージ読込に失敗しました: %s",
+        "translation": "i18n 메시지 읽기에 실패했습니다: %s"
+    },
+    {
+        "id": "io.ReadAllに失敗しました",
+        "translation": "io.ReadAll에 실패했습니다"
+    },
+    {
+        "id": "os.Createに失敗しました",
+        "translation": "os.Create에 실패했습니다"
+    },
+    {
+        "id": "os.Executableに失敗しました",
+        "translation": "os.Executable에 실패했습니다"
+    },
+    {
+        "id": "os.MkdirAllに失敗しました",
+        "translation": "os.MkdirAll에 실패했습니다"
+    },
+    {
+        "id": "os.Openに失敗しました",
+        "translation": "os.Open에 실패했습니다"
+    },
+    {
+        "id": "os.Statに失敗しました",
+        "translation": "os.Stat에 실패했습니다"
+    },
+    {
+        "id": "os.WriteFileに失敗しました",
+        "translation": "os.WriteFile에 실패했습니다"
+    },
+    {
+        "id": "user_config.jsonの保存用JSON生成に失敗しました",
+        "translation": "user_config.json 저장용 JSON 생성에 실패했습니다"
+    },
+    {
+        "id": "user_config.jsonの書き込みに失敗しました: %s",
+        "translation": "user_config.json 쓰기에 실패했습니다: %s"
+    },
+    {
+        "id": "user_config.jsonの読込に失敗しました: %s",
+        "translation": "user_config.json 읽기에 실패했습니다: %s"
+    },
+    {
+        "id": "アプリアイコンのデコードに失敗しました: %s",
+        "translation": "앱 아이콘 디코딩에 실패했습니다: %s"
+    },
+    {
+        "id": "インデックスが無効です: %d",
+        "translation": "잘못된 인덱스입니다: %d"
+    },
+    {
+        "id": "平面との交点計算に失敗しました",
+        "translation": "평면과의 교차점 계산에 실패했습니다"
+    },
+    {
+        "id": "曲線フィットに失敗しました",
+        "translation": "곡선 피팅에 실패했습니다"
+    },
+    {
+        "id": "画像のデコードに失敗しました: %s",
+        "translation": "이미지 디코딩에 실패했습니다: %s"
+    },
+    {
+        "id": "画像ファイルのクローズに失敗しました: %s",
+        "translation": "이미지 파일 닫기에 실패했습니다: %s"
+    },
+    {
+        "id": "画像ファイルの読み込みに失敗しました: %s",
+        "translation": "이미지 파일 읽기에 실패했습니다: %s"
+    },
+    {
+        "id": "画像形式が未対応です: %s",
+        "translation": "지원하지 않는 이미지 형식입니다: %s"
+    },
+    {
+        "id": "設定JSONの解析に失敗しました: %s",
+        "translation": "설정 JSON 파싱에 실패했습니다: %s"
+    },
+    {
+        "id": "音量設定に失敗しました: code=%d",
+        "translation": "볼륨 설정에 실패했습니다: code=%d"
+    },
+    {
+        "id": "音声シークに失敗しました: %s",
+        "translation": "오디오 시크에 실패했습니다: %s"
+    },
+    {
+        "id": "音声再生に失敗しました: %s",
+        "translation": "오디오 재생에 실패했습니다: %s"
+    },
+    {
+        "id": "音声一時停止に失敗しました: %s",
+        "translation": "오디오 일시정지에 실패했습니다: %s"
+    },
+    {
+        "id": "ボーンフレームのコピーに失敗しました: %s",
+        "translation": "본 프레임 복사에 실패했습니다: %s"
+    },
+    {
+        "id": "描画用モデルの複製に失敗しました: %v",
+        "translation": "렌더링 모델 복제에 실패했습니다: %v"
+    },
+    {
+        "id": "Framebuffer is not complete: %v",
+        "translation": "프레임버퍼가 완전하지 않습니다: %v"
+    },
+    {
+        "id": "#",
+        "translation": "#"
+    },
+    {
+        "id": "No.",
+        "translation": "No."
+    },
+    {
+        "id": "Toon",
+        "translation": "Toon"
+    },
+    {
+        "id": "OK",
+        "translation": "OK"
+    },
+    {
+        "id": "キャンセル",
+        "translation": "취소"
+    },
+    {
+        "id": "%s %s",
+        "translation": "%s %s"
+    },
+    {
+        "id": "%s: %s",
+        "translation": "%s: %s"
+    },
+    {
+        "id": "---------------------------------",
+        "translation": "---------------------------------"
+    },
+    {
+        "id": "■■■■■ %s ■■■■■",
+        "translation": "■■■■■ %s ■■■■■"
+    },
+    {
+        "id": "~~~~~~~~~~ %s ~~~~~~~~~~",
+        "translation": "~~~~~~~~~~ %s ~~~~~~~~~~"
+    },
+    {
+        "id": "********** %s **********",
+        "translation": "********** %s **********"
+    },
+    {
+        "id": "!!!!!!!!!! %s !!!!!!!!!!",
+        "translation": "!!!!!!!!!! %s !!!!!!!!!!"
+    },
+    {
+        "id": "エラーメッセージ: %s",
+        "translation": "오류 메시지: %s"
+    },
+    {
+        "id": "スタックトレース:\n%s",
+        "translation": "스택 트레이스:\n%s"
+    },
+    {
+        "id": "設定の保存に失敗しました: %s",
+        "translation": "설정 저장에 실패했습니다: %s"
     }
 ]

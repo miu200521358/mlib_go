@@ -430,31 +430,42 @@ func (fp *FilePicker) showSaveDialog() {
 
 // handlePathChanged はパス変更時の処理を行う。
 func (fp *FilePicker) handlePathChanged(path string) {
-	cleaned := fp.cleanPath(path)
-	if cleaned == "" || cleaned == fp.prevPath {
-		return
-	}
-	if fp.historyKey != "" && fp.repository != nil && !fp.repository.CanLoad(cleaned) {
-		return
-	}
-
-	fp.prevPath = cleaned
-	if fp.pathEdit != nil {
-		fp.pathEdit.SetText(cleaned)
-	}
-	if fp.nameEdit != nil {
-		fp.nameEdit.SetText(fp.repository.InferName(cleaned))
-	}
-	if fp.onPathChanged != nil {
-		fp.onPathChanged(fp.window, fp.repository, cleaned)
-	}
-	fp.saveHistoryIfNeeded(cleaned)
+	// パス変更時は同一パスを再適用しない。
+	fp.applyPath(path, false)
 }
 
 // handlePathConfirmed はEnter確定時にパス変更処理を実行する。
 func (fp *FilePicker) handlePathConfirmed(path string) {
+	// Enter確定時は同一パスでも再適用する。
+	fp.applyPath(path, true)
+}
+
+// handleDropFiles はドロップされたファイル一覧から読み込み対象を反映する。
+func (fp *FilePicker) handleDropFiles(files []string) {
+	if fp == nil || len(files) == 0 {
+		return
+	}
+	// D&Dは最初に有効判定を通過した1件のみ採用する。
+	for _, file := range files {
+		cleaned := fp.cleanPath(file)
+		if cleaned == "" {
+			continue
+		}
+		if fp.repository != nil && !fp.repository.CanLoad(cleaned) {
+			continue
+		}
+		fp.handlePathConfirmed(cleaned)
+		return
+	}
+}
+
+// applyPath はパス更新処理を共通化する。
+func (fp *FilePicker) applyPath(path string, allowSame bool) {
 	cleaned := fp.cleanPath(path)
 	if cleaned == "" {
+		return
+	}
+	if !allowSame && cleaned == fp.prevPath {
 		return
 	}
 	if fp.historyKey != "" && fp.repository != nil && !fp.repository.CanLoad(cleaned) {
@@ -472,24 +483,6 @@ func (fp *FilePicker) handlePathConfirmed(path string) {
 		fp.onPathChanged(fp.window, fp.repository, cleaned)
 	}
 	fp.saveHistoryIfNeeded(cleaned)
-}
-
-// handleDropFiles はドロップされたファイル一覧から読み込み対象を反映する。
-func (fp *FilePicker) handleDropFiles(files []string) {
-	if fp == nil || len(files) == 0 {
-		return
-	}
-	for _, file := range files {
-		cleaned := fp.cleanPath(file)
-		if cleaned == "" {
-			continue
-		}
-		if fp.repository != nil && !fp.repository.CanLoad(cleaned) {
-			continue
-		}
-		fp.handlePathConfirmed(cleaned)
-		return
-	}
 }
 
 // saveHistoryIfNeeded は履歴保存が可能な場合に保存する。
@@ -602,14 +595,14 @@ func (fp *FilePicker) openHistoryDialog() {
 				Children: []declarative.Widget{
 					declarative.PushButton{
 						AssignTo: &push,
-						Text:     "OK",
+						Text:     fp.t("OK"),
 						Enabled:  true,
 						OnClicked: func() {
 							dlg.Accept()
 						},
 					},
 					declarative.PushButton{
-						Text: "Cancel",
+						Text: fp.t("キャンセル"),
 						OnClicked: func() {
 							dlg.Cancel()
 						},

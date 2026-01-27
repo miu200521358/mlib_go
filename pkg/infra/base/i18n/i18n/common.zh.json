@@ -1254,5 +1254,213 @@
     {
         "id": "画像形式/破損を確認してください。パスに絵文字/特殊記号がある場合は英数字のみのパスへ移動してください。",
         "translation": "请检查图像格式/是否损坏。如果路径包含表情符号或特殊字符，请移动到仅包含字母数字的路径。"
+    },
+    {
+        "id": "CalculateXに失敗しました",
+        "translation": "计算X失败"
+    },
+    {
+        "id": "MCIエラーが発生しました",
+        "translation": "发生了MCI错误"
+    },
+    {
+        "id": "MCIエラーが発生しました: %s",
+        "translation": "发生了MCI错误: %s"
+    },
+    {
+        "id": "Quaternion.Logに失敗しました",
+        "translation": "Quaternion.Log失败"
+    },
+    {
+        "id": "app_config.jsonの解析に失敗しました: %s",
+        "translation": "解析app_config.json失败: %s"
+    },
+    {
+        "id": "app_config.jsonの読込に失敗しました: %s",
+        "translation": "读取app_config.json失败: %s"
+    },
+    {
+        "id": "file.Closeに失敗しました",
+        "translation": "file.Close失败"
+    },
+    {
+        "id": "file.WriteStringに失敗しました",
+        "translation": "file.WriteString失败"
+    },
+    {
+        "id": "history.jsonの読込に失敗しました: %s",
+        "translation": "读取history.json失败: %s"
+    },
+    {
+        "id": "i18nメッセージ解析に失敗しました: %s",
+        "translation": "解析i18n消息失败: %s"
+    },
+    {
+        "id": "i18nメッセージ読込に失敗しました: %s",
+        "translation": "读取i18n消息失败: %s"
+    },
+    {
+        "id": "io.ReadAllに失敗しました",
+        "translation": "io.ReadAll失败"
+    },
+    {
+        "id": "os.Createに失敗しました",
+        "translation": "os.Create失败"
+    },
+    {
+        "id": "os.Executableに失敗しました",
+        "translation": "os.Executable失败"
+    },
+    {
+        "id": "os.MkdirAllに失敗しました",
+        "translation": "os.MkdirAll失败"
+    },
+    {
+        "id": "os.Openに失敗しました",
+        "translation": "os.Open失败"
+    },
+    {
+        "id": "os.Statに失敗しました",
+        "translation": "os.Stat失败"
+    },
+    {
+        "id": "os.WriteFileに失敗しました",
+        "translation": "os.WriteFile失败"
+    },
+    {
+        "id": "user_config.jsonの保存用JSON生成に失敗しました",
+        "translation": "生成用于保存user_config.json的JSON失败"
+    },
+    {
+        "id": "user_config.jsonの書き込みに失敗しました: %s",
+        "translation": "写入user_config.json失败: %s"
+    },
+    {
+        "id": "user_config.jsonの読込に失敗しました: %s",
+        "translation": "读取user_config.json失败: %s"
+    },
+    {
+        "id": "アプリアイコンのデコードに失敗しました: %s",
+        "translation": "解码应用图标失败: %s"
+    },
+    {
+        "id": "インデックスが無効です: %d",
+        "translation": "索引无效: %d"
+    },
+    {
+        "id": "平面との交点計算に失敗しました",
+        "translation": "计算与平面的交点失败"
+    },
+    {
+        "id": "曲線フィットに失敗しました",
+        "translation": "曲线拟合失败"
+    },
+    {
+        "id": "画像のデコードに失敗しました: %s",
+        "translation": "解码图像失败: %s"
+    },
+    {
+        "id": "画像ファイルのクローズに失敗しました: %s",
+        "translation": "关闭图像文件失败: %s"
+    },
+    {
+        "id": "画像ファイルの読み込みに失敗しました: %s",
+        "translation": "读取图像文件失败: %s"
+    },
+    {
+        "id": "画像形式が未対応です: %s",
+        "translation": "不支持的图像格式: %s"
+    },
+    {
+        "id": "設定JSONの解析に失敗しました: %s",
+        "translation": "解析设置JSON失败: %s"
+    },
+    {
+        "id": "音量設定に失敗しました: code=%d",
+        "translation": "设置音量失败: code=%d"
+    },
+    {
+        "id": "音声シークに失敗しました: %s",
+        "translation": "音频定位失败: %s"
+    },
+    {
+        "id": "音声再生に失敗しました: %s",
+        "translation": "音频播放失败: %s"
+    },
+    {
+        "id": "音声一時停止に失敗しました: %s",
+        "translation": "音频暂停失败: %s"
+    },
+    {
+        "id": "ボーンフレームのコピーに失敗しました: %s",
+        "translation": "复制骨骼帧失败: %s"
+    },
+    {
+        "id": "描画用モデルの複製に失敗しました: %v",
+        "translation": "复制渲染模型失败: %v"
+    },
+    {
+        "id": "Framebuffer is not complete: %v",
+        "translation": "帧缓冲不完整: %v"
+    },
+    {
+        "id": "#",
+        "translation": "#"
+    },
+    {
+        "id": "No.",
+        "translation": "No."
+    },
+    {
+        "id": "Toon",
+        "translation": "Toon"
+    },
+    {
+        "id": "OK",
+        "translation": "OK"
+    },
+    {
+        "id": "キャンセル",
+        "translation": "取消"
+    },
+    {
+        "id": "%s %s",
+        "translation": "%s %s"
+    },
+    {
+        "id": "%s: %s",
+        "translation": "%s: %s"
+    },
+    {
+        "id": "---------------------------------",
+        "translation": "---------------------------------"
+    },
+    {
+        "id": "■■■■■ %s ■■■■■",
+        "translation": "■■■■■ %s ■■■■■"
+    },
+    {
+        "id": "~~~~~~~~~~ %s ~~~~~~~~~~",
+        "translation": "~~~~~~~~~~ %s ~~~~~~~~~~"
+    },
+    {
+        "id": "********** %s **********",
+        "translation": "********** %s **********"
+    },
+    {
+        "id": "!!!!!!!!!! %s !!!!!!!!!!",
+        "translation": "!!!!!!!!!! %s !!!!!!!!!!"
+    },
+    {
+        "id": "エラーメッセージ: %s",
+        "translation": "错误消息: %s"
+    },
+    {
+        "id": "スタックトレース:\n%s",
+        "translation": "堆栈跟踪:\n%s"
+    },
+    {
+        "id": "設定の保存に失敗しました: %s",
+        "translation": "保存设置失败: %s"
     }
 ]

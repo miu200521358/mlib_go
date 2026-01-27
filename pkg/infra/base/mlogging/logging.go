@@ -165,7 +165,7 @@ func (l *Logger) Line() {
 	if !l.shouldOutput(logging.LOG_LEVEL_INFO) {
 		return
 	}
-	log.Printf("---------------------------------")
+	log.Print(l.translateKey("---------------------------------"))
 }
 
 // InfoLine は区切り線付き情報ログを出力する。
@@ -189,7 +189,7 @@ func (l *Logger) InfoTitle(title, msg string, params ...any) {
 	if !l.shouldOutput(logging.LOG_LEVEL_INFO) {
 		return
 	}
-	log.Printf("■■■■■ %s ■■■■■", title)
+	log.Printf(l.translateKey("■■■■■ %s ■■■■■"), title)
 	log.Printf(l.formatMessage(logging.LOG_LEVEL_INFO, msg), params...)
 }
 
@@ -204,7 +204,7 @@ func (l *Logger) WarnTitle(title, msg string, params ...any) {
 	if !l.shouldOutput(logging.LOG_LEVEL_WARN) {
 		return
 	}
-	log.Printf("~~~~~~~~~~ %s ~~~~~~~~~~", title)
+	log.Printf(l.translateKey("~~~~~~~~~~ %s ~~~~~~~~~~"), title)
 	log.Printf(l.formatMessage(logging.LOG_LEVEL_WARN, msg), params...)
 }
 
@@ -213,20 +213,20 @@ func (l *Logger) ErrorTitle(title string, err error, msg string, params ...any) 
 	if !l.shouldOutput(logging.LOG_LEVEL_ERROR) {
 		return
 	}
-	log.Printf("********** %s **********", title)
+	log.Printf(l.translateKey("********** %s **********"), title)
 	if err != nil {
 		// ErrorID/対処法/スタックの制御はエラー種別で分岐する。
-		errID := extractErrorID(err)
+		errID := merr.ExtractErrorID(err)
 		if errID != "" {
 			log.Printf("%s: %s", l.translateKey("エラーID"), errID)
 		}
-		log.Printf("Error Message: %s", l.formatErrorMessage(err))
+		log.Printf(l.translateKey("エラーメッセージ: %s"), l.formatErrorMessage(err))
 		if extractErrorKind(err) == merr.ErrorKindValidate {
 			if remedy := l.formatErrorRemedy(errID); remedy != "" {
 				log.Printf("%s: %s", l.translateKey("対処方法"), remedy)
 			}
 		} else {
-			log.Printf("Stack Trace:\n%s", dumpAllGoroutines())
+			log.Printf(l.translateKey("スタックトレース:\n%s"), dumpAllGoroutines())
 		}
 	}
 	if msg != "" {
@@ -239,20 +239,20 @@ func (l *Logger) FatalTitle(title string, err error, msg string, params ...any) 
 	if !l.shouldOutput(logging.LOG_LEVEL_FATAL) {
 		return
 	}
-	log.Printf("!!!!!!!!!! %s !!!!!!!!!!", title)
+	log.Printf(l.translateKey("!!!!!!!!!! %s !!!!!!!!!!"), title)
 	if err != nil {
 		// ErrorID/対処法/スタックの制御はエラー種別で分岐する。
-		errID := extractErrorID(err)
+		errID := merr.ExtractErrorID(err)
 		if errID != "" {
 			log.Printf("%s: %s", l.translateKey("エラーID"), errID)
 		}
-		log.Printf("Error Message: %s", l.formatErrorMessage(err))
+		log.Printf(l.translateKey("エラーメッセージ: %s"), l.formatErrorMessage(err))
 		if extractErrorKind(err) == merr.ErrorKindValidate {
 			if remedy := l.formatErrorRemedy(errID); remedy != "" {
 				log.Printf("%s: %s", l.translateKey("対処方法"), remedy)
 			}
 		} else {
-			log.Printf("Stack Trace:\n%s", dumpAllGoroutines())
+			log.Printf(l.translateKey("スタックトレース:\n%s"), dumpAllGoroutines())
 		}
 	}
 	if msg != "" {
@@ -345,7 +345,7 @@ func (l *Logger) formatErrorRemedy(errID string) string {
 
 // formatErrorSummary はエラー管理表のSummaryを翻訳して返す。
 func (l *Logger) formatErrorSummary(err error) string {
-	rec, err := merr.FindRecord(extractErrorID(err))
+	rec, err := merr.FindRecord(merr.ExtractErrorID(err))
 	if err != nil || rec == nil || rec.Summary == "" {
 		return ""
 	}
@@ -384,9 +384,6 @@ func (l *Logger) translateKey(key string) string {
 }
 
 type (
-	iErrorIDProvider interface {
-		ErrorID() string
-	}
 	iErrorKindProvider interface {
 		ErrorKind() merr.ErrorKind
 	}
@@ -395,18 +392,6 @@ type (
 		MessageParams() []any
 	}
 )
-
-// extractErrorID はエラーIDを取得する。
-func extractErrorID(err error) string {
-	if err == nil {
-		return ""
-	}
-	var provider iErrorIDProvider
-	if errors.As(err, &provider) {
-		return provider.ErrorID()
-	}
-	return ""
-}
 
 // extractErrorKind はエラー種別を取得する。
 func extractErrorKind(err error) merr.ErrorKind {

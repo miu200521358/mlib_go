@@ -4,6 +4,7 @@ package merr
 import (
 	"embed"
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -40,6 +41,20 @@ type ErrorRecord struct {
 	Summary     string
 	Remedy      string
 	SourcePaths []string
+}
+
+// ExtractErrorID はエラーからErrorIDを取得する。
+func ExtractErrorID(err error) string {
+	if err == nil {
+		return ""
+	}
+	var provider interface {
+		ErrorID() string
+	}
+	if errors.As(err, &provider) {
+		return provider.ErrorID()
+	}
+	return ""
 }
 
 // CommonError は ErrorID 付きの共通エラー。

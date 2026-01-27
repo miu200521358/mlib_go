@@ -149,6 +149,10 @@ const (
 	UserConfigKeyFrameDrop = "frame_drop"
 	// UserConfigKeyAudio は音楽ファイル履歴キー。
 	UserConfigKeyAudio = "audio"
+	// UserConfigKeyPmxHistory はモデルファイル履歴キー。
+	UserConfigKeyPmxHistory = "pmx"
+	// UserConfigKeyVmdHistory はモーションファイル履歴キー。
+	UserConfigKeyVmdHistory = "vmd"
 	// UserConfigKeyVolume は音量キー。
 	UserConfigKeyVolume = "volume"
 )

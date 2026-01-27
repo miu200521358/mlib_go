@@ -17,10 +17,12 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/miu200521358/win"
 
+	"github.com/miu200521358/mlib_go/pkg/domain/deform"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
+	"github.com/miu200521358/mlib_go/pkg/infra/ikdebug"
 	"github.com/miu200521358/mlib_go/pkg/shared/base"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
@@ -714,6 +716,7 @@ func (vl *ViewerManager) deformWindow(
 	}
 
 	logger := logging.DefaultLogger()
+	ikDebugFactory := vl.ikDebugFactory()
 	physicsEnabled := vl.shared.HasFlag(state.STATE_FLAG_PHYSICS_ENABLED)
 	if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) && vw.physics == nil {
 		logger.Verbose(logging.VERBOSE_INDEX_PHYSICS, "物理未初期化: window=%d frame=%v", vw.windowIndex, frame)
@@ -732,7 +735,7 @@ func (vl *ViewerManager) deformWindow(
 			motionData,
 			vw.vmdDeltas[i],
 			frame,
-			&mdeform.DeformOptions{EnableIK: true},
+			&mdeform.DeformOptions{EnableIK: true, IkDebugFactory: ikDebugFactory},
 		)
 	}
 
@@ -799,6 +802,15 @@ func (vl *ViewerManager) deformWindow(
 	}
 }
 
+// ikDebugFactory はIKデバッグ用ファクトリを返す。
+func (vl *ViewerManager) ikDebugFactory() deform.IIkDebugFactory {
+	logger := logging.DefaultLogger()
+	if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_IK) {
+		return ikdebug.NewFactory()
+	}
+	return nil
+}
+
 // updateWind は風パラメータを物理エンジンへ適用する。
 func (vl *ViewerManager) updateWind(vw *ViewerWindow, frame motion.Frame) {
 	if vw == nil || vw.physics == nil {
@@ -845,6 +857,7 @@ func (vl *ViewerManager) updatePhysicsSelectively(
 		return
 	}
 	physicsEnabled := vl.shared.HasFlag(state.STATE_FLAG_PHYSICS_ENABLED)
+	ikDebugFactory := vl.ikDebugFactory()
 
 	for i, renderer := range vw.modelRenderers {
 		if renderer == nil || renderer.Model == nil {
@@ -856,7 +869,7 @@ func (vl *ViewerManager) updatePhysicsSelectively(
 			motionData,
 			vw.vmdDeltas[i],
 			frame,
-			&mdeform.DeformOptions{EnableIK: true},
+			&mdeform.DeformOptions{EnableIK: true, IkDebugFactory: ikDebugFactory},
 		)
 	}
 
@@ -972,6 +985,7 @@ func (vl *ViewerManager) deformForReset(
 	if vw == nil {
 		return 0, nil
 	}
+	ikDebugFactory := vl.ikDebugFactory()
 	vw.MakeContextCurrent()
 	vw.loadModelRenderers()
 	vw.loadMotions()
@@ -993,7 +1007,7 @@ func (vl *ViewerManager) deformForReset(
 			motionData,
 			vw.vmdDeltas[i],
 			frame,
-			&mdeform.DeformOptions{EnableIK: true},
+			&mdeform.DeformOptions{EnableIK: true, IkDebugFactory: ikDebugFactory},
 		)
 	}
 
@@ -1006,6 +1020,7 @@ func (vl *ViewerManager) deformForResetStartFit(
 	frame motion.Frame,
 	resetMotions []*motion.VmdMotion,
 ) (motion.Frame, []*motion.VmdMotion) {
+	ikDebugFactory := vl.ikDebugFactory()
 	// 変位・回転の最大量を集計してリセット移行フレーム数を見積もる。
 	deformMaxTranslations := make([][]float64, len(vw.modelRenderers))
 	deformMaxRotations := make([][]float64, len(vw.modelRenderers))
@@ -1092,7 +1107,7 @@ func (vl *ViewerManager) deformForResetStartFit(
 			resetMotions[i],
 			nil,
 			0,
-			&mdeform.DeformOptions{EnableIK: true},
+			&mdeform.DeformOptions{EnableIK: true, IkDebugFactory: ikDebugFactory},
 		)
 	}
 
