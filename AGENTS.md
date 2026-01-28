@@ -15,3 +15,4 @@
 - Go ファイルを新規作成したら必ず `mlib_go_t4/internal/scripts/add_instruction_header.sh` を実行して `// 指示: miu200521358` を付与し、非ASCII化する
 - 推測で断言せず、Unknown は残し、確認に必要なファイル/シンボル/手順を列挙すること。
 - 実装完了報告前に、コンパイルエラーがない状態（起動できる状態）を必ず確認・達成する
+- 実装完了報告前に、文言ヌケモレチェック（`mlib_skills\skills\00_project\060_mlib_i18n_key_checks\scripts\check_i18n_keys.py`）を必ず実施・ヌケモレを防ぐ
