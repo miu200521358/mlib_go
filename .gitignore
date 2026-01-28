@@ -41,3 +41,4 @@ bin/
 .gomodcache/
 cmd/__debug_bin.*
 cmd/logs/
+.gopath/

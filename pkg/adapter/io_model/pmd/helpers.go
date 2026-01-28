@@ -61,13 +61,18 @@ func parseTextureSpec(raw string) textureSpec {
 		}
 	}
 	if strings.Contains(name, "/") {
-		parts := strings.SplitN(name, "/", 2)
-		base := strings.TrimSpace(parts[0])
-		sphere := strings.TrimSpace(parts[1])
-		return textureSpec{
-			textureName: base,
-			sphereName:  sphere,
-			sphereMode:  model.SPHERE_MODE_MULTIPLICATION,
+		// 5.11の「/」区切りは末尾がスフィア拡張子のときのみ分割する。
+		last := strings.LastIndex(name, "/")
+		if last >= 0 && last < len(name)-1 {
+			base := strings.TrimSpace(name[:last])
+			sphere := strings.TrimSpace(name[last+1:])
+			if isSphereTexture(sphere) {
+				return textureSpec{
+					textureName: base,
+					sphereName:  sphere,
+					sphereMode:  model.SPHERE_MODE_MULTIPLICATION,
+				}
+			}
 		}
 	}
 	if isSphereTexture(name) {

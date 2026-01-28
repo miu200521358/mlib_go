@@ -34,6 +34,11 @@ type pmdReader struct {
 	boneDisplayList         []pmdBoneDisplay
 }
 
+const (
+	// pmdIkUnitRotationScale はPMDのIK単位角をPMX互換に補正する倍率。
+	pmdIkUnitRotationScale = 4.0
+)
+
 // newPmdReader はpmdReaderを生成する。
 func newPmdReader(r io.Reader) *pmdReader {
 	return &pmdReader{
@@ -347,9 +352,10 @@ func (p *pmdReader) readBones(modelData *model.PmxModel) error {
 		if parentRaw == 0xFFFF {
 			parentIndex = -1
 		}
+		// PMDの接続番号0はボーンIndex=0として扱う（PmxEditor互換）。
 		tailIndex := int(tailRaw)
-		if tailRaw == 0xFFFF || tailRaw == 0 {
-			// PMDの接続番号0は表示先なしとして扱う（仕様不明のため決め打ち対応）。
+		if tailRaw == 0xFFFF {
+			// PMDの接続番号0xFFFFは表示先なしとして扱う。
 			tailIndex = -1
 		}
 		bone := &model.Bone{
@@ -403,6 +409,7 @@ func (p *pmdReader) readIk(modelData *model.PmxModel) error {
 		if err != nil {
 			return wrapParseFailed("PMD IK制限角の読み込みに失敗しました", err)
 		}
+		unitRotation := controlWeight * pmdIkUnitRotationScale
 		links := make([]model.IkLink, 0, chainLen)
 		for j := 0; j < int(chainLen); j++ {
 			linkRaw, err := p.reader.ReadUint16()
@@ -418,7 +425,7 @@ func (p *pmdReader) readIk(modelData *model.PmxModel) error {
 		ik := &model.Ik{
 			BoneIndex:    int(targetRaw),
 			LoopCount:    int(iterations),
-			UnitRotation: mmath.Vec3{Vec: r3.Vec{X: controlWeight, Y: controlWeight, Z: controlWeight}},
+			UnitRotation: mmath.Vec3{Vec: r3.Vec{X: unitRotation, Y: unitRotation, Z: unitRotation}},
 			Links:        links,
 		}
 		bone, err := modelData.Bones.Get(ikBoneIndex)
@@ -429,11 +436,12 @@ func (p *pmdReader) readIk(modelData *model.PmxModel) error {
 		if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_IK) {
 			logger.Verbose(
 				logging.VERBOSE_INDEX_IK,
-				"PMD IK単位角(読み込み直後): bone=%s index=%d raw=%.6f deg(rad換算)=%.6f",
+				"PMD IK単位角(読み込み直後): bone=%s index=%d raw=%.6f applied=%.6f deg(rad換算)=%.6f",
 				bone.Name(),
 				ikBoneIndex,
 				controlWeight,
-				mmath.RadToDeg(controlWeight),
+				unitRotation,
+				mmath.RadToDeg(unitRotation),
 			)
 		}
 		ikName := bone.Name()
@@ -466,6 +474,8 @@ func (p *pmdReader) readIk(modelData *model.PmxModel) error {
 		bone.BoneFlag |= model.BONE_FLAG_IS_IK
 	}
 	applyPmdBoneLayerOverrides(modelData)
+	applyPmdTwistBoneOverrides(modelData)
+	applyPmdBoneFlagOverrides(modelData)
 	return nil
 }
 
@@ -474,7 +484,7 @@ func applyPmdBoneLayerOverrides(modelData *model.PmxModel) {
 	if modelData == nil || modelData.Bones == nil {
 		return
 	}
-	// PMDには変形階層がないため、足IK/つま先IKとその子を+1補正する（決め打ち）。
+	// PMDには変形階層がないため、IKボーンとその子を+1補正する（決め打ち）。
 	children := make(map[int][]int)
 	for _, bone := range modelData.Bones.Values() {
 		if bone == nil || bone.ParentIndex < 0 {
@@ -487,13 +497,7 @@ func applyPmdBoneLayerOverrides(modelData *model.PmxModel) {
 		if bone == nil || bone.Ik == nil {
 			continue
 		}
-		if !isLegOrToeIkBoneName(bone.Name()) {
-			continue
-		}
 		applyPmdLayerIncrement(modelData, updated, bone.Index(), bone.Ik.BoneIndex)
-		for _, link := range bone.Ik.Links {
-			applyPmdLayerIncrement(modelData, updated, link.BoneIndex, bone.Ik.BoneIndex)
-		}
 		for _, childIndex := range children[bone.Index()] {
 			applyPmdLayerIncrement(modelData, updated, childIndex, bone.Ik.BoneIndex)
 		}
@@ -537,23 +541,61 @@ func applyPmdLayerIncrement(modelData *model.PmxModel, updated map[int]struct{},
 	updated[boneIndex] = struct{}{}
 }
 
-// isLegOrToeIkBoneName は足IK/つま先IKか判定する。
-func isLegOrToeIkBoneName(name string) bool {
+// applyPmdTwistBoneOverrides はPMDの捻りボーンに固定軸と表示先補正を適用する。
+func applyPmdTwistBoneOverrides(modelData *model.PmxModel) {
+	if modelData == nil || modelData.Bones == nil {
+		return
+	}
+	for _, bone := range modelData.Bones.Values() {
+		if bone == nil || !isPmdTwistBoneName(bone.Name()) {
+			continue
+		}
+		// 捻りボーンの固定軸は、ボーン位置から表示先ボーンへの方向を使う。
+		if bone.TailIndex >= 0 {
+			if tail, err := modelData.Bones.Get(bone.TailIndex); err == nil && tail != nil {
+				axis := tail.Position.Subed(bone.Position)
+				if axis.Length() > 0 {
+					bone.FixedAxis = axis.Normalized()
+					bone.BoneFlag |= model.BONE_FLAG_HAS_FIXED_AXIS
+				}
+			}
+		}
+		// 捻りボーンの表示先はオフセット扱いにする。
+		bone.TailIndex = -1
+		bone.BoneFlag &^= model.BONE_FLAG_TAIL_IS_BONE
+	}
+}
+
+// applyPmdBoneFlagOverrides はPMDのボーンフラグを決め打ちで補正する。
+func applyPmdBoneFlagOverrides(modelData *model.PmxModel) {
+	if modelData == nil || modelData.Bones == nil {
+		return
+	}
+	for _, bone := range modelData.Bones.Values() {
+		if bone == nil {
+			continue
+		}
+		// PmxEditor互換のため、全ボーンを操作可能にする。
+		bone.BoneFlag |= model.BONE_FLAG_CAN_MANIPULATE
+	}
+}
+
+// isPmdTwistBoneName はPMDの捻りボーン名か判定する。
+func isPmdTwistBoneName(name string) bool {
 	if name == "" {
 		return false
 	}
-	leftLegIkAlt := strings.ReplaceAll(model.LEG_IK.Left(), "ＩＫ", "IK")
-	rightLegIkAlt := strings.ReplaceAll(model.LEG_IK.Right(), "ＩＫ", "IK")
-	leftToeIkAlt := strings.ReplaceAll(model.TOE_IK.Left(), "ＩＫ", "IK")
-	rightToeIkAlt := strings.ReplaceAll(model.TOE_IK.Right(), "ＩＫ", "IK")
-	return name == model.LEG_IK.Left() ||
-		name == model.LEG_IK.Right() ||
-		name == leftLegIkAlt ||
-		name == rightLegIkAlt ||
-		name == model.TOE_IK.Left() ||
-		name == model.TOE_IK.Right() ||
-		name == leftToeIkAlt ||
-		name == rightToeIkAlt
+	return matchesStandardBoneName(
+		name,
+		model.ARM_TWIST,
+		model.ARM_TWIST1,
+		model.ARM_TWIST2,
+		model.ARM_TWIST3,
+		model.WRIST_TWIST,
+		model.WRIST_TWIST1,
+		model.WRIST_TWIST2,
+		model.WRIST_TWIST3,
+	)
 }
 
 // isAnkleBoneName は足首ボーン名か判定する。
@@ -561,10 +603,26 @@ func isAnkleBoneName(name string) bool {
 	if name == "" {
 		return false
 	}
-	if name == model.ANKLE.Left() || name == model.ANKLE.Right() {
-		return true
+	return matchesStandardBoneName(
+		name,
+		model.ANKLE,
+		model.ANKLE_GROUND,
+		model.ANKLE_D,
+		model.ANKLE_D_GROUND,
+	)
+}
+
+// matchesStandardBoneName は標準ボーン名一覧に一致するか判定する。
+func matchesStandardBoneName(name string, names ...model.StandardBoneName) bool {
+	if name == "" {
+		return false
 	}
-	return strings.Contains(name, "足首")
+	for _, standardName := range names {
+		if name == standardName.String() || name == standardName.Left() || name == standardName.Right() {
+			return true
+		}
+	}
+	return false
 }
 
 // readSkins は表情データを読み込む。

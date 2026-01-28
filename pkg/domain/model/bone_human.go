@@ -126,6 +126,8 @@ func (bones *BoneCollection) GetTrunkRoot() (*Bone, error) {
 func (bones *BoneCollection) CreateTrunkRoot() (*Bone, error) {
 	bone := NewBoneByName(TRUNK_ROOT.String())
 	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
+	// 体幹中心はシステム補完ボーンとして扱う。
+	bone.IsSystem = true
 
 	// 位置
 	upper, _ := bones.GetUpper()
@@ -196,6 +198,8 @@ func (bones *BoneCollection) GetLegCenter() (*Bone, error) {
 func (bones *BoneCollection) CreateLegCenter() (*Bone, error) {
 	bone := NewBoneByName(LEG_CENTER.String())
 	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
+	// 足中心はシステム補完ボーンとして扱う。
+	bone.IsSystem = true
 
 	// 位置
 	legLeft, _ := bones.GetLeg(BONE_DIRECTION_LEFT)
@@ -304,6 +308,8 @@ func (bones *BoneCollection) GetNeckRoot() (*Bone, error) {
 func (bones *BoneCollection) CreateNeckRoot() (*Bone, error) {
 	bone := NewBoneByName(NECK_ROOT.String())
 	bone.BoneFlag = BONE_FLAG_IS_VISIBLE | BONE_FLAG_CAN_MANIPULATE | BONE_FLAG_CAN_ROTATE | BONE_FLAG_CAN_TRANSLATE
+	// 首根元はシステム補完ボーンとして扱う。
+	bone.IsSystem = true
 
 	// 位置
 	armLeft, _ := bones.GetArm(BONE_DIRECTION_LEFT)
