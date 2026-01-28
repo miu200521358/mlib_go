@@ -8,6 +8,7 @@ import (
 )
 
 // ModelLoadResult はモデル読み込み結果を表す。
+// テクスチャ検証の実行順序はツール固有のため、Validation は呼び出し側で設定する。
 type ModelLoadResult struct {
 	Model      *model.PmxModel
 	Validation *TextureValidationResult
@@ -17,20 +18,6 @@ type ModelLoadResult struct {
 type MotionLoadResult struct {
 	Motion   *motion.VmdMotion
 	MaxFrame motion.Frame
-}
-
-// LoadModelWithValidation はモデルを読み込み、必要に応じてテクスチャ検証を行う。
-func LoadModelWithValidation(rep portio.IFileReader, path string, validator portio.ITextureValidator) (*ModelLoadResult, error) {
-	modelData, err := LoadModel(rep, path)
-	if err != nil {
-		return nil, err
-	}
-	result := &ModelLoadResult{Model: modelData}
-	if validator == nil || modelData == nil {
-		return result, nil
-	}
-	result.Validation = ValidateModelTextures(modelData, validator)
-	return result, nil
 }
 
 // LoadMotionWithMeta はモーションを読み込み、最大フレームを返す。

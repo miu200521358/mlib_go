@@ -7,18 +7,15 @@ package ui
 import (
 	"github.com/miu200521358/mlib_go/pkg/adapter/audio_api"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
-	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
 	"github.com/miu200521358/mlib_go/pkg/infra/controller"
 	"github.com/miu200521358/mlib_go/pkg/infra/controller/widget"
-	"github.com/miu200521358/mlib_go/pkg/infra/file/mfile"
 	"github.com/miu200521358/mlib_go/pkg/shared/base"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 	"github.com/miu200521358/mlib_go/pkg/usecase"
-	portio "github.com/miu200521358/mlib_go/pkg/usecase/port/io"
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
 )
@@ -230,11 +227,7 @@ func loadModel(logger logging.ILogger, translator i18n.II18n, cw *controller.Con
 		cw.SetModel(windowIndex, modelIndex, nil)
 		return
 	}
-	var validator portio.ITextureValidator
-	if materialView != nil {
-		validator = mfile.NewTextureValidator()
-	}
-	result, err := usecase.LoadModelWithValidation(rep, path, validator)
+	modelData, err := usecase.LoadModel(rep, path)
 	if err != nil {
 		logLoadFailed(logger, translator, err)
 		if materialView != nil {
@@ -245,12 +238,6 @@ func loadModel(logger logging.ILogger, translator i18n.II18n, cw *controller.Con
 		}
 		cw.SetModel(windowIndex, modelIndex, nil)
 		return
-	}
-	modelData := (*model.PmxModel)(nil)
-	validation := (*usecase.TextureValidationResult)(nil)
-	if result != nil {
-		modelData = result.Model
-		validation = result.Validation
 	}
 	if modelData == nil {
 		if materialView != nil {
@@ -263,7 +250,6 @@ func loadModel(logger logging.ILogger, translator i18n.II18n, cw *controller.Con
 		return
 	}
 	if materialView != nil {
-		logTextureValidationErrors(logger, validation)
 		materialView.ResetRows(modelData)
 	}
 	cw.SetModel(windowIndex, modelIndex, modelData)
@@ -309,22 +295,6 @@ func logLoadFailed(logger logging.ILogger, translator i18n.II18n, err error) {
 		logger = logging.DefaultLogger()
 	}
 	logErrorTitle(logger, i18n.TranslateOrMark(translator, "読み込み失敗"), err)
-}
-
-// logTextureValidationErrors はテクスチャ検証エラーをログ出力する。
-func logTextureValidationErrors(logger logging.ILogger, result *usecase.TextureValidationResult) {
-	if logger == nil || result == nil {
-		return
-	}
-	if len(result.Errors) == 0 {
-		return
-	}
-	for _, err := range result.Errors {
-		if err == nil {
-			continue
-		}
-		logger.Warn("テクスチャ検証でエラーが発生しました: %s", err.Error())
-	}
 }
 
 // logErrorTitle はタイトル付きエラーを出力する。
