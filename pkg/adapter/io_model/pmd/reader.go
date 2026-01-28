@@ -352,9 +352,9 @@ func (p *pmdReader) readBones(modelData *model.PmxModel) error {
 		if parentRaw == 0xFFFF {
 			parentIndex = -1
 		}
-		// PMDの接続番号0はボーンIndex=0として扱う（PmxEditor互換）。
+		// PMDの接続番号0は表示先なしとして扱う。
 		tailIndex := int(tailRaw)
-		if tailRaw == 0xFFFF {
+		if tailRaw == 0 || tailRaw == 0xFFFF {
 			// PMDの接続番号0xFFFFは表示先なしとして扱う。
 			tailIndex = -1
 		}
