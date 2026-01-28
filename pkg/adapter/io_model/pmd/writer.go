@@ -12,7 +12,11 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 )
 
-const maxUint16 = int(^uint16(0))
+const (
+	maxUint16 = int(^uint16(0))
+	maxInt16  = int(^uint16(0) >> 1)
+	minInt16  = -maxInt16 - 1
+)
 
 // pmdWriter はPMD書き込み処理を表す。
 type pmdWriter struct {
@@ -393,13 +397,14 @@ func (s *pmdWriteState) writeBones() error {
 			}
 		} else if boneType == 9 {
 			weight := int(math.Round(bone.EffectFactor * 100.0))
-			if weight < 0 {
-				weight = 0
+			// PMDの付与率はint16で格納するため符号を保持する。
+			if weight < minInt16 {
+				weight = minInt16
 			}
-			if weight > maxUint16 {
-				weight = maxUint16
+			if weight > maxInt16 {
+				weight = maxInt16
 			}
-			ikParentValue = uint16(weight)
+			ikParentValue = uint16(int16(weight))
 		}
 		if err := s.writer.WriteUint16(ikParentValue); err != nil {
 			return io_common.NewIoSaveFailed("PMDボーンIK親の書き込みに失敗しました", err)

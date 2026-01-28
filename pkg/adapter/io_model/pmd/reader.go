@@ -374,7 +374,9 @@ func (p *pmdReader) readBones(modelData *model.PmxModel) error {
 		} else if boneType == 9 {
 			if tailIndex >= 0 {
 				bone.EffectIndex = tailIndex
-				bone.EffectFactor = float64(ikParentRaw) * 0.01
+				// PMDの付与率はint16扱いのため符号を維持する。
+				effectRaw := int16(ikParentRaw)
+				bone.EffectFactor = float64(effectRaw) * 0.01
 			}
 		}
 		modelData.Bones.AppendRaw(bone)
@@ -550,13 +552,15 @@ func applyPmdTwistBoneOverrides(modelData *model.PmxModel) {
 		if bone == nil || !isPmdTwistBoneName(bone.Name()) {
 			continue
 		}
-		// 捻りボーンの固定軸は、ボーン位置から表示先ボーンへの方向を使う。
-		if bone.TailIndex >= 0 {
-			if tail, err := modelData.Bones.Get(bone.TailIndex); err == nil && tail != nil {
-				axis := tail.Position.Subed(bone.Position)
-				if axis.Length() > 0 {
-					bone.FixedAxis = axis.Normalized()
-					bone.BoneFlag |= model.BONE_FLAG_HAS_FIXED_AXIS
+		if isPmdTwistMainBoneName(bone.Name()) {
+			// 捻りボーンの固定軸は、ボーン位置から表示先ボーンへの方向を使う。
+			if bone.TailIndex >= 0 {
+				if tail, err := modelData.Bones.Get(bone.TailIndex); err == nil && tail != nil {
+					axis := tail.Position.Subed(bone.Position)
+					if axis.Length() > 0 {
+						bone.FixedAxis = axis.Normalized()
+						bone.BoneFlag |= model.BONE_FLAG_HAS_FIXED_AXIS
+					}
 				}
 			}
 		}
@@ -595,6 +599,18 @@ func isPmdTwistBoneName(name string) bool {
 		model.WRIST_TWIST1,
 		model.WRIST_TWIST2,
 		model.WRIST_TWIST3,
+	)
+}
+
+// isPmdTwistMainBoneName はPMDの捻り本体ボーン名か判定する。
+func isPmdTwistMainBoneName(name string) bool {
+	if name == "" {
+		return false
+	}
+	return matchesStandardBoneName(
+		name,
+		model.ARM_TWIST,
+		model.WRIST_TWIST,
 	)
 }
 
