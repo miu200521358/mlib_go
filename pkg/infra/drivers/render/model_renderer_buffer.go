@@ -96,8 +96,8 @@ func (mr *ModelRenderer) initializeBuffers(factory *mgl.BufferFactory, modelData
 	md.selectedVertexCount = len(indexes)
 	md.selectedVertexIbo = factory.NewIndexBuffer(gl.Ptr(indexes), len(indexes))
 
-	// // カーソル位置表示用バッファの初期化
-	// md.cursorPositionBufferHandle = factory.CreateDebugBuffer()
+	// カーソル位置表示用バッファの初期化
+	md.cursorPositionBufferHandle = factory.NewDebugBuffer(nil, 0)
 
 	// SSBOの作成
 	var ssbo uint32

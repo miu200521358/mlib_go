@@ -187,19 +187,50 @@ func (mr *ModelRenderer) drawBone(windowIndex int, shader graphics_api.IShader, 
 	gl.DepthFunc(gl.LEQUAL)
 }
 
+// buildCursorLineVertices はカーソル位置の点列からライン描画用の頂点配列を生成する。
+func buildCursorLineVertices(cursorPositions []float32, vertexColor mgl32.Vec4, limit int) []float32 {
+	pointCount := len(cursorPositions) / 3
+	if pointCount < 2 {
+		return nil
+	}
+	if limit > 0 && pointCount > limit {
+		start := (pointCount - limit) * 3
+		cursorPositions = cursorPositions[start:]
+		pointCount = limit
+	}
+	if pointCount < 2 {
+		return nil
+	}
+	const cursorLineFieldCount = 7
+	vertexCount := (pointCount - 1) * 2
+	out := make([]float32, 0, vertexCount*cursorLineFieldCount)
+	for i := 0; i < pointCount-1; i++ {
+		idx0 := i * 3
+		idx1 := (i + 1) * 3
+		out = append(
+			out,
+			cursorPositions[idx0], cursorPositions[idx0+1], cursorPositions[idx0+2],
+			vertexColor[0], vertexColor[1], vertexColor[2], vertexColor[3],
+			cursorPositions[idx1], cursorPositions[idx1+1], cursorPositions[idx1+2],
+			vertexColor[0], vertexColor[1], vertexColor[2], vertexColor[3],
+		)
+	}
+	return out
+}
+
 // drawCursorLine は、カーソルの軌跡をラインで描画する処理です。
 func (mr *ModelRenderer) drawCursorLine(shader graphics_api.IShader, cursorPositions []float32, vertexColor mgl32.Vec4) {
-	// モデルの前面に描画するため深度テストを一時無効化
-	gl.Enable(gl.DEPTH_TEST)
-	gl.DepthFunc(gl.ALWAYS)
 	if mr.cursorPositionBufferHandle == nil {
 		return
 	}
-
-	vertexCount := len(cursorPositions) / 3
-	if limit := mr.effectiveCursorPositionLimit(); limit < vertexCount {
-		vertexCount = limit
+	lineVertices := buildCursorLineVertices(cursorPositions, vertexColor, 0)
+	if len(lineVertices) == 0 {
+		return
 	}
+
+	// モデルの前面に描画するため深度テストを一時無効化
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.ALWAYS)
 
 	program := shader.Program(graphics_api.ProgramTypeCursor)
 	gl.UseProgram(program)
@@ -207,7 +238,11 @@ func (mr *ModelRenderer) drawCursorLine(shader graphics_api.IShader, cursorPosit
 	colorUniform := mgl.GetUniformLocation(program, mgl.ShaderColor)
 	gl.Uniform4fv(colorUniform, 1, &vertexColor[0])
 
+	const cursorLineFieldCount = 7
+	vertexCount := len(lineVertices) / cursorLineFieldCount
 	mr.cursorPositionBufferHandle.Bind()
+	// デバッグバッファ更新はバインド後に行う。
+	mr.cursorPositionBufferHandle.UpdateDebugBuffer(lineVertices)
 	gl.DrawArrays(gl.LINES, 0, int32(vertexCount))
 	mr.cursorPositionBufferHandle.Unbind()
 
@@ -234,6 +269,8 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	removeSelection := false
 	cursorPositions := []float32(nil)
 	removeCursorPositions := []float32(nil)
+	cursorLinePositions := []float32(nil)
+	removeCursorLinePositions := []float32(nil)
 	screenWidth := 0
 	screenHeight := 0
 	rectMin := mmath.Vec2{}
@@ -245,6 +282,8 @@ func (mr *ModelRenderer) drawSelectedVertex(
 		removeSelection = selectionRequest.Remove
 		cursorPositions = selectionRequest.CursorPositions
 		removeCursorPositions = selectionRequest.RemoveCursorPositions
+		cursorLinePositions = selectionRequest.CursorLinePositions
+		removeCursorLinePositions = selectionRequest.RemoveCursorLinePositions
 		screenWidth = selectionRequest.ScreenWidth
 		screenHeight = selectionRequest.ScreenHeight
 		rectMin = selectionRequest.RectMin
@@ -330,6 +369,17 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	gl.UseProgram(0)
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.LEQUAL)
+
+	if selectionMode == state.SELECTED_VERTEX_MODE_POINT {
+		// カーソル軌跡は淡い黄色で表示する。
+		cursorLineColor := mgl32.Vec4{0.95, 1.0, 0.75, 0.8}
+		if len(cursorLinePositions) > 0 {
+			mr.drawCursorLine(shader, cursorLinePositions, cursorLineColor)
+		}
+		if len(removeCursorLinePositions) > 0 {
+			mr.drawCursorLine(shader, removeCursorLinePositions, cursorLineColor)
+		}
+	}
 
 	visibleVertexFlags := buildVisibleVertexFlags(vertices, mr.Model.Materials, mr.ModelDrawer.faces, selectedMaterialIndexes)
 	selectedSet := make(map[int]struct{}, len(nowSelectedVertexes))

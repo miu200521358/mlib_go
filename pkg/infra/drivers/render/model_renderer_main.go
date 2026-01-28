@@ -18,16 +18,18 @@ import (
 
 // VertexSelectionRequest は選択頂点の更新要求をまとめる。
 type VertexSelectionRequest struct {
-	Mode                  state.SelectedVertexMode
-	Apply                 bool
-	Remove                bool
-	CursorPositions       []float32
-	RemoveCursorPositions []float32
-	ScreenWidth           int
-	ScreenHeight          int
-	RectMin               mmath.Vec2
-	RectMax               mmath.Vec2
-	HasRect               bool
+	Mode                      state.SelectedVertexMode
+	Apply                     bool
+	Remove                    bool
+	CursorPositions           []float32
+	RemoveCursorPositions     []float32
+	CursorLinePositions       []float32
+	RemoveCursorLinePositions []float32
+	ScreenWidth               int
+	ScreenHeight              int
+	RectMin                   mmath.Vec2
+	RectMax                   mmath.Vec2
+	HasRect                   bool
 }
 
 // ModelRenderer は、PMXモデル全体の描画処理を統括する構造体です。

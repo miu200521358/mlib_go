@@ -87,17 +87,20 @@ type ViewerWindow struct {
 	vmdDeltas          []*delta.VmdDeltas
 	physicsModelHashes []string
 
-	leftButtonPressed                     bool
-	middleButtonPressed                   bool
-	rightButtonPressed                    bool
-	shiftPressed                          bool
-	ctrlPressed                           bool
-	updatedPrevCursor                     bool
-	prevCursorPos                         mmath.Vec2
-	cursorX                               float64
-	cursorY                               float64
-	leftCursorWindowPositions             map[mmath.Vec2]float32
-	leftCursorRemoveWindowPositions       map[mmath.Vec2]float32
+	leftButtonPressed               bool
+	middleButtonPressed             bool
+	rightButtonPressed              bool
+	shiftPressed                    bool
+	ctrlPressed                     bool
+	updatedPrevCursor               bool
+	prevCursorPos                   mmath.Vec2
+	cursorX                         float64
+	cursorY                         float64
+	leftCursorWindowPositions       map[mmath.Vec2]float32
+	leftCursorRemoveWindowPositions map[mmath.Vec2]float32
+	// カーソル履歴の順序を保持するための記録リスト。
+	leftCursorWindowOrder                 []mmath.Vec2
+	leftCursorRemoveWindowOrder           []mmath.Vec2
 	leftCursorWorldHistoryPositions       []*mmath.Vec3
 	leftCursorRemoveWorldHistoryPositions []*mmath.Vec3
 	boxSelectionDragging                  bool
@@ -167,6 +170,8 @@ func newViewerWindow(windowIndex int, title string, width, height, positionX, po
 		selectedVertexHoverModelIndex:         -1,
 		leftCursorWindowPositions:             make(map[mmath.Vec2]float32),
 		leftCursorRemoveWindowPositions:       make(map[mmath.Vec2]float32),
+		leftCursorWindowOrder:                 make([]mmath.Vec2, 0),
+		leftCursorRemoveWindowOrder:           make([]mmath.Vec2, 0),
 		leftCursorWorldHistoryPositions:       make([]*mmath.Vec3, 0),
 		leftCursorRemoveWorldHistoryPositions: make([]*mmath.Vec3, 0),
 	}
@@ -278,6 +283,13 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 	}
 	selectedCursorPositions := flattenCursorPositions(leftCursorWorldPositions, limit)
 	removeSelectedCursorPositions := flattenCursorPositions(leftCursorRemoveWorldPositions, limit)
+	cursorLinePositions := []float32(nil)
+	removeCursorLinePositions := []float32(nil)
+	if showSelectedVertex && selectionMode == state.SELECTED_VERTEX_MODE_POINT {
+		// 軌跡表示は履歴全体を使うため、上限指定は行わない。
+		cursorLinePositions = flattenCursorPositions(vw.leftCursorWorldHistoryPositions, 0)
+		removeCursorLinePositions = flattenCursorPositions(vw.leftCursorRemoveWorldHistoryPositions, 0)
+	}
 	applyPointSelection := len(selectedCursorPositions) > 0 || len(removeSelectedCursorPositions) > 0
 	removePointSelection := len(removeSelectedCursorPositions) > 0
 	applyBoxSelection := false
@@ -372,19 +384,25 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 		selectionRequest := (*render.VertexSelectionRequest)(nil)
 		if showSelectedVertex {
 			selectionRequest = &render.VertexSelectionRequest{
-				Mode:                  selectionMode,
-				Apply:                 false,
-				Remove:                false,
-				CursorPositions:       cursorPositions,
-				RemoveCursorPositions: removeCursorPositions,
-				ScreenWidth:           fbW,
-				ScreenHeight:          fbH,
-				RectMin:               boxSelectionMin,
-				RectMax:               boxSelectionMax,
-				HasRect:               false,
+				Mode:                      selectionMode,
+				Apply:                     false,
+				Remove:                    false,
+				CursorPositions:           cursorPositions,
+				RemoveCursorPositions:     removeCursorPositions,
+				CursorLinePositions:       nil,
+				RemoveCursorLinePositions: nil,
+				ScreenWidth:               fbW,
+				ScreenHeight:              fbH,
+				RectMin:                   boxSelectionMin,
+				RectMax:                   boxSelectionMax,
+				HasRect:                   false,
 			}
 		}
 		if showSelectedVertex && i == 0 {
+			if selectionMode == state.SELECTED_VERTEX_MODE_POINT && selectionRequest != nil {
+				selectionRequest.CursorLinePositions = cursorLinePositions
+				selectionRequest.RemoveCursorLinePositions = removeCursorLinePositions
+			}
 			switch selectionMode {
 			case state.SELECTED_VERTEX_MODE_BOX:
 				if applyBoxSelection && selectionRequest != nil {
@@ -464,6 +482,8 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 		if selectionMode == state.SELECTED_VERTEX_MODE_POINT {
 			vw.leftCursorWindowPositions = make(map[mmath.Vec2]float32)
 			vw.leftCursorRemoveWindowPositions = make(map[mmath.Vec2]float32)
+			vw.leftCursorWindowOrder = make([]mmath.Vec2, 0)
+			vw.leftCursorRemoveWindowOrder = make([]mmath.Vec2, 0)
 			vw.leftCursorWorldHistoryPositions = make([]*mmath.Vec3, 0)
 			vw.leftCursorRemoveWorldHistoryPositions = make([]*mmath.Vec3, 0)
 		}
@@ -783,8 +803,14 @@ func (vw *ViewerWindow) cursorPosCallback(_ *glfw.Window, xpos, ypos float64) {
 		} else {
 			screenPos := mmath.Vec2{X: xpos, Y: ypos}
 			if vw.isCtrlPressed() {
+				if _, exists := vw.leftCursorRemoveWindowPositions[screenPos]; !exists {
+					vw.leftCursorRemoveWindowOrder = append(vw.leftCursorRemoveWindowOrder, screenPos)
+				}
 				vw.leftCursorRemoveWindowPositions[screenPos] = 0
 			} else {
+				if _, exists := vw.leftCursorWindowPositions[screenPos]; !exists {
+					vw.leftCursorWindowOrder = append(vw.leftCursorWindowOrder, screenPos)
+				}
 				vw.leftCursorWindowPositions[screenPos] = 0
 			}
 		}
@@ -848,8 +874,9 @@ func (vw *ViewerWindow) updateCursorPositions() ([]*mmath.Vec3, []*mmath.Vec3) {
 		scaleY = float64(fbH) / float64(winH)
 	}
 
-	for screenPos, depth := range vw.leftCursorWindowPositions {
-		if depth != 0 {
+	for _, screenPos := range vw.leftCursorWindowOrder {
+		depth, exists := vw.leftCursorWindowPositions[screenPos]
+		if !exists || depth != 0 {
 			continue
 		}
 		for range 20 {
@@ -867,8 +894,9 @@ func (vw *ViewerWindow) updateCursorPositions() ([]*mmath.Vec3, []*mmath.Vec3) {
 			}
 		}
 	}
-	for screenPos, depth := range vw.leftCursorRemoveWindowPositions {
-		if depth != 0 {
+	for _, screenPos := range vw.leftCursorRemoveWindowOrder {
+		depth, exists := vw.leftCursorRemoveWindowPositions[screenPos]
+		if !exists || depth != 0 {
 			continue
 		}
 		for range 20 {
@@ -912,8 +940,14 @@ func flattenCursorPositions(positions []*mmath.Vec3, limit int) []float32 {
 func (vw *ViewerWindow) queueSelectedVertexSelection(xpos, ypos float64, remove bool) {
 	screenPos := mmath.Vec2{X: xpos, Y: ypos}
 	if remove {
+		if _, exists := vw.leftCursorRemoveWindowPositions[screenPos]; !exists {
+			vw.leftCursorRemoveWindowOrder = append(vw.leftCursorRemoveWindowOrder, screenPos)
+		}
 		vw.leftCursorRemoveWindowPositions[screenPos] = 0
 		return
+	}
+	if _, exists := vw.leftCursorWindowPositions[screenPos]; !exists {
+		vw.leftCursorWindowOrder = append(vw.leftCursorWindowOrder, screenPos)
 	}
 	vw.leftCursorWindowPositions[screenPos] = 0
 }
