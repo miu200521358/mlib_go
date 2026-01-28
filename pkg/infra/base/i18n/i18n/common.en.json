@@ -1188,10 +1188,6 @@
         "translation": "Check image format/extension"
     },
     {
-        "id": "音楽ファイルを選択してください",
-        "translation": "Select an audio file"
-    },
-    {
         "id": "cmd でリポジトリを注入してください",
         "translation": "Inject repository via cmd"
     },
