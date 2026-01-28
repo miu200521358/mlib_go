@@ -32,6 +32,8 @@ type pmdReader struct {
 	boneDisplayNames        []string
 	boneDisplayNamesEnglish []string
 	boneDisplayList         []pmdBoneDisplay
+	materialToonIndexes     []uint8
+	toonTextureNames        []string
 }
 
 const (
@@ -253,6 +255,7 @@ func (p *pmdReader) readMaterials(modelData *model.PmxModel) error {
 		if err != nil {
 			return wrapParseFailed("PMD材質Toonの読み込みに失敗しました", err)
 		}
+		p.materialToonIndexes = append(p.materialToonIndexes, toonIndex)
 		edgeFlag, err := p.reader.ReadUint8()
 		if err != nil {
 			return wrapParseFailed("PMD材質エッジフラグの読み込みに失敗しました", err)
@@ -290,7 +293,10 @@ func (p *pmdReader) readMaterials(modelData *model.PmxModel) error {
 			drawFlag |= model.DRAW_FLAG_GROUND_SHADOW
 		}
 		// alpha=0.98付近はセルフシャドウマップ無効扱い。
-		if !(alpha >= 0.98 && alpha < 0.99) {
+		if alpha >= 0.98 && alpha < 0.99 {
+			// alpha=0.98付近はセルフシャドウも無効扱い。
+			drawFlag &^= model.DRAW_FLAG_DRAWING_SELF_SHADOWS
+		} else {
 			drawFlag |= model.DRAW_FLAG_DRAWING_ON_SELF_SHADOW_MAPS
 		}
 		material.DrawFlag = drawFlag
@@ -584,6 +590,47 @@ func applyPmdBoneFlagOverrides(modelData *model.PmxModel) {
 	}
 }
 
+// applyPmdToonOverrides はPMDの拡張トゥーン名を材質へ反映する。
+func (p *pmdReader) applyPmdToonOverrides(modelData *model.PmxModel) {
+	if p == nil || modelData == nil || modelData.Materials == nil {
+		return
+	}
+	if len(p.materialToonIndexes) == 0 || len(p.toonTextureNames) == 0 {
+		return
+	}
+	defaultNames := defaultToonFileNames()
+	for idx, material := range modelData.Materials.Values() {
+		if material == nil || idx < 0 || idx >= len(p.materialToonIndexes) {
+			continue
+		}
+		toonIndex := p.materialToonIndexes[idx]
+		if toonIndex == 0xFF {
+			// 未設定扱いは共有トゥーンを外す。
+			material.ToonSharingFlag = model.TOON_SHARING_INDIVIDUAL
+			material.ToonTextureIndex = -1
+			continue
+		}
+		if toonIndex > 9 {
+			continue
+		}
+		toonName := ""
+		if int(toonIndex) < len(p.toonTextureNames) {
+			toonName = strings.TrimSpace(p.toonTextureNames[toonIndex])
+		}
+		if toonName == "" {
+			continue
+		}
+		if int(toonIndex) < len(defaultNames) && strings.EqualFold(toonName, defaultNames[toonIndex]) {
+			// 既定名と一致する場合は共有トゥーンのままにする。
+			material.ToonSharingFlag = model.TOON_SHARING_SHARING
+			material.ToonTextureIndex = int(toonIndex)
+			continue
+		}
+		material.ToonSharingFlag = model.TOON_SHARING_INDIVIDUAL
+		material.ToonTextureIndex = p.findOrAppendTexture(modelData, toonName)
+	}
+}
+
 // isPmdTwistBoneName はPMDの捻りボーン名か判定する。
 func isPmdTwistBoneName(name string) bool {
 	if name == "" {
@@ -829,10 +876,13 @@ func (p *pmdReader) readExtensions(modelData *model.PmxModel) error {
 	}
 
 	for i := 0; i < 10; i++ {
-		if _, err := p.readFixedString(100, "PMDトゥーンテクスチャ名"); err != nil {
+		name, err := p.readFixedString(100, "PMDトゥーンテクスチャ名")
+		if err != nil {
 			return err
 		}
+		p.toonTextureNames = append(p.toonTextureNames, name)
 	}
+	p.applyPmdToonOverrides(modelData)
 
 	rigidCount, err := p.reader.ReadUint32()
 	if err != nil {
