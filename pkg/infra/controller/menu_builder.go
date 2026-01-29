@@ -5,6 +5,8 @@
 package controller
 
 import (
+	"strings"
+
 	"github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"github.com/miu200521358/walk/pkg/declarative"
@@ -46,6 +48,7 @@ func BuildMenuItemsWithMessages(translator i18n.II18n, logger logging.ILogger, i
 			continue
 		}
 		title := i18n.TranslateOrMark(translator, item.TitleKey)
+		displayTitle := strings.ReplaceAll(title, "&", "")
 		message := title
 		if item.MessageKey != "" {
 			message = i18n.TranslateOrMark(translator, item.MessageKey)
@@ -53,17 +56,33 @@ func BuildMenuItemsWithMessages(translator i18n.II18n, logger logging.ILogger, i
 		menuItems = append(menuItems, declarative.Action{
 			Text: title,
 			OnTriggered: func() {
-				logMenuMessage(logger, message)
+				logMenuMessage(logger, displayTitle, message)
 			},
 		})
 	}
 	return menuItems
 }
 
-// logMenuMessage はメニュー選択時のログを出力する。
-func logMenuMessage(logger logging.ILogger, message string) {
+// logMenuMessage はメニュー選択時のログをタイトル付きで出力する。
+func logMenuMessage(logger logging.ILogger, title, message string) {
 	if logger == nil {
 		logger = logging.DefaultLogger()
+	}
+	if title != "" && message != "" && title != message {
+		if titled, ok := logger.(interface {
+			InfoLineTitle(title, msg string, params ...any)
+		}); ok {
+			titled.InfoLineTitle(title, message)
+			return
+		}
+		if lineLogger, ok := logger.(interface {
+			InfoLine(msg string, params ...any)
+		}); ok {
+			lineLogger.InfoLine(message)
+			return
+		}
+		logger.Info("%s %s", title, message)
+		return
 	}
 	if lineLogger, ok := logger.(interface {
 		InfoLine(msg string, params ...any)
