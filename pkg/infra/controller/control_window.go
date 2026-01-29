@@ -7,6 +7,7 @@ package controller
 import (
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
@@ -265,6 +266,18 @@ func (cw *ControlWindow) infoLineTitle(title, msg string) {
 		return
 	}
 	logger.Info("%s %s", title, msg)
+}
+
+// helpAction は使い方メニュー用の項目を生成する。
+func (cw *ControlWindow) helpAction(titleKey, messageKey string) declarative.MenuItem {
+	title := cw.t(titleKey)
+	displayTitle := strings.ReplaceAll(title, "&", "")
+	return declarative.Action{
+		Text: title,
+		OnTriggered: func() {
+			cw.infoLineTitle(displayTitle, cw.t(messageKey))
+		},
+	}
 }
 
 // OnClose は閉じる処理を行う。
@@ -679,12 +692,10 @@ func (cw *ControlWindow) buildViewerMenu() declarative.Menu {
 				declarative.Action{Text: cw.t("&回転ボーン"), Checkable: true, OnTriggered: cw.TriggerShowBoneRotate, AssignTo: &cw.showBoneRotateAction},
 				declarative.Action{Text: cw.t("&移動ボーン"), Checkable: true, OnTriggered: cw.TriggerShowBoneTranslate, AssignTo: &cw.showBoneTranslateAction},
 				declarative.Action{Text: cw.t("&表示ボーン"), Checkable: true, OnTriggered: cw.TriggerShowBoneVisible, AssignTo: &cw.showBoneVisibleAction},
-				declarative.Action{Text: cw.t("&ボーン表示の使い方"), OnTriggered: cw.showBoneHelp},
 			}},
 			declarative.Menu{Text: cw.t("&剛体表示"), Items: []declarative.MenuItem{
 				declarative.Action{Text: cw.t("&前面表示"), Checkable: true, OnTriggered: cw.TriggerShowRigidBodyFront, AssignTo: &cw.showRigidBodyFrontAction},
 				declarative.Action{Text: cw.t("&埋め込み表示"), Checkable: true, OnTriggered: cw.TriggerShowRigidBodyBack, AssignTo: &cw.showRigidBodyBackAction},
-				declarative.Action{Text: cw.t("&剛体表示の使い方"), OnTriggered: cw.showRigidBodyHelp},
 			}},
 			declarative.Action{Text: cw.t("&ジョイント表示"), Checkable: true, OnTriggered: cw.TriggerShowJoint, AssignTo: &cw.showJointAction},
 			declarative.Separator{},
@@ -701,10 +712,57 @@ func (cw *ControlWindow) buildViewerMenu() declarative.Menu {
 				declarative.Action{Text: cw.t("&上半身合わせ"), Checkable: true, OnTriggered: cw.TriggerShowOverrideUpper, AssignTo: &cw.showOverrideUpperAction},
 				declarative.Action{Text: cw.t("&下半身合わせ"), Checkable: true, OnTriggered: cw.TriggerShowOverrideLower, AssignTo: &cw.showOverrideLowerAction},
 				declarative.Action{Text: cw.t("&カメラ合わせなし"), Checkable: true, OnTriggered: cw.TriggerShowOverrideNone, AssignTo: &cw.showOverrideNoneAction},
-				declarative.Action{Text: cw.t("&サブビューワーオーバーレイの使い方"), OnTriggered: cw.showOverrideHelp},
 			}},
 			declarative.Separator{},
-			declarative.Action{Text: cw.t("&ビューワーの使い方"), OnTriggered: cw.showViewerHelp},
+			cw.buildViewerHelpMenu(),
+		},
+	}
+}
+
+// buildViewerHelpMenu はビューワーの使い方メニューを構築する。
+func (cw *ControlWindow) buildViewerHelpMenu() declarative.Menu {
+	return declarative.Menu{
+		Text: cw.t("&使い方"),
+		Items: []declarative.MenuItem{
+			cw.helpAction("カメラ操作", "カメラ操作メッセージ"),
+			cw.helpAction("&フレームドロップON", "フレームドロップONメッセージ"),
+			declarative.Menu{Text: cw.t("&fps制限"), Items: []declarative.MenuItem{
+				cw.helpAction("&30fps制限", "30fps制限メッセージ"),
+				cw.helpAction("&60fps制限", "60fps制限メッセージ"),
+				cw.helpAction("&fps無制限", "fps無制限メッセージ"),
+			}},
+			cw.helpAction("&情報表示", "情報表示メッセージ"),
+			cw.helpAction("&物理ON/OFF", "物理ON/OFFメッセージ"),
+			cw.helpAction("&物理リセット", "物理リセットメッセージ"),
+			declarative.Menu{Text: cw.t("&ボーン表示"), Items: []declarative.MenuItem{
+				cw.helpAction("&全ボーン", "全ボーンメッセージ"),
+				cw.helpAction("&IKボーン", "IKボーンメッセージ"),
+				cw.helpAction("&付与親ボーン", "付与親ボーンメッセージ"),
+				cw.helpAction("&軸制限ボーン", "軸制限ボーンメッセージ"),
+				cw.helpAction("&回転ボーン", "回転ボーンメッセージ"),
+				cw.helpAction("&移動ボーン", "移動ボーンメッセージ"),
+				cw.helpAction("&表示ボーン", "表示ボーンメッセージ"),
+				cw.helpAction("&ボーン表示の使い方", "ボーン表示の使い方メッセージ"),
+			}},
+			declarative.Menu{Text: cw.t("&剛体表示"), Items: []declarative.MenuItem{
+				cw.helpAction("&前面表示", "前面表示メッセージ"),
+				cw.helpAction("&埋め込み表示", "埋め込み表示メッセージ"),
+				cw.helpAction("&剛体表示の使い方", "剛体表示の使い方メッセージ"),
+			}},
+			cw.helpAction("&ジョイント表示", "ジョイント表示メッセージ"),
+			cw.helpAction("&法線表示", "法線表示メッセージ"),
+			cw.helpAction("&ワイヤーフレーム表示", "ワイヤーフレーム表示メッセージ"),
+			declarative.Menu{Text: cw.t("&頂点選択"), Items: []declarative.MenuItem{
+				cw.helpAction("&ポイント選択", "ポイント選択メッセージ"),
+				cw.helpAction("&ボックス選択", "ボックス選択メッセージ"),
+			}},
+			cw.helpAction("&カメラ同期", "カメラ同期メッセージ"),
+			declarative.Menu{Text: cw.t("&サブビューワーオーバーレイ"), Items: []declarative.MenuItem{
+				cw.helpAction("&上半身合わせ", "上半身合わせメッセージ"),
+				cw.helpAction("&下半身合わせ", "下半身合わせメッセージ"),
+				cw.helpAction("&カメラ合わせなし", "カメラ合わせなしメッセージ"),
+				cw.helpAction("&サブビューワーオーバーレイの使い方", "サブビューワーオーバーレイの使い方メッセージ"),
+			}},
 		},
 	}
 }
@@ -712,7 +770,7 @@ func (cw *ControlWindow) buildViewerMenu() declarative.Menu {
 // buildControllerMenuItems はコントローラーメニュー項目を構築する。
 func (cw *ControlWindow) buildControllerMenuItems() []declarative.MenuItem {
 	items := []declarative.MenuItem{
-		declarative.Action{Text: cw.t("&使い方"), OnTriggered: cw.showControllerHelp},
+		declarative.Menu{Text: cw.t("&使い方"), Items: cw.buildControllerHelpMenuItems()},
 		declarative.Separator{},
 		declarative.Action{Text: cw.t("&画面移動連動"), Checkable: true, OnTriggered: cw.triggerWindowLinkage, AssignTo: &cw.linkWindowAction},
 		declarative.Separator{},
@@ -729,6 +787,23 @@ func (cw *ControlWindow) buildControllerMenuItems() []declarative.MenuItem {
 		)
 	}
 	return items
+}
+
+// buildControllerHelpMenuItems はコントローラーウィンドウの使い方メニュー項目を構築する。
+func (cw *ControlWindow) buildControllerHelpMenuItems() []declarative.MenuItem {
+	return []declarative.MenuItem{
+		cw.helpAction("要素の説明", "要素の説明メッセージ"),
+		declarative.Menu{Text: cw.t("再生"), Items: []declarative.MenuItem{
+			cw.helpAction("再生ボタン", "再生ボタンメッセージ"),
+			cw.helpAction("キーフレーム番号", "キーフレーム番号メッセージ"),
+			cw.helpAction("再生スライダー", "再生スライダーメッセージ"),
+		}},
+		declarative.Menu{Text: cw.t("音楽"), Items: []declarative.MenuItem{
+			cw.helpAction("音楽ファイル", "音楽ファイルメッセージ"),
+			cw.helpAction("音量", "音量メッセージ"),
+		}},
+		cw.helpAction("ファイル操作", "ファイル操作メッセージ"),
+	}
 }
 
 // buildLanguageMenu は言語メニュー項目を構築する。

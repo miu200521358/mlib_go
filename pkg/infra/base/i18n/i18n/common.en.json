@@ -409,7 +409,7 @@
     },
     {
         "id": "サブビューワーオーバーレイの使い方メッセージ",
-        "translation": "When checked, the sub-window rendering will be overlaid on the main window.\nWhile checked, operating the main window will also synchronize the movement of the sub-window.\nThe size of the character model in the sub-window will be approximately matched to the character model in the main window.\nYou can switch whether to use the upper body or lower body as the alignment reference."
+        "translation": "Enable to overlay rendering and sync sub-viewer movement.\nYou can switch alignment between upper and lower body."
     },
     {
         "id": "&カメラ同期",
@@ -593,7 +593,7 @@
     },
     {
         "id": "ボーン表示の使い方メッセージ",
-        "translation": "・Turning ON bone display will show the model's bones\n・You can select the types of bones to display from the menu\n・Multiple types can be displayed at the same time\n・While bones are displayed, clicking near a bone will show a list of nearby bone names."
+        "translation": "Bone display shows bones by type; multiple types can be shown.\nHover near a bone square to display the bone name tooltip."
     },
     {
         "id": "&剛体表示の使い方",
@@ -601,7 +601,7 @@
     },
     {
         "id": "剛体表示の使い方メッセージ",
-        "translation": "・Turning ON rigid body display will show the model's rigid bodies\n・In front display mode, rigid bodies are shown over the model\n・In embedded display mode, only the parts of the rigid bodies sticking out from the model are shown\n・While rigid bodies are displayed, clicking on a rigid body will show its name and group."
+        "translation": "Rigid-body display shows rigid bodies; front/embedded modes are available.\nHover near the rigid-body center to show its name tooltip."
     },
     {
         "id": "表示名",
@@ -1458,5 +1458,165 @@
     {
         "id": "設定の保存に失敗しました: %s",
         "translation": "Failed to save settings: %s"
+    },
+    {
+        "id": "カメラ操作",
+        "translation": "Camera Controls"
+    },
+    {
+        "id": "カメラ操作メッセージ",
+        "translation": "Use the mouse wheel to change FOV, middle-button drag to move, right-button drag to rotate.\nHold Shift for larger changes, Ctrl for smaller.\nUse numpad 1/2/4/5/6/8 to switch views like MMD."
+    },
+    {
+        "id": "フレームドロップONメッセージ",
+        "translation": "Switch playback to \"real-time priority / allow frame drops\".\nUncheck to disallow frame drops and render every frame."
+    },
+    {
+        "id": "30fps制限メッセージ",
+        "translation": "Limit rendering updates to 30 fps."
+    },
+    {
+        "id": "60fps制限メッセージ",
+        "translation": "Limit rendering updates to 60 fps."
+    },
+    {
+        "id": "fps無制限メッセージ",
+        "translation": "Remove the rendering FPS limit."
+    },
+    {
+        "id": "情報表示メッセージ",
+        "translation": "Show FPS in the window title (in dev builds, draw/physics FPS)."
+    },
+    {
+        "id": "物理ON/OFFメッセージ",
+        "translation": "Toggle physics simulation on/off."
+    },
+    {
+        "id": "物理リセットメッセージ",
+        "translation": "Reset physics state."
+    },
+    {
+        "id": "全ボーンメッセージ",
+        "translation": "Show all bones."
+    },
+    {
+        "id": "IKボーンメッセージ",
+        "translation": "Show IK-related bones."
+    },
+    {
+        "id": "付与親ボーンメッセージ",
+        "translation": "Show effector/parent bones (including external parents)."
+    },
+    {
+        "id": "軸制限ボーンメッセージ",
+        "translation": "Show axis-limited bones."
+    },
+    {
+        "id": "回転ボーンメッセージ",
+        "translation": "Show rotatable bones."
+    },
+    {
+        "id": "移動ボーンメッセージ",
+        "translation": "Show translatable bones."
+    },
+    {
+        "id": "表示ボーンメッセージ",
+        "translation": "Show bones with the visible flag."
+    },
+    {
+        "id": "前面表示メッセージ",
+        "translation": "Show rigid-body wireframes/contact points in front of the model."
+    },
+    {
+        "id": "埋め込み表示メッセージ",
+        "translation": "Show only the protruding parts of rigid bodies."
+    },
+    {
+        "id": "ジョイント表示メッセージ",
+        "translation": "Show joint constraints/limits as wires.\nHover near a joint center to show the joint name tooltip."
+    },
+    {
+        "id": "法線表示メッセージ",
+        "translation": "Show normals as lines."
+    },
+    {
+        "id": "ワイヤーフレーム表示メッセージ",
+        "translation": "Show meshes as wireframes.\nAutomatically turns on when vertex selection is enabled."
+    },
+    {
+        "id": "ポイント選択メッセージ",
+        "translation": "Left-drag to draw a cursor trail and select nearby vertices.\nCtrl removes selection (selected vertices are orange; trail is pale yellow)."
+    },
+    {
+        "id": "ボックス選択メッセージ",
+        "translation": "Left-drag to draw a selection rectangle and select visible vertices inside. Ctrl removes selection (selected vertices are orange; trail is pale yellow)."
+    },
+    {
+        "id": "カメラ同期メッセージ",
+        "translation": "Synchronize cameras across viewers (mutually exclusive with upper/lower overlay)."
+    },
+    {
+        "id": "上半身合わせメッセージ",
+        "translation": "Overlay the sub-viewer and match scale based on the upper body."
+    },
+    {
+        "id": "下半身合わせメッセージ",
+        "translation": "Overlay the sub-viewer and match scale based on the lower body."
+    },
+    {
+        "id": "カメラ合わせなしメッセージ",
+        "translation": "Overlay without camera synchronization."
+    },
+    {
+        "id": "要素の説明",
+        "translation": "Element Descriptions"
+    },
+    {
+        "id": "要素の説明メッセージ",
+        "translation": "Click the name field of each element to show its usage in the message area."
+    },
+    {
+        "id": "再生ボタン",
+        "translation": "Play Button"
+    },
+    {
+        "id": "再生ボタンメッセージ",
+        "translation": "Toggle play/pause. Other controls are restricted during playback."
+    },
+    {
+        "id": "キーフレーム番号",
+        "translation": "Keyframe Number"
+    },
+    {
+        "id": "キーフレーム番号メッセージ",
+        "translation": "View/change the current frame number. Adjust with the spinner or mouse wheel."
+    },
+    {
+        "id": "再生スライダー",
+        "translation": "Playback Slider"
+    },
+    {
+        "id": "再生スライダーメッセージ",
+        "translation": "Move the playback position. You can also adjust with the mouse wheel."
+    },
+    {
+        "id": "音楽",
+        "translation": "Audio"
+    },
+    {
+        "id": "音楽ファイルメッセージ",
+        "translation": "Enter a wav/mp3 file and playback will sync when playing."
+    },
+    {
+        "id": "音量メッセージ",
+        "translation": "Adjust volume from 0 to 100."
+    },
+    {
+        "id": "ファイル操作",
+        "translation": "File Operations"
+    },
+    {
+        "id": "ファイル操作メッセージ",
+        "translation": "Besides Open, you can set file paths via drag-and-drop or history."
     }
 ]
