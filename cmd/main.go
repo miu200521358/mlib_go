@@ -11,7 +11,7 @@ import (
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
 
-	"github.com/miu200521358/mlib_go/cmd/ui"
+	"github.com/miu200521358/mlib_go/pkg/adapter/mcontroller/ui"
 	"github.com/miu200521358/mlib_go/pkg/infra/app"
 	"github.com/miu200521358/mlib_go/pkg/infra/controller"
 	"github.com/miu200521358/mlib_go/pkg/shared/base"

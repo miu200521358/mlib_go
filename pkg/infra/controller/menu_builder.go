@@ -68,7 +68,7 @@ func logMenuMessage(logger logging.ILogger, title, message string) {
 	if logger == nil {
 		logger = logging.DefaultLogger()
 	}
-	if title != "" && message != "" && title != message {
+	if title != "" {
 		if titled, ok := logger.(interface {
 			InfoLineTitle(title, msg string, params ...any)
 		}); ok {
@@ -78,10 +78,18 @@ func logMenuMessage(logger logging.ILogger, title, message string) {
 		if lineLogger, ok := logger.(interface {
 			InfoLine(msg string, params ...any)
 		}); ok {
-			lineLogger.InfoLine(message)
+			if message != "" {
+				lineLogger.InfoLine(message)
+			} else {
+				lineLogger.InfoLine(title)
+			}
 			return
 		}
-		logger.Info("%s %s", title, message)
+		if message != "" {
+			logger.Info("%s %s", title, message)
+		} else {
+			logger.Info(title)
+		}
 		return
 	}
 	if lineLogger, ok := logger.(interface {

@@ -7,6 +7,7 @@ package ui
 import (
 	"github.com/miu200521358/mlib_go/pkg/adapter/audio_api"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
+	"github.com/miu200521358/mlib_go/pkg/adapter/mpresenter/messages"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
 	"github.com/miu200521358/mlib_go/pkg/infra/controller"
 	"github.com/miu200521358/mlib_go/pkg/infra/controller/widget"
@@ -45,7 +46,7 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 
 	materialView := widget.NewMaterialTableView(
 		translator,
-		i18n.TranslateOrMark(translator, "材質ビュー説明"),
+		i18n.TranslateOrMark(translator, messages.HelpMaterialView),
 		func(cw *controller.ControlWindow, indexes []int) {
 			if cw == nil {
 				return
@@ -55,11 +56,11 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 	)
 	vertexView := widget.NewVertexTableView(
 		translator,
-		i18n.TranslateOrMark(translator, "頂点ビュー説明"),
+		i18n.TranslateOrMark(translator, messages.HelpVertexView),
 	)
 
 	allMaterialButton := widget.NewMPushButton()
-	allMaterialButton.SetLabel(i18n.TranslateOrMark(translator, "全"))
+	allMaterialButton.SetLabel(i18n.TranslateOrMark(translator, messages.LabelAll))
 	allMaterialButton.SetMinSize(declarative.Size{Width: 50})
 	allMaterialButton.SetOnClicked(func(cw *controller.ControlWindow) {
 		if materialView == nil {
@@ -69,7 +70,7 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 	})
 
 	invertMaterialButton := widget.NewMPushButton()
-	invertMaterialButton.SetLabel(i18n.TranslateOrMark(translator, "反"))
+	invertMaterialButton.SetLabel(i18n.TranslateOrMark(translator, messages.LabelInvert))
 	invertMaterialButton.SetMinSize(declarative.Size{Width: 50})
 	invertMaterialButton.SetOnClicked(func(cw *controller.ControlWindow) {
 		if materialView == nil {
@@ -82,8 +83,8 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 		userConfig,
 		translator,
 		config.UserConfigKeyPmxHistory,
-		i18n.TranslateOrMark(translator, "モデルファイル1-1"),
-		i18n.TranslateOrMark(translator, "モデルファイルを選択してください"),
+		i18n.TranslateOrMark(translator, messages.LabelModelFile11),
+		i18n.TranslateOrMark(translator, messages.LabelModelFileTip),
 		func(cw *controller.ControlWindow, rep io_common.IFileReader, path string) {
 			loadModel(logger, translator, cw, rep, path, materialView, vertexView, 0, 0)
 		},
@@ -93,8 +94,8 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 		userConfig,
 		translator,
 		config.UserConfigKeyVmdHistory,
-		i18n.TranslateOrMark(translator, "モーションファイル1-1"),
-		i18n.TranslateOrMark(translator, "モーションファイルを選択してください"),
+		i18n.TranslateOrMark(translator, messages.LabelMotionFile11),
+		i18n.TranslateOrMark(translator, messages.LabelMotionFileTip),
 		func(cw *controller.ControlWindow, rep io_common.IFileReader, path string) {
 			loadMotion(logger, translator, cw, rep, player, path, 0, 0)
 		},
@@ -104,8 +105,8 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 		userConfig,
 		translator,
 		config.UserConfigKeyPmxHistory,
-		i18n.TranslateOrMark(translator, "モデルファイル2-1"),
-		i18n.TranslateOrMark(translator, "モデルファイルを選択してください"),
+		i18n.TranslateOrMark(translator, messages.LabelModelFile21),
+		i18n.TranslateOrMark(translator, messages.LabelModelFileTip),
 		func(cw *controller.ControlWindow, rep io_common.IFileReader, path string) {
 			loadModel(logger, translator, cw, rep, path, nil, nil, 1, 0)
 		},
@@ -115,8 +116,8 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 		userConfig,
 		translator,
 		config.UserConfigKeyVmdHistory,
-		i18n.TranslateOrMark(translator, "モーションファイル2-1"),
-		i18n.TranslateOrMark(translator, "モーションファイルを選択してください"),
+		i18n.TranslateOrMark(translator, messages.LabelMotionFile21),
+		i18n.TranslateOrMark(translator, messages.LabelMotionFileTip),
 		func(cw *controller.ControlWindow, rep io_common.IFileReader, path string) {
 			loadMotion(logger, translator, cw, rep, player, path, 1, 0)
 		},
@@ -140,7 +141,7 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 	})
 
 	fileTabPage := declarative.TabPage{
-		Title:    i18n.TranslateOrMark(translator, "ファイル"),
+		Title:    i18n.TranslateOrMark(translator, messages.LabelFile),
 		AssignTo: &fileTab,
 		Layout:   declarative.VBox{},
 		Background: declarative.SolidColorBrush{
@@ -150,7 +151,7 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 			declarative.Composite{
 				Layout: declarative.VBox{},
 				Children: []declarative.Widget{
-					declarative.TextLabel{Text: i18n.TranslateOrMark(translator, "表示用モデル設定説明")},
+					declarative.TextLabel{Text: i18n.TranslateOrMark(translator, messages.HelpDisplayModelSetting)},
 					pmxLoad11Picker.Widgets(),
 					vmdLoad11Picker.Widgets(),
 					declarative.VSeparator{},
@@ -165,7 +166,7 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 	}
 
 	materialTabPage := declarative.TabPage{
-		Title:    i18n.TranslateOrMark(translator, "材質ビュー"),
+		Title:    i18n.TranslateOrMark(translator, messages.LabelMaterialView),
 		AssignTo: &materialTab,
 		Layout:   declarative.VBox{},
 		Background: declarative.SolidColorBrush{
@@ -175,7 +176,7 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 			declarative.Composite{
 				Layout: declarative.HBox{},
 				Children: []declarative.Widget{
-					declarative.TextLabel{Text: i18n.TranslateOrMark(translator, "材質ビュー")},
+					declarative.TextLabel{Text: i18n.TranslateOrMark(translator, messages.LabelMaterialView)},
 					declarative.HSpacer{},
 					allMaterialButton.Widgets(),
 					invertMaterialButton.Widgets(),
@@ -186,7 +187,7 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 	}
 
 	vertexTabPage := declarative.TabPage{
-		Title:    i18n.TranslateOrMark(translator, "頂点ビュー"),
+		Title:    i18n.TranslateOrMark(translator, messages.LabelVertexView),
 		AssignTo: &vertexTab,
 		Layout:   declarative.VBox{},
 		Background: declarative.SolidColorBrush{
@@ -196,7 +197,7 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 			declarative.Composite{
 				Layout: declarative.HBox{},
 				Children: []declarative.Widget{
-					declarative.TextLabel{Text: i18n.TranslateOrMark(translator, "頂点ビュー")},
+					declarative.TextLabel{Text: i18n.TranslateOrMark(translator, messages.LabelVertexView)},
 					declarative.HSpacer{},
 				},
 			},
@@ -294,7 +295,7 @@ func logLoadFailed(logger logging.ILogger, translator i18n.II18n, err error) {
 	if logger == nil {
 		logger = logging.DefaultLogger()
 	}
-	logErrorTitle(logger, i18n.TranslateOrMark(translator, "読み込み失敗"), err)
+	logErrorTitle(logger, i18n.TranslateOrMark(translator, messages.MessageLoadFailed), err)
 }
 
 // logErrorTitle はタイトル付きエラーを出力する。

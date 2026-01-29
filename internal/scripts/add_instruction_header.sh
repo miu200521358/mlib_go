@@ -26,6 +26,9 @@ instruction="$(printf '// \u6307\u793A: miu200521358')"
 
 mapfile -d '' go_files < <(find "$repo_root" -type f -name '*.go' \
   -not -path '*/.git/*' \
+  -not -path '*/.gomodcache/*' \
+  -not -path '*/.gocache/*' \
+  -not -path '*/.gopath/*' \
   -not -path '*/vendor/*' \
   -not -path '*/node_modules/*' \
   -not -path '*/.cache/*' \
