@@ -370,13 +370,13 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.LEQUAL)
 
-	if selectionMode == state.SELECTED_VERTEX_MODE_POINT {
+	if selectionMode == state.SELECTED_VERTEX_MODE_POINT || selectionMode == state.SELECTED_VERTEX_MODE_BOX {
 		// カーソル軌跡は淡い黄色で表示する。
 		cursorLineColor := mgl32.Vec4{0.95, 1.0, 0.75, 0.8}
 		if len(cursorLinePositions) > 0 {
 			mr.drawCursorLine(shader, cursorLinePositions, cursorLineColor)
 		}
-		if len(removeCursorLinePositions) > 0 {
+		if selectionMode == state.SELECTED_VERTEX_MODE_POINT && len(removeCursorLinePositions) > 0 {
 			mr.drawCursorLine(shader, removeCursorLinePositions, cursorLineColor)
 		}
 	}

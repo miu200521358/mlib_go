@@ -285,10 +285,15 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 	removeSelectedCursorPositions := flattenCursorPositions(leftCursorRemoveWorldPositions, limit)
 	cursorLinePositions := []float32(nil)
 	removeCursorLinePositions := []float32(nil)
+	boxLinePositions := []float32(nil)
 	if showSelectedVertex && selectionMode == state.SELECTED_VERTEX_MODE_POINT {
 		// 軌跡表示は履歴全体を使うため、上限指定は行わない。
 		cursorLinePositions = flattenCursorPositions(vw.leftCursorWorldHistoryPositions, 0)
 		removeCursorLinePositions = flattenCursorPositions(vw.leftCursorRemoveWorldHistoryPositions, 0)
+	}
+	if showSelectedVertex && selectionMode == state.SELECTED_VERTEX_MODE_BOX &&
+		(vw.boxSelectionDragging || vw.boxSelectionPending) {
+		boxLinePositions = vw.buildBoxSelectionLinePositions(winW, winH, fbW, fbH)
 	}
 	applyPointSelection := len(selectedCursorPositions) > 0 || len(removeSelectedCursorPositions) > 0
 	removePointSelection := len(removeSelectedCursorPositions) > 0
@@ -402,6 +407,9 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 			if selectionMode == state.SELECTED_VERTEX_MODE_POINT && selectionRequest != nil {
 				selectionRequest.CursorLinePositions = cursorLinePositions
 				selectionRequest.RemoveCursorLinePositions = removeCursorLinePositions
+			}
+			if selectionMode == state.SELECTED_VERTEX_MODE_BOX && selectionRequest != nil {
+				selectionRequest.CursorLinePositions = boxLinePositions
 			}
 			switch selectionMode {
 			case state.SELECTED_VERTEX_MODE_BOX:
@@ -1326,6 +1334,50 @@ func (vw *ViewerWindow) consumeBoxSelectionRect(winW, winH, fbW, fbH int) (mmath
 	maxY = min(maxY, float64(fbH))
 
 	return mmath.Vec2{X: minX, Y: minY}, mmath.Vec2{X: maxX, Y: maxY}, remove, true
+}
+
+// buildBoxSelectionLinePositions はボックス選択矩形のライン頂点をワールド座標で生成する。
+func (vw *ViewerWindow) buildBoxSelectionLinePositions(winW, winH, fbW, fbH int) []float32 {
+	if vw == nil || vw.shader == nil || winW <= 0 || winH <= 0 || fbW <= 0 || fbH <= 0 {
+		return nil
+	}
+	scaleX := float64(fbW) / float64(winW)
+	scaleY := float64(fbH) / float64(winH)
+	startX := vw.boxSelectionStart.X * scaleX
+	startY := vw.boxSelectionStart.Y * scaleY
+	endX := vw.boxSelectionEnd.X * scaleX
+	endY := vw.boxSelectionEnd.Y * scaleY
+
+	minX := math.Min(startX, endX)
+	maxX := math.Max(startX, endX)
+	minY := math.Min(startY, endY)
+	maxY := math.Max(startY, endY)
+
+	minX = max(minX, 0)
+	minY = max(minY, 0)
+	maxX = min(maxX, float64(fbW))
+	maxY = min(maxY, float64(fbH))
+	if maxX-minX <= 0 || maxY-minY <= 0 {
+		return nil
+	}
+
+	// 画面矩形が一致するように、近平面近傍のワールド座標へ変換する。
+	// 近接しすぎると描画が消えることがあるため、少し奥に寄せる。
+	depth := float32(0.01)
+	p0 := vw.getWorldPosition(float32(minX), float32(minY), depth, fbW, fbH)
+	p1 := vw.getWorldPosition(float32(maxX), float32(minY), depth, fbW, fbH)
+	p2 := vw.getWorldPosition(float32(maxX), float32(maxY), depth, fbW, fbH)
+	p3 := vw.getWorldPosition(float32(minX), float32(maxY), depth, fbW, fbH)
+	if p0 == nil || p1 == nil || p2 == nil || p3 == nil {
+		return nil
+	}
+	return []float32{
+		float32(p0.X), float32(p0.Y), float32(p0.Z),
+		float32(p1.X), float32(p1.Y), float32(p1.Z),
+		float32(p2.X), float32(p2.Y), float32(p2.Z),
+		float32(p3.X), float32(p3.Y), float32(p3.Z),
+		float32(p0.X), float32(p0.Y), float32(p0.Z),
+	}
 }
 
 // toMgl32Mat4 はmmath.Mat4をmgl32.Mat4に変換する。
