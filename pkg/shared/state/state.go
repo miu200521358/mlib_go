@@ -206,6 +206,7 @@ type stateMotionSlot struct {
 
 type stateIndexSlot struct {
 	Indexes []int
+	Version uint64
 }
 
 // SharedState は共有状態の実装。
@@ -680,13 +681,30 @@ func (ss *SharedState) SelectedMaterialIndexes(viewerIndex, modelIndex int) []in
 	return cloneIntSlice(slot.Indexes)
 }
 
+// SelectedMaterialIndexesWithVersion は選択材質インデックスと更新バージョンを返す。
+// 返却するスライスは内部共有参照のため、呼び出し側で変更しないこと。
+func (ss *SharedState) SelectedMaterialIndexesWithVersion(viewerIndex, modelIndex int) ([]int, uint64) {
+	if viewerIndex < 0 || viewerIndex >= len(ss.selectedIndexes) {
+		return nil, 0
+	}
+	if modelIndex < 0 || modelIndex >= len(ss.selectedIndexes[viewerIndex]) {
+		return nil, 0
+	}
+	slot := ss.selectedIndexes[viewerIndex][modelIndex].Load().(stateIndexSlot)
+	return slot.Indexes, slot.Version
+}
+
 // SetSelectedMaterialIndexes は選択材質インデックスを設定する。
 func (ss *SharedState) SetSelectedMaterialIndexes(viewerIndex, modelIndex int, indexes []int) {
 	slot := ss.ensureIndexSlot(viewerIndex, modelIndex)
 	if slot == nil {
 		return
 	}
-	slot.Store(stateIndexSlot{Indexes: cloneIntSlice(indexes)})
+	nextVersion := uint64(1)
+	if current, ok := slot.Load().(stateIndexSlot); ok {
+		nextVersion = current.Version + 1
+	}
+	slot.Store(stateIndexSlot{Indexes: cloneIntSlice(indexes), Version: nextVersion})
 }
 
 // SelectedVertexIndexes は選択頂点インデックスを返す。
@@ -701,13 +719,30 @@ func (ss *SharedState) SelectedVertexIndexes(viewerIndex, modelIndex int) []int 
 	return cloneIntSlice(slot.Indexes)
 }
 
+// SelectedVertexIndexesWithVersion は選択頂点インデックスと更新バージョンを返す。
+// 返却するスライスは内部共有参照のため、呼び出し側で変更しないこと。
+func (ss *SharedState) SelectedVertexIndexesWithVersion(viewerIndex, modelIndex int) ([]int, uint64) {
+	if viewerIndex < 0 || viewerIndex >= len(ss.selectedVertexIndexes) {
+		return nil, 0
+	}
+	if modelIndex < 0 || modelIndex >= len(ss.selectedVertexIndexes[viewerIndex]) {
+		return nil, 0
+	}
+	slot := ss.selectedVertexIndexes[viewerIndex][modelIndex].Load().(stateIndexSlot)
+	return slot.Indexes, slot.Version
+}
+
 // SetSelectedVertexIndexes は選択頂点インデックスを設定する。
 func (ss *SharedState) SetSelectedVertexIndexes(viewerIndex, modelIndex int, indexes []int) {
 	slot := ss.ensureVertexIndexSlot(viewerIndex, modelIndex)
 	if slot == nil {
 		return
 	}
-	slot.Store(stateIndexSlot{Indexes: cloneIntSlice(indexes)})
+	nextVersion := uint64(1)
+	if current, ok := slot.Load().(stateIndexSlot); ok {
+		nextVersion = current.Version + 1
+	}
+	slot.Store(stateIndexSlot{Indexes: cloneIntSlice(indexes), Version: nextVersion})
 }
 
 // SelectedVertexMode は選択頂点のモードを返す。
@@ -874,8 +909,8 @@ func (ss *SharedState) ensureModelSlot(viewerIndex, modelIndex int) *atomic.Valu
 	}
 	ss.models[viewerIndex] = ensureSlotSlice(ss.models[viewerIndex], modelIndex, stateModelSlot{})
 	ss.motions[viewerIndex] = ensureSlotSlice(ss.motions[viewerIndex], modelIndex, stateMotionSlot{})
-	ss.selectedIndexes[viewerIndex] = ensureSlotSlice(ss.selectedIndexes[viewerIndex], modelIndex, stateIndexSlot{Indexes: []int{}})
-	ss.selectedVertexIndexes[viewerIndex] = ensureSlotSlice(ss.selectedVertexIndexes[viewerIndex], modelIndex, stateIndexSlot{Indexes: []int{}})
+	ss.selectedIndexes[viewerIndex] = ensureSlotSlice(ss.selectedIndexes[viewerIndex], modelIndex, stateIndexSlot{Indexes: []int{}, Version: 0})
+	ss.selectedVertexIndexes[viewerIndex] = ensureSlotSlice(ss.selectedVertexIndexes[viewerIndex], modelIndex, stateIndexSlot{Indexes: []int{}, Version: 0})
 	return &ss.models[viewerIndex][modelIndex]
 }
 
@@ -897,7 +932,7 @@ func (ss *SharedState) ensureIndexSlot(viewerIndex, modelIndex int) *atomic.Valu
 	if !ss.ensureViewerIndex(viewerIndex) {
 		return nil
 	}
-	ss.selectedIndexes[viewerIndex] = ensureSlotSlice(ss.selectedIndexes[viewerIndex], modelIndex, stateIndexSlot{Indexes: []int{}})
+	ss.selectedIndexes[viewerIndex] = ensureSlotSlice(ss.selectedIndexes[viewerIndex], modelIndex, stateIndexSlot{Indexes: []int{}, Version: 0})
 	return &ss.selectedIndexes[viewerIndex][modelIndex]
 }
 
@@ -908,7 +943,7 @@ func (ss *SharedState) ensureVertexIndexSlot(viewerIndex, modelIndex int) *atomi
 	if !ss.ensureViewerIndex(viewerIndex) {
 		return nil
 	}
-	ss.selectedVertexIndexes[viewerIndex] = ensureSlotSlice(ss.selectedVertexIndexes[viewerIndex], modelIndex, stateIndexSlot{Indexes: []int{}})
+	ss.selectedVertexIndexes[viewerIndex] = ensureSlotSlice(ss.selectedVertexIndexes[viewerIndex], modelIndex, stateIndexSlot{Indexes: []int{}, Version: 0})
 	return &ss.selectedVertexIndexes[viewerIndex][modelIndex]
 }
 

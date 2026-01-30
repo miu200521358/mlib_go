@@ -5,8 +5,6 @@
 package render
 
 import (
-	"slices"
-
 	"github.com/miu200521358/mlib_go/pkg/adapter/graphics_api"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
@@ -54,13 +52,20 @@ type ModelRenderer struct {
 	meshes []*MeshRenderer
 	// ボーン行列テクスチャ用の再利用バッファ
 	boneMatrixScratch []float32
+	// テクスチャ管理（解放のため保持）
+	textureManager *TextureManager
+	// 選択材質のマスク
+	selectedMaterialMask []bool
+	// 選択材質の更新バージョン
+	selectedMaterialVersion uint64
 }
 
 // NewModelRendererEmpty は空のModelRendererを生成する。
 func NewModelRendererEmpty() *ModelRenderer {
 	return &ModelRenderer{
-		ModelDrawer: &ModelDrawer{},
-		meshes:      make([]*MeshRenderer, 0),
+		ModelDrawer:             &ModelDrawer{},
+		meshes:                  make([]*MeshRenderer, 0),
+		selectedMaterialVersion: ^uint64(0),
 	}
 }
 
@@ -68,10 +73,11 @@ func NewModelRendererEmpty() *ModelRenderer {
 // ここでは、モデルのバッファ初期化や各材質ごとの MeshRenderer の生成も行います。
 func NewModelRenderer(windowIndex int, modelData *model.PmxModel) *ModelRenderer {
 	mr := &ModelRenderer{
-		ModelDrawer: &ModelDrawer{},
-		windowIndex: windowIndex,
-		Model:       modelData,
-		modelIndex:  0,
+		ModelDrawer:             &ModelDrawer{},
+		windowIndex:             windowIndex,
+		Model:                   modelData,
+		modelIndex:              0,
+		selectedMaterialVersion: ^uint64(0),
 	}
 
 	applyTextureTypesForRender(modelData)
@@ -100,6 +106,8 @@ func NewModelRenderer(windowIndex int, modelData *model.PmxModel) *ModelRenderer
 		mr.meshes[index] = NewMeshRenderer(factory, mr.faces, materialExt, prevVerticesCount)
 		prevVerticesCount += material.VerticesCount
 	}
+
+	mr.textureManager = tm
 
 	// モデルのハッシュ値を設定
 	mr.hash = modelData.Hash()
@@ -138,8 +146,42 @@ func (mr *ModelRenderer) Delete() {
 			mesh.delete()
 		}
 	}
+	if mr.textureManager != nil {
+		mr.textureManager.Delete()
+	}
 	// ModelDrawerのリソースも解放
 	mr.ModelDrawer.delete()
+}
+
+// updateSelectedMaterialMask は選択材質マスクを更新する。
+func (mr *ModelRenderer) updateSelectedMaterialMask(selectedMaterialIndexes []int, version uint64) {
+	if mr == nil {
+		return
+	}
+	materialCount := len(mr.meshes)
+	if materialCount == 0 {
+		mr.selectedMaterialMask = nil
+		mr.selectedMaterialVersion = version
+		return
+	}
+	if mr.selectedMaterialVersion == version && len(mr.selectedMaterialMask) == materialCount {
+		return
+	}
+
+	mask := mr.selectedMaterialMask
+	if mask == nil || len(mask) != materialCount {
+		mask = make([]bool, materialCount)
+	} else {
+		clear(mask)
+	}
+	for _, idx := range selectedMaterialIndexes {
+		if idx < 0 || idx >= materialCount {
+			continue
+		}
+		mask[idx] = true
+	}
+	mr.selectedMaterialMask = mask
+	mr.selectedMaterialVersion = version
 }
 
 // Render は、最新の変形情報 vmdDeltas とアプリケーション状態 appState に基づいてモデルを描画します。
@@ -164,11 +206,16 @@ func (mr *ModelRenderer) Render(
 	}
 	mr.boneMatrixScratch = paddedMatrixes
 
-	selectedMaterialIndexes := shared.SelectedMaterialIndexes(mr.windowIndex, mr.modelIndex)
+	selectedMaterialIndexes, selectedMaterialVersion := shared.SelectedMaterialIndexesWithVersion(mr.windowIndex, mr.modelIndex)
+	mr.updateSelectedMaterialMask(selectedMaterialIndexes, selectedMaterialVersion)
+	selectedMaterialMask := mr.selectedMaterialMask
 
 	// 各材質（メッシュ）ごとの描画
 	for i, mesh := range mr.meshes {
-		if mesh == nil || mesh.elemBuffer == nil || !slices.Contains(selectedMaterialIndexes, i) {
+		if mesh == nil || mesh.elemBuffer == nil {
+			continue
+		}
+		if selectedMaterialMask == nil || i < 0 || i >= len(selectedMaterialMask) || !selectedMaterialMask[i] {
 			// 頂点を持たない材質、選択されていない材質は描画しない
 			continue
 		}
