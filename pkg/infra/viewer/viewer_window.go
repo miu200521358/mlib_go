@@ -267,6 +267,10 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 
 	showSelectedVertex := vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX)
 	selectionMode := vw.selectedVertexMode()
+	selectionDepthMode := state.SELECTED_VERTEX_DEPTH_MODE_ALL
+	if vw.list != nil && vw.list.shared != nil {
+		selectionDepthMode = vw.list.shared.SelectedVertexDepthMode()
+	}
 	applyBoxSelection := false
 	boxSelectionRemove := false
 	boxSelectionMin := mmath.Vec2{}
@@ -427,6 +431,7 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 		if showSelectedVertex {
 			selectionRequest = &render.VertexSelectionRequest{
 				Mode:                      selectionMode,
+				DepthMode:                 selectionDepthMode,
 				Apply:                     false,
 				Remove:                    false,
 				CursorPositions:           cursorPositions,

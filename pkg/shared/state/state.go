@@ -108,6 +108,16 @@ const (
 	SELECTED_VERTEX_MODE_BOX
 )
 
+// SelectedVertexDepthMode は選択頂点の深度判定モードを表す。
+type SelectedVertexDepthMode int
+
+const (
+	// SELECTED_VERTEX_DEPTH_MODE_ALL は全面選択。
+	SELECTED_VERTEX_DEPTH_MODE_ALL SelectedVertexDepthMode = iota
+	// SELECTED_VERTEX_DEPTH_MODE_FRONT は最前面のみ選択。
+	SELECTED_VERTEX_DEPTH_MODE_FRONT
+)
+
 // IStateModel は共有状態で扱うモデルI/F。
 type IStateModel interface {
 	hashable.IHashable
@@ -178,6 +188,8 @@ type ISharedState interface {
 	SetSelectedVertexIndexes(viewerIndex, modelIndex int, indexes []int)
 	SelectedVertexMode() SelectedVertexMode
 	SetSelectedVertexMode(mode SelectedVertexMode)
+	SelectedVertexDepthMode() SelectedVertexDepthMode
+	SetSelectedVertexDepthMode(mode SelectedVertexDepthMode)
 	IsDeltaSaveEnabled(viewerIndex int) bool
 	SetDeltaSaveEnabled(viewerIndex int, enabled bool)
 	DeltaSaveIndex(viewerIndex int) int
@@ -211,36 +223,37 @@ type stateIndexSlot struct {
 
 // SharedState は共有状態の実装。
 type SharedState struct {
-	mu                    sync.Mutex
-	flags                 atomic.Uint64
-	frameValue            atomic.Value
-	maxFrameValue         atomic.Value
-	frameIntervalValue    atomic.Value
-	controlWindowPosition atomic.Value
-	controlWindowHandle   atomic.Int32
-	viewerWindowHandles   []atomic.Int32
-	focusedWindowHandle   atomic.Int32
-	controlWindowReady    atomic.Bool
-	viewerWindowReady     []atomic.Bool
-	controlWindowFocused  atomic.Bool
-	viewerWindowFocused   []atomic.Bool
-	fpsLimitTriggered     atomic.Bool
-	controlWindowMoving   atomic.Bool
-	closed                atomic.Bool
-	focusLinkEnabled      atomic.Bool
-	linkingFocus          atomic.Bool
-	models                [][]atomic.Value
-	motions               [][]atomic.Value
-	selectedIndexes       [][]atomic.Value
-	selectedVertexIndexes [][]atomic.Value
-	selectedVertexMode    atomic.Int32
-	deltaSaveEnabled      []atomic.Bool
-	deltaSaveIndexes      []atomic.Int32
-	deltaMotions          [][][]atomic.Value
-	physicsWorldMotions   []atomic.Value
-	physicsModelMotions   [][]atomic.Value
-	windMotions           []atomic.Value
-	physicsResetType      atomic.Int32
+	mu                      sync.Mutex
+	flags                   atomic.Uint64
+	frameValue              atomic.Value
+	maxFrameValue           atomic.Value
+	frameIntervalValue      atomic.Value
+	controlWindowPosition   atomic.Value
+	controlWindowHandle     atomic.Int32
+	viewerWindowHandles     []atomic.Int32
+	focusedWindowHandle     atomic.Int32
+	controlWindowReady      atomic.Bool
+	viewerWindowReady       []atomic.Bool
+	controlWindowFocused    atomic.Bool
+	viewerWindowFocused     []atomic.Bool
+	fpsLimitTriggered       atomic.Bool
+	controlWindowMoving     atomic.Bool
+	closed                  atomic.Bool
+	focusLinkEnabled        atomic.Bool
+	linkingFocus            atomic.Bool
+	models                  [][]atomic.Value
+	motions                 [][]atomic.Value
+	selectedIndexes         [][]atomic.Value
+	selectedVertexIndexes   [][]atomic.Value
+	selectedVertexMode      atomic.Int32
+	selectedVertexDepthMode atomic.Int32
+	deltaSaveEnabled        []atomic.Bool
+	deltaSaveIndexes        []atomic.Int32
+	deltaMotions            [][][]atomic.Value
+	physicsWorldMotions     []atomic.Value
+	physicsModelMotions     [][]atomic.Value
+	windMotions             []atomic.Value
+	physicsResetType        atomic.Int32
 }
 
 // NewSharedState は共有状態を生成する。
@@ -273,6 +286,7 @@ func NewSharedState(viewerCount int) *SharedState {
 	ss.controlWindowMoving.Store(false)
 	ss.closed.Store(false)
 	ss.selectedVertexMode.Store(int32(SELECTED_VERTEX_MODE_POINT))
+	ss.selectedVertexDepthMode.Store(int32(SELECTED_VERTEX_DEPTH_MODE_ALL))
 	ss.focusLinkEnabled.Store(true)
 	ss.linkingFocus.Store(false)
 	ss.physicsResetType.Store(int32(PHYSICS_RESET_TYPE_NONE))
@@ -753,6 +767,16 @@ func (ss *SharedState) SelectedVertexMode() SelectedVertexMode {
 // SetSelectedVertexMode は選択頂点のモードを設定する。
 func (ss *SharedState) SetSelectedVertexMode(mode SelectedVertexMode) {
 	ss.selectedVertexMode.Store(int32(mode))
+}
+
+// SelectedVertexDepthMode は選択頂点の深度判定モードを返す。
+func (ss *SharedState) SelectedVertexDepthMode() SelectedVertexDepthMode {
+	return SelectedVertexDepthMode(ss.selectedVertexDepthMode.Load())
+}
+
+// SetSelectedVertexDepthMode は選択頂点の深度判定モードを設定する。
+func (ss *SharedState) SetSelectedVertexDepthMode(mode SelectedVertexDepthMode) {
+	ss.selectedVertexDepthMode.Store(int32(mode))
 }
 
 // IsDeltaSaveEnabled は差分保存が有効か判定する。

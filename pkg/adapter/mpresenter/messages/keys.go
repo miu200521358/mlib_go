@@ -28,6 +28,8 @@ const (
 	HelpMaterialView                 = "材質ビュー説明"
 	LabelVertexView                  = "頂点ビュー"
 	HelpVertexView                   = "頂点ビュー説明"
+	LabelSelectedVertexDepthAll      = "&全面"
+	LabelSelectedVertexDepthFront    = "&最前面"
 	LabelAll                         = "全"
 	LabelInvert                      = "反"
 )

@@ -17,6 +17,7 @@ import (
 // VertexSelectionRequest は選択頂点の更新要求をまとめる。
 type VertexSelectionRequest struct {
 	Mode                      state.SelectedVertexMode
+	DepthMode                 state.SelectedVertexDepthMode
 	Apply                     bool
 	Remove                    bool
 	CursorPositions           []float32

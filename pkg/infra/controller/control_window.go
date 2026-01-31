@@ -9,6 +9,7 @@ import (
 	"io"
 	"strings"
 
+	"github.com/miu200521358/mlib_go/pkg/adapter/mpresenter/messages"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
 	baseerr "github.com/miu200521358/mlib_go/pkg/infra/base/err"
@@ -69,37 +70,39 @@ type ControlWindow struct {
 
 	leftButtonPressed bool
 
-	enabledFrameDropAction        *walk.Action
-	enabledPhysicsAction          *walk.Action
-	physicsResetAction            *walk.Action
-	showNormalAction              *walk.Action
-	showWireAction                *walk.Action
-	showOverrideUpperAction       *walk.Action
-	showOverrideLowerAction       *walk.Action
-	showOverrideNoneAction        *walk.Action
-	showSelectedVertexPointAction *walk.Action
-	showSelectedVertexBoxAction   *walk.Action
-	showBoneAllAction             *walk.Action
-	showBoneIkAction              *walk.Action
-	showBoneEffectorAction        *walk.Action
-	showBoneFixedAction           *walk.Action
-	showBoneRotateAction          *walk.Action
-	showBoneTranslateAction       *walk.Action
-	showBoneVisibleAction         *walk.Action
-	showRigidBodyFrontAction      *walk.Action
-	showRigidBodyBackAction       *walk.Action
-	showJointAction               *walk.Action
-	showInfoAction                *walk.Action
-	limitFps30Action              *walk.Action
-	limitFps60Action              *walk.Action
-	limitFpsUnLimitAction         *walk.Action
-	cameraSyncAction              *walk.Action
-	logLevelDebugAction           *walk.Action
-	logLevelVerboseAction         *walk.Action
-	logLevelIkVerboseAction       *walk.Action
-	logLevelPhysicsVerboseAction  *walk.Action
-	logLevelViewerVerboseAction   *walk.Action
-	linkWindowAction              *walk.Action
+	enabledFrameDropAction             *walk.Action
+	enabledPhysicsAction               *walk.Action
+	physicsResetAction                 *walk.Action
+	showNormalAction                   *walk.Action
+	showWireAction                     *walk.Action
+	showOverrideUpperAction            *walk.Action
+	showOverrideLowerAction            *walk.Action
+	showOverrideNoneAction             *walk.Action
+	showSelectedVertexPointAction      *walk.Action
+	showSelectedVertexBoxAction        *walk.Action
+	showSelectedVertexAllDepthAction   *walk.Action
+	showSelectedVertexFrontDepthAction *walk.Action
+	showBoneAllAction                  *walk.Action
+	showBoneIkAction                   *walk.Action
+	showBoneEffectorAction             *walk.Action
+	showBoneFixedAction                *walk.Action
+	showBoneRotateAction               *walk.Action
+	showBoneTranslateAction            *walk.Action
+	showBoneVisibleAction              *walk.Action
+	showRigidBodyFrontAction           *walk.Action
+	showRigidBodyBackAction            *walk.Action
+	showJointAction                    *walk.Action
+	showInfoAction                     *walk.Action
+	limitFps30Action                   *walk.Action
+	limitFps60Action                   *walk.Action
+	limitFpsUnLimitAction              *walk.Action
+	cameraSyncAction                   *walk.Action
+	logLevelDebugAction                *walk.Action
+	logLevelVerboseAction              *walk.Action
+	logLevelIkVerboseAction            *walk.Action
+	logLevelPhysicsVerboseAction       *walk.Action
+	logLevelViewerVerboseAction        *walk.Action
+	linkWindowAction                   *walk.Action
 
 	verboseSinks map[logging.VerboseIndex]logging.IVerboseSink
 }
@@ -705,6 +708,9 @@ func (cw *ControlWindow) buildViewerMenu() declarative.Menu {
 			declarative.Menu{Text: cw.t("&頂点選択"), Items: []declarative.MenuItem{
 				declarative.Action{Text: cw.t("&ボックス選択"), Checkable: true, OnTriggered: cw.TriggerShowSelectedVertexBox, AssignTo: &cw.showSelectedVertexBoxAction},
 				declarative.Action{Text: cw.t("&ポイント選択"), Checkable: true, OnTriggered: cw.TriggerShowSelectedVertexPoint, AssignTo: &cw.showSelectedVertexPointAction},
+				declarative.Separator{},
+				declarative.Action{Text: cw.t(messages.LabelSelectedVertexDepthAll), Checkable: true, OnTriggered: cw.TriggerShowSelectedVertexDepthAll, AssignTo: &cw.showSelectedVertexAllDepthAction},
+				declarative.Action{Text: cw.t(messages.LabelSelectedVertexDepthFront), Checkable: true, OnTriggered: cw.TriggerShowSelectedVertexDepthFront, AssignTo: &cw.showSelectedVertexFrontDepthAction},
 			}},
 			declarative.Separator{},
 			declarative.Action{Text: cw.t("&カメラ同期"), Checkable: true, OnTriggered: cw.TriggerCameraSync, AssignTo: &cw.cameraSyncAction},
@@ -892,6 +898,9 @@ func (cw *ControlWindow) TriggerShowSelectedVertexPoint() {
 	}
 	cw.SetDisplayFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX, enabled)
 	cw.SetDisplayFlag(state.STATE_FLAG_SHOW_WIRE, enabled)
+	if enabled {
+		cw.updateSelectedVertexDepthActions()
+	}
 }
 
 // TriggerShowSelectedVertexBox はボックス選択を切り替える。
@@ -903,6 +912,35 @@ func (cw *ControlWindow) TriggerShowSelectedVertexBox() {
 	}
 	cw.SetDisplayFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX, enabled)
 	cw.SetDisplayFlag(state.STATE_FLAG_SHOW_WIRE, enabled)
+	if enabled {
+		cw.updateSelectedVertexDepthActions()
+	}
+}
+
+// TriggerShowSelectedVertexDepthAll は頂点選択の深度判定を全面に切り替える。
+func (cw *ControlWindow) TriggerShowSelectedVertexDepthAll() {
+	enabled := cw.actionChecked(cw.showSelectedVertexAllDepthAction)
+	if !enabled {
+		cw.updateActionChecked(cw.showSelectedVertexAllDepthAction, true)
+		return
+	}
+	cw.updateActionChecked(cw.showSelectedVertexFrontDepthAction, false)
+	if cw.shared != nil {
+		cw.shared.SetSelectedVertexDepthMode(state.SELECTED_VERTEX_DEPTH_MODE_ALL)
+	}
+}
+
+// TriggerShowSelectedVertexDepthFront は頂点選択の深度判定を最前面に切り替える。
+func (cw *ControlWindow) TriggerShowSelectedVertexDepthFront() {
+	enabled := cw.actionChecked(cw.showSelectedVertexFrontDepthAction)
+	if !enabled {
+		cw.updateActionChecked(cw.showSelectedVertexFrontDepthAction, true)
+		return
+	}
+	cw.updateActionChecked(cw.showSelectedVertexAllDepthAction, false)
+	if cw.shared != nil {
+		cw.shared.SetSelectedVertexDepthMode(state.SELECTED_VERTEX_DEPTH_MODE_FRONT)
+	}
 }
 
 // TriggerShowBoneAll は全ボーン表示を切り替える。
@@ -1146,6 +1184,8 @@ func (cw *ControlWindow) updateDisplayAction(flag state.StateFlag, enabled bool)
 		if !enabled {
 			cw.updateActionChecked(cw.showSelectedVertexPointAction, false)
 			cw.updateActionChecked(cw.showSelectedVertexBoxAction, false)
+			cw.updateActionChecked(cw.showSelectedVertexAllDepthAction, false)
+			cw.updateActionChecked(cw.showSelectedVertexFrontDepthAction, false)
 			return
 		}
 		mode := state.SELECTED_VERTEX_MODE_POINT
@@ -1155,10 +1195,11 @@ func (cw *ControlWindow) updateDisplayAction(flag state.StateFlag, enabled bool)
 		if mode == state.SELECTED_VERTEX_MODE_BOX {
 			cw.updateActionChecked(cw.showSelectedVertexBoxAction, true)
 			cw.updateActionChecked(cw.showSelectedVertexPointAction, false)
-			return
+		} else {
+			cw.updateActionChecked(cw.showSelectedVertexPointAction, true)
+			cw.updateActionChecked(cw.showSelectedVertexBoxAction, false)
 		}
-		cw.updateActionChecked(cw.showSelectedVertexPointAction, true)
-		cw.updateActionChecked(cw.showSelectedVertexBoxAction, false)
+		cw.updateSelectedVertexDepthActions()
 	case state.STATE_FLAG_SHOW_BONE_ALL:
 		cw.updateActionChecked(cw.showBoneAllAction, enabled)
 	case state.STATE_FLAG_SHOW_BONE_IK:
@@ -1190,6 +1231,21 @@ func (cw *ControlWindow) updateDisplayAction(flag state.StateFlag, enabled bool)
 	case state.STATE_FLAG_PHYSICS_ENABLED:
 		cw.updateActionChecked(cw.enabledPhysicsAction, enabled)
 	}
+}
+
+// updateSelectedVertexDepthActions は頂点選択の深度判定メニュー状態を同期する。
+func (cw *ControlWindow) updateSelectedVertexDepthActions() {
+	if cw == nil || cw.shared == nil {
+		return
+	}
+	mode := cw.shared.SelectedVertexDepthMode()
+	if mode == state.SELECTED_VERTEX_DEPTH_MODE_FRONT {
+		cw.updateActionChecked(cw.showSelectedVertexFrontDepthAction, true)
+		cw.updateActionChecked(cw.showSelectedVertexAllDepthAction, false)
+		return
+	}
+	cw.updateActionChecked(cw.showSelectedVertexAllDepthAction, true)
+	cw.updateActionChecked(cw.showSelectedVertexFrontDepthAction, false)
 }
 
 // actionChecked はアクションのチェック状態を返す。

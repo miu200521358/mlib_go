@@ -275,6 +275,7 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	selectionRequest *VertexSelectionRequest,
 ) ([]int, int) {
 	selectionMode := state.SELECTED_VERTEX_MODE_POINT
+	depthMode := state.SELECTED_VERTEX_DEPTH_MODE_ALL
 	applySelection := false
 	removeSelection := false
 	cursorPositions := []float32(nil)
@@ -290,6 +291,7 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	hasRect := false
 	if selectionRequest != nil {
 		selectionMode = selectionRequest.Mode
+		depthMode = selectionRequest.DepthMode
 		applySelection = selectionRequest.Apply
 		removeSelection = selectionRequest.Remove
 		cursorPositions = selectionRequest.CursorPositions
@@ -438,7 +440,8 @@ func (mr *ModelRenderer) drawSelectedVertex(
 				if ok {
 					rectX0, rectY0, rectW, rectH, rectOk := selectionRectToPixels(minX, minY, maxX, maxY, screenWidth, screenHeight)
 					depthMap := []float32(nil)
-					if rectOk && shader != nil && shader.Msaa() != nil {
+					depthModeFront := depthMode == state.SELECTED_VERTEX_DEPTH_MODE_FRONT
+					if depthModeFront && rectOk && shader != nil && shader.Msaa() != nil {
 						if reader, ok := shader.Msaa().(interface {
 							ReadDepthRegion(x, y, width, height, framebufferHeight int) []float32
 						}); ok {
@@ -467,23 +470,26 @@ func (mr *ModelRenderer) drawSelectedVertex(
 						if screenX < minX || screenX > maxX || screenY < minY || screenY > maxY {
 							continue
 						}
-						if !rectOk || len(depthMap) != rectW*rectH {
-							continue
-						}
-						px := int(math.Floor(screenX))
-						py := int(math.Floor(screenY))
-						if px < rectX0 || py < rectY0 || px >= rectX0+rectW || py >= rectY0+rectH {
-							continue
-						}
-						ix := px - rectX0
-						iy := (rectH - 1) - (py - rectY0)
-						depthAt := depthMap[iy*rectW+ix]
-						if depthAt <= 0.0 || depthAt >= 1.0 {
-							continue
-						}
-						// 深度バッファ上で手前にある頂点のみ選択対象とする。
-						if depth > depthAt+depthTolerance {
-							continue
+						depthAt := float32(-1)
+						if depthModeFront {
+							if !rectOk || len(depthMap) != rectW*rectH {
+								continue
+							}
+							px := int(math.Floor(screenX))
+							py := int(math.Floor(screenY))
+							if px < rectX0 || py < rectY0 || px >= rectX0+rectW || py >= rectY0+rectH {
+								continue
+							}
+							ix := px - rectX0
+							iy := (rectH - 1) - (py - rectY0)
+							depthAt = depthMap[iy*rectW+ix]
+							if depthAt <= 0.0 || depthAt >= 1.0 {
+								continue
+							}
+							// 深度バッファ上で手前にある頂点のみ選択対象とする。
+							if depth > depthAt+depthTolerance {
+								continue
+							}
 						}
 						if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
 							logger.Verbose(
@@ -554,73 +560,83 @@ func (mr *ModelRenderer) drawSelectedVertex(
 					})
 				}
 				if len(candidates) > 0 {
-					activeCursorDepths := cursorDepths
-					if removeSelection && len(removeCursorDepths) > 0 {
-						activeCursorDepths = removeCursorDepths
-					}
-					rectX0, rectY0, rectW, rectH, rectOk := selectionRectToPixels(minX, minY, maxX, maxY, screenWidth, screenHeight)
-					depthMap := []float32(nil)
-					if rectOk && shader != nil && shader.Msaa() != nil {
-						if reader, ok := shader.Msaa().(interface {
-							ReadDepthRegion(x, y, width, height, framebufferHeight int) []float32
-						}); ok {
-							depthMap = reader.ReadDepthRegion(rectX0, rectY0, rectW, rectH, screenHeight)
-						}
-					}
-					depthTolerance := depthToleranceFromBuffer()
-					frontIndex := -1
-					frontDepthDiff := float32(math.MaxFloat32)
-					frontDepth := float32(math.MaxFloat32)
-					frontDistance := float32(math.MaxFloat32)
-					useCursorDepth := len(activeCursorDepths) > 0
-					// 画素深度で可視面を絞り込み、カーソル深度との差分が最小の頂点を選択する。
-					for _, candidate := range candidates {
-						if !rectOk || len(depthMap) != rectW*rectH {
-							continue
-						}
-						px := int(math.Floor(candidate.ScreenX))
-						py := int(math.Floor(candidate.ScreenY))
-						if px < rectX0 || py < rectY0 || px >= rectX0+rectW || py >= rectY0+rectH {
-							continue
-						}
-						ix := px - rectX0
-						iy := (rectH - 1) - (py - rectY0)
-						depthAt := depthMap[iy*rectW+ix]
-						if depthAt <= 0.0 || depthAt >= 1.0 {
-							continue
-						}
-						// 深度バッファ上で手前にある頂点のみ選択対象とする。
-						if candidate.Depth > depthAt+depthTolerance {
-							continue
-						}
-						if useCursorDepth {
-							depthDiff, ok := minCursorDepthDifference(candidate.Depth, activeCursorDepths)
-							if !ok {
+					if depthMode == state.SELECTED_VERTEX_DEPTH_MODE_ALL {
+						for _, candidate := range candidates {
+							if removeSelection {
+								delete(selectedSet, candidate.Index)
 								continue
 							}
-							if depthDiff < frontDepthDiff ||
-								(depthDiff == frontDepthDiff && candidate.Depth < frontDepth) ||
-								(depthDiff == frontDepthDiff && candidate.Depth == frontDepth && candidate.Distance < frontDistance) {
-								frontDepthDiff = depthDiff
+							selectedSet[candidate.Index] = struct{}{}
+						}
+					} else {
+						activeCursorDepths := cursorDepths
+						if removeSelection && len(removeCursorDepths) > 0 {
+							activeCursorDepths = removeCursorDepths
+						}
+						rectX0, rectY0, rectW, rectH, rectOk := selectionRectToPixels(minX, minY, maxX, maxY, screenWidth, screenHeight)
+						depthMap := []float32(nil)
+						if rectOk && shader != nil && shader.Msaa() != nil {
+							if reader, ok := shader.Msaa().(interface {
+								ReadDepthRegion(x, y, width, height, framebufferHeight int) []float32
+							}); ok {
+								depthMap = reader.ReadDepthRegion(rectX0, rectY0, rectW, rectH, screenHeight)
+							}
+						}
+						depthTolerance := depthToleranceFromBuffer()
+						frontIndex := -1
+						frontDepthDiff := float32(math.MaxFloat32)
+						frontDepth := float32(math.MaxFloat32)
+						frontDistance := float32(math.MaxFloat32)
+						useCursorDepth := len(activeCursorDepths) > 0
+						// 画素深度で可視面を絞り込み、カーソル深度との差分が最小の頂点を選択する。
+						for _, candidate := range candidates {
+							if !rectOk || len(depthMap) != rectW*rectH {
+								continue
+							}
+							px := int(math.Floor(candidate.ScreenX))
+							py := int(math.Floor(candidate.ScreenY))
+							if px < rectX0 || py < rectY0 || px >= rectX0+rectW || py >= rectY0+rectH {
+								continue
+							}
+							ix := px - rectX0
+							iy := (rectH - 1) - (py - rectY0)
+							depthAt := depthMap[iy*rectW+ix]
+							if depthAt <= 0.0 || depthAt >= 1.0 {
+								continue
+							}
+							// 深度バッファ上で手前にある頂点のみ選択対象とする。
+							if candidate.Depth > depthAt+depthTolerance {
+								continue
+							}
+							if useCursorDepth {
+								depthDiff, ok := minCursorDepthDifference(candidate.Depth, activeCursorDepths)
+								if !ok {
+									continue
+								}
+								if depthDiff < frontDepthDiff ||
+									(depthDiff == frontDepthDiff && candidate.Depth < frontDepth) ||
+									(depthDiff == frontDepthDiff && candidate.Depth == frontDepth && candidate.Distance < frontDistance) {
+									frontDepthDiff = depthDiff
+									frontDepth = candidate.Depth
+									frontDistance = candidate.Distance
+									frontIndex = candidate.Index
+								}
+								continue
+							}
+							// 深度取得できない場合は、最前面(最小深度)を優先する。
+							if candidate.Depth < frontDepth ||
+								(candidate.Depth == frontDepth && candidate.Distance < frontDistance) {
 								frontDepth = candidate.Depth
 								frontDistance = candidate.Distance
 								frontIndex = candidate.Index
 							}
-							continue
 						}
-						// 深度取得できない場合は、最前面(最小深度)を優先する。
-						if candidate.Depth < frontDepth ||
-							(candidate.Depth == frontDepth && candidate.Distance < frontDistance) {
-							frontDepth = candidate.Depth
-							frontDistance = candidate.Distance
-							frontIndex = candidate.Index
-						}
-					}
-					if frontIndex >= 0 {
-						if removeCursorPositions != nil {
-							delete(selectedSet, frontIndex)
-						} else {
-							selectedSet[frontIndex] = struct{}{}
+						if frontIndex >= 0 {
+							if removeCursorPositions != nil {
+								delete(selectedSet, frontIndex)
+							} else {
+								selectedSet[frontIndex] = struct{}{}
+							}
 						}
 					}
 				}
