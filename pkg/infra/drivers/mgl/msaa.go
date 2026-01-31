@@ -17,14 +17,14 @@ type msaaConfig struct {
 
 // MsaaBuffer はMSAA用FBOの実装。
 type MsaaBuffer struct {
-	config              msaaConfig
-	msFBO               uint32
-	colorBufferMS       uint32
-	depthBufferMS       uint32
-	colorBuffer         uint32
-	depthBuffer         uint32
-	resolveFBO          uint32
-	initErr             error
+	config        msaaConfig
+	msFBO         uint32
+	colorBufferMS uint32
+	depthBufferMS uint32
+	colorBuffer   uint32
+	depthBuffer   uint32
+	resolveFBO    uint32
+	initErr       error
 }
 
 // NewMsaaBuffer はMSAAバッファを生成する。
@@ -95,12 +95,19 @@ func (m *MsaaBuffer) initError() error {
 func (m *MsaaBuffer) ReadDepthAt(x, y, width, height int) float32 {
 	_ = width
 	_ = height
+	var readFBO int32
+	var drawFBO int32
+	gl.GetIntegerv(gl.READ_FRAMEBUFFER_BINDING, &readFBO)
+	gl.GetIntegerv(gl.DRAW_FRAMEBUFFER_BINDING, &drawFBO)
+
 	gl.BindFramebuffer(gl.FRAMEBUFFER, m.resolveFBO)
 
 	var depth float32
 	gl.ReadPixels(int32(x), int32(m.config.height-y), 1, 1, gl.DEPTH_COMPONENT, gl.FLOAT, gl.Ptr(&depth))
 
-	m.Unbind()
+	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, uint32(readFBO))
+	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, uint32(drawFBO))
+	gl.BindTexture(gl.TEXTURE_2D, 0)
 
 	return depth
 }
@@ -110,6 +117,11 @@ func (m *MsaaBuffer) ReadDepthRegion(x, y, width, height, framebufferHeight int)
 	if width <= 0 || height <= 0 || framebufferHeight <= 0 {
 		return nil
 	}
+	var readFBO int32
+	var drawFBO int32
+	gl.GetIntegerv(gl.READ_FRAMEBUFFER_BINDING, &readFBO)
+	gl.GetIntegerv(gl.DRAW_FRAMEBUFFER_BINDING, &drawFBO)
+
 	gl.BindFramebuffer(gl.FRAMEBUFFER, m.resolveFBO)
 
 	depth := make([]float32, width*height)
@@ -119,7 +131,9 @@ func (m *MsaaBuffer) ReadDepthRegion(x, y, width, height, framebufferHeight int)
 	}
 	gl.ReadPixels(int32(x), int32(readY), int32(width), int32(height), gl.DEPTH_COMPONENT, gl.FLOAT, gl.Ptr(&depth[0]))
 
-	m.Unbind()
+	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, uint32(readFBO))
+	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, uint32(drawFBO))
+	gl.BindTexture(gl.TEXTURE_2D, 0)
 
 	return depth
 }
@@ -155,6 +169,24 @@ func (m *MsaaBuffer) Resolve() {
 		gl.COLOR_BUFFER_BIT, gl.NEAREST,
 	)
 	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, 0)
+}
+
+// ResolveDepth は深度のみを解決して読み出し用FBOへ反映する。
+func (m *MsaaBuffer) ResolveDepth() {
+	var readFBO int32
+	var drawFBO int32
+	gl.GetIntegerv(gl.READ_FRAMEBUFFER_BINDING, &readFBO)
+	gl.GetIntegerv(gl.DRAW_FRAMEBUFFER_BINDING, &drawFBO)
+
+	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, m.msFBO)
+	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, m.resolveFBO)
+	gl.BlitFramebuffer(
+		0, 0, int32(m.config.width), int32(m.config.height),
+		0, 0, int32(m.config.width), int32(m.config.height),
+		gl.DEPTH_BUFFER_BIT, gl.NEAREST,
+	)
+	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, uint32(readFBO))
+	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, uint32(drawFBO))
 }
 
 // Delete はMSAAリソースを解放する。

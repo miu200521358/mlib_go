@@ -80,6 +80,11 @@ func (m *IntermediateMsaaBuffer) initError() error {
 
 // ReadDepthAt は指定座標の深度値を読み取る。
 func (m *IntermediateMsaaBuffer) ReadDepthAt(x, y, width, height int) float32 {
+	var readFBO int32
+	var drawFBO int32
+	gl.GetIntegerv(gl.READ_FRAMEBUFFER_BINDING, &readFBO)
+	gl.GetIntegerv(gl.DRAW_FRAMEBUFFER_BINDING, &drawFBO)
+
 	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, m.msaaFBO)
 	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, m.intermediateFBO)
 	gl.BlitFramebuffer(
@@ -96,7 +101,8 @@ func (m *IntermediateMsaaBuffer) ReadDepthAt(x, y, width, height int) float32 {
 	var depth float32
 	gl.ReadPixels(int32(x), int32(height-y), 1, 1, gl.DEPTH_COMPONENT, gl.FLOAT, gl.Ptr(&depth))
 
-	m.Unbind()
+	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, uint32(readFBO))
+	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, uint32(drawFBO))
 
 	return depth
 }
@@ -106,6 +112,11 @@ func (m *IntermediateMsaaBuffer) ReadDepthRegion(x, y, width, height, framebuffe
 	if width <= 0 || height <= 0 || framebufferHeight <= 0 {
 		return nil
 	}
+	var readFBO int32
+	var drawFBO int32
+	gl.GetIntegerv(gl.READ_FRAMEBUFFER_BINDING, &readFBO)
+	gl.GetIntegerv(gl.DRAW_FRAMEBUFFER_BINDING, &drawFBO)
+
 	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, m.msaaFBO)
 	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, m.intermediateFBO)
 	gl.BlitFramebuffer(
@@ -125,7 +136,8 @@ func (m *IntermediateMsaaBuffer) ReadDepthRegion(x, y, width, height, framebuffe
 		gl.ReadPixels(int32(x), int32(readY), int32(width), int32(height), gl.DEPTH_COMPONENT, gl.FLOAT, gl.Ptr(&depth[0]))
 	}
 
-	m.Unbind()
+	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, uint32(readFBO))
+	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, uint32(drawFBO))
 
 	return depth
 }
@@ -157,6 +169,24 @@ func (m *IntermediateMsaaBuffer) Resolve() {
 		gl.COLOR_BUFFER_BIT, gl.NEAREST,
 	)
 	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, 0)
+}
+
+// ResolveDepth は深度のみを解決して読み出し用FBOへ反映する。
+func (m *IntermediateMsaaBuffer) ResolveDepth() {
+	var readFBO int32
+	var drawFBO int32
+	gl.GetIntegerv(gl.READ_FRAMEBUFFER_BINDING, &readFBO)
+	gl.GetIntegerv(gl.DRAW_FRAMEBUFFER_BINDING, &drawFBO)
+
+	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, m.msaaFBO)
+	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, m.intermediateFBO)
+	gl.BlitFramebuffer(
+		0, 0, int32(m.config.width), int32(m.config.height),
+		0, 0, int32(m.config.width), int32(m.config.height),
+		gl.DEPTH_BUFFER_BIT, gl.NEAREST,
+	)
+	gl.BindFramebuffer(gl.READ_FRAMEBUFFER, uint32(readFBO))
+	gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, uint32(drawFBO))
 }
 
 // Delete はMSAAリソースを解放する。

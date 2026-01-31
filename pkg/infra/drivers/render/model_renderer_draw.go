@@ -106,6 +106,10 @@ func (mr *ModelRenderer) drawNormal(windowIndex int, shader graphics_api.IShader
 	program := shader.Program(graphics_api.ProgramTypeNormal)
 	gl.UseProgram(program)
 
+	// 法線表示は深度を書き換えない。
+	gl.DepthMask(false)
+	defer gl.DepthMask(true)
+
 	mr.normalBufferHandle.Bind()
 	mr.normalIbo.Bind()
 
@@ -135,6 +139,9 @@ func (mr *ModelRenderer) drawBone(windowIndex int, shader graphics_api.IShader, 
 	// モデルの前面にボーンを描画するため、深度テストの設定を変更
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.ALWAYS)
+	// ボーン表示は深度を書き換えない。
+	gl.DepthMask(false)
+	defer gl.DepthMask(true)
 
 	program := shader.Program(graphics_api.ProgramTypeBone)
 	gl.UseProgram(program)
@@ -231,6 +238,9 @@ func (mr *ModelRenderer) drawCursorLine(shader graphics_api.IShader, cursorPosit
 	// モデルの前面に描画するため深度テストを一時無効化
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.ALWAYS)
+	// カーソル線は深度を書き換えない。
+	gl.DepthMask(false)
+	defer gl.DepthMask(true)
 
 	program := shader.Program(graphics_api.ProgramTypeCursor)
 	gl.UseProgram(program)
@@ -268,7 +278,9 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	applySelection := false
 	removeSelection := false
 	cursorPositions := []float32(nil)
+	cursorDepths := []float32(nil)
 	removeCursorPositions := []float32(nil)
+	removeCursorDepths := []float32(nil)
 	cursorLinePositions := []float32(nil)
 	removeCursorLinePositions := []float32(nil)
 	screenWidth := 0
@@ -281,7 +293,9 @@ func (mr *ModelRenderer) drawSelectedVertex(
 		applySelection = selectionRequest.Apply
 		removeSelection = selectionRequest.Remove
 		cursorPositions = selectionRequest.CursorPositions
+		cursorDepths = selectionRequest.CursorDepths
 		removeCursorPositions = selectionRequest.RemoveCursorPositions
+		removeCursorDepths = selectionRequest.RemoveCursorDepths
 		cursorLinePositions = selectionRequest.CursorLinePositions
 		removeCursorLinePositions = selectionRequest.RemoveCursorLinePositions
 		screenWidth = selectionRequest.ScreenWidth
@@ -350,6 +364,8 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	if len(srcCursorPositions) > len(cursorValues) {
 		srcCursorPositions = srcCursorPositions[:len(cursorValues)]
 	}
+	cursorDepths = truncateCursorDepths(cursorDepths, len(srcCursorPositions)/3)
+	removeCursorDepths = truncateCursorDepths(removeCursorDepths, len(srcCursorPositions)/3)
 	copy(cursorValues[:], srcCursorPositions)
 	gl.Uniform3fv(cursorPositionsUniform, maxCursorPositions, &cursorValues[0])
 
@@ -429,7 +445,7 @@ func (mr *ModelRenderer) drawSelectedVertex(
 							depthMap = reader.ReadDepthRegion(rectX0, rectY0, rectW, rectH, screenHeight)
 						}
 					}
-					const depthEpsilon = 0.00001
+					depthTolerance := depthToleranceFromBuffer()
 					logger := logging.DefaultLogger()
 					for i := 0; i+3 < len(positions); i += 4 {
 						if positions[i+3] < 0 {
@@ -451,22 +467,23 @@ func (mr *ModelRenderer) drawSelectedVertex(
 						if screenX < minX || screenX > maxX || screenY < minY || screenY > maxY {
 							continue
 						}
-						depthAt := float32(-1)
-						if rectOk && len(depthMap) == rectW*rectH {
-							px := int(math.Floor(screenX))
-							py := int(math.Floor(screenY))
-							if px < rectX0 || py < rectY0 || px >= rectX0+rectW || py >= rectY0+rectH {
-								continue
-							}
-							ix := px - rectX0
-							iy := (rectH - 1) - (py - rectY0)
-							depthAt = depthMap[iy*rectW+ix]
-							if depthAt <= 0.0 || depthAt >= 1.0 {
-								continue
-							}
-							if math.Abs(float64(depth-depthAt)) > depthEpsilon {
-								continue
-							}
+						if !rectOk || len(depthMap) != rectW*rectH {
+							continue
+						}
+						px := int(math.Floor(screenX))
+						py := int(math.Floor(screenY))
+						if px < rectX0 || py < rectY0 || px >= rectX0+rectW || py >= rectY0+rectH {
+							continue
+						}
+						ix := px - rectX0
+						iy := (rectH - 1) - (py - rectY0)
+						depthAt := depthMap[iy*rectW+ix]
+						if depthAt <= 0.0 || depthAt >= 1.0 {
+							continue
+						}
+						// 深度バッファ上で手前にある頂点のみ選択対象とする。
+						if depth > depthAt+depthTolerance {
+							continue
 						}
 						if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
 							logger.Verbose(
@@ -484,27 +501,128 @@ func (mr *ModelRenderer) drawSelectedVertex(
 				}
 			}
 		default:
-			frontIndex := -1
-			frontDepth := float32(math.MaxFloat32)
-			for i := 0; i+3 < len(positions); i += 4 {
-				depth := positions[i+3]
-				if depth < 0 {
-					continue
+			view, projection, ok := selectionViewProjection(shader, screenWidth, screenHeight)
+			if ok {
+				type candidate struct {
+					Index    int
+					ScreenX  float64
+					ScreenY  float64
+					Depth    float32
+					Distance float32
 				}
-				idx := i / 4
-				if visibleVertexFlags != nil && !visibleVertexFlags[idx] {
-					continue
+				candidates := make([]candidate, 0)
+				minX := math.MaxFloat64
+				minY := math.MaxFloat64
+				maxX := -math.MaxFloat64
+				maxY := -math.MaxFloat64
+				for i := 0; i+3 < len(positions); i += 4 {
+					distance := positions[i+3]
+					if distance < 0 {
+						continue
+					}
+					idx := i / 4
+					if visibleVertexFlags != nil && !visibleVertexFlags[idx] {
+						continue
+					}
+					pos := mmath.Vec3{
+						Vec: r3.Vec{
+							X: float64(positions[i]), Y: float64(positions[i+1]), Z: float64(positions[i+2]),
+						},
+					}
+					screenX, screenY, depth, ok := projectToScreenForSelection(pos, view, projection, screenWidth, screenHeight)
+					if !ok {
+						continue
+					}
+					if screenX < minX {
+						minX = screenX
+					}
+					if screenY < minY {
+						minY = screenY
+					}
+					if screenX > maxX {
+						maxX = screenX
+					}
+					if screenY > maxY {
+						maxY = screenY
+					}
+					candidates = append(candidates, candidate{
+						Index:    idx,
+						ScreenX:  screenX,
+						ScreenY:  screenY,
+						Depth:    depth,
+						Distance: distance,
+					})
 				}
-				if depth < frontDepth {
-					frontDepth = depth
-					frontIndex = idx
-				}
-			}
-			if frontIndex >= 0 {
-				if removeCursorPositions != nil {
-					delete(selectedSet, frontIndex)
-				} else {
-					selectedSet[frontIndex] = struct{}{}
+				if len(candidates) > 0 {
+					activeCursorDepths := cursorDepths
+					if removeSelection && len(removeCursorDepths) > 0 {
+						activeCursorDepths = removeCursorDepths
+					}
+					rectX0, rectY0, rectW, rectH, rectOk := selectionRectToPixels(minX, minY, maxX, maxY, screenWidth, screenHeight)
+					depthMap := []float32(nil)
+					if rectOk && shader != nil && shader.Msaa() != nil {
+						if reader, ok := shader.Msaa().(interface {
+							ReadDepthRegion(x, y, width, height, framebufferHeight int) []float32
+						}); ok {
+							depthMap = reader.ReadDepthRegion(rectX0, rectY0, rectW, rectH, screenHeight)
+						}
+					}
+					depthTolerance := depthToleranceFromBuffer()
+					frontIndex := -1
+					frontDepthDiff := float32(math.MaxFloat32)
+					frontDepth := float32(math.MaxFloat32)
+					frontDistance := float32(math.MaxFloat32)
+					useCursorDepth := len(activeCursorDepths) > 0
+					// 画素深度で可視面を絞り込み、カーソル深度との差分が最小の頂点を選択する。
+					for _, candidate := range candidates {
+						if !rectOk || len(depthMap) != rectW*rectH {
+							continue
+						}
+						px := int(math.Floor(candidate.ScreenX))
+						py := int(math.Floor(candidate.ScreenY))
+						if px < rectX0 || py < rectY0 || px >= rectX0+rectW || py >= rectY0+rectH {
+							continue
+						}
+						ix := px - rectX0
+						iy := (rectH - 1) - (py - rectY0)
+						depthAt := depthMap[iy*rectW+ix]
+						if depthAt <= 0.0 || depthAt >= 1.0 {
+							continue
+						}
+						// 深度バッファ上で手前にある頂点のみ選択対象とする。
+						if candidate.Depth > depthAt+depthTolerance {
+							continue
+						}
+						if useCursorDepth {
+							depthDiff, ok := minCursorDepthDifference(candidate.Depth, activeCursorDepths)
+							if !ok {
+								continue
+							}
+							if depthDiff < frontDepthDiff ||
+								(depthDiff == frontDepthDiff && candidate.Depth < frontDepth) ||
+								(depthDiff == frontDepthDiff && candidate.Depth == frontDepth && candidate.Distance < frontDistance) {
+								frontDepthDiff = depthDiff
+								frontDepth = candidate.Depth
+								frontDistance = candidate.Distance
+								frontIndex = candidate.Index
+							}
+							continue
+						}
+						// 深度取得できない場合は、最前面(最小深度)を優先する。
+						if candidate.Depth < frontDepth ||
+							(candidate.Depth == frontDepth && candidate.Distance < frontDistance) {
+							frontDepth = candidate.Depth
+							frontDistance = candidate.Distance
+							frontIndex = candidate.Index
+						}
+					}
+					if frontIndex >= 0 {
+						if removeCursorPositions != nil {
+							delete(selectedSet, frontIndex)
+						} else {
+							selectedSet[frontIndex] = struct{}{}
+						}
+					}
 				}
 			}
 		}
@@ -532,6 +650,47 @@ func (mr *ModelRenderer) drawSelectedVertex(
 
 	// 選択頂点インデックスの更新結果を返す。
 	return selectedSetToSlice(selectedSet), hoverIndex
+}
+
+// truncateCursorDepths はカーソル深度配列をカーソル位置数に合わせて切り詰める。
+func truncateCursorDepths(depths []float32, positionCount int) []float32 {
+	if len(depths) == 0 || positionCount <= 0 {
+		return nil
+	}
+	if positionCount >= len(depths) {
+		return depths
+	}
+	return depths[:positionCount]
+}
+
+// depthToleranceFromBuffer は深度バッファの量子化幅から比較用の許容値を算出する。
+// OpenGL定数が参照できない環境があるため、ここでは24bitを既定値として扱う。
+func depthToleranceFromBuffer() float32 {
+	const depthBits = uint(24)
+	const maxValue = float32((1 << depthBits) - 1)
+	step := 1.0 / maxValue
+	return step * 0.5
+}
+
+// minCursorDepthDifference は候補深度とカーソル深度の差分最小値を返す。
+func minCursorDepthDifference(depth float32, cursorDepths []float32) (float32, bool) {
+	if len(cursorDepths) == 0 {
+		return 0, false
+	}
+	minDiff := float32(math.MaxFloat32)
+	for _, cursorDepth := range cursorDepths {
+		if cursorDepth <= 0.0 || cursorDepth >= 1.0 {
+			continue
+		}
+		diff := float32(math.Abs(float64(depth - cursorDepth)))
+		if diff < minDiff {
+			minDiff = diff
+		}
+	}
+	if minDiff == float32(math.MaxFloat32) {
+		return 0, false
+	}
+	return minDiff, true
 }
 
 // selectionViewProjection は選択判定用のビュー・射影行列を構築する。

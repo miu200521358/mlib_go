@@ -267,36 +267,6 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 
 	showSelectedVertex := vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX)
 	selectionMode := vw.selectedVertexMode()
-	var leftCursorWorldPositions []*mmath.Vec3
-	var leftCursorRemoveWorldPositions []*mmath.Vec3
-	if showSelectedVertex && selectionMode == state.SELECTED_VERTEX_MODE_POINT {
-		leftCursorWorldPositions, leftCursorRemoveWorldPositions = vw.updateCursorPositions()
-	}
-
-	limit := 0
-	if vw.list.appConfig != nil {
-		limit = vw.list.appConfig.CursorPositionLimit
-	}
-	var hoverCursorPositions []float32
-	if showSelectedVertex {
-		hoverCursorPositions = vw.buildCursorPositions(vw.cursorX, vw.cursorY, limit)
-	}
-	selectedCursorPositions := flattenCursorPositions(leftCursorWorldPositions, limit)
-	removeSelectedCursorPositions := flattenCursorPositions(leftCursorRemoveWorldPositions, limit)
-	cursorLinePositions := []float32(nil)
-	removeCursorLinePositions := []float32(nil)
-	boxLinePositions := []float32(nil)
-	if showSelectedVertex && selectionMode == state.SELECTED_VERTEX_MODE_POINT {
-		// 軌跡表示は履歴全体を使うため、上限指定は行わない。
-		cursorLinePositions = flattenCursorPositions(vw.leftCursorWorldHistoryPositions, 0)
-		removeCursorLinePositions = flattenCursorPositions(vw.leftCursorRemoveWorldHistoryPositions, 0)
-	}
-	if showSelectedVertex && selectionMode == state.SELECTED_VERTEX_MODE_BOX &&
-		(vw.boxSelectionDragging || vw.boxSelectionPending) {
-		boxLinePositions = vw.buildBoxSelectionLinePositions(winW, winH, fbW, fbH)
-	}
-	applyPointSelection := len(selectedCursorPositions) > 0 || len(removeSelectedCursorPositions) > 0
-	removePointSelection := len(removeSelectedCursorPositions) > 0
 	applyBoxSelection := false
 	boxSelectionRemove := false
 	boxSelectionMin := mmath.Vec2{}
@@ -364,6 +334,7 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 		debugBoneHover = vw.boneHighlighter.DebugBoneHoverInfo()
 	}
 
+	baseResults := make([]*render.ModelRenderBaseResult, len(vw.modelRenderers))
 	for i, renderer := range vw.modelRenderers {
 		if renderer == nil || renderer.Model == nil {
 			continue
@@ -379,12 +350,78 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 		renderer.SetModelIndex(i)
 
 		vmdDeltas := vw.vmdDeltas[i]
+		baseResults[i] = renderer.RenderBase(
+			vw.shader,
+			vw.list.shared,
+			vmdDeltas,
+			debugBoneHover,
+		)
+	}
+
+	var leftCursorWorldPositions []*mmath.Vec3
+	var leftCursorDepths []float32
+	var leftCursorRemoveWorldPositions []*mmath.Vec3
+	var leftCursorRemoveDepths []float32
+	hoverCursorPositions := []float32(nil)
+	selectedCursorPositions := []float32(nil)
+	selectedCursorDepths := []float32(nil)
+	removeSelectedCursorPositions := []float32(nil)
+	removeSelectedCursorDepths := []float32(nil)
+	cursorLinePositions := []float32(nil)
+	removeCursorLinePositions := []float32(nil)
+	boxLinePositions := []float32(nil)
+	applyPointSelection := false
+	removePointSelection := false
+	if showSelectedVertex {
+		if resolver, ok := vw.shader.Msaa().(interface {
+			ResolveDepth()
+		}); ok {
+			resolver.ResolveDepth()
+		}
+		if selectionMode == state.SELECTED_VERTEX_MODE_POINT {
+			leftCursorWorldPositions, leftCursorDepths, leftCursorRemoveWorldPositions, leftCursorRemoveDepths = vw.updateCursorPositions()
+		}
+		limit := 0
+		if vw.list.appConfig != nil {
+			limit = vw.list.appConfig.CursorPositionLimit
+		}
+		hoverCursorPositions = vw.buildCursorPositions(vw.cursorX, vw.cursorY, limit)
+		selectedCursorPositions = flattenCursorPositions(leftCursorWorldPositions, limit)
+		selectedCursorDepths = flattenCursorDepths(leftCursorDepths, limit)
+		removeSelectedCursorPositions = flattenCursorPositions(leftCursorRemoveWorldPositions, limit)
+		removeSelectedCursorDepths = flattenCursorDepths(leftCursorRemoveDepths, limit)
+		if selectionMode == state.SELECTED_VERTEX_MODE_POINT {
+			// 軌跡表示は履歴全体を使うため、上限指定は行わない。
+			cursorLinePositions = flattenCursorPositions(vw.leftCursorWorldHistoryPositions, 0)
+			removeCursorLinePositions = flattenCursorPositions(vw.leftCursorRemoveWorldHistoryPositions, 0)
+		}
+		if selectionMode == state.SELECTED_VERTEX_MODE_BOX &&
+			(vw.boxSelectionDragging || vw.boxSelectionPending) {
+			boxLinePositions = vw.buildBoxSelectionLinePositions(winW, winH, fbW, fbH)
+		}
+		applyPointSelection = len(selectedCursorPositions) > 0 || len(removeSelectedCursorPositions) > 0
+		removePointSelection = len(removeSelectedCursorPositions) > 0
+	}
+
+	for i, renderer := range vw.modelRenderers {
+		if renderer == nil || renderer.Model == nil {
+			continue
+		}
+		if i >= len(vw.vmdDeltas) || vw.vmdDeltas[i] == nil {
+			continue
+		}
+		base := baseResults[i]
+		if base == nil {
+			continue
+		}
 		selectedVertexIndexes := []int{}
 		if showSelectedVertex {
 			selectedVertexIndexes = vw.list.shared.SelectedVertexIndexes(vw.windowIndex, i)
 		}
 		cursorPositions := hoverCursorPositions
+		cursorDepths := []float32(nil)
 		removeCursorPositions := []float32(nil)
+		removeCursorDepths := []float32(nil)
 		applySelectionForModel := false
 		selectionRequest := (*render.VertexSelectionRequest)(nil)
 		if showSelectedVertex {
@@ -393,7 +430,9 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 				Apply:                     false,
 				Remove:                    false,
 				CursorPositions:           cursorPositions,
+				CursorDepths:              cursorDepths,
 				RemoveCursorPositions:     removeCursorPositions,
+				RemoveCursorDepths:        removeCursorDepths,
 				CursorLinePositions:       nil,
 				RemoveCursorLinePositions: nil,
 				ScreenWidth:               fbW,
@@ -423,25 +462,29 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 				if applyPointSelection && selectionRequest != nil {
 					if removePointSelection {
 						cursorPositions = removeSelectedCursorPositions
+						cursorDepths = removeSelectedCursorDepths
 						removeCursorPositions = cursorPositions
+						removeCursorDepths = cursorDepths
 					} else {
 						cursorPositions = selectedCursorPositions
+						cursorDepths = selectedCursorDepths
 					}
 					selectionRequest.CursorPositions = cursorPositions
+					selectionRequest.CursorDepths = cursorDepths
 					selectionRequest.RemoveCursorPositions = removeCursorPositions
+					selectionRequest.RemoveCursorDepths = removeCursorDepths
 					selectionRequest.Apply = true
 					selectionRequest.Remove = removePointSelection
 					applySelectionForModel = true
 				}
 			}
 		}
-		updatedSelected, hoverIndex := renderer.Render(
+		updatedSelected, hoverIndex := renderer.RenderSelection(
 			vw.shader,
 			vw.list.shared,
-			vmdDeltas,
-			debugBoneHover,
 			selectedVertexIndexes,
 			selectionRequest,
+			base,
 		)
 		if applySelectionForModel {
 			vw.list.shared.SetSelectedVertexIndexes(vw.windowIndex, i, updatedSelected)
@@ -858,23 +901,25 @@ func (vw *ViewerWindow) cursorPosCallback(_ *glfw.Window, xpos, ypos float64) {
 }
 
 // updateCursorPositions は左クリックで記録したスクリーン座標をワールド座標に変換する。
-func (vw *ViewerWindow) updateCursorPositions() ([]*mmath.Vec3, []*mmath.Vec3) {
+func (vw *ViewerWindow) updateCursorPositions() ([]*mmath.Vec3, []float32, []*mmath.Vec3, []float32) {
 	if vw == nil || vw.shader == nil || vw.list == nil || vw.list.shared == nil {
-		return nil, nil
+		return nil, nil, nil, nil
 	}
 	if !vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) {
-		return nil, nil
+		return nil, nil, nil, nil
 	}
 	if vw.selectedVertexMode() != state.SELECTED_VERTEX_MODE_POINT {
-		return nil, nil
+		return nil, nil, nil, nil
 	}
 	leftCursorWorldPositions := make([]*mmath.Vec3, 0)
+	leftCursorDepths := make([]float32, 0)
 	leftCursorRemoveWorldPositions := make([]*mmath.Vec3, 0)
+	leftCursorRemoveDepths := make([]float32, 0)
 
 	winW, winH := vw.GetSize()
 	fbW, fbH := vw.GetFramebufferSize()
 	if fbW <= 0 || fbH <= 0 {
-		return leftCursorWorldPositions, leftCursorRemoveWorldPositions
+		return leftCursorWorldPositions, leftCursorDepths, leftCursorRemoveWorldPositions, leftCursorRemoveDepths
 	}
 	scaleX, scaleY := 1.0, 1.0
 	if winW > 0 && winH > 0 {
@@ -887,18 +932,17 @@ func (vw *ViewerWindow) updateCursorPositions() ([]*mmath.Vec3, []*mmath.Vec3) {
 		if !exists || depth != 0 {
 			continue
 		}
-		for range 20 {
-			x := float32(screenPos.X * scaleX)
-			y := float32(screenPos.Y * scaleY)
-			newDepth := vw.shader.Msaa().ReadDepthAt(int(x), int(y), fbW, fbH)
-			if newDepth > 0.0 && newDepth < 1.0 {
-				vw.leftCursorWindowPositions[screenPos] = newDepth
-				worldPos := vw.getWorldPosition(x, y, newDepth, fbW, fbH)
-				if worldPos != nil {
-					leftCursorWorldPositions = append(leftCursorWorldPositions, worldPos)
-					vw.leftCursorWorldHistoryPositions = append(vw.leftCursorWorldHistoryPositions, worldPos)
-				}
-				break
+		// 深度は最新の深度バッファを参照して確定する。
+		x := float32(screenPos.X * scaleX)
+		y := float32(screenPos.Y * scaleY)
+		newDepth := vw.shader.Msaa().ReadDepthAt(int(x), int(y), fbW, fbH)
+		if newDepth > 0.0 && newDepth < 1.0 {
+			vw.leftCursorWindowPositions[screenPos] = newDepth
+			worldPos := vw.getWorldPosition(x, y, newDepth, fbW, fbH)
+			if worldPos != nil {
+				leftCursorWorldPositions = append(leftCursorWorldPositions, worldPos)
+				leftCursorDepths = append(leftCursorDepths, newDepth)
+				vw.leftCursorWorldHistoryPositions = append(vw.leftCursorWorldHistoryPositions, worldPos)
 			}
 		}
 	}
@@ -907,23 +951,22 @@ func (vw *ViewerWindow) updateCursorPositions() ([]*mmath.Vec3, []*mmath.Vec3) {
 		if !exists || depth != 0 {
 			continue
 		}
-		for range 20 {
-			x := float32(screenPos.X * scaleX)
-			y := float32(screenPos.Y * scaleY)
-			newDepth := vw.shader.Msaa().ReadDepthAt(int(x), int(y), fbW, fbH)
-			if newDepth > 0.0 && newDepth < 1.0 {
-				vw.leftCursorRemoveWindowPositions[screenPos] = newDepth
-				worldPos := vw.getWorldPosition(x, y, newDepth, fbW, fbH)
-				if worldPos != nil {
-					leftCursorRemoveWorldPositions = append(leftCursorRemoveWorldPositions, worldPos)
-					vw.leftCursorRemoveWorldHistoryPositions = append(vw.leftCursorRemoveWorldHistoryPositions, worldPos)
-				}
-				break
+		// 深度は最新の深度バッファを参照して確定する。
+		x := float32(screenPos.X * scaleX)
+		y := float32(screenPos.Y * scaleY)
+		newDepth := vw.shader.Msaa().ReadDepthAt(int(x), int(y), fbW, fbH)
+		if newDepth > 0.0 && newDepth < 1.0 {
+			vw.leftCursorRemoveWindowPositions[screenPos] = newDepth
+			worldPos := vw.getWorldPosition(x, y, newDepth, fbW, fbH)
+			if worldPos != nil {
+				leftCursorRemoveWorldPositions = append(leftCursorRemoveWorldPositions, worldPos)
+				leftCursorRemoveDepths = append(leftCursorRemoveDepths, newDepth)
+				vw.leftCursorRemoveWorldHistoryPositions = append(vw.leftCursorRemoveWorldHistoryPositions, worldPos)
 			}
 		}
 	}
 
-	return leftCursorWorldPositions, leftCursorRemoveWorldPositions
+	return leftCursorWorldPositions, leftCursorDepths, leftCursorRemoveWorldPositions, leftCursorRemoveDepths
 }
 
 // flattenCursorPositions はワールド座標配列をGPU向け配列に変換する。
@@ -941,6 +984,20 @@ func flattenCursorPositions(positions []*mmath.Vec3, limit int) []float32 {
 			break
 		}
 	}
+	return out
+}
+
+// flattenCursorDepths は深度配列をGPU向けに上限付きで切り出す。
+func flattenCursorDepths(depths []float32, limit int) []float32 {
+	if len(depths) == 0 {
+		return nil
+	}
+	count := len(depths)
+	if limit > 0 && count > limit {
+		count = limit
+	}
+	out := make([]float32, count)
+	copy(out, depths[:count])
 	return out
 }
 
@@ -1197,15 +1254,14 @@ func (vw *ViewerWindow) cursorWorldPosition(xpos, ypos float64) (*mmath.Vec3, bo
 		xpos *= scaleX
 		ypos *= scaleY
 	}
-	for range 20 {
-		depth := vw.shader.Msaa().ReadDepthAt(int(xpos), int(ypos), framebufferWidth, framebufferHeight)
-		if depth <= 0.0 || depth >= 1.0 {
-			continue
-		}
-		world := vw.getWorldPosition(float32(xpos), float32(ypos), depth, framebufferWidth, framebufferHeight)
-		if world != nil {
-			return world, true
-		}
+	// 深度は最新の深度バッファを参照して取得する。
+	depth := vw.shader.Msaa().ReadDepthAt(int(xpos), int(ypos), framebufferWidth, framebufferHeight)
+	if depth <= 0.0 || depth >= 1.0 {
+		return nil, false
+	}
+	world := vw.getWorldPosition(float32(xpos), float32(ypos), depth, framebufferWidth, framebufferHeight)
+	if world != nil {
+		return world, true
 	}
 	return nil, false
 }

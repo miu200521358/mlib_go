@@ -20,7 +20,9 @@ type VertexSelectionRequest struct {
 	Apply                     bool
 	Remove                    bool
 	CursorPositions           []float32
+	CursorDepths              []float32
 	RemoveCursorPositions     []float32
+	RemoveCursorDepths        []float32
 	CursorLinePositions       []float32
 	RemoveCursorLinePositions []float32
 	ScreenWidth               int
@@ -58,6 +60,18 @@ type ModelRenderer struct {
 	selectedMaterialMask []bool
 	// 選択材質の更新バージョン
 	selectedMaterialVersion uint64
+}
+
+// ModelRenderBaseResult はベース描画の結果を表す。
+type ModelRenderBaseResult struct {
+	// ボーン行列テクスチャ用の行列
+	PaddedMatrixes []float32
+	// 行列テクスチャの幅
+	MatrixWidth int
+	// 行列テクスチャの高さ
+	MatrixHeight int
+	// 選択材質インデックス
+	SelectedMaterialIndexes []int
 }
 
 // NewModelRendererEmpty は空のModelRendererを生成する。
@@ -153,47 +167,19 @@ func (mr *ModelRenderer) Delete() {
 	mr.ModelDrawer.delete()
 }
 
-// updateSelectedMaterialMask は選択材質マスクを更新する。
-func (mr *ModelRenderer) updateSelectedMaterialMask(selectedMaterialIndexes []int, version uint64) {
-	if mr == nil {
-		return
-	}
-	materialCount := len(mr.meshes)
-	if materialCount == 0 {
-		mr.selectedMaterialMask = nil
-		mr.selectedMaterialVersion = version
-		return
-	}
-	if mr.selectedMaterialVersion == version && len(mr.selectedMaterialMask) == materialCount {
-		return
-	}
-
-	mask := mr.selectedMaterialMask
-	if mask == nil || len(mask) != materialCount {
-		mask = make([]bool, materialCount)
-	} else {
-		clear(mask)
-	}
-	for _, idx := range selectedMaterialIndexes {
-		if idx < 0 || idx >= materialCount {
-			continue
-		}
-		mask[idx] = true
-	}
-	mr.selectedMaterialMask = mask
-	mr.selectedMaterialVersion = version
-}
-
-// Render は、最新の変形情報 vmdDeltas とアプリケーション状態 appState に基づいてモデルを描画します。
-// 描画前にバッファの更新処理を行い、その後各描画パス（メッシュ描画、法線、ボーン、選択頂点など）を呼び出します。
-func (mr *ModelRenderer) Render(
+// RenderBase はモデルのベース描画（メッシュ/法線/ボーン）を行う。
+func (mr *ModelRenderer) RenderBase(
 	shader graphics_api.IShader,
 	shared *state.SharedState,
 	vmdDeltas *delta.VmdDeltas,
 	debugBoneHover []*graphics_api.DebugBoneHover,
-	selectedVertexIndexes []int,
-	selectionRequest *VertexSelectionRequest,
-) ([]int, int) {
+) *ModelRenderBaseResult {
+	if mr == nil || shader == nil || shared == nil || vmdDeltas == nil {
+		return nil
+	}
+	if mr.bufferHandle == nil {
+		return nil
+	}
 	mr.bufferHandle.Bind()
 	defer mr.bufferHandle.Unbind()
 
@@ -202,7 +188,7 @@ func (mr *ModelRenderer) Render(
 
 	paddedMatrixes, matrixWidth, matrixHeight, err := createBoneMatrixes(vmdDeltas.Bones, mr.boneMatrixScratch)
 	if err != nil {
-		return selectedVertexIndexes, -1
+		return nil
 	}
 	mr.boneMatrixScratch = paddedMatrixes
 
@@ -249,22 +235,88 @@ func (mr *ModelRenderer) Render(
 		mr.drawBone(mr.windowIndex, shader, mr.Model.Bones, shared, paddedMatrixes, matrixWidth, matrixHeight, debugBoneHover)
 	}
 
-	hoverIndex := -1
-	if shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) {
-		selectedVertexIndexes, hoverIndex = mr.drawSelectedVertex(
-			mr.windowIndex,
-			mr.Model.Vertices,
-			selectedMaterialIndexes,
-			selectedVertexIndexes,
-			nil,
-			shader,
-			paddedMatrixes,
-			matrixWidth,
-			matrixHeight,
-			selectionRequest,
-		)
+	return &ModelRenderBaseResult{
+		PaddedMatrixes:          paddedMatrixes,
+		MatrixWidth:             matrixWidth,
+		MatrixHeight:            matrixHeight,
+		SelectedMaterialIndexes: selectedMaterialIndexes,
 	}
-	return selectedVertexIndexes, hoverIndex
+}
+
+// RenderSelection は選択頂点の描画と選択結果を返す。
+func (mr *ModelRenderer) RenderSelection(
+	shader graphics_api.IShader,
+	shared *state.SharedState,
+	selectedVertexIndexes []int,
+	selectionRequest *VertexSelectionRequest,
+	base *ModelRenderBaseResult,
+) ([]int, int) {
+	if mr == nil || shader == nil || shared == nil || base == nil {
+		return selectedVertexIndexes, -1
+	}
+	if !shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) {
+		return selectedVertexIndexes, -1
+	}
+	return mr.drawSelectedVertex(
+		mr.windowIndex,
+		mr.Model.Vertices,
+		base.SelectedMaterialIndexes,
+		selectedVertexIndexes,
+		nil,
+		shader,
+		base.PaddedMatrixes,
+		base.MatrixWidth,
+		base.MatrixHeight,
+		selectionRequest,
+	)
+}
+
+// updateSelectedMaterialMask は選択材質マスクを更新する。
+func (mr *ModelRenderer) updateSelectedMaterialMask(selectedMaterialIndexes []int, version uint64) {
+	if mr == nil {
+		return
+	}
+	materialCount := len(mr.meshes)
+	if materialCount == 0 {
+		mr.selectedMaterialMask = nil
+		mr.selectedMaterialVersion = version
+		return
+	}
+	if mr.selectedMaterialVersion == version && len(mr.selectedMaterialMask) == materialCount {
+		return
+	}
+
+	mask := mr.selectedMaterialMask
+	if mask == nil || len(mask) != materialCount {
+		mask = make([]bool, materialCount)
+	} else {
+		clear(mask)
+	}
+	for _, idx := range selectedMaterialIndexes {
+		if idx < 0 || idx >= materialCount {
+			continue
+		}
+		mask[idx] = true
+	}
+	mr.selectedMaterialMask = mask
+	mr.selectedMaterialVersion = version
+}
+
+// Render は、最新の変形情報 vmdDeltas とアプリケーション状態 appState に基づいてモデルを描画します。
+// 描画前にバッファの更新処理を行い、その後各描画パス（メッシュ描画、法線、ボーン、選択頂点など）を呼び出します。
+func (mr *ModelRenderer) Render(
+	shader graphics_api.IShader,
+	shared *state.SharedState,
+	vmdDeltas *delta.VmdDeltas,
+	debugBoneHover []*graphics_api.DebugBoneHover,
+	selectedVertexIndexes []int,
+	selectionRequest *VertexSelectionRequest,
+) ([]int, int) {
+	base := mr.RenderBase(shader, shared, vmdDeltas, debugBoneHover)
+	if base == nil {
+		return selectedVertexIndexes, -1
+	}
+	return mr.RenderSelection(shader, shared, selectedVertexIndexes, selectionRequest, base)
 }
 
 // applyTextureTypesForRender は材質参照に基づいてテクスチャ種別を確定する。
