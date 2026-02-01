@@ -855,15 +855,8 @@ func (vw *ViewerWindow) startModelRendererLoad(modelIndex int, modelData *model.
 	token := state.token
 
 	go func() {
+		// モデル本体は不変とし、変形結果は別バッファへ出力するため複製しない。
 		renderModel := modelData
-		copied, err := modelData.Copy()
-		if err == nil {
-			// 描画や物理でモデルを書き換えないよう、描画用は複製を使う。
-			copied.SetHash(modelData.Hash())
-			renderModel = &copied
-		} else {
-			logging.DefaultLogger().Warn("描画用モデルの複製に失敗しました: %v", err)
-		}
 		if ctx.Err() != nil {
 			return
 		}

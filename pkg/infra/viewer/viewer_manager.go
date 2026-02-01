@@ -911,7 +911,7 @@ func (vl *ViewerManager) deformWindow(
 			vw.vmdDeltas[i],
 			frame,
 		)
-		mdeform.ApplySkinning(renderer.Model, vw.vmdDeltas[i].Bones, vw.vmdDeltas[i].Morphs)
+		// モデル本体は不変とし、変形結果はGPUバッファへ出力するためCPU側スキニングは行わない。
 	}
 }
 

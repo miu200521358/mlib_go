@@ -115,6 +115,11 @@ func NewTextureManager() *TextureManager {
 
 // LoadAllTextures はモデルに紐づくテクスチャをロードする。
 func (tm *TextureManager) LoadAllTextures(windowIndex int, textures *model.TextureCollection, modelPath string) error {
+	return tm.LoadAllTexturesWithTypes(windowIndex, textures, modelPath, nil)
+}
+
+// LoadAllTexturesWithTypes はテクスチャ種別を指定してモデルのテクスチャをロードする。
+func (tm *TextureManager) LoadAllTexturesWithTypes(windowIndex int, textures *model.TextureCollection, modelPath string, textureTypes map[int]model.TextureType) error {
 	if tm == nil || textures == nil {
 		return nil
 	}
@@ -126,7 +131,13 @@ func (tm *TextureManager) LoadAllTextures(windowIndex int, textures *model.Textu
 		if texture == nil || !texture.IsValid() {
 			continue
 		}
-		texGl, err := tm.loadTextureGl(windowIndex, texture, modelPath)
+		texType := texture.TextureType
+		if textureTypes != nil {
+			if resolved, ok := textureTypes[texture.Index()]; ok {
+				texType = resolved
+			}
+		}
+		texGl, err := tm.loadTextureGl(windowIndex, texture, modelPath, texType)
 		if err != nil {
 			if loadErr == nil {
 				loadErr = err
@@ -248,7 +259,7 @@ func (tm *TextureManager) Delete() {
 }
 
 // loadTextureGl は単一テクスチャをOpenGL向けにロードする。
-func (tm *TextureManager) loadTextureGl(windowIndex int, texture *model.Texture, modelPath string) (*textureGl, error) {
+func (tm *TextureManager) loadTextureGl(windowIndex int, texture *model.Texture, modelPath string, textureType model.TextureType) (*textureGl, error) {
 	if texture == nil || texture.Name() == "" {
 		return nil, merr.NewImagePackageError("テクスチャ名が不正です", nil)
 	}
@@ -256,7 +267,7 @@ func (tm *TextureManager) loadTextureGl(windowIndex int, texture *model.Texture,
 
 	texGl := &textureGl{
 		Texture:     texture,
-		TextureType: texture.TextureType,
+		TextureType: textureType,
 	}
 
 	// モデルパス + テクスチャ相対パス

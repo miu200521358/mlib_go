@@ -118,13 +118,13 @@ func NewModelRendererWithPreparedData(windowIndex int, modelData *model.PmxModel
 		selectedMaterialVersion: ^uint64(0),
 	}
 
-	applyTextureTypesForRender(modelData)
+	textureTypes := resolveTextureTypesForRender(modelData)
 
 	tm := NewTextureManager()
 	if err := tm.LoadToonTextures(windowIndex); err != nil {
 		logging.DefaultLogger().Warn("トゥーンテクスチャの読み込みに失敗しました: %v", err)
 	}
-	if err := tm.LoadAllTextures(windowIndex, modelData.Textures, modelData.Path()); err != nil {
+	if err := tm.LoadAllTexturesWithTypes(windowIndex, modelData.Textures, modelData.Path(), textureTypes); err != nil {
 		logging.DefaultLogger().Warn("テクスチャの読み込みに失敗しました: %v", err)
 	}
 
@@ -354,10 +354,10 @@ func (mr *ModelRenderer) Render(
 	return mr.RenderSelection(shader, shared, selectedVertexIndexes, selectionRequest, base)
 }
 
-// applyTextureTypesForRender は材質参照に基づいてテクスチャ種別を確定する。
-func applyTextureTypesForRender(modelData *model.PmxModel) {
+// resolveTextureTypesForRender は材質参照に基づいてテクスチャ種別を決定する。
+func resolveTextureTypesForRender(modelData *model.PmxModel) map[int]model.TextureType {
 	if modelData == nil || modelData.Materials == nil || modelData.Textures == nil {
-		return
+		return nil
 	}
 
 	normal := make(map[int]struct{})
@@ -379,21 +379,26 @@ func applyTextureTypesForRender(modelData *model.PmxModel) {
 		}
 	}
 
+	types := make(map[int]model.TextureType)
 	for _, texture := range modelData.Textures.Values() {
 		if texture == nil || !texture.IsValid() {
 			continue
 		}
 		idx := texture.Index()
+		if idx < 0 {
+			continue
+		}
 		if _, ok := normal[idx]; ok {
-			texture.TextureType = model.TEXTURE_TYPE_TEXTURE
+			types[idx] = model.TEXTURE_TYPE_TEXTURE
 			continue
 		}
 		if _, ok := sphere[idx]; ok {
-			texture.TextureType = model.TEXTURE_TYPE_SPHERE
+			types[idx] = model.TEXTURE_TYPE_SPHERE
 			continue
 		}
 		if _, ok := toon[idx]; ok {
-			texture.TextureType = model.TEXTURE_TYPE_TOON
+			types[idx] = model.TEXTURE_TYPE_TOON
 		}
 	}
+	return types
 }
