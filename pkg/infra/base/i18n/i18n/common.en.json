@@ -644,6 +644,14 @@
         "translation": "&Vertex Selection"
     },
     {
+        "id": "&全面",
+        "translation": "&All"
+    },
+    {
+        "id": "&最前面",
+        "translation": "&Frontmost"
+    },
+    {
         "id": "&ボックス選択",
         "translation": "&Box Selection"
     },

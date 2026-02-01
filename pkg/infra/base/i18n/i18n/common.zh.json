@@ -644,6 +644,14 @@
         "translation": "&顶点选择"
     },
     {
+        "id": "&全面",
+        "translation": "&全面"
+    },
+    {
+        "id": "&最前面",
+        "translation": "&最前面"
+    },
+    {
         "id": "&ボックス選択",
         "translation": "&框选"
     },
