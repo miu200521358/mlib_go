@@ -870,7 +870,13 @@ func (vw *ViewerWindow) startModelRendererLoad(modelIndex int, modelData *model.
 
 		// UI応答性を確保するため1コア分は空ける。
 		workerCount := max(1, runtime.GOMAXPROCS(0)-1)
-		bufferData, err := render.PrepareModelRendererBufferData(ctx, renderModel, workerCount)
+		// 法線/選択/ボーンは必要時に生成するため、基本バッファのみ準備する。
+		bufferData, err := render.PrepareModelRendererBufferDataWithOptions(
+			ctx,
+			renderModel,
+			workerCount,
+			render.ModelRendererBufferOptions{},
+		)
 		if ctx.Err() != nil {
 			return
 		}

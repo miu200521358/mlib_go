@@ -92,7 +92,13 @@ func NewModelRenderer(windowIndex int, modelData *model.PmxModel) *ModelRenderer
 	if modelData == nil {
 		return nil
 	}
-	bufferData, err := PrepareModelRendererBufferData(context.Background(), modelData, 0)
+	// 法線/選択/ボーンは必要時に生成するため、基本バッファのみ準備する。
+	bufferData, err := PrepareModelRendererBufferDataWithOptions(
+		context.Background(),
+		modelData,
+		0,
+		ModelRendererBufferOptions{},
+	)
 	if err != nil {
 		logging.DefaultLogger().Warn("描画バッファ準備に失敗しました: %v", err)
 	}
@@ -249,12 +255,16 @@ func (mr *ModelRenderer) RenderBase(
 
 	// 法線描画
 	if shared.HasFlag(state.STATE_FLAG_SHOW_NORMAL) {
-		mr.drawNormal(mr.windowIndex, shader, paddedMatrixes, matrixWidth, matrixHeight)
+		if mr.ensureNormalBuffers() {
+			mr.drawNormal(mr.windowIndex, shader, paddedMatrixes, matrixWidth, matrixHeight)
+		}
 	}
 
 	// ボーン描画
 	if shared.IsAnyBoneVisible() {
-		mr.drawBone(mr.windowIndex, shader, mr.Model.Bones, shared, paddedMatrixes, matrixWidth, matrixHeight, debugBoneHover)
+		if mr.ensureBoneBuffers() {
+			mr.drawBone(mr.windowIndex, shader, mr.Model.Bones, shared, paddedMatrixes, matrixWidth, matrixHeight, debugBoneHover)
+		}
 	}
 
 	return &ModelRenderBaseResult{
@@ -277,6 +287,9 @@ func (mr *ModelRenderer) RenderSelection(
 		return selectedVertexIndexes, -1
 	}
 	if !shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) {
+		return selectedVertexIndexes, -1
+	}
+	if !mr.ensureSelectedVertexBuffers() {
 		return selectedVertexIndexes, -1
 	}
 	return mr.drawSelectedVertex(
