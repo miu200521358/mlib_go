@@ -892,6 +892,7 @@ func (cw *ControlWindow) TriggerShowOverrideNone() {
 // TriggerShowSelectedVertexPoint はポイント選択を切り替える。
 func (cw *ControlWindow) TriggerShowSelectedVertexPoint() {
 	enabled := cw.actionChecked(cw.showSelectedVertexPointAction)
+	wasEnabled := cw.shared != nil && cw.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX)
 	if enabled {
 		cw.updateActionChecked(cw.showSelectedVertexBoxAction, false)
 		cw.shared.SetSelectedVertexMode(state.SELECTED_VERTEX_MODE_POINT)
@@ -899,6 +900,10 @@ func (cw *ControlWindow) TriggerShowSelectedVertexPoint() {
 	cw.SetDisplayFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX, enabled)
 	cw.SetDisplayFlag(state.STATE_FLAG_SHOW_WIRE, enabled)
 	if enabled {
+		// 初回の頂点選択は全面に戻す。
+		if !wasEnabled && cw.shared != nil {
+			cw.shared.SetSelectedVertexDepthMode(state.SELECTED_VERTEX_DEPTH_MODE_ALL)
+		}
 		cw.updateSelectedVertexDepthActions()
 	}
 }
@@ -906,6 +911,7 @@ func (cw *ControlWindow) TriggerShowSelectedVertexPoint() {
 // TriggerShowSelectedVertexBox はボックス選択を切り替える。
 func (cw *ControlWindow) TriggerShowSelectedVertexBox() {
 	enabled := cw.actionChecked(cw.showSelectedVertexBoxAction)
+	wasEnabled := cw.shared != nil && cw.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX)
 	if enabled {
 		cw.updateActionChecked(cw.showSelectedVertexPointAction, false)
 		cw.shared.SetSelectedVertexMode(state.SELECTED_VERTEX_MODE_BOX)
@@ -913,6 +919,10 @@ func (cw *ControlWindow) TriggerShowSelectedVertexBox() {
 	cw.SetDisplayFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX, enabled)
 	cw.SetDisplayFlag(state.STATE_FLAG_SHOW_WIRE, enabled)
 	if enabled {
+		// 初回の頂点選択は全面に戻す。
+		if !wasEnabled && cw.shared != nil {
+			cw.shared.SetSelectedVertexDepthMode(state.SELECTED_VERTEX_DEPTH_MODE_ALL)
+		}
 		cw.updateSelectedVertexDepthActions()
 	}
 }
