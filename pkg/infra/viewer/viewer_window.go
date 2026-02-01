@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"image"
 	"math"
-	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
@@ -52,7 +51,6 @@ type modelRendererLoadState struct {
 	sourceModel   *model.PmxModel
 	cancel        context.CancelFunc
 	inProgress    bool
-	profileActive bool
 }
 
 // modelRendererLoadResult は非同期読み込みの完了結果を保持する。
@@ -63,23 +61,6 @@ type modelRendererLoadResult struct {
 	renderModel *model.PmxModel
 	bufferData  *render.ModelRendererBufferData
 	err         error
-}
-
-// formatModelLoadTimestamp はモデル読み込み計測用の時刻表示を返す。
-func formatModelLoadTimestamp(t time.Time) string {
-	return t.Format("2006-01-02 15:04:05.000")
-}
-
-// resolveModelDisplayName はログ表示用のモデル名を返す。
-func resolveModelDisplayName(modelData *model.PmxModel) string {
-	if modelData == nil {
-		return "(不明)"
-	}
-	path := modelData.Path()
-	if path == "" {
-		return "(不明)"
-	}
-	return filepath.Base(path)
 }
 
 // CameraPreset はカメラ視点プリセットを表す。
@@ -754,12 +735,6 @@ func (vw *ViewerWindow) applyModelRendererLoadResults() {
 			if result.token != state.token {
 				continue
 			}
-			if state.profileActive {
-				if vw.list != nil {
-					vw.list.finishModelLoadProfile(logging.DefaultLogger())
-				}
-				state.profileActive = false
-			}
 			state.inProgress = false
 			state.cancel = nil
 			if result.err != nil {
@@ -777,22 +752,6 @@ func (vw *ViewerWindow) applyModelRendererLoadResults() {
 			renderer.SourceModel = result.sourceModel
 			vw.modelRenderers[result.modelIndex] = renderer
 			vw.vmdDeltas[result.modelIndex] = nil
-			if logger := logging.DefaultLogger(); logger != nil {
-				timestamp := formatModelLoadTimestamp(time.Now())
-				displayName := resolveModelDisplayName(result.sourceModel)
-				modelHash := ""
-				if result.sourceModel != nil {
-					modelHash = result.sourceModel.Hash()
-				}
-				logger.Info(
-					"モデル読み込み完了(描画可能): window=%d model=%d time=%s name=%s hash=%s",
-					vw.windowIndex,
-					result.modelIndex,
-					timestamp,
-					displayName,
-					modelHash,
-				)
-			}
 		default:
 			return
 		}
@@ -832,23 +791,6 @@ func (vw *ViewerWindow) startModelRendererLoad(modelIndex int, modelData *model.
 	state.hash = modelData.Hash()
 	state.sourceModel = modelData
 	state.inProgress = true
-	state.profileActive = false
-
-	if vw.list != nil {
-		state.profileActive = vw.list.startModelLoadProfile(logging.DefaultLogger())
-	}
-	if logger := logging.DefaultLogger(); logger != nil {
-		timestamp := formatModelLoadTimestamp(time.Now())
-		displayName := resolveModelDisplayName(modelData)
-		logger.Info(
-			"モデル読み込み開始(描画準備): window=%d model=%d time=%s name=%s hash=%s",
-			vw.windowIndex,
-			modelIndex,
-			timestamp,
-			displayName,
-			modelData.Hash(),
-		)
-	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	state.cancel = cancel
@@ -902,12 +844,6 @@ func (vw *ViewerWindow) cancelModelRendererLoad(modelIndex int) {
 	if state.cancel != nil {
 		state.cancel()
 		state.cancel = nil
-	}
-	if state.profileActive {
-		if vw.list != nil {
-			vw.list.finishModelLoadProfile(logging.DefaultLogger())
-		}
-		state.profileActive = false
 	}
 	state.token++
 	state.hash = ""

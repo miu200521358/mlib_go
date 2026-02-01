@@ -126,6 +126,13 @@ pip install skillport
 skillport init
 ```
 
+```
+レビュワーからの指摘に対する検討および対応計画を立案してください
+```
+
+```
+
+```
 
 ## License
 
