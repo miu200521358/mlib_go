@@ -39,16 +39,20 @@ const (
 
 // ViewerManager はビューワー全体を管理する。
 type ViewerManager struct {
-	shared                *state.SharedState
-	appConfig             *config.AppConfig
-	userConfig            config.IUserConfig
-	windowList            []*ViewerWindow
-	physicsMotionsScratch []*motion.VmdMotion
-	timeStepsScratch      []float32
-	iconImage             image.Image
-	viewerProfileActive   bool
-	viewerProfilePath     string
-	viewerProfileFile     *os.File
+	shared                 *state.SharedState
+	appConfig              *config.AppConfig
+	userConfig             config.IUserConfig
+	windowList             []*ViewerWindow
+	physicsMotionsScratch  []*motion.VmdMotion
+	timeStepsScratch       []float32
+	iconImage              image.Image
+	viewerProfileActive    bool
+	viewerProfilePath      string
+	viewerProfileFile      *os.File
+	modelLoadProfileActive bool
+	modelLoadProfilePath   string
+	modelLoadProfileFile   *os.File
+	modelLoadProfileCount  int
 }
 
 // NewViewerManager はViewerManagerを生成する。
@@ -151,6 +155,7 @@ func (vl *ViewerManager) Run() {
 		vw.cleanupResources()
 		vw.Destroy()
 	}
+	vl.stopModelLoadProfile(logging.DefaultLogger())
 	vl.stopViewerProfile(logging.DefaultLogger())
 	glfw.Terminate()
 }
@@ -216,6 +221,83 @@ func (vl *ViewerManager) stopViewerProfile(logger logging.ILogger) {
 	vl.viewerProfilePath = ""
 }
 
+// startModelLoadProfile はモデル読み込み用のCPUプロファイル計測を開始する。
+func (vl *ViewerManager) startModelLoadProfile(logger logging.ILogger) bool {
+	if vl == nil {
+		return false
+	}
+	if vl.modelLoadProfileActive {
+		if vl.modelLoadProfileCount <= 0 {
+			vl.modelLoadProfileCount = 1
+		} else {
+			vl.modelLoadProfileCount++
+		}
+		return true
+	}
+	if vl.viewerProfileActive {
+		if logger != nil {
+			logger.Warn("モデル読み込みプロファイル開始に失敗しました: ビューワープロファイルが有効です (%s)", vl.viewerProfilePath)
+		}
+		return false
+	}
+	file, displayPath, fullPath, err := vl.createModelLoadProfileFile()
+	if err != nil {
+		if logger != nil {
+			logger.Error("モデル読み込みプロファイル開始に失敗しました: %s", sanitizeProfileError(err, fullPath, displayPath))
+		}
+		return false
+	}
+	if err := pprof.StartCPUProfile(file); err != nil {
+		_ = file.Close()
+		if logger != nil {
+			logger.Error("モデル読み込みプロファイル開始に失敗しました: %s", sanitizeProfileError(err, fullPath, displayPath))
+		}
+		return false
+	}
+	vl.modelLoadProfileFile = file
+	vl.modelLoadProfilePath = displayPath
+	vl.modelLoadProfileActive = true
+	vl.modelLoadProfileCount = 1
+	if logger != nil {
+		logger.Info("モデル読み込みプロファイル開始: %s", displayPath)
+	}
+	return true
+}
+
+// finishModelLoadProfile はモデル読み込み用のCPUプロファイル計測を終了する。
+func (vl *ViewerManager) finishModelLoadProfile(logger logging.ILogger) {
+	if vl == nil {
+		return
+	}
+	if vl.modelLoadProfileCount > 0 {
+		vl.modelLoadProfileCount--
+	}
+	if vl.modelLoadProfileCount > 0 {
+		return
+	}
+	vl.stopModelLoadProfile(logger)
+}
+
+// stopModelLoadProfile はモデル読み込み用のCPUプロファイル計測を強制停止する。
+func (vl *ViewerManager) stopModelLoadProfile(logger logging.ILogger) {
+	if vl == nil || !vl.modelLoadProfileActive {
+		return
+	}
+	pprof.StopCPUProfile()
+	if vl.modelLoadProfileFile != nil {
+		if err := vl.modelLoadProfileFile.Close(); err != nil && logger != nil {
+			logger.Error("モデル読み込みプロファイル保存に失敗しました: %s", sanitizeProfileError(err, "", vl.modelLoadProfilePath))
+		}
+		vl.modelLoadProfileFile = nil
+	}
+	if logger != nil && vl.modelLoadProfilePath != "" {
+		logger.Info("モデル読み込みプロファイル出力: %s", vl.modelLoadProfilePath)
+	}
+	vl.modelLoadProfileActive = false
+	vl.modelLoadProfilePath = ""
+	vl.modelLoadProfileCount = 0
+}
+
 // createViewerProfileFile はpprof出力用ファイルを生成する。
 func (vl *ViewerManager) createViewerProfileFile() (*os.File, string, string, error) {
 	dir, displayDir, err := vl.resolveViewerProfileDir()
@@ -226,6 +308,25 @@ func (vl *ViewerManager) createViewerProfileFile() (*os.File, string, string, er
 		return nil, "", "", err
 	}
 	fileName := viewerProfileFileName()
+	fullPath := filepath.Join(dir, fileName)
+	file, err := os.Create(fullPath)
+	if err != nil {
+		return nil, "", fullPath, err
+	}
+	displayPath := filepath.Join(displayDir, fileName)
+	return file, displayPath, fullPath, nil
+}
+
+// createModelLoadProfileFile はモデル読み込み用のpprof出力ファイルを生成する。
+func (vl *ViewerManager) createModelLoadProfileFile() (*os.File, string, string, error) {
+	dir, displayDir, err := vl.resolveViewerProfileDir()
+	if err != nil {
+		return nil, "", "", err
+	}
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return nil, "", "", err
+	}
+	fileName := modelLoadProfileFileName()
 	fullPath := filepath.Join(dir, fileName)
 	file, err := os.Create(fullPath)
 	if err != nil {
@@ -250,6 +351,12 @@ func (vl *ViewerManager) resolveViewerProfileDir() (string, string, error) {
 func viewerProfileFileName() string {
 	stamp := time.Now().Format("20060102_150405")
 	return fmt.Sprintf("pprof_viewer_%s.pprof", stamp)
+}
+
+// modelLoadProfileFileName はモデル読み込み用のpprofファイル名を生成する。
+func modelLoadProfileFileName() string {
+	stamp := time.Now().Format("20060102_150405_000")
+	return fmt.Sprintf("pprof_model_load_%s.pprof", stamp)
 }
 
 // sanitizeProfileError はパスをマスクしたエラー文言を返す。
@@ -444,9 +551,15 @@ func (vl *ViewerManager) processFrame(elapsed float64) (bool, float32) {
 			"物理リセット種別: frame=%v resetType=%d", frame, physicsResetType)
 	}
 
-	// 描画前にモデル/モーションを同期する。
+	// 描画前にモデル/モーションを同期し、読み込み中は描画と物理を停止する。
+	loading := false
 	for _, vw := range vl.windowList {
-		vw.prepareFrame()
+		if vw.prepareFrame() {
+			loading = true
+		}
+	}
+	if loading {
+		return true, 0
 	}
 
 	// 物理差分生成と物理前変形を行う。
@@ -987,7 +1100,7 @@ func (vl *ViewerManager) deformForReset(
 	}
 	ikDebugFactory := vl.ikDebugFactory()
 	vw.MakeContextCurrent()
-	vw.loadModelRenderers()
+	_ = vw.loadModelRenderers()
 	vw.loadMotions()
 	vw.ensurePhysicsModelSlots()
 

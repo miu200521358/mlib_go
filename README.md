@@ -112,6 +112,11 @@ go list -m -mod=mod -versions github.com/miu200521358/walk
 4. `go tool pprof profile.go cpu.pprof`
 5. `go tool pprof -http=:8080 cpu.pprof`
 
+```
+export filename=pprof_model_load_20260201_201437_000
+printf "top 50\n" | go tool pprof "$filename.pprof" > "${filename}_top_50.txt"
+```
+
 ### Agent Skills
 
 ```
