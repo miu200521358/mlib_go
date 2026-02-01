@@ -241,6 +241,22 @@ func resolveInitialGravity(list *ViewerManager, windowIndex int) mmath.Vec3 {
 	return *gravityFrame.Gravity
 }
 
+// ensureContextCurrent はOpenGLコンテキストを必要時だけカレントにする。
+func (vw *ViewerWindow) ensureContextCurrent() {
+	if vw == nil || vw.Window == nil {
+		return
+	}
+	if glfw.GetCurrentContext() == vw.Window {
+		return
+	}
+	vw.MakeContextCurrent()
+}
+
+// isSelectionEnabledInWindow はこのウィンドウで選択/ホバーを有効にするか返す。
+func (vw *ViewerWindow) isSelectionEnabledInWindow() bool {
+	return vw != nil && vw.windowIndex == 0
+}
+
 // Title はタイトルを返す。
 func (vw *ViewerWindow) Title() string {
 	return vw.title
@@ -287,10 +303,11 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 	if fbW == 0 || fbH == 0 {
 		return
 	}
-	vw.MakeContextCurrent()
+	vw.ensureContextCurrent()
 	vw.shader.Resize(fbW, fbH)
 
 	showSelectedVertex := vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX)
+	selectionEnabled := vw.isSelectionEnabledInWindow()
 	selectionMode := vw.selectedVertexMode()
 	selectionDepthMode := state.SELECTED_VERTEX_DEPTH_MODE_ALL
 	if vw.list != nil && vw.list.shared != nil {
@@ -300,7 +317,7 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 	boxSelectionRemove := false
 	boxSelectionMin := mmath.Vec2{}
 	boxSelectionMax := mmath.Vec2{}
-	if showSelectedVertex && selectionMode == state.SELECTED_VERTEX_MODE_BOX {
+	if showSelectedVertex && selectionEnabled && selectionMode == state.SELECTED_VERTEX_MODE_BOX {
 		if minPos, maxPos, remove, ok := vw.consumeBoxSelectionRect(winW, winH, fbW, fbH); ok {
 			applyBoxSelection = true
 			boxSelectionRemove = remove
@@ -354,13 +371,18 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 
 	vw.renderFloor()
 
-	vw.updateSelectedVertexHoverExpire()
-	vw.updateBoneHoverExpire()
-	vw.updateRigidBodyHoverExpire()
-	vw.updateJointHoverExpire()
 	var debugBoneHover []*graphics_api.DebugBoneHover
-	if vw.boneHighlighter != nil {
-		debugBoneHover = vw.boneHighlighter.DebugBoneHoverInfo()
+	if selectionEnabled {
+		vw.updateSelectedVertexHoverExpire()
+		vw.updateBoneHoverExpire()
+		vw.updateRigidBodyHoverExpire()
+		vw.updateJointHoverExpire()
+		if vw.boneHighlighter != nil {
+			debugBoneHover = vw.boneHighlighter.DebugBoneHoverInfo()
+		}
+	} else {
+		// サブウィンドウでは選択/ホバーを行わないため、状態をクリアする。
+		vw.clearAllHovers()
 	}
 
 	baseResults := make([]*render.ModelRenderBaseResult, len(vw.modelRenderers))
@@ -401,7 +423,7 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 	boxLinePositions := []float32(nil)
 	applyPointSelection := false
 	removePointSelection := false
-	if showSelectedVertex {
+	if showSelectedVertex && selectionEnabled {
 		if resolver, ok := vw.shader.Msaa().(interface {
 			ResolveDepth()
 		}); ok {
@@ -453,7 +475,7 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 		removeCursorDepths := []float32(nil)
 		applySelectionForModel := false
 		selectionRequest := (*render.VertexSelectionRequest)(nil)
-		if showSelectedVertex {
+		if showSelectedVertex && selectionEnabled {
 			selectionRequest = &render.VertexSelectionRequest{
 				Mode:                      selectionMode,
 				DepthMode:                 selectionDepthMode,
@@ -472,7 +494,7 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 				HasRect:                   false,
 			}
 		}
-		if showSelectedVertex && i == 0 {
+		if showSelectedVertex && selectionEnabled && i == 0 {
 			if selectionMode == state.SELECTED_VERTEX_MODE_POINT && selectionRequest != nil {
 				selectionRequest.CursorLinePositions = cursorLinePositions
 				selectionRequest.RemoveCursorLinePositions = removeCursorLinePositions
@@ -519,7 +541,7 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 		if applySelectionForModel {
 			vw.list.shared.SetSelectedVertexIndexes(vw.windowIndex, i, updatedSelected)
 		}
-		if showSelectedVertex && i == 0 {
+		if showSelectedVertex && selectionEnabled && i == 0 {
 			vw.updateSelectedVertexHover(i, hoverIndex)
 		}
 	}
@@ -577,7 +599,7 @@ func (vw *ViewerWindow) cleanupResources() {
 		return
 	}
 	if vw.Window != nil {
-		vw.MakeContextCurrent()
+		vw.ensureContextCurrent()
 	}
 	vw.cancelAllModelRendererLoads()
 
@@ -608,7 +630,7 @@ func (vw *ViewerWindow) renderFloor() {
 
 // prepareFrame は描画前にモデル/モーションを同期し、描画停止が必要か返す。
 func (vw *ViewerWindow) prepareFrame() bool {
-	vw.MakeContextCurrent()
+	vw.ensureContextCurrent()
 	loading := vw.loadModelRenderers()
 	vw.loadMotions()
 	vw.ensurePhysicsModelSlots()
@@ -957,12 +979,13 @@ func (vw *ViewerWindow) keyCallback(_ *glfw.Window, key glfw.Key, _ int, action 
 
 // mouseCallback はマウスボタン入力を処理する。
 func (vw *ViewerWindow) mouseCallback(_ *glfw.Window, button glfw.MouseButton, action glfw.Action, _ glfw.ModifierKey) {
+	selectionEnabled := vw.isSelectionEnabledInWindow()
 	switch action {
 	case glfw.Press:
 		switch button {
 		case glfw.MouseButtonLeft:
 			vw.leftButtonPressed = true
-			if vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) &&
+			if selectionEnabled && vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) &&
 				vw.selectedVertexMode() == state.SELECTED_VERTEX_MODE_BOX {
 				vw.boxSelectionDragging = true
 				vw.boxSelectionStart = mmath.Vec2{X: vw.cursorX, Y: vw.cursorY}
@@ -977,6 +1000,11 @@ func (vw *ViewerWindow) mouseCallback(_ *glfw.Window, button glfw.MouseButton, a
 		switch button {
 		case glfw.MouseButtonLeft:
 			vw.leftButtonPressed = false
+			if !selectionEnabled {
+				vw.boxSelectionDragging = false
+				vw.boxSelectionPending = false
+				return
+			}
 			if vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) {
 				if vw.selectedVertexMode() == state.SELECTED_VERTEX_MODE_BOX {
 					vw.boxSelectionDragging = false
@@ -1013,6 +1041,7 @@ func (vw *ViewerWindow) mouseCallback(_ *glfw.Window, button glfw.MouseButton, a
 func (vw *ViewerWindow) cursorPosCallback(_ *glfw.Window, xpos, ypos float64) {
 	vw.cursorX = xpos
 	vw.cursorY = ypos
+	selectionEnabled := vw.isSelectionEnabledInWindow()
 
 	if !vw.updatedPrevCursor {
 		vw.prevCursorPos.X = xpos
@@ -1025,7 +1054,7 @@ func (vw *ViewerWindow) cursorPosCallback(_ *glfw.Window, xpos, ypos float64) {
 	} else if vw.middleButtonPressed {
 		vw.updateCameraPositionByCursor(xpos, ypos)
 	}
-	if vw.leftButtonPressed && vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) {
+	if selectionEnabled && vw.leftButtonPressed && vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) {
 		if vw.selectedVertexMode() == state.SELECTED_VERTEX_MODE_BOX {
 			if vw.boxSelectionDragging {
 				vw.boxSelectionEnd = mmath.Vec2{X: xpos, Y: ypos}
@@ -1046,6 +1075,11 @@ func (vw *ViewerWindow) cursorPosCallback(_ *glfw.Window, xpos, ypos float64) {
 		}
 	}
 	if !vw.rightButtonPressed && !vw.middleButtonPressed {
+		if !selectionEnabled {
+			vw.prevCursorPos.X = xpos
+			vw.prevCursorPos.Y = ypos
+			return
+		}
 		if vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) {
 			vw.clearNonVertexHovers()
 			vw.prevCursorPos.X = xpos
@@ -1082,6 +1116,9 @@ func (vw *ViewerWindow) cursorPosCallback(_ *glfw.Window, xpos, ypos float64) {
 // updateCursorPositions は左クリックで記録したスクリーン座標をワールド座標に変換する。
 func (vw *ViewerWindow) updateCursorPositions() ([]*mmath.Vec3, []float32, []*mmath.Vec3, []float32) {
 	if vw == nil || vw.shader == nil || vw.list == nil || vw.list.shared == nil {
+		return nil, nil, nil, nil
+	}
+	if !vw.isSelectionEnabledInWindow() {
 		return nil, nil, nil, nil
 	}
 	if !vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) {
@@ -1182,6 +1219,9 @@ func flattenCursorDepths(depths []float32, limit int) []float32 {
 
 // queueSelectedVertexSelection は選択頂点の更新要求をキューに積む。
 func (vw *ViewerWindow) queueSelectedVertexSelection(xpos, ypos float64, remove bool) {
+	if !vw.isSelectionEnabledInWindow() {
+		return
+	}
 	screenPos := mmath.Vec2{X: xpos, Y: ypos}
 	if remove {
 		if _, exists := vw.leftCursorRemoveWindowPositions[screenPos]; !exists {

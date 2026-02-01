@@ -410,6 +410,10 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	for _, idx := range nowNoSelectedVertexes {
 		delete(selectedSet, idx)
 	}
+	if len(selectedMaterialIndexes) == 0 {
+		// 材質が全て未選択の場合、頂点の選択/ホバーは無効化する。
+		return selectedSetToSlice(selectedSet), -1
+	}
 	truncatedCursorPositions := cursorPositions
 	if len(truncatedCursorPositions) > maxValueCount {
 		truncatedCursorPositions = truncatedCursorPositions[:maxValueCount]

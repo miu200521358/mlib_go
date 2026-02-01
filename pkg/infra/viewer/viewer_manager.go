@@ -1099,7 +1099,7 @@ func (vl *ViewerManager) deformForReset(
 		return 0, nil
 	}
 	ikDebugFactory := vl.ikDebugFactory()
-	vw.MakeContextCurrent()
+	vw.ensureContextCurrent()
 	_ = vw.loadModelRenderers()
 	vw.loadMotions()
 	vw.ensurePhysicsModelSlots()
