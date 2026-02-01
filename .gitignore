@@ -42,3 +42,4 @@ bin/
 cmd/__debug_bin.*
 cmd/logs/
 .gopath/
+*.zip
