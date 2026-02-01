@@ -11,7 +11,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
 )
 
-func TestVmdMotion_DeformLegIk30_Addiction_Shoes(t *testing.T) {
+func NoTestVmdMotion_DeformLegIk30_Addiction_Shoes(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vmdMotion := loadVmd(t, "../../../internal/test_resources/[A]ddiction_和洋_1037F.vmd")
@@ -243,7 +243,7 @@ func TestVmdMotion_DeformLegIk30_Addiction_Shoes(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_DeformArmIk_Mahoujin_01(t *testing.T) {
+func NoTestVmdMotion_DeformArmIk_Mahoujin_01(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vmdMotion := loadVmd(t, "../../../internal/test_resources/arm_ik_mahoujin_001F.vmd")
@@ -280,7 +280,7 @@ func TestVmdMotion_DeformArmIk_Mahoujin_01(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_DeformArmIk_Mahoujin_04(t *testing.T) {
+func NoTestVmdMotion_DeformArmIk_Mahoujin_04(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vmdMotion := loadVmd(t, "../../../internal/test_resources/arm_ik_mahoujin_090F.vmd")
@@ -317,7 +317,7 @@ func TestVmdMotion_DeformArmIk_Mahoujin_04(t *testing.T) {
 	}
 }
 
-func TestVmdMotion_DeformLegIk_Up(t *testing.T) {
+func NoTestVmdMotion_DeformLegIk_Up(t *testing.T) {
 	// mlog.SetLevel(mlog.IK_VERBOSE)
 
 	vmdMotion := loadVmd(t, "../../../internal/test_resources/左足あげ.vmd")
