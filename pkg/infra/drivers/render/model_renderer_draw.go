@@ -59,19 +59,6 @@ type ModelDrawer struct {
 	// SSBO
 	ssbo uint32
 
-	// readbackPbos はSSBO読み出し用のPBOを保持する（ダブルバッファ）。
-	readbackPbos [2]uint32
-	// readbackFences はPBOコピー完了待ちのフェンスを保持する。
-	readbackFences [2]uintptr
-	// readbackIndex は次に書き込むPBOのインデックス。
-	readbackIndex int
-	// readbackSize はPBO確保済みサイズ（バイト）を保持する。
-	readbackSize int
-	// readbackPositions は読み出し結果の再利用バッファ。
-	readbackPositions []float32
-	// selectionCandidates は選択判定用の候補スライスを再利用するためのバッファ。
-	selectionCandidates []vertexSelectionCandidate
-
 	// cursorPositionLimit はカーソル位置の上限数。
 	cursorPositionLimit int
 }
@@ -113,20 +100,6 @@ func (md *ModelDrawer) delete() {
 		gl.DeleteBuffers(1, &md.ssbo)
 		md.ssbo = 0
 	}
-	for i := range md.readbackFences {
-		if md.readbackFences[i] != 0 {
-			gl.DeleteSync(md.readbackFences[i])
-			md.readbackFences[i] = 0
-		}
-	}
-	if md.readbackPbos[0] != 0 || md.readbackPbos[1] != 0 {
-		gl.DeleteBuffers(2, &md.readbackPbos[0])
-		md.readbackPbos = [2]uint32{}
-	}
-	md.readbackIndex = 0
-	md.readbackSize = 0
-	md.readbackPositions = nil
-	md.selectionCandidates = nil
 }
 
 // drawNormal 描画処理：法線表示
@@ -454,11 +427,19 @@ func (mr *ModelRenderer) drawSelectedVertex(
 		return selectedSetToSlice(selectedSet), -1
 	}
 
-	positions, ok := mr.readbackSSBOPositions(vertexCount)
-	if !ok {
-		// 読み出しが完了していないフレームは選択/ホバー更新をスキップする。
+	// SSBOから同期読み出しして選択判定に利用する。
+	positions := make([]float32, vertexCount*4)
+	byteSize := vertexCount * 4 * 4
+	gl.MemoryBarrier(gl.SHADER_STORAGE_BARRIER_BIT)
+	gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, mr.ssbo)
+	ptr := gl.MapBufferRange(gl.SHADER_STORAGE_BUFFER, 0, byteSize, gl.MAP_READ_BIT)
+	if ptr == nil {
+		gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, 0)
 		return selectedSetToSlice(selectedSet), -1
 	}
+	copy(positions, unsafe.Slice((*float32)(ptr), vertexCount*4))
+	gl.UnmapBuffer(gl.SHADER_STORAGE_BUFFER)
+	gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, 0)
 
 	if applySelection {
 		switch {
@@ -538,12 +519,7 @@ func (mr *ModelRenderer) drawSelectedVertex(
 		default:
 			view, projection, ok := selectionViewProjection(shader, screenWidth, screenHeight)
 			if ok {
-				candidates := mr.selectionCandidates
-				if candidates == nil {
-					candidates = make([]vertexSelectionCandidate, 0)
-				} else {
-					candidates = candidates[:0]
-				}
+				candidates := make([]vertexSelectionCandidate, 0)
 				minX := math.MaxFloat64
 				minY := math.MaxFloat64
 				maxX := -math.MaxFloat64
@@ -586,7 +562,6 @@ func (mr *ModelRenderer) drawSelectedVertex(
 						Distance: distance,
 					})
 				}
-				mr.selectionCandidates = candidates
 				if len(candidates) > 0 {
 					if depthMode == state.SELECTED_VERTEX_DEPTH_MODE_ALL {
 						for _, candidate := range candidates {
@@ -703,138 +678,6 @@ type vertexSelectionCandidate struct {
 	ScreenY  float64
 	Depth    float32
 	Distance float32
-}
-
-// ensureReadbackPositions はSSBO読み出し結果を格納する再利用バッファを準備する。
-func (mr *ModelRenderer) ensureReadbackPositions(vertexCount int) []float32 {
-	if vertexCount <= 0 {
-		mr.readbackPositions = nil
-		return nil
-	}
-	needed := vertexCount * 4
-	if cap(mr.readbackPositions) < needed {
-		mr.readbackPositions = make([]float32, needed)
-	} else {
-		mr.readbackPositions = mr.readbackPositions[:needed]
-	}
-	return mr.readbackPositions
-}
-
-// ensureReadbackBuffers はSSBO読み出し用のPBOを必要サイズで確保する。
-func (mr *ModelRenderer) ensureReadbackBuffers(byteSize int) {
-	if mr == nil || byteSize <= 0 {
-		return
-	}
-	if mr.readbackSize == byteSize && mr.readbackPbos[0] != 0 && mr.readbackPbos[1] != 0 {
-		return
-	}
-	for i := range mr.readbackFences {
-		if mr.readbackFences[i] != 0 {
-			gl.DeleteSync(mr.readbackFences[i])
-			mr.readbackFences[i] = 0
-		}
-	}
-	if mr.readbackPbos[0] != 0 || mr.readbackPbos[1] != 0 {
-		gl.DeleteBuffers(2, &mr.readbackPbos[0])
-		mr.readbackPbos = [2]uint32{}
-	}
-	gl.GenBuffers(2, &mr.readbackPbos[0])
-	for i := 0; i < len(mr.readbackPbos); i++ {
-		gl.BindBuffer(gl.PIXEL_PACK_BUFFER, mr.readbackPbos[i])
-		gl.BufferData(gl.PIXEL_PACK_BUFFER, byteSize, nil, gl.STREAM_READ)
-	}
-	gl.BindBuffer(gl.PIXEL_PACK_BUFFER, 0)
-	mr.readbackSize = byteSize
-	mr.readbackIndex = 0
-}
-
-// isReadbackBufferFree はPBOが書き込み可能か判定する。
-func (mr *ModelRenderer) isReadbackBufferFree(index int) bool {
-	if mr == nil || index < 0 || index >= len(mr.readbackFences) {
-		return false
-	}
-	fence := mr.readbackFences[index]
-	if fence == 0 {
-		return true
-	}
-	status := gl.ClientWaitSync(fence, 0, 0)
-	if status != gl.ALREADY_SIGNALED && status != gl.CONDITION_SATISFIED {
-		return false
-	}
-	gl.DeleteSync(fence)
-	mr.readbackFences[index] = 0
-	return true
-}
-
-// queueReadbackCopy はSSBO→PBOの非同期コピーをキューに積む。
-func (mr *ModelRenderer) queueReadbackCopy(index int, byteSize int) {
-	if mr == nil || mr.ssbo == 0 || index < 0 || index >= len(mr.readbackPbos) {
-		return
-	}
-	// SSBOの書き込み完了を待ってからPBOへコピーする。
-	gl.MemoryBarrier(gl.SHADER_STORAGE_BARRIER_BIT)
-	gl.BindBuffer(gl.COPY_READ_BUFFER, mr.ssbo)
-	gl.BindBuffer(gl.COPY_WRITE_BUFFER, mr.readbackPbos[index])
-	gl.CopyBufferSubData(gl.COPY_READ_BUFFER, gl.COPY_WRITE_BUFFER, 0, 0, byteSize)
-	gl.BindBuffer(gl.COPY_READ_BUFFER, 0)
-	gl.BindBuffer(gl.COPY_WRITE_BUFFER, 0)
-	if mr.readbackFences[index] != 0 {
-		gl.DeleteSync(mr.readbackFences[index])
-		mr.readbackFences[index] = 0
-	}
-	mr.readbackFences[index] = gl.FenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0)
-}
-
-// tryReadbackFromIndex は指定PBOから読み出せる場合のみ結果を取り出す。
-func (mr *ModelRenderer) tryReadbackFromIndex(index int, vertexCount int, byteSize int) ([]float32, bool) {
-	if mr == nil || index < 0 || index >= len(mr.readbackPbos) {
-		return nil, false
-	}
-	fence := mr.readbackFences[index]
-	if fence == 0 {
-		return nil, false
-	}
-	status := gl.ClientWaitSync(fence, 0, 0)
-	if status != gl.ALREADY_SIGNALED && status != gl.CONDITION_SATISFIED {
-		return nil, false
-	}
-	gl.DeleteSync(fence)
-	mr.readbackFences[index] = 0
-
-	gl.BindBuffer(gl.PIXEL_PACK_BUFFER, mr.readbackPbos[index])
-	ptr := gl.MapBufferRange(gl.PIXEL_PACK_BUFFER, 0, byteSize, gl.MAP_READ_BIT)
-	if ptr == nil {
-		gl.BindBuffer(gl.PIXEL_PACK_BUFFER, 0)
-		return nil, false
-	}
-	positions := mr.ensureReadbackPositions(vertexCount)
-	src := unsafe.Slice((*float32)(ptr), vertexCount*4)
-	copy(positions, src)
-	gl.UnmapBuffer(gl.PIXEL_PACK_BUFFER)
-	gl.BindBuffer(gl.PIXEL_PACK_BUFFER, 0)
-	return positions, true
-}
-
-// readbackSSBOPositions はSSBOを非同期で読み出し、準備完了時のみ結果を返す。
-func (mr *ModelRenderer) readbackSSBOPositions(vertexCount int) ([]float32, bool) {
-	if mr == nil || mr.ssbo == 0 || vertexCount <= 0 {
-		return nil, false
-	}
-	byteSize := vertexCount * 4 * 4
-	mr.ensureReadbackBuffers(byteSize)
-
-	readIndex := (mr.readbackIndex + 1) % len(mr.readbackPbos)
-	positions, ok := mr.tryReadbackFromIndex(readIndex, vertexCount, byteSize)
-
-	// 書き込み側PBOが空いていれば次の読み出しをキューに積む。
-	if mr.isReadbackBufferFree(mr.readbackIndex) {
-		mr.queueReadbackCopy(mr.readbackIndex, byteSize)
-		mr.readbackIndex = readIndex
-	}
-	if ok {
-		return positions, true
-	}
-	return nil, false
 }
 
 // truncateCursorDepths はカーソル深度配列をカーソル位置数に合わせて切り詰める。

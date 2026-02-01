@@ -927,8 +927,24 @@ func (cw *ControlWindow) TriggerShowSelectedVertexBox() {
 	}
 }
 
+// ensureSelectedVertexBoxSelectionForDepth は深度選択時に頂点選択モードが未選択ならボックス選択を有効にする。
+func (cw *ControlWindow) ensureSelectedVertexBoxSelectionForDepth() {
+	if cw == nil || cw.shared == nil {
+		return
+	}
+	if cw.actionChecked(cw.showSelectedVertexPointAction) || cw.actionChecked(cw.showSelectedVertexBoxAction) {
+		return
+	}
+	cw.shared.SetSelectedVertexMode(state.SELECTED_VERTEX_MODE_BOX)
+	cw.setDisplayFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX, true)
+	cw.updateActionChecked(cw.showSelectedVertexBoxAction, true)
+	cw.updateActionChecked(cw.showSelectedVertexPointAction, false)
+	cw.SetDisplayFlag(state.STATE_FLAG_SHOW_WIRE, true)
+}
+
 // TriggerShowSelectedVertexDepthAll は頂点選択の深度判定を全面に切り替える。
 func (cw *ControlWindow) TriggerShowSelectedVertexDepthAll() {
+	cw.ensureSelectedVertexBoxSelectionForDepth()
 	enabled := cw.actionChecked(cw.showSelectedVertexAllDepthAction)
 	if !enabled {
 		cw.updateActionChecked(cw.showSelectedVertexAllDepthAction, true)
@@ -942,6 +958,7 @@ func (cw *ControlWindow) TriggerShowSelectedVertexDepthAll() {
 
 // TriggerShowSelectedVertexDepthFront は頂点選択の深度判定を最前面に切り替える。
 func (cw *ControlWindow) TriggerShowSelectedVertexDepthFront() {
+	cw.ensureSelectedVertexBoxSelectionForDepth()
 	enabled := cw.actionChecked(cw.showSelectedVertexFrontDepthAction)
 	if !enabled {
 		cw.updateActionChecked(cw.showSelectedVertexFrontDepthAction, true)
