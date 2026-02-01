@@ -5,96 +5,216 @@
 package render
 
 import (
+	"context"
+	"runtime"
 	"sync"
+	"unsafe"
 
 	"github.com/go-gl/gl/v4.3-core/gl"
+	"github.com/go-gl/mathgl/mgl32"
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/mgl"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 )
 
 // ModelRenderer (旧 RenderModel) のバッファ初期化処理をまとめたファイルです。
 // このファイルでは、頂点情報、法線、ボーンライン・ボーンポイント、選択頂点、カーソル位置、SSBO など
 // モデル描画に必要な OpenGL バッファの生成・データ転送処理を行います。
 
-// initializeBuffers は、モデルの頂点バッファおよび関連バッファを初期化します。
-func (mr *ModelRenderer) initializeBuffers(factory *mgl.BufferFactory, modelData *model.PmxModel) {
-	// ModelDrawer を初期化
-	md := mr.ModelDrawer
+// ModelRendererBufferData はOpenGLバッファ生成前のデータをまとめた構造体です。
+type ModelRendererBufferData struct {
+	Vertices               []float32
+	NormalVertices         []float32
+	SelectedVertexVertices []float32
+	Faces                  []uint32
+	NormalIndexes          []uint32
+	BoneLines              []float32
+	BoneLineFaces          []uint32
+	BoneLineIndexes        []int
+	BonePoints             []float32
+	BonePointFaces         []uint32
+	BonePointIndexes       []int
+	SelectedVertexIndexes  []uint32
+}
 
-	// WaitGroupを用いて並列処理を管理
+// PrepareModelRendererBufferData はバッファ生成前の頂点/面/ボーン情報を作成する。
+func PrepareModelRendererBufferData(ctx context.Context, modelData *model.PmxModel, workerCount int) (*ModelRendererBufferData, error) {
+	if modelData == nil {
+		return &ModelRendererBufferData{}, nil
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	if ctx.Err() != nil {
+		return nil, ctx.Err()
+	}
+
 	var wg sync.WaitGroup
+	var loadErr error
+	var errMu sync.Mutex
 
-	// 頂点データ、法線データ、選択頂点データを一括生成
+	setErr := func(err error) {
+		if err == nil {
+			return
+		}
+		errMu.Lock()
+		if loadErr == nil {
+			loadErr = err
+		}
+		errMu.Unlock()
+	}
+
+	var vertices []float32
+	var normalVertices []float32
 	var selectedVertexVertices []float32
+	var faces []uint32
+	var boneLines []float32
+	var boneLineFaces []uint32
+	var boneLineIndexes []int
+	var bonePoints []float32
+	var bonePointFaces []uint32
+	var bonePointIndexes []int
+
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		md.vertices, md.normalVertices, selectedVertexVertices = createAllVertexData(modelData)
+		v, n, s, err := createAllVertexData(ctx, modelData, workerCount)
+		if err != nil {
+			setErr(err)
+			return
+		}
+		vertices = v
+		normalVertices = n
+		selectedVertexVertices = s
 	}()
 
-	// 面データ一括生成
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		md.faces = createIndexesData(modelData)
+		f, err := createIndexesData(ctx, modelData, workerCount)
+		if err != nil {
+			setErr(err)
+			return
+		}
+		faces = f
 	}()
 
-	// ボーンデバッグ関連バッファを一括で初期化
-	var boneLines, bonePoints []float32
-	var boneLineFaces, bonePointFaces []uint32
-	var boneLineIndexes, bonePointIndexes []int
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
+		if ctx.Err() != nil {
+			setErr(ctx.Err())
+			return
+		}
 		boneLines, boneLineFaces, boneLineIndexes,
 			bonePoints, bonePointFaces, bonePointIndexes = createAllBoneDebugData(modelData)
 	}()
 
-	// WaitGroupの完了を待つ
 	wg.Wait()
 
+	if loadErr != nil {
+		return nil, loadErr
+	}
+	if ctx.Err() != nil {
+		return nil, ctx.Err()
+	}
+
+	return &ModelRendererBufferData{
+		Vertices:               vertices,
+		NormalVertices:         normalVertices,
+		SelectedVertexVertices: selectedVertexVertices,
+		Faces:                  faces,
+		NormalIndexes:          createNormalIndexesData(modelData),
+		BoneLines:              boneLines,
+		BoneLineFaces:          boneLineFaces,
+		BoneLineIndexes:        boneLineIndexes,
+		BonePoints:             bonePoints,
+		BonePointFaces:         bonePointFaces,
+		BonePointIndexes:       bonePointIndexes,
+		SelectedVertexIndexes:  createAllVertexIndexesData(modelData),
+	}, nil
+}
+
+// initializeBuffers は、モデルの頂点バッファおよび関連バッファを初期化します。
+func (mr *ModelRenderer) initializeBuffers(factory *mgl.BufferFactory, modelData *model.PmxModel) {
+	bufferData, err := PrepareModelRendererBufferData(context.Background(), modelData, 0)
+	if err != nil {
+		logging.DefaultLogger().Warn("描画バッファ準備に失敗しました: %v", err)
+		return
+	}
+	mr.initializeBuffersWithData(factory, modelData, bufferData)
+}
+
+// initializeBuffersWithData は準備済みのバッファデータからOpenGLバッファを生成します。
+func (mr *ModelRenderer) initializeBuffersWithData(factory *mgl.BufferFactory, modelData *model.PmxModel, bufferData *ModelRendererBufferData) {
+	if mr == nil || factory == nil || modelData == nil || bufferData == nil {
+		return
+	}
+	// ModelDrawer を初期化
+	md := mr.ModelDrawer
+
+	md.vertices = bufferData.Vertices
+	md.normalVertices = bufferData.NormalVertices
+	md.faces = bufferData.Faces
+
 	// GLオブジェクトの生成は並列化しない ------------
+	var verticesPtr unsafe.Pointer
+	if len(md.vertices) > 0 {
+		verticesPtr = gl.Ptr(md.vertices)
+	}
+	mr.bufferHandle = factory.NewVertexBuffer(verticesPtr, len(md.vertices))
 
-	// メインのモデル頂点バッファ
-	mr.bufferHandle = factory.NewVertexBuffer(gl.Ptr(md.vertices), len(md.vertices))
+	var normalPtr unsafe.Pointer
+	if len(md.normalVertices) > 0 {
+		normalPtr = gl.Ptr(md.normalVertices)
+	}
+	md.normalBufferHandle = factory.NewVertexBuffer(normalPtr, len(md.normalVertices))
 
-	// 法線バッファの初期化
-	md.normalBufferHandle = factory.NewVertexBuffer(gl.Ptr(md.normalVertices), len(md.normalVertices))
-
-	// 法線表示用のインデックスバッファ
-	normalIndexes := createNormalIndexesData(modelData)
+	normalIndexes := bufferData.NormalIndexes
 	md.normalIndexCount = len(normalIndexes)
-	md.normalIbo = factory.NewIndexBuffer(gl.Ptr(normalIndexes), len(normalIndexes))
+	var normalIndexPtr unsafe.Pointer
+	if len(normalIndexes) > 0 {
+		normalIndexPtr = gl.Ptr(normalIndexes)
+	}
+	md.normalIbo = factory.NewIndexBuffer(normalIndexPtr, len(normalIndexes))
 
 	// ボーンラインバッファの設定
-	md.boneLineIndexes = boneLineIndexes
-	md.boneLineCount = len(boneLineIndexes)
-	if len(boneLines) > 0 {
-		md.boneLineBufferHandle = factory.NewBoneBuffer(gl.Ptr(boneLines), len(boneLines))
+	md.boneLineIndexes = bufferData.BoneLineIndexes
+	md.boneLineCount = len(md.boneLineIndexes)
+	if len(bufferData.BoneLines) > 0 {
+		md.boneLineBufferHandle = factory.NewBoneBuffer(gl.Ptr(bufferData.BoneLines), len(bufferData.BoneLines))
 	}
-	if len(boneLineFaces) > 0 {
-		md.boneLineIbo = factory.NewIndexBuffer(gl.Ptr(boneLineFaces), len(boneLineFaces))
+	if len(bufferData.BoneLineFaces) > 0 {
+		md.boneLineIbo = factory.NewIndexBuffer(gl.Ptr(bufferData.BoneLineFaces), len(bufferData.BoneLineFaces))
 	}
 
 	// ボーンポイントバッファの設定
-	md.bonePointIndexes = bonePointIndexes
-	md.bonePointCount = len(bonePointIndexes)
-	if len(bonePoints) > 0 {
-		md.bonePointBufferHandle = factory.NewBoneBuffer(gl.Ptr(bonePoints), len(bonePoints))
+	md.bonePointIndexes = bufferData.BonePointIndexes
+	md.bonePointCount = len(md.bonePointIndexes)
+	if len(bufferData.BonePoints) > 0 {
+		md.bonePointBufferHandle = factory.NewBoneBuffer(gl.Ptr(bufferData.BonePoints), len(bufferData.BonePoints))
 	}
-	if len(bonePointFaces) > 0 {
-		md.bonePointIbo = factory.NewIndexBuffer(gl.Ptr(bonePointFaces), len(bonePointFaces))
+	if len(bufferData.BonePointFaces) > 0 {
+		md.bonePointIbo = factory.NewIndexBuffer(gl.Ptr(bufferData.BonePointFaces), len(bufferData.BonePointFaces))
 	}
 
 	// 選択頂点バッファの設定
-	md.selectedVertexBufferHandle = factory.NewVertexBuffer(gl.Ptr(selectedVertexVertices), len(selectedVertexVertices))
+	var selectedPtr unsafe.Pointer
+	if len(bufferData.SelectedVertexVertices) > 0 {
+		selectedPtr = gl.Ptr(bufferData.SelectedVertexVertices)
+	}
+	md.selectedVertexBufferHandle = factory.NewVertexBuffer(selectedPtr, len(bufferData.SelectedVertexVertices))
 	// 選択頂点用の元データ参照を保持して、VBOのベースコピーが破棄されないようにする。
-	md.selectedVertexVertices = selectedVertexVertices
+	md.selectedVertexVertices = bufferData.SelectedVertexVertices
 
 	// 選択頂点用のインデックスバッファ（すべての頂点のインデックス）
-	indexes := createAllVertexIndexesData(modelData)
-	md.selectedVertexCount = len(indexes)
-	md.selectedVertexIbo = factory.NewIndexBuffer(gl.Ptr(indexes), len(indexes))
+	md.selectedVertexCount = len(bufferData.SelectedVertexIndexes)
+	var selectedIndexPtr unsafe.Pointer
+	if len(bufferData.SelectedVertexIndexes) > 0 {
+		selectedIndexPtr = gl.Ptr(bufferData.SelectedVertexIndexes)
+	}
+	md.selectedVertexIbo = factory.NewIndexBuffer(selectedIndexPtr, len(bufferData.SelectedVertexIndexes))
 
 	// カーソル位置表示用バッファの初期化
 	md.cursorPositionBufferHandle = factory.NewDebugBuffer(nil, 0)
@@ -109,66 +229,62 @@ func (mr *ModelRenderer) initializeBuffers(factory *mgl.BufferFactory, modelData
 	mr.ssbo = ssbo
 }
 
-// createAllVertexData は頂点データ、法線データ、選択頂点データを一括で生成します
-func createAllVertexData(modelData *model.PmxModel) ([]float32, []float32, []float32) {
+// createAllVertexData は頂点データ、法線データ、選択頂点データを一括で生成します。
+func createAllVertexData(ctx context.Context, modelData *model.PmxModel, workerCount int) ([]float32, []float32, []float32, error) {
+	if modelData == nil {
+		return nil, nil, nil, nil
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	if ctx.Err() != nil {
+		return nil, nil, nil, ctx.Err()
+	}
+
 	vertexCount := modelData.Vertices.Len()
 	vertices := make([]float32, vertexCount*vertexDataSize)
 	normalVertices := make([]float32, vertexCount*2*vertexDataSize)
 	selectedVertices := make([]float32, vertexCount*vertexDataSize)
-
-	var wg sync.WaitGroup
-
-	// 並列処理のためのバッチサイズ
-	batchSize := 1000
-	batches := (vertexCount + batchSize - 1) / batchSize
-
-	for b := 0; b < batches; b++ {
-		wg.Add(1)
-		go func(batchIndex int) {
-			defer wg.Done()
-			start := batchIndex * batchSize
-			end := min(start+batchSize, vertexCount)
-
-			// 各バッチが担当する位置を計算
-			vertexOffset := start * vertexDataSize
-			normalOffset := start * 2 * vertexDataSize
-			selectedOffset := start * vertexDataSize
-
-			for i := start; i < end; i++ {
-				localIdx := i - start
-				vertexLocalOffset := localIdx * vertexDataSize
-				normalLocalOffset := localIdx * 2 * vertexDataSize
-				selectedLocalOffset := localIdx * vertexDataSize
-
-				if vertex, err := modelData.Vertices.Get(i); err == nil {
-					// 通常の頂点データ
-					vgl := newVertexGl(vertex)
-					copy(vertices[vertexOffset+vertexLocalOffset:], vgl)
-
-					// 法線データ
-					normalVgl := newVertexNormalGl(vertex)
-					copy(normalVertices[normalOffset+normalLocalOffset:], vgl)                      // 頂点位置
-					copy(normalVertices[normalOffset+normalLocalOffset+vertexDataSize:], normalVgl) // 法線方向の終点
-
-					// 選択頂点データ（非選択時は描画されないUVにしておく）
-					svgl := newSelectedVertexGl(vertex)
-					copy(selectedVertices[selectedOffset+selectedLocalOffset:], svgl)
-				} else {
-					// 空データの場合
-					emptyVgl := make([]float32, vertexDataSize)
-					copy(vertices[vertexOffset+vertexLocalOffset:], emptyVgl)
-
-					copy(normalVertices[normalOffset+normalLocalOffset:], emptyVgl)
-					copy(normalVertices[normalOffset+normalLocalOffset+vertexDataSize:], emptyVgl)
-
-					copy(selectedVertices[selectedOffset+selectedLocalOffset:], emptyVgl)
-				}
-			}
-		}(b)
+	if vertexCount == 0 {
+		return vertices, normalVertices, selectedVertices, nil
 	}
 
+	// CPU負荷が高いため、固定数ワーカーで分割する。
+	workerCount = resolveWorkerCount(workerCount, vertexCount)
+	batchSize := resolveBatchSize(vertexCount, workerCount, 4096)
+	batches := (vertexCount + batchSize - 1) / batchSize
+	values := modelData.Vertices.Values()
+
+	var wg sync.WaitGroup
+	for w := 0; w < workerCount; w++ {
+		wg.Add(1)
+		go func(workerIndex int) {
+			defer wg.Done()
+			for b := workerIndex; b < batches; b += workerCount {
+				if ctx.Err() != nil {
+					return
+				}
+				start := b * batchSize
+				end := min(start+batchSize, vertexCount)
+				for i := start; i < end; i++ {
+					vertex := values[i]
+					if vertex == nil {
+						continue
+					}
+					vertexBase := i * vertexDataSize
+					normalBase := i * 2 * vertexDataSize
+					selectedBase := i * vertexDataSize
+					fillVertexData(vertices, vertexBase, normalVertices, normalBase, normalVertices, normalBase+vertexDataSize, selectedVertices, selectedBase, vertex)
+				}
+			}
+		}(w)
+	}
 	wg.Wait()
-	return vertices, normalVertices, selectedVertices
+
+	if ctx.Err() != nil {
+		return nil, nil, nil, ctx.Err()
+	}
+	return vertices, normalVertices, selectedVertices, nil
 }
 
 // createAllBoneDebugData はボーンライン・ポイントデータを一括生成します
@@ -204,43 +320,62 @@ func createAllBoneDebugData(modelData *model.PmxModel) ([]float32, []uint32, []i
 	return boneLines, boneLineFaces, boneLineIndexes, bonePoints, bonePointFaces, bonePointIndexes
 }
 
-// createIndexesData はインデックスデータを生成します
-func createIndexesData(modelData *model.PmxModel) []uint32 {
-	faceCount := modelData.Faces.Len()
-	faces := make([]uint32, faceCount*3)
-	var wg sync.WaitGroup
-
-	// 面情報の並列処理
-	batchSize := 1000 // 一度に処理する面数
-	batches := (faceCount + batchSize - 1) / batchSize
-
-	for b := 0; b < batches; b++ {
-		wg.Add(1)
-		go func(batchIndex int) {
-			defer wg.Done()
-			start := batchIndex * batchSize
-			end := min(start+batchSize, faceCount)
-			offset := start * 3
-
-			for i := start; i < end; i++ {
-				var vertices [3]int
-				if face, err := modelData.Faces.Get(i); err == nil {
-					vertices = face.VertexIndexes
-				} else {
-					vertices = [3]int{0, 0, 0}
-				}
-
-				localIdx := (i - start) * 3
-				// 頂点の順序を反転（OpenGL用）
-				faces[offset+localIdx] = uint32(vertices[2])
-				faces[offset+localIdx+1] = uint32(vertices[1])
-				faces[offset+localIdx+2] = uint32(vertices[0])
-			}
-		}(b)
+// createIndexesData はインデックスデータを生成します。
+func createIndexesData(ctx context.Context, modelData *model.PmxModel, workerCount int) ([]uint32, error) {
+	if modelData == nil {
+		return nil, nil
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	if ctx.Err() != nil {
+		return nil, ctx.Err()
 	}
 
+	faceCount := modelData.Faces.Len()
+	faces := make([]uint32, faceCount*3)
+	if faceCount == 0 {
+		return faces, nil
+	}
+
+	// 面情報は大規模になりやすいため、ワーカー数を固定して処理する。
+	workerCount = resolveWorkerCount(workerCount, faceCount)
+	batchSize := resolveBatchSize(faceCount, workerCount, 8192)
+	batches := (faceCount + batchSize - 1) / batchSize
+	values := modelData.Faces.Values()
+
+	var wg sync.WaitGroup
+	for w := 0; w < workerCount; w++ {
+		wg.Add(1)
+		go func(workerIndex int) {
+			defer wg.Done()
+			for b := workerIndex; b < batches; b += workerCount {
+				if ctx.Err() != nil {
+					return
+				}
+				start := b * batchSize
+				end := min(start+batchSize, faceCount)
+				for i := start; i < end; i++ {
+					face := values[i]
+					if face == nil {
+						continue
+					}
+					base := i * 3
+					vertices := face.VertexIndexes
+					// 頂点の順序を反転（OpenGL用）
+					faces[base] = uint32(vertices[2])
+					faces[base+1] = uint32(vertices[1])
+					faces[base+2] = uint32(vertices[0])
+				}
+			}
+		}(w)
+	}
 	wg.Wait()
-	return faces
+
+	if ctx.Err() != nil {
+		return nil, ctx.Err()
+	}
+	return faces, nil
 }
 
 // createNormalIndexesData は法線インデックスデータを生成します
@@ -263,4 +398,127 @@ func createAllVertexIndexesData(modelData *model.PmxModel) []uint32 {
 		indexes[i] = uint32(i)
 	}
 	return indexes
+}
+
+// fillVertexData は単一頂点のデータを各バッファへ書き込みます。
+func fillVertexData(
+	vertices []float32,
+	vertexBase int,
+	normalVertices []float32,
+	normalStartBase int,
+	normalEndVertices []float32,
+	normalEndBase int,
+	selectedVertices []float32,
+	selectedBase int,
+	vertex *model.Vertex,
+) {
+	p := mgl.NewGlVec3(&vertex.Position)
+	n := mgl.NewGlVec3(&vertex.Normal)
+	extUvX := float32(0)
+	extUvY := float32(0)
+	if len(vertex.ExtendedUvs) > 0 {
+		extUvX = float32(vertex.ExtendedUvs[0].X)
+		extUvY = float32(vertex.ExtendedUvs[0].Y)
+	}
+	deform := packDeform(vertex.Deform)
+	sdefFlag := float32(mmath.BoolToInt(vertex.DeformType == model.SDEF))
+	sdefC, sdefR0, sdefR1 := getSdefParams(vertex.Deform)
+
+	writeVertexFields(vertices, vertexBase, p, n, float32(vertex.Uv.X), float32(vertex.Uv.Y), extUvX, extUvY, float32(vertex.EdgeFactor), deform, sdefFlag, sdefC, sdefR0, sdefR1)
+	writeVertexFields(normalVertices, normalStartBase, p, n, float32(vertex.Uv.X), float32(vertex.Uv.Y), extUvX, extUvY, float32(vertex.EdgeFactor), deform, sdefFlag, sdefC, sdefR0, sdefR1)
+
+	normalScaled := vertex.Normal.MuledScalar(0.5)
+	nScaled := mgl.NewGlVec3(&normalScaled)
+	writeVertexFields(normalEndVertices, normalEndBase,
+		mgl32.Vec3{p[0] + nScaled[0], p[1] + nScaled[1], p[2] + nScaled[2]},
+		nScaled,
+		0, 0, 0, 0, 0,
+		deform, sdefFlag, sdefC, sdefR0, sdefR1,
+	)
+
+	writeVertexFields(selectedVertices, selectedBase, p, n, -0.1, 0, 0, 0, 0, deform, sdefFlag, sdefC, sdefR0, sdefR1)
+}
+
+// writeVertexFields は頂点配列へ共通属性を書き込みます。
+func writeVertexFields(
+	dst []float32,
+	base int,
+	position mgl32.Vec3,
+	normal mgl32.Vec3,
+	uvX float32,
+	uvY float32,
+	extUvX float32,
+	extUvY float32,
+	edgeFactor float32,
+	deform [8]float32,
+	sdefFlag float32,
+	sdefC mgl32.Vec3,
+	sdefR0 mgl32.Vec3,
+	sdefR1 mgl32.Vec3,
+) {
+	if base < 0 || base+vertexDataSize > len(dst) {
+		return
+	}
+	dst[base+0] = position[0]
+	dst[base+1] = position[1]
+	dst[base+2] = position[2]
+	dst[base+3] = normal[0]
+	dst[base+4] = normal[1]
+	dst[base+5] = normal[2]
+	dst[base+6] = uvX
+	dst[base+7] = uvY
+	dst[base+8] = extUvX
+	dst[base+9] = extUvY
+	dst[base+10] = edgeFactor
+	dst[base+11] = deform[0]
+	dst[base+12] = deform[1]
+	dst[base+13] = deform[2]
+	dst[base+14] = deform[3]
+	dst[base+15] = deform[4]
+	dst[base+16] = deform[5]
+	dst[base+17] = deform[6]
+	dst[base+18] = deform[7]
+	dst[base+19] = sdefFlag
+	dst[base+20] = sdefC[0]
+	dst[base+21] = sdefC[1]
+	dst[base+22] = sdefC[2]
+	dst[base+23] = sdefR0[0]
+	dst[base+24] = sdefR0[1]
+	dst[base+25] = sdefR0[2]
+	dst[base+26] = sdefR1[0]
+	dst[base+27] = sdefR1[1]
+	dst[base+28] = sdefR1[2]
+}
+
+// resolveWorkerCount は利用可能コア数と処理量からワーカー数を決める。
+func resolveWorkerCount(workerCount int, total int) int {
+	if workerCount <= 0 {
+		workerCount = runtime.GOMAXPROCS(0)
+	}
+	if workerCount <= 0 {
+		workerCount = 1
+	}
+	if total > 0 && workerCount > total {
+		workerCount = total
+	}
+	return workerCount
+}
+
+// resolveBatchSize はバッチサイズを決定する。
+func resolveBatchSize(total int, workerCount int, defaultSize int) int {
+	if defaultSize <= 0 {
+		defaultSize = 1024
+	}
+	if total <= 0 {
+		return defaultSize
+	}
+	if workerCount <= 0 {
+		workerCount = 1
+	}
+	// ワーカー1つあたり約8バッチになるように調整する。
+	target := total / (workerCount * 8)
+	if target < defaultSize {
+		return defaultSize
+	}
+	return target
 }

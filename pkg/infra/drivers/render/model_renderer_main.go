@@ -5,6 +5,8 @@
 package render
 
 import (
+	"context"
+
 	"github.com/miu200521358/mlib_go/pkg/adapter/graphics_api"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
@@ -87,6 +89,21 @@ func NewModelRendererEmpty() *ModelRenderer {
 // NewModelRenderer は、新しい ModelRenderer を生成します。
 // ここでは、モデルのバッファ初期化や各材質ごとの MeshRenderer の生成も行います。
 func NewModelRenderer(windowIndex int, modelData *model.PmxModel) *ModelRenderer {
+	if modelData == nil {
+		return nil
+	}
+	bufferData, err := PrepareModelRendererBufferData(context.Background(), modelData, 0)
+	if err != nil {
+		logging.DefaultLogger().Warn("描画バッファ準備に失敗しました: %v", err)
+	}
+	return NewModelRendererWithPreparedData(windowIndex, modelData, bufferData)
+}
+
+// NewModelRendererWithPreparedData は準備済みのバッファデータからModelRendererを生成します。
+func NewModelRendererWithPreparedData(windowIndex int, modelData *model.PmxModel, bufferData *ModelRendererBufferData) *ModelRenderer {
+	if modelData == nil {
+		return nil
+	}
 	mr := &ModelRenderer{
 		ModelDrawer:             &ModelDrawer{},
 		windowIndex:             windowIndex,
@@ -109,7 +126,11 @@ func NewModelRenderer(windowIndex int, modelData *model.PmxModel) *ModelRenderer
 	factory := mgl.NewBufferFactory()
 
 	// バッファの初期化 (実装は model_renderer_buffer.go に記述)
-	mr.initializeBuffers(factory, modelData)
+	if bufferData == nil {
+		mr.initializeBuffers(factory, modelData)
+	} else {
+		mr.initializeBuffersWithData(factory, modelData, bufferData)
+	}
 
 	// 各材質ごとに MeshRenderer を生成
 	mr.meshes = make([]*MeshRenderer, modelData.Materials.Len())

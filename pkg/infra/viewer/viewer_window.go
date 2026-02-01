@@ -5,9 +5,11 @@
 package viewer
 
 import (
+	"context"
 	"fmt"
 	"image"
 	"math"
+	"runtime"
 	"strings"
 	"time"
 	"unsafe"
@@ -41,6 +43,25 @@ const (
 	// collisionAllFilterMask は全ての剛体を対象にするフィルタマスク。
 	collisionAllFilterMask = int(^uint32(0))
 )
+
+// modelRendererLoadState はモデル描画の非同期読み込み状態を保持する。
+type modelRendererLoadState struct {
+	token       uint64
+	hash        string
+	sourceModel *model.PmxModel
+	cancel      context.CancelFunc
+	inProgress  bool
+}
+
+// modelRendererLoadResult は非同期読み込みの完了結果を保持する。
+type modelRendererLoadResult struct {
+	modelIndex  int
+	token       uint64
+	sourceModel *model.PmxModel
+	renderModel *model.PmxModel
+	bufferData  *render.ModelRendererBufferData
+	err         error
+}
 
 // CameraPreset はカメラ視点プリセットを表す。
 type CameraPreset struct {
@@ -83,6 +104,8 @@ type ViewerWindow struct {
 	lastSelectedVertexHoverAt     time.Time
 
 	modelRenderers     []*render.ModelRenderer
+	modelRendererLoads []modelRendererLoadState
+	loadResults        chan *modelRendererLoadResult
 	motions            []*motion.VmdMotion
 	vmdDeltas          []*delta.VmdDeltas
 	physicsModelHashes []string
@@ -163,6 +186,8 @@ func newViewerWindow(windowIndex int, title string, width, height, positionX, po
 		boneHighlighter:                       mgl.NewBoneHighlighter(),
 		rigidBodyHighlighter:                  mgl.NewRigidBodyHighlighter(),
 		modelRenderers:                        make([]*render.ModelRenderer, 0),
+		modelRendererLoads:                    make([]modelRendererLoadState, 0),
+		loadResults:                           make(chan *modelRendererLoadResult, 16),
 		motions:                               make([]*motion.VmdMotion, 0),
 		vmdDeltas:                             make([]*delta.VmdDeltas, 0),
 		physicsModelHashes:                    make([]string, 0),
@@ -554,6 +579,7 @@ func (vw *ViewerWindow) cleanupResources() {
 	if vw.Window != nil {
 		vw.MakeContextCurrent()
 	}
+	vw.cancelAllModelRendererLoads()
 
 	for _, renderer := range vw.modelRenderers {
 		if renderer != nil {
@@ -628,12 +654,16 @@ func (vw *ViewerWindow) syncPhysicsModel(modelIndex int, modelData *model.PmxMod
 
 // loadModelRenderers はモデルレンダラを共有状態から同期する。
 func (vw *ViewerWindow) loadModelRenderers() {
+	vw.applyModelRendererLoadResults()
 	modelCount := vw.list.shared.ModelCount(vw.windowIndex)
 	motionCount := vw.list.shared.MotionCount(vw.windowIndex)
 	count := max(modelCount, motionCount)
 	for i := 0; i < count; i++ {
 		if i >= len(vw.modelRenderers) {
 			vw.modelRenderers = append(vw.modelRenderers, nil)
+		}
+		if i >= len(vw.modelRendererLoads) {
+			vw.modelRendererLoads = append(vw.modelRendererLoads, modelRendererLoadState{})
 		}
 		if i >= len(vw.motions) {
 			vw.motions = append(vw.motions, nil)
@@ -656,6 +686,7 @@ func (vw *ViewerWindow) loadModelRenderers() {
 				vw.modelRenderers[i] = nil
 				vw.vmdDeltas[i] = nil
 			}
+			vw.cancelModelRendererLoad(i)
 			continue
 		}
 		shouldReload := existing == nil
@@ -666,24 +697,163 @@ func (vw *ViewerWindow) loadModelRenderers() {
 				shouldReload = true
 			}
 		}
+		if vw.isModelRendererLoading(i, modelData) {
+			continue
+		}
 		if shouldReload {
 			if existing != nil {
 				existing.Delete()
 			}
-			renderModel := modelData
-			copied, err := modelData.Copy()
-			if err == nil {
-				// 描画や物理でモデルを書き換えないよう、描画用は複製を使う。
-				copied.SetHash(modelData.Hash())
-				renderModel = &copied
-			} else {
-				logging.DefaultLogger().Warn("描画用モデルの複製に失敗しました: %v", err)
-			}
-			renderer := render.NewModelRenderer(vw.windowIndex, renderModel)
-			renderer.SourceModel = modelData
-			vw.modelRenderers[i] = renderer
+			vw.modelRenderers[i] = nil
 			vw.vmdDeltas[i] = nil
+			vw.startModelRendererLoad(i, modelData)
 		}
+	}
+}
+
+// applyModelRendererLoadResults は非同期読み込みの完了結果を反映する。
+func (vw *ViewerWindow) applyModelRendererLoadResults() {
+	if vw == nil || vw.loadResults == nil {
+		return
+	}
+	for {
+		select {
+		case result := <-vw.loadResults:
+			if result == nil {
+				continue
+			}
+			if result.modelIndex < 0 || result.modelIndex >= len(vw.modelRendererLoads) {
+				continue
+			}
+			state := &vw.modelRendererLoads[result.modelIndex]
+			// 取消/再読み込み済みの結果は破棄する。
+			if result.token != state.token {
+				continue
+			}
+			state.inProgress = false
+			state.cancel = nil
+			if result.err != nil {
+				logging.DefaultLogger().Warn("描画バッファの準備に失敗しました: %v", result.err)
+				continue
+			}
+			if result.renderModel == nil || result.bufferData == nil {
+				logging.DefaultLogger().Warn("描画バッファの準備結果が不正です")
+				continue
+			}
+			if existing := vw.modelRenderers[result.modelIndex]; existing != nil {
+				existing.Delete()
+			}
+			renderer := render.NewModelRendererWithPreparedData(vw.windowIndex, result.renderModel, result.bufferData)
+			renderer.SourceModel = result.sourceModel
+			vw.modelRenderers[result.modelIndex] = renderer
+			vw.vmdDeltas[result.modelIndex] = nil
+		default:
+			return
+		}
+	}
+}
+
+// isModelRendererLoading は指定モデルが読み込み中か判定する。
+func (vw *ViewerWindow) isModelRendererLoading(modelIndex int, modelData *model.PmxModel) bool {
+	if vw == nil || modelData == nil {
+		return false
+	}
+	if modelIndex < 0 || modelIndex >= len(vw.modelRendererLoads) {
+		return false
+	}
+	state := &vw.modelRendererLoads[modelIndex]
+	if !state.inProgress {
+		return false
+	}
+	if state.sourceModel != modelData {
+		return false
+	}
+	return state.hash == modelData.Hash()
+}
+
+// startModelRendererLoad はモデル描画の非同期読み込みを開始する。
+func (vw *ViewerWindow) startModelRendererLoad(modelIndex int, modelData *model.PmxModel) {
+	if vw == nil || modelData == nil {
+		return
+	}
+	if modelIndex < 0 || modelIndex >= len(vw.modelRendererLoads) {
+		return
+	}
+	vw.cancelModelRendererLoad(modelIndex)
+
+	state := &vw.modelRendererLoads[modelIndex]
+	state.token++
+	state.hash = modelData.Hash()
+	state.sourceModel = modelData
+	state.inProgress = true
+
+	ctx, cancel := context.WithCancel(context.Background())
+	state.cancel = cancel
+	token := state.token
+
+	go func() {
+		renderModel := modelData
+		copied, err := modelData.Copy()
+		if err == nil {
+			// 描画や物理でモデルを書き換えないよう、描画用は複製を使う。
+			copied.SetHash(modelData.Hash())
+			renderModel = &copied
+		} else {
+			logging.DefaultLogger().Warn("描画用モデルの複製に失敗しました: %v", err)
+		}
+		if ctx.Err() != nil {
+			return
+		}
+
+		// UI応答性を確保するため1コア分は空ける。
+		workerCount := max(1, runtime.GOMAXPROCS(0)-1)
+		bufferData, err := render.PrepareModelRendererBufferData(ctx, renderModel, workerCount)
+		if ctx.Err() != nil {
+			return
+		}
+
+		result := &modelRendererLoadResult{
+			modelIndex:  modelIndex,
+			token:       token,
+			sourceModel: modelData,
+			renderModel: renderModel,
+			bufferData:  bufferData,
+			err:         err,
+		}
+		select {
+		case vw.loadResults <- result:
+		default:
+			logging.DefaultLogger().Warn("描画読み込み結果の通知に失敗しました: modelIndex=%d", modelIndex)
+		}
+	}()
+}
+
+// cancelModelRendererLoad は指定モデルの読み込みを中断する。
+func (vw *ViewerWindow) cancelModelRendererLoad(modelIndex int) {
+	if vw == nil {
+		return
+	}
+	if modelIndex < 0 || modelIndex >= len(vw.modelRendererLoads) {
+		return
+	}
+	state := &vw.modelRendererLoads[modelIndex]
+	if state.cancel != nil {
+		state.cancel()
+		state.cancel = nil
+	}
+	state.token++
+	state.hash = ""
+	state.sourceModel = nil
+	state.inProgress = false
+}
+
+// cancelAllModelRendererLoads は全モデルの読み込みを中断する。
+func (vw *ViewerWindow) cancelAllModelRendererLoads() {
+	if vw == nil {
+		return
+	}
+	for i := range vw.modelRendererLoads {
+		vw.cancelModelRendererLoad(i)
 	}
 }
 
