@@ -1,18 +1,22 @@
+// 指示: miu200521358
 package delta
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/domain/model"
+	"github.com/miu200521358/mlib_go/pkg/shared/contracts/mtime"
 )
 
+// VmdDeltas はボーン/モーフの差分をまとめる。
 type VmdDeltas struct {
-	frame      float32
+	frame      mtime.Frame
 	modelHash  string
 	motionHash string
 	Bones      *BoneDeltas
 	Morphs     *MorphDeltas
 }
 
-func NewVmdDeltas(frame float32, bones *pmx.Bones, modelHash, motionHash string) *VmdDeltas {
+// NewVmdDeltas はVmdDeltasを生成する。
+func NewVmdDeltas(frame mtime.Frame, bones *model.BoneCollection, modelHash, motionHash string) *VmdDeltas {
 	return &VmdDeltas{
 		frame:      frame,
 		modelHash:  modelHash,
@@ -22,26 +26,50 @@ func NewVmdDeltas(frame float32, bones *pmx.Bones, modelHash, motionHash string)
 	}
 }
 
-func (vmdDeltas *VmdDeltas) Frame() float32 {
-	return vmdDeltas.frame
+// Frame はフレーム番号を返す。
+func (v *VmdDeltas) Frame() mtime.Frame {
+	if v == nil {
+		return 0
+	}
+	return v.frame
 }
 
-func (vmdDeltas *VmdDeltas) SetFrame(frame float32) {
-	vmdDeltas.frame = frame
+// SetFrame はフレーム番号を設定する。
+func (v *VmdDeltas) SetFrame(frame mtime.Frame) {
+	if v == nil {
+		return
+	}
+	v.frame = frame
 }
 
-func (vmdDeltas *VmdDeltas) ModelHash() string {
-	return vmdDeltas.modelHash
+// ModelHash はモデルハッシュを返す。
+func (v *VmdDeltas) ModelHash() string {
+	if v == nil {
+		return ""
+	}
+	return v.modelHash
 }
 
-func (vmdDeltas *VmdDeltas) SetModelHash(hash string) {
-	vmdDeltas.modelHash = hash
+// SetModelHash はモデルハッシュを設定する。
+func (v *VmdDeltas) SetModelHash(hash string) {
+	if v == nil {
+		return
+	}
+	v.modelHash = hash
 }
 
-func (vmdDeltas *VmdDeltas) MotionHash() string {
-	return vmdDeltas.motionHash
+// MotionHash はモーションハッシュを返す。
+func (v *VmdDeltas) MotionHash() string {
+	if v == nil {
+		return ""
+	}
+	return v.motionHash
 }
 
-func (vmdDeltas *VmdDeltas) SetMotionHash(hash string) {
-	vmdDeltas.motionHash = hash
+// SetMotionHash はモーションハッシュを設定する。
+func (v *VmdDeltas) SetMotionHash(hash string) {
+	if v == nil {
+		return
+	}
+	v.motionHash = hash
 }

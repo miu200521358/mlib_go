@@ -1,78 +1,105 @@
+// 指示: miu200521358
 package delta
 
-import "github.com/miu200521358/mlib_go/pkg/domain/pmx"
+import (
+	"github.com/miu200521358/mlib_go/pkg/domain/model"
+	"github.com/miu200521358/mlib_go/pkg/domain/model/collection"
+)
 
-// RigidBodyDeltas は RigidBodyDelta の集合を管理する
+// RigidBodyDeltas は剛体差分の集合を表す。
 type RigidBodyDeltas struct {
 	data        []*RigidBodyDelta
-	rigidBodies *pmx.RigidBodies
+	rigidBodies *collection.NamedCollection[*model.RigidBody]
 }
 
-// NewRigidBodyDeltas は剛体数に合わせて RigidBodyDelta のスライスを用意する
-func NewRigidBodyDeltas(rigidBodies *pmx.RigidBodies) *RigidBodyDeltas {
+// NewRigidBodyDeltas はRigidBodyDeltasを生成する。
+func NewRigidBodyDeltas(rigidBodies *collection.NamedCollection[*model.RigidBody]) *RigidBodyDeltas {
+	length := 0
+	if rigidBodies != nil {
+		length = rigidBodies.Len()
+	}
 	return &RigidBodyDeltas{
-		data:        make([]*RigidBodyDelta, rigidBodies.Length()),
+		data:        make([]*RigidBodyDelta, length),
 		rigidBodies: rigidBodies,
 	}
 }
 
-func (bds *RigidBodyDeltas) Length() int {
-	return len(bds.data)
+// Len は要素数を返す。
+func (d *RigidBodyDeltas) Len() int {
+	if d == nil {
+		return 0
+	}
+	return len(d.data)
 }
 
-// Get は boneIndex に対応する RigidBodyDelta を返す
-func (bds *RigidBodyDeltas) Get(boneIndex int) *RigidBodyDelta {
-	if boneIndex < 0 || boneIndex >= len(bds.data) {
+// Get はindexの差分を返す。
+func (d *RigidBodyDeltas) Get(index int) *RigidBodyDelta {
+	if d == nil || index < 0 || index >= len(d.data) {
 		return nil
 	}
-	return bds.data[boneIndex]
+	return d.data[index]
 }
 
-// GetByName はボーン名に対応する RigidBodyDelta を返す
-func (bds *RigidBodyDeltas) GetByName(boneName string) *RigidBodyDelta {
-	if bone, err := bds.rigidBodies.GetByName(boneName); err == nil {
-		return bds.Get(bone.Index())
+// GetByName は名前に対応する差分を返す。
+func (d *RigidBodyDeltas) GetByName(name string) *RigidBodyDelta {
+	if d == nil || d.rigidBodies == nil {
+		return nil
 	}
-
-	return nil
+	body, err := d.rigidBodies.GetByName(name)
+	if err != nil {
+		return nil
+	}
+	return d.Get(body.Index())
 }
 
-// Delete は指定のインデックスの RigidBodyDelta を削除する
-func (bds *RigidBodyDeltas) Delete(boneIndex int) {
-	if boneIndex < 0 || boneIndex >= len(bds.data) {
+// Update は差分を更新する。
+func (d *RigidBodyDeltas) Update(delta *RigidBodyDelta) {
+	if d == nil || delta == nil || delta.RigidBody == nil {
 		return
 	}
-	bds.data[boneIndex] = nil
-}
-
-// Update は RigidBodyDelta をデータにセットする
-func (bds *RigidBodyDeltas) Update(bd *RigidBodyDelta) {
-	if bd == nil || bd.RigidBody == nil {
+	idx := delta.RigidBody.Index()
+	if idx < 0 || idx >= len(d.data) {
 		return
 	}
-	idx := bd.RigidBody.Index()
-	if idx >= 0 && idx < len(bds.data) {
-		bds.data[idx] = bd
+	d.data[idx] = delta
+}
+
+// Delete はindexの差分を削除する。
+func (d *RigidBodyDeltas) Delete(index int) {
+	if d == nil || index < 0 || index >= len(d.data) {
+		return
 	}
+	d.data[index] = nil
 }
 
-// Contains は指定のインデックスに RigidBodyDelta が存在するかを返す
-func (bds *RigidBodyDeltas) Contains(boneIndex int) bool {
-	return boneIndex >= 0 && boneIndex < len(bds.data) && bds.data[boneIndex] != nil
-}
-
-func (bds *RigidBodyDeltas) ContainsByName(boneName string) bool {
-	if bone, err := bds.rigidBodies.GetByName(boneName); err == nil {
-		return bds.Contains(bone.Index())
+// Contains はindexの差分が存在するか判定する。
+func (d *RigidBodyDeltas) Contains(index int) bool {
+	if d == nil || index < 0 || index >= len(d.data) {
+		return false
 	}
-	return false
+	return d.data[index] != nil
 }
 
-// ForEach は全ての値をコールバック関数に渡します
-func (bds *RigidBodyDeltas) ForEach(callback func(index int, value *RigidBodyDelta) bool) {
-	for i, v := range bds.data {
-		if !callback(i, v) {
-			break
+// ContainsByName は名前に対応する差分が存在するか判定する。
+func (d *RigidBodyDeltas) ContainsByName(name string) bool {
+	if d == nil || d.rigidBodies == nil {
+		return false
+	}
+	body, err := d.rigidBodies.GetByName(name)
+	if err != nil {
+		return false
+	}
+	return d.Contains(body.Index())
+}
+
+// ForEach は全要素を走査する。
+func (d *RigidBodyDeltas) ForEach(fn func(index int, delta *RigidBodyDelta) bool) {
+	if d == nil || fn == nil {
+		return
+	}
+	for i, v := range d.data {
+		if !fn(i, v) {
+			return
 		}
 	}
 }

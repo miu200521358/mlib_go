@@ -1,283 +1,541 @@
+// 指示: miu200521358
 package delta
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/domain/model"
+	"github.com/miu200521358/mlib_go/pkg/shared/contracts/mtime"
 )
 
-// BoneDelta は1つのボーンにおける変形（ポジション・回転・スケールなど）の差分を表す
+// BoneDelta は1ボーンの差分と派生行列を保持する。
 type BoneDelta struct {
-	Bone              *pmx.Bone
-	Frame             float32
-	GlobalIkOffMatrix *mmath.MMat4
-	GlobalMatrix      *mmath.MMat4
-	LocalMatrix       *mmath.MMat4
-	GlobalPosition    *mmath.MVec3
-	UnitMatrix        *mmath.MMat4
+	Bone                *model.Bone
+	Frame               mtime.Frame
+	globalIkOffMatrix   mmath.Mat4
+	globalMatrix        mmath.Mat4
+	localMatrix         mmath.Mat4
+	unitMatrix          mmath.Mat4
+	globalPosition      mmath.Vec3
+	totalLocalMat       mmath.Mat4
+	totalRotation       mmath.Quaternion
+	totalPosition       mmath.Vec3
+	totalScale          mmath.Vec3
+	totalLocalCached    bool
+	totalLocalHas       bool
+	totalRotationCached bool
+	totalRotationHas    bool
+	totalPositionCached bool
+	totalPositionHas    bool
+	totalScaleCached    bool
+	totalScaleHas       bool
+	GlobalIkOffMatrix   *mmath.Mat4
+	GlobalMatrix        *mmath.Mat4
+	LocalMatrix         *mmath.Mat4
+	UnitMatrix          *mmath.Mat4
+	GlobalPosition      *mmath.Vec3
 
-	FramePosition                *mmath.MVec3
-	FrameMorphPosition           *mmath.MVec3
-	FrameCancelablePosition      *mmath.MVec3
-	FrameMorphCancelablePosition *mmath.MVec3
+	FramePosition                *mmath.Vec3
+	FrameMorphPosition           *mmath.Vec3
+	FrameCancelablePosition      *mmath.Vec3
+	FrameMorphCancelablePosition *mmath.Vec3
 
-	FrameRotation                *mmath.MQuaternion
-	FrameMorphRotation           *mmath.MQuaternion
-	FrameCancelableRotation      *mmath.MQuaternion
-	FrameMorphCancelableRotation *mmath.MQuaternion
+	FrameRotation                *mmath.Quaternion
+	FrameMorphRotation           *mmath.Quaternion
+	FrameCancelableRotation      *mmath.Quaternion
+	FrameMorphCancelableRotation *mmath.Quaternion
 
-	FrameScale                *mmath.MVec3
-	FrameMorphScale           *mmath.MVec3
-	FrameCancelableScale      *mmath.MVec3
-	FrameMorphCancelableScale *mmath.MVec3
+	FrameScale                *mmath.Vec3
+	FrameMorphScale           *mmath.Vec3
+	FrameCancelableScale      *mmath.Vec3
+	FrameMorphCancelableScale *mmath.Vec3
 
-	FrameLocalMat      *mmath.MMat4
-	FrameLocalMorphMat *mmath.MMat4
+	FrameLocalMat      *mmath.Mat4
+	FrameLocalMorphMat *mmath.Mat4
 }
 
-// NewBoneDelta は新規の BoneDelta を生成するコンストラクタ
-func NewBoneDelta(bone *pmx.Bone, frame float32) *BoneDelta {
-	return &BoneDelta{
-		Bone:  bone,
-		Frame: frame,
+// NewBoneDelta はBoneDeltaを生成する。
+func NewBoneDelta(bone *model.Bone, frame mtime.Frame) *BoneDelta {
+	return &BoneDelta{Bone: bone, Frame: frame}
+}
+
+// InvalidateTotals は総合成のキャッシュを無効化する。
+func (d *BoneDelta) InvalidateTotals() {
+	if d == nil {
+		return
 	}
+	d.totalLocalCached = false
+	d.totalLocalHas = false
+	d.totalRotationCached = false
+	d.totalRotationHas = false
+	d.totalPositionCached = false
+	d.totalPositionHas = false
+	d.totalScaleCached = false
+	d.totalScaleHas = false
 }
 
-// NewBoneDeltaByGlobalMatrix はグローバル行列をもとにボーンデルタを生成する
-func NewBoneDeltaByGlobalMatrix(bone *pmx.Bone, frame float32, globalMatrix *mmath.MMat4, parent *BoneDelta) *BoneDelta {
-	var parentGlobal *mmath.MMat4
+// SetGlobalIkOffMatrix はIKオフ用の行列を設定する。
+func (d *BoneDelta) SetGlobalIkOffMatrix(mat mmath.Mat4) {
+	if d == nil {
+		return
+	}
+	d.globalIkOffMatrix = mat
+	d.GlobalIkOffMatrix = &d.globalIkOffMatrix
+}
+
+// SetGlobalMatrix はグローバル行列を設定する。
+func (d *BoneDelta) SetGlobalMatrix(mat mmath.Mat4) {
+	if d == nil {
+		return
+	}
+	d.globalMatrix = mat
+	d.GlobalMatrix = &d.globalMatrix
+}
+
+// SetLocalMatrix はローカル行列を設定する。
+func (d *BoneDelta) SetLocalMatrix(mat mmath.Mat4) {
+	if d == nil {
+		return
+	}
+	d.localMatrix = mat
+	d.LocalMatrix = &d.localMatrix
+}
+
+// SetUnitMatrix はユニット行列を設定する。
+func (d *BoneDelta) SetUnitMatrix(mat mmath.Mat4) {
+	if d == nil {
+		return
+	}
+	d.unitMatrix = mat
+	d.UnitMatrix = &d.unitMatrix
+}
+
+// ResetUnitMatrix はユニット行列を初期化して返す。
+func (d *BoneDelta) ResetUnitMatrix() *mmath.Mat4 {
+	if d == nil {
+		return nil
+	}
+	d.unitMatrix = mmath.NewMat4()
+	d.UnitMatrix = &d.unitMatrix
+	return d.UnitMatrix
+}
+
+// GlobalMatrixPtr はグローバル行列の参照を返す。
+func (d *BoneDelta) GlobalMatrixPtr() *mmath.Mat4 {
+	if d == nil {
+		return nil
+	}
+	d.GlobalMatrix = &d.globalMatrix
+	return d.GlobalMatrix
+}
+
+// LocalMatrixPtr はローカル行列の参照を返す。
+func (d *BoneDelta) LocalMatrixPtr() *mmath.Mat4 {
+	if d == nil {
+		return nil
+	}
+	d.LocalMatrix = &d.localMatrix
+	return d.LocalMatrix
+}
+
+// SetGlobalPosition はグローバル位置を設定する。
+func (d *BoneDelta) SetGlobalPosition(pos mmath.Vec3) {
+	if d == nil {
+		return
+	}
+	d.globalPosition = pos
+	d.GlobalPosition = &d.globalPosition
+}
+
+// NewBoneDeltaByGlobalMatrix はグローバル行列をもとにボーン差分を生成する。
+func NewBoneDeltaByGlobalMatrix(
+	bone *model.Bone,
+	frame mtime.Frame,
+	globalMatrix mmath.Mat4,
+	parent *BoneDelta,
+) *BoneDelta {
+	if bone == nil {
+		return nil
+	}
+	parentGlobal := mmath.NewMat4()
+	parentPos := mmath.NewVec3()
 	if parent != nil {
 		parentGlobal = parent.FilledGlobalMatrix()
-	} else {
-		parentGlobal = mmath.NewMMat4()
+		if parent.Bone != nil {
+			parentPos = parent.Bone.Position
+		}
 	}
-	localMat := globalMatrix.Muled(bone.OffsetMatrix)
-	unitMat := parentGlobal.Inverted().Muled(globalMatrix)
-
-	return &BoneDelta{
-		Bone:         bone,
-		Frame:        frame,
-		GlobalMatrix: globalMatrix,
-		LocalMatrix:  localMat,
-		UnitMatrix:   unitMat,
-		// 位置と回転を抜き出して保持
-		FramePosition: unitMat.Translation().Subed(bone.ParentRelativePosition),
-		FrameRotation: unitMat.Quaternion(),
+	var localMat mmath.Mat4
+	neg := bone.Position.Negated()
+	globalMatrix.MulTranslateTo(&neg, &localMat)
+	invParent := parentGlobal.Inverted()
+	var unitMat mmath.Mat4
+	invParent.MulToPtr(&globalMatrix, &unitMat)
+	parentRelative := bone.Position.Subed(parentPos)
+	framePos := unitMat.Translation().Subed(parentRelative)
+	frameRot := unitMat.Quaternion()
+	global := globalMatrix
+	local := localMat
+	unit := unitMat
+	d := &BoneDelta{
+		Bone:          bone,
+		Frame:         frame,
+		FramePosition: &framePos,
+		FrameRotation: &frameRot,
 	}
+	d.globalMatrix = global
+	d.GlobalMatrix = &d.globalMatrix
+	d.localMatrix = local
+	d.LocalMatrix = &d.localMatrix
+	d.unitMatrix = unit
+	d.UnitMatrix = &d.unitMatrix
+	return d
 }
 
-func (bd *BoneDelta) FilledGlobalMatrix() *mmath.MMat4 {
-	if bd.GlobalMatrix == nil {
-		bd.GlobalMatrix = mmath.NewMMat4()
+// FilledGlobalMatrix はグローバル行列を返す。
+func (d *BoneDelta) FilledGlobalMatrix() mmath.Mat4 {
+	if d == nil || d.GlobalMatrix == nil {
+		return mmath.NewMat4()
 	}
-	return bd.GlobalMatrix
+	return *d.GlobalMatrix
 }
 
-func (bd *BoneDelta) FilledLocalMatrix() *mmath.MMat4 {
-	if bd.LocalMatrix == nil {
-		bd.LocalMatrix = bd.FilledGlobalMatrix().Muled(bd.Bone.OffsetMatrix)
+// FilledLocalMatrix はローカル行列を返す。
+func (d *BoneDelta) FilledLocalMatrix() mmath.Mat4 {
+	if d == nil {
+		return mmath.NewMat4()
 	}
-	return bd.LocalMatrix
+	if d.LocalMatrix == nil {
+		global := d.FilledGlobalMatrix()
+		if d.Bone != nil {
+			neg := d.Bone.Position.Negated()
+			global.MulTranslateTo(&neg, &d.localMatrix)
+		} else {
+			d.localMatrix = global
+		}
+		d.LocalMatrix = &d.localMatrix
+	}
+	return *d.LocalMatrix
 }
 
-func (bd *BoneDelta) FilledUnitMatrix() *mmath.MMat4 {
-	if bd.UnitMatrix == nil {
-		return mmath.NewMMat4()
+// FilledUnitMatrix はユニット行列を返す。
+func (d *BoneDelta) FilledUnitMatrix() mmath.Mat4 {
+	if d == nil || d.UnitMatrix == nil {
+		return mmath.NewMat4()
 	}
-	return bd.UnitMatrix
+	return *d.UnitMatrix
 }
 
-func (bd *BoneDelta) FilledGlobalPosition() *mmath.MVec3 {
-	if bd.GlobalPosition == nil {
-		bd.GlobalPosition = bd.FilledGlobalMatrix().Translation()
+// FilledGlobalPosition はグローバル位置を返す。
+func (d *BoneDelta) FilledGlobalPosition() mmath.Vec3 {
+	if d == nil {
+		return mmath.NewVec3()
 	}
-	return bd.GlobalPosition
+	if d.GlobalPosition == nil {
+		d.globalPosition = d.FilledGlobalMatrix().Translation()
+		d.GlobalPosition = &d.globalPosition
+	}
+	return *d.GlobalPosition
 }
 
-// 回転は同じ処理をまとめ、骨特有の制御（FixedAxisなど）もここに含める
-func (bd *BoneDelta) FilledFrameRotation() *mmath.MQuaternion {
-	if bd.FrameRotation == nil {
-		bd.FrameRotation = mmath.NewMQuaternion()
+// FilledFrameRotation はフレーム回転を返す。
+func (d *BoneDelta) FilledFrameRotation() mmath.Quaternion {
+	if d == nil || d.FrameRotation == nil {
+		return mmath.NewQuaternion()
 	}
-	return bd.FrameRotation
-}
-func (bd *BoneDelta) FilledFrameMorphRotation() *mmath.MQuaternion {
-	if bd.FrameMorphRotation == nil {
-		bd.FrameMorphRotation = mmath.NewMQuaternion()
-	}
-	return bd.FrameMorphRotation
-}
-func (bd *BoneDelta) FilledFrameCancelableRotation() *mmath.MQuaternion {
-	if bd.FrameCancelableRotation == nil {
-		bd.FrameCancelableRotation = mmath.NewMQuaternion()
-	}
-	return bd.FrameCancelableRotation
-}
-func (bd *BoneDelta) FilledFrameMorphCancelableRotation() *mmath.MQuaternion {
-	if bd.FrameMorphCancelableRotation == nil {
-		bd.FrameMorphCancelableRotation = mmath.NewMQuaternion()
-	}
-	return bd.FrameMorphCancelableRotation
+	return *d.FrameRotation
 }
 
-// トータルの回転(モーフ含む)を返す(なかった場合、Identを返す)
-func (bd *BoneDelta) FilledTotalRotation() *mmath.MQuaternion {
-	rot := bd.TotalRotation()
+// FilledFrameMorphRotation はフレームモーフ回転を返す。
+func (d *BoneDelta) FilledFrameMorphRotation() mmath.Quaternion {
+	if d == nil || d.FrameMorphRotation == nil {
+		return mmath.NewQuaternion()
+	}
+	return *d.FrameMorphRotation
+}
+
+// FilledFrameCancelableRotation はフレームキャンセル回転を返す。
+func (d *BoneDelta) FilledFrameCancelableRotation() mmath.Quaternion {
+	if d == nil || d.FrameCancelableRotation == nil {
+		return mmath.NewQuaternion()
+	}
+	return *d.FrameCancelableRotation
+}
+
+// FilledFrameMorphCancelableRotation はフレームモーフキャンセル回転を返す。
+func (d *BoneDelta) FilledFrameMorphCancelableRotation() mmath.Quaternion {
+	if d == nil || d.FrameMorphCancelableRotation == nil {
+		return mmath.NewQuaternion()
+	}
+	return *d.FrameMorphCancelableRotation
+}
+
+// TotalRotation はモーフ込みの回転を返す。
+func (d *BoneDelta) TotalRotation() *mmath.Quaternion {
+	if d == nil {
+		return nil
+	}
+	if d.totalRotationCached {
+		if !d.totalRotationHas {
+			return nil
+		}
+		return &d.totalRotation
+	}
+	var rot mmath.Quaternion
+	hasRot := false
+	if d.FrameRotation != nil {
+		rot = *d.FrameRotation
+		hasRot = true
+	}
+	if d.FrameMorphRotation != nil && !d.FrameMorphRotation.IsIdent() {
+		if !hasRot {
+			rot = *d.FrameMorphRotation
+			hasRot = true
+		} else {
+			rot = rot.Muled(*d.FrameMorphRotation)
+		}
+	}
+	if !hasRot {
+		d.totalRotationCached = true
+		d.totalRotationHas = false
+		return nil
+	}
+	if boneHasFixedAxis(d.Bone) {
+		rot = rot.ToFixedAxisRotation(d.Bone.FixedAxis.Normalized())
+	}
+	d.totalRotation = rot
+	d.totalRotationCached = true
+	d.totalRotationHas = true
+	return &d.totalRotation
+}
+
+// FilledTotalRotation はモーフ込みの回転を返す。
+func (d *BoneDelta) FilledTotalRotation() mmath.Quaternion {
+	rot := d.TotalRotation()
 	if rot == nil {
-		rot = mmath.MQuaternionIdent
+		return mmath.NewQuaternion()
 	}
-	return rot
+	return *rot
 }
 
-// トータルの回転(モーフ含む)を返す(なかった場合、nilを返す)
-func (bd *BoneDelta) TotalRotation() *mmath.MQuaternion {
-	rot := bd.FrameRotation
-	morphRot := bd.FrameMorphRotation
-	if morphRot != nil && !morphRot.IsIdent() {
-		if rot == nil {
-			rot = morphRot.Copy()
+// FilledFramePosition はフレーム位置を返す。
+func (d *BoneDelta) FilledFramePosition() mmath.Vec3 {
+	if d == nil || d.FramePosition == nil {
+		return mmath.NewVec3()
+	}
+	return *d.FramePosition
+}
+
+// FilledFrameMorphPosition はフレームモーフ位置を返す。
+func (d *BoneDelta) FilledFrameMorphPosition() mmath.Vec3 {
+	if d == nil || d.FrameMorphPosition == nil {
+		return mmath.NewVec3()
+	}
+	return *d.FrameMorphPosition
+}
+
+// FilledFrameCancelablePosition はフレームキャンセル位置を返す。
+func (d *BoneDelta) FilledFrameCancelablePosition() mmath.Vec3 {
+	if d == nil || d.FrameCancelablePosition == nil {
+		return mmath.NewVec3()
+	}
+	return *d.FrameCancelablePosition
+}
+
+// FilledFrameMorphCancelablePosition はフレームモーフキャンセル位置を返す。
+func (d *BoneDelta) FilledFrameMorphCancelablePosition() mmath.Vec3 {
+	if d == nil || d.FrameMorphCancelablePosition == nil {
+		return mmath.NewVec3()
+	}
+	return *d.FrameMorphCancelablePosition
+}
+
+// TotalPosition はモーフ込みの位置を返す。
+func (d *BoneDelta) TotalPosition() *mmath.Vec3 {
+	if d == nil {
+		return nil
+	}
+	if d.totalPositionCached {
+		if !d.totalPositionHas {
+			return nil
+		}
+		return &d.totalPosition
+	}
+	var pos mmath.Vec3
+	hasPos := false
+	if d.FramePosition != nil {
+		pos = *d.FramePosition
+		hasPos = true
+	}
+	if d.FrameMorphPosition != nil && !d.FrameMorphPosition.IsZero() {
+		if !hasPos {
+			pos = *d.FrameMorphPosition
+			hasPos = true
 		} else {
-			rot = rot.Muled(morphRot)
+			pos = pos.Added(*d.FrameMorphPosition)
 		}
 	}
-
-	// ボーンが固定軸を持っている場合の最終調整
-	if rot != nil && bd.Bone.HasFixedAxis() {
-		rot = rot.ToFixedAxisRotation(bd.Bone.NormalizedFixedAxis)
+	if !hasPos {
+		d.totalPositionCached = true
+		d.totalPositionHas = false
+		return nil
 	}
-
-	return rot
+	d.totalPosition = pos
+	d.totalPositionCached = true
+	d.totalPositionHas = true
+	return &d.totalPosition
 }
 
-func (bd *BoneDelta) FilledFramePosition() *mmath.MVec3 {
-	if bd.FramePosition == nil {
-		bd.FramePosition = mmath.NewMVec3()
-	}
-	return bd.FramePosition
-}
-func (bd *BoneDelta) FilledFrameMorphPosition() *mmath.MVec3 {
-	if bd.FrameMorphPosition == nil {
-		bd.FrameMorphPosition = mmath.NewMVec3()
-	}
-	return bd.FrameMorphPosition
-}
-func (bd *BoneDelta) FilledFrameCancelablePosition() *mmath.MVec3 {
-	if bd.FrameCancelablePosition == nil {
-		bd.FrameCancelablePosition = mmath.NewMVec3()
-	}
-	return bd.FrameCancelablePosition
-}
-func (bd *BoneDelta) FilledFrameMorphCancelablePosition() *mmath.MVec3 {
-	if bd.FrameMorphCancelablePosition == nil {
-		bd.FrameMorphCancelablePosition = mmath.NewMVec3()
-	}
-	return bd.FrameMorphCancelablePosition
-}
-
-// トータルの位置(モーフ含む)を返す(なかった場合、Zeroを返す)
-func (bd *BoneDelta) FilledTotalPosition() *mmath.MVec3 {
-	pos := bd.TotalPosition()
+// FilledTotalPosition はモーフ込みの位置を返す。
+func (d *BoneDelta) FilledTotalPosition() mmath.Vec3 {
+	pos := d.TotalPosition()
 	if pos == nil {
-		return mmath.MVec3Zero
+		return mmath.NewVec3()
 	}
-	return pos
+	return *pos
 }
 
-// トータルの位置(モーフ含む)を返す(なかった場合、nilを返す)
-func (bd *BoneDelta) TotalPosition() *mmath.MVec3 {
-	pos := bd.FramePosition
-	morphPos := bd.FrameMorphPosition
-	if morphPos != nil && !morphPos.IsZero() {
-		if pos == nil {
-			pos = morphPos
+// FilledFrameScale はフレームスケールを返す。
+func (d *BoneDelta) FilledFrameScale() mmath.Vec3 {
+	if d == nil || d.FrameScale == nil {
+		return mmath.ONE_VEC3
+	}
+	return *d.FrameScale
+}
+
+// FilledFrameMorphScale はフレームモーフスケールを返す。
+func (d *BoneDelta) FilledFrameMorphScale() mmath.Vec3 {
+	if d == nil || d.FrameMorphScale == nil {
+		return mmath.ONE_VEC3
+	}
+	return *d.FrameMorphScale
+}
+
+// FilledFrameCancelableScale はフレームキャンセルスケールを返す。
+func (d *BoneDelta) FilledFrameCancelableScale() mmath.Vec3 {
+	if d == nil || d.FrameCancelableScale == nil {
+		return mmath.ONE_VEC3
+	}
+	return *d.FrameCancelableScale
+}
+
+// FilledFrameMorphCancelableScale はフレームモーフキャンセルスケールを返す。
+func (d *BoneDelta) FilledFrameMorphCancelableScale() mmath.Vec3 {
+	if d == nil || d.FrameMorphCancelableScale == nil {
+		return mmath.ONE_VEC3
+	}
+	return *d.FrameMorphCancelableScale
+}
+
+// TotalScale はモーフ込みのスケールを返す。
+func (d *BoneDelta) TotalScale() *mmath.Vec3 {
+	if d == nil {
+		return nil
+	}
+	if d.totalScaleCached {
+		if !d.totalScaleHas {
+			return nil
+		}
+		return &d.totalScale
+	}
+	var scale mmath.Vec3
+	hasScale := false
+	if d.FrameScale != nil {
+		scale = *d.FrameScale
+		hasScale = true
+	}
+	if d.FrameMorphScale != nil && !d.FrameMorphScale.IsOne() {
+		if !hasScale {
+			scale = *d.FrameMorphScale
+			hasScale = true
 		} else {
-			pos = pos.Added(morphPos)
+			scale = scale.Muled(*d.FrameMorphScale)
 		}
 	}
-	return pos
+	if !hasScale {
+		d.totalScaleCached = true
+		d.totalScaleHas = false
+		return nil
+	}
+	d.totalScale = scale
+	d.totalScaleCached = true
+	d.totalScaleHas = true
+	return &d.totalScale
 }
 
-// スケール系
-func (bd *BoneDelta) FilledFrameScale() *mmath.MVec3 {
-	if bd.FrameScale == nil {
-		bd.FrameScale = &mmath.MVec3{X: 1, Y: 1, Z: 1}
-	}
-	return bd.FrameScale
-}
-func (bd *BoneDelta) FilledFrameMorphScale() *mmath.MVec3 {
-	if bd.FrameMorphScale == nil {
-		bd.FrameMorphScale = &mmath.MVec3{X: 1, Y: 1, Z: 1}
-	}
-	return bd.FrameMorphScale
-}
-func (bd *BoneDelta) FilledFrameCancelableScale() *mmath.MVec3 {
-	if bd.FrameCancelableScale == nil {
-		bd.FrameCancelableScale = &mmath.MVec3{X: 1, Y: 1, Z: 1}
-	}
-	return bd.FrameCancelableScale
-}
-func (bd *BoneDelta) FilledFrameMorphCancelableScale() *mmath.MVec3 {
-	if bd.FrameMorphCancelableScale == nil {
-		bd.FrameMorphCancelableScale = &mmath.MVec3{X: 1, Y: 1, Z: 1}
-	}
-	return bd.FrameMorphCancelableScale
-}
-
-// トータルのスケール(モーフ含む)を返す(なかった場合、Oneを返す)
-func (bd *BoneDelta) FilledTotalScale() *mmath.MVec3 {
-	scale := bd.TotalScale()
+// FilledTotalScale はモーフ込みのスケールを返す。
+func (d *BoneDelta) FilledTotalScale() mmath.Vec3 {
+	scale := d.TotalScale()
 	if scale == nil {
-		return mmath.MVec3One
+		return mmath.ONE_VEC3
 	}
-	return scale
+	return *scale
 }
 
-// トータルのスケール(モーフ含む)を返す(なかった場合、nilを返す)
-func (bd *BoneDelta) TotalScale() *mmath.MVec3 {
-	scale := bd.FrameScale
-	morphScale := bd.FrameMorphScale
-	if morphScale != nil && !morphScale.IsOne() {
-		if scale == nil {
-			scale = morphScale
+// FilledFrameLocalMat はフレームローカル行列を返す。
+func (d *BoneDelta) FilledFrameLocalMat() mmath.Mat4 {
+	if d == nil || d.FrameLocalMat == nil {
+		return mmath.NewMat4()
+	}
+	return *d.FrameLocalMat
+}
+
+// FilledFrameLocalMorphMat はフレームモーフローカル行列を返す。
+func (d *BoneDelta) FilledFrameLocalMorphMat() mmath.Mat4 {
+	if d == nil || d.FrameLocalMorphMat == nil {
+		return mmath.NewMat4()
+	}
+	return *d.FrameLocalMorphMat
+}
+
+// TotalLocalMat はモーフ込みのローカル行列を返す。
+func (d *BoneDelta) TotalLocalMat() *mmath.Mat4 {
+	if d == nil {
+		return nil
+	}
+	if d.totalLocalCached {
+		if !d.totalLocalHas {
+			return nil
+		}
+		return &d.totalLocalMat
+	}
+	var mat mmath.Mat4
+	hasMat := false
+	if d.FrameLocalMat != nil && !d.FrameLocalMat.IsIdent() {
+		mat = *d.FrameLocalMat
+		hasMat = true
+	}
+	if d.FrameLocalMorphMat != nil && !d.FrameLocalMorphMat.IsIdent() {
+		if !hasMat {
+			mat = *d.FrameLocalMorphMat
+			hasMat = true
 		} else {
-			scale = scale.Muled(morphScale)
+			mat.MulToPtr(d.FrameLocalMorphMat, &mat)
 		}
 	}
-	return scale
+	if !hasMat {
+		d.totalLocalCached = true
+		d.totalLocalHas = false
+		return nil
+	}
+	d.totalLocalMat = mat
+	d.totalLocalCached = true
+	d.totalLocalHas = true
+	return &d.totalLocalMat
 }
 
-// ローカル行列
-func (bd *BoneDelta) FilledFrameLocalMat() *mmath.MMat4 {
-	if bd.FrameLocalMat == nil {
-		bd.FrameLocalMat = mmath.NewMMat4()
-	}
-	return bd.FrameLocalMat
-}
-func (bd *BoneDelta) FilledFrameLocalMorphMat() *mmath.MMat4 {
-	if bd.FrameLocalMorphMat == nil {
-		bd.FrameLocalMorphMat = mmath.NewMMat4()
-	}
-	return bd.FrameLocalMorphMat
-}
-
-// トータルのローカル行列(モーフ含む)(なかった場合、Identを返す)
-func (bd *BoneDelta) FilledTotalLocalMat() *mmath.MMat4 {
-	mat := bd.TotalLocalMat()
+// FilledTotalLocalMat はモーフ込みのローカル行列を返す。
+func (d *BoneDelta) FilledTotalLocalMat() mmath.Mat4 {
+	mat := d.TotalLocalMat()
 	if mat == nil {
-		return mmath.MMat4Ident
+		return mmath.NewMat4()
 	}
-	return mat
+	return *mat
 }
 
-// トータルのローカル行列(モーフ含む)(なかった場合、nilを返す)
-func (bd *BoneDelta) TotalLocalMat() *mmath.MMat4 {
-	mat := bd.FrameLocalMat
-	morphMat := bd.FrameLocalMorphMat
-	if morphMat != nil && !morphMat.IsIdent() {
-		if mat == nil {
-			mat = morphMat
-		} else {
-			mat = mat.Muled(morphMat)
-		}
+// boneHasFixedAxis は固定軸を持つか判定する。
+func boneHasFixedAxis(bone *model.Bone) bool {
+	if bone == nil {
+		return false
 	}
-	return mat
+	return bone.BoneFlag&model.BONE_FLAG_HAS_FIXED_AXIS != 0 && !bone.FixedAxis.IsZero()
 }

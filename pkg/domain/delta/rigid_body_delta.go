@@ -1,30 +1,43 @@
+// 指示: miu200521358
 package delta
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/domain/model"
+	"github.com/miu200521358/mlib_go/pkg/shared/contracts/mtime"
 )
 
-// RigidBodyDelta は1つのボーンにおける変形（ポジション・回転・スケールなど）の差分を表す
+// RigidBodyDelta は剛体差分を表す。
 type RigidBodyDelta struct {
-	RigidBody *pmx.RigidBody
-	Frame     float32
-	Size      *mmath.MVec3 // 剛体の大きさ
-	Mass      float64      // 剛体の質量
+	RigidBody *model.RigidBody
+	Frame     mtime.Frame
+	Size      mmath.Vec3
+	Mass      float64
 }
 
-// NewRigidBodyDelta は新規の RigidBodyDelta を生成するコンストラクタ
-func NewRigidBodyDelta(rigidBody *pmx.RigidBody, frame float32) *RigidBodyDelta {
+// NewRigidBodyDelta はRigidBodyDeltaを生成する。
+func NewRigidBodyDelta(rigidBody *model.RigidBody, frame mtime.Frame) *RigidBodyDelta {
+	if rigidBody == nil {
+		return nil
+	}
 	return &RigidBodyDelta{
 		RigidBody: rigidBody,
 		Frame:     frame,
+		Size:      rigidBody.Size,
+		Mass:      rigidBody.Param.Mass,
 	}
 }
 
-// NewRigidBodyDelta は新規の RigidBodyDelta を生成するコンストラクタ
+// NewRigidBodyDeltaByValue は値を指定してRigidBodyDeltaを生成する。
 func NewRigidBodyDeltaByValue(
-	rigidBody *pmx.RigidBody, frame float32, size *mmath.MVec3, mass float64,
+	rigidBody *model.RigidBody,
+	frame mtime.Frame,
+	size mmath.Vec3,
+	mass float64,
 ) *RigidBodyDelta {
+	if rigidBody == nil {
+		return nil
+	}
 	return &RigidBodyDelta{
 		RigidBody: rigidBody,
 		Frame:     frame,

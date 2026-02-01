@@ -69,16 +69,31 @@ go fmt ./...
 4. `go tool pprof -http=:8081 mem.pprof`
 
 
-## bullet
+## SWIG/Bullet
 
-1. swig インストール
-https://rinatz.github.io/swigdoc/abstract.html
+### 前提条件
+1. SWIG インストール: https://rinatz.github.io/swigdoc/abstract.html
+2. TDM-GCC インストール: https://jmeubank.github.io/tdm-gcc/download/
 
-2. 変換コード作成
+### SWIG コード生成コマンド
 
+新しいパッケージ構成（`pkg\infra\drivers\mbullet\bt`）用:
+
+```bash
+cd pkg\infra\drivers\mbullet\bt
+
+swig_bt.bat
 ```
-(mtool) C:\MMD\mlib_go\pkg\infrastructure\bt>swig -c++ -go -cgo -I"C:\MMD\mlib_go\pkg\infrastructure\bt\bullet\src" -I"C:\development\TDM-GCC-64\lib\gcc\x86_64-w64-mingw32\10.3.0\include\c++\x86_64-w64-mingw32" -I"C:\development\TDM-GCC-64\x86_64-w64-mingw32\include" -I"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include" -cpperraswarn -o "C:\MMD\mlib_go\pkg\infrastructure\bt\bt.cxx" "C:\MMD\mlib_go\pkg\infrastructure\bt\bullet.i"
-```
+
+### 生成されるファイル
+- `bt.go` - Goバインディング
+- `bt.cxx` - C++ラッパー
+- `bt.h` - ヘッダーファイル
+
+### 注意事項
+- `bullet.i` を変更した場合のみ再実行が必要
+- SWIG の再生成はリポジトリ管理者が実施
+- パスは環境に応じて調整すること
 
 ## バージョン反映
 
@@ -96,6 +111,20 @@ go list -m -mod=mod -versions github.com/miu200521358/walk
 3. `(mtool) C:\MMD\mlib_go\crumb>go run profile.go`
 4. `go tool pprof profile.go cpu.pprof`
 5. `go tool pprof -http=:8080 cpu.pprof`
+
+```
+export filename=pprof_model_load_20260201_201437_000
+printf "top 50\n" | go tool pprof "$filename.pprof" > "${filename}_top_50.txt"
+```
+
+### Agent Skills
+
+```
+conda create -n mlib python=3.14 -y
+conda activate mlib
+pip install skillport
+skillport init
+```
 
 
 ## License

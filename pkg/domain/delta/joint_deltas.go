@@ -1,78 +1,105 @@
+// 指示: miu200521358
 package delta
 
-import "github.com/miu200521358/mlib_go/pkg/domain/pmx"
+import (
+	"github.com/miu200521358/mlib_go/pkg/domain/model"
+	"github.com/miu200521358/mlib_go/pkg/domain/model/collection"
+)
 
-// JointDeltas は JointDelta の集合を管理する
+// JointDeltas はジョイント差分の集合を表す。
 type JointDeltas struct {
 	data   []*JointDelta
-	joints *pmx.Joints
+	joints *collection.NamedCollection[*model.Joint]
 }
 
-// NewJointDeltas はジョイント数に合わせて JointDelta のスライスを用意する
-func NewJointDeltas(joints *pmx.Joints) *JointDeltas {
+// NewJointDeltas はJointDeltasを生成する。
+func NewJointDeltas(joints *collection.NamedCollection[*model.Joint]) *JointDeltas {
+	length := 0
+	if joints != nil {
+		length = joints.Len()
+	}
 	return &JointDeltas{
-		data:   make([]*JointDelta, joints.Length()),
+		data:   make([]*JointDelta, length),
 		joints: joints,
 	}
 }
 
-func (bds *JointDeltas) Length() int {
-	return len(bds.data)
+// Len は要素数を返す。
+func (d *JointDeltas) Len() int {
+	if d == nil {
+		return 0
+	}
+	return len(d.data)
 }
 
-// Get は jointIndex に対応する JointDelta を返す
-func (bds *JointDeltas) Get(jointIndex int) *JointDelta {
-	if jointIndex < 0 || jointIndex >= len(bds.data) {
+// Get はindexの差分を返す。
+func (d *JointDeltas) Get(index int) *JointDelta {
+	if d == nil || index < 0 || index >= len(d.data) {
 		return nil
 	}
-	return bds.data[jointIndex]
+	return d.data[index]
 }
 
-// GetByName はボーン名に対応する JointDelta を返す
-func (bds *JointDeltas) GetByName(jointName string) *JointDelta {
-	if joint, err := bds.joints.GetByName(jointName); err == nil {
-		return bds.Get(joint.Index())
+// GetByName は名前に対応する差分を返す。
+func (d *JointDeltas) GetByName(name string) *JointDelta {
+	if d == nil || d.joints == nil {
+		return nil
 	}
-
-	return nil
+	joint, err := d.joints.GetByName(name)
+	if err != nil {
+		return nil
+	}
+	return d.Get(joint.Index())
 }
 
-// Delete は指定のインデックスの JointDelta を削除する
-func (bds *JointDeltas) Delete(jointIndex int) {
-	if jointIndex < 0 || jointIndex >= len(bds.data) {
+// Update は差分を更新する。
+func (d *JointDeltas) Update(delta *JointDelta) {
+	if d == nil || delta == nil || delta.Joint == nil {
 		return
 	}
-	bds.data[jointIndex] = nil
-}
-
-// Update は JointDelta をデータにセットする
-func (bds *JointDeltas) Update(bd *JointDelta) {
-	if bd == nil || bd.Joint == nil {
+	idx := delta.Joint.Index()
+	if idx < 0 || idx >= len(d.data) {
 		return
 	}
-	idx := bd.Joint.Index()
-	if idx >= 0 && idx < len(bds.data) {
-		bds.data[idx] = bd
+	d.data[idx] = delta
+}
+
+// Delete はindexの差分を削除する。
+func (d *JointDeltas) Delete(index int) {
+	if d == nil || index < 0 || index >= len(d.data) {
+		return
 	}
+	d.data[index] = nil
 }
 
-// Contains は指定のインデックスに JointDelta が存在するかを返す
-func (bds *JointDeltas) Contains(jointIndex int) bool {
-	return jointIndex >= 0 && jointIndex < len(bds.data) && bds.data[jointIndex] != nil
-}
-
-func (bds *JointDeltas) ContainsByName(jointName string) bool {
-	if joint, err := bds.joints.GetByName(jointName); err == nil {
-		return bds.Contains(joint.Index())
+// Contains はindexの差分が存在するか判定する。
+func (d *JointDeltas) Contains(index int) bool {
+	if d == nil || index < 0 || index >= len(d.data) {
+		return false
 	}
-	return false
+	return d.data[index] != nil
 }
 
-// ForEach は全ての値をコールバック関数に渡します
-func (bds *JointDeltas) ForEach(callback func(index int, value *JointDelta) bool) {
-	for i, v := range bds.data {
-		if !callback(i, v) {
-			break
+// ContainsByName は名前に対応する差分が存在するか判定する。
+func (d *JointDeltas) ContainsByName(name string) bool {
+	if d == nil || d.joints == nil {
+		return false
+	}
+	joint, err := d.joints.GetByName(name)
+	if err != nil {
+		return false
+	}
+	return d.Contains(joint.Index())
+}
+
+// ForEach は全要素を走査する。
+func (d *JointDeltas) ForEach(fn func(index int, delta *JointDelta) bool) {
+	if d == nil || fn == nil {
+		return
+	}
+	for i, v := range d.data {
+		if !fn(i, v) {
+			return
 		}
 	}
 }

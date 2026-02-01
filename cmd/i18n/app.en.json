@@ -42,5 +42,73 @@
     {
         "id": "読み込み失敗",
         "translation": "Load Failed"
+    },
+    {
+        "id": "システム用ボーン追加失敗",
+        "translation": "Failed to add system bones"
+    },
+    {
+        "id": "表示用モデル設定説明",
+        "translation": "Display model settings"
+    },
+    {
+        "id": "ファイル",
+        "translation": "File"
+    },
+    {
+        "id": "モデルファイル1-1",
+        "translation": "Model File 1-1"
+    },
+    {
+        "id": "モデルファイル2-1",
+        "translation": "Model File 2-1"
+    },
+    {
+        "id": "モーションファイル1-1",
+        "translation": "Motion File 1-1"
+    },
+    {
+        "id": "モーションファイル2-1",
+        "translation": "Motion File 2-1"
+    },
+    {
+        "id": "モデルファイルを選択してください",
+        "translation": "Please select a model file"
+    },
+    {
+        "id": "モーションファイルを選択してください",
+        "translation": "Please select a motion file"
+    },
+    {
+        "id": "材質ビュー",
+        "translation": "Material View"
+    },
+    {
+        "id": "材質ビュー説明",
+        "translation": "Material View Help"
+    },
+    {
+        "id": "頂点ビュー",
+        "translation": "Vertex View"
+    },
+    {
+        "id": "頂点ビュー説明",
+        "translation": "Vertex View Help"
+    },
+    {
+        "id": "&全面",
+        "translation": "&All"
+    },
+    {
+        "id": "&最前面",
+        "translation": "&Frontmost"
+    },
+    {
+        "id": "全",
+        "translation": "All"
+    },
+    {
+        "id": "反",
+        "translation": "Invert"
     }
 ]

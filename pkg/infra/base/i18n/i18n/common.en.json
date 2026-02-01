@@ -1,0 +1,1622 @@
+[
+    {
+        "id": "&ビューワー",
+        "translation": "&Viewer"
+    },
+    {
+        "id": "&フレームドロップON",
+        "translation": "&Frame Drop ON"
+    },
+    {
+        "id": "&物理ON/OFF",
+        "translation": "&Physics ON/OFF"
+    },
+    {
+        "id": "&物理リセット",
+        "translation": "&Physics Reset"
+    },
+    {
+        "id": "&法線表示",
+        "translation": "&Normal Display"
+    },
+    {
+        "id": "&ボーン表示",
+        "translation": "&Bone Display"
+    },
+    {
+        "id": "&全ボーン",
+        "translation": "&All Bones"
+    },
+    {
+        "id": "&IKボーン",
+        "translation": "&IK Bones"
+    },
+    {
+        "id": "&付与親ボーン",
+        "translation": "&Assigned Parent Bones"
+    },
+    {
+        "id": "&軸制限ボーン",
+        "translation": "&Axis Restricted Bones"
+    },
+    {
+        "id": "&回転ボーン",
+        "translation": "&Rotation Bones"
+    },
+    {
+        "id": "&移動ボーン",
+        "translation": "&Move Bones"
+    },
+    {
+        "id": "&表示ボーン",
+        "translation": "&Display Bones"
+    },
+    {
+        "id": "&剛体表示",
+        "translation": "&Rigid Body Display"
+    },
+    {
+        "id": "&ジョイント表示",
+        "translation": "&Joint Display"
+    },
+    {
+        "id": "背景色生成エラー",
+        "translation": "Background Color Generation Error"
+    },
+    {
+        "id": "&言語",
+        "translation": "&Language"
+    },
+    {
+        "id": "未設定",
+        "translation": "Not Set"
+    },
+    {
+        "id": "開く",
+        "translation": "Open"
+    },
+    {
+        "id": "履歴",
+        "translation": "History"
+    },
+    {
+        "id": "ファイルが存在しません",
+        "translation": "File Does Not Exist"
+    },
+    {
+        "id": "読み込み失敗",
+        "translation": "Load Failed"
+    },
+    {
+        "id": "履歴ダイアログ生成エラー",
+        "translation": "History Dialog Generation Error"
+    },
+    {
+        "id": "履歴ダイアログタイトル",
+        "translation": "History of {{.Title}}"
+    },
+    {
+        "id": "履歴リスト生成エラー",
+        "translation": "History List Generation Error"
+    },
+    {
+        "id": "ボタンBox生成エラー",
+        "translation": "Button Box Generation Error"
+    },
+    {
+        "id": "OKボタン生成エラー",
+        "translation": "OK Button Generation Error"
+    },
+    {
+        "id": "Cancelボタン生成エラー",
+        "translation": "Cancel Button Generation Error"
+    },
+    {
+        "id": "ファイル選択ダイアログタイトル",
+        "translation": "Please Select {{.Title}}"
+    },
+    {
+        "id": "ファイル選択ダイアログ選択エラー",
+        "translation": "File Selection Dialog Error"
+    },
+    {
+        "id": "タブウィジェット生成エラー",
+        "translation": "Tab Widget Generation Error"
+    },
+    {
+        "id": "タブページ生成エラー",
+        "translation": "Tab Page Generation Error"
+    },
+    {
+        "id": "再生",
+        "translation": "Play"
+    },
+    {
+        "id": "一時停止",
+        "translation": "Pause"
+    },
+    {
+        "id": "メインウィンドウ生成エラー",
+        "translation": "Main Window Generation Error"
+    },
+    {
+        "id": "ビューワーウィンドウ生成エラー",
+        "translation": "Viewer Window Generation Error"
+    },
+    {
+        "id": "コンソール生成エラー",
+        "translation": "Console Generation Error"
+    },
+    {
+        "id": "ファイル",
+        "translation": "File"
+    },
+    {
+        "id": "Pmxファイル",
+        "translation": "PMX File"
+    },
+    {
+        "id": "Pmxファイルピッカー生成エラー",
+        "translation": "PMX File Picker Generation Error"
+    },
+    {
+        "id": "Vmdファイル",
+        "translation": "VMD File"
+    },
+    {
+        "id": "Vmdファイルピッカー生成エラー",
+        "translation": "VMD File Picker Generation Error"
+    },
+    {
+        "id": "セパレータ生成エラー",
+        "translation": "Separator Generation Error"
+    },
+    {
+        "id": "モーションプレイヤー生成エラー",
+        "translation": "Motion Player Generation Error"
+    },
+    {
+        "id": "Pmxファイル読み込みエラー",
+        "translation": "PMX File Loading Error"
+    },
+    {
+        "id": "Vmdファイル読み込みエラー",
+        "translation": "VMD File Loading Error"
+    },
+    {
+        "id": "ビューワー",
+        "translation": "Viewer"
+    },
+    {
+        "id": "&コントローラーウィンドウ",
+        "translation": "&Controller Window"
+    },
+    {
+        "id": "&デバッグログ表示",
+        "translation": "&Display Debug Messages"
+    },
+    {
+        "id": "&冗長ログ表示",
+        "translation": "&Display Verbose Messages"
+    },
+    {
+        "id": "予期せぬエラーが発生しました",
+        "translation": "An unexpected error has occurred"
+    },
+    {
+        "id": "有効なPmxファイルが入力されていません",
+        "translation": "A valid Pmx file has not been entered"
+    },
+    {
+        "id": "&使い方",
+        "translation": "&How to use"
+    },
+    {
+        "id": "&ビューワーの使い方",
+        "translation": "&How to use the viewer"
+    },
+    {
+        "id": "ビューワーの使い方メッセージ",
+        "translation": "・Use the mouse wheel up and down to zoom in and out\n・Click and move the mouse wheel to change the camera position\n・Click and move the right mouse button to change the camera direction\n・Hold Shift while operating the mouse to increase the movement amount\n・Hold Ctrl while operating the mouse to decrease the movement amount\n・Enter '1' on the keypad to view from the bottom\n・Enter '2' on the keypad to view from the front\n・Enter '4' on the keypad to view from the left\n・Enter '5' on the keypad to view from the top\n・Enter '6' on the keypad to view from the right\n・Enter '8' on the keypad to view from the back"
+    },
+    {
+        "id": "&再生フォームの使い方",
+        "translation": "&How to use the playback form"
+    },
+    {
+        "id": "再生フォームの使い方",
+        "translation": "How to use the playback form"
+    },
+    {
+        "id": "再生ウィジェットの使い方メッセージ",
+        "translation": "・The 'Play' button becomes clickable when a PMX model is set\n・Setting a VMD motion is optional\n・Clicking the 'Play' button starts the rendering. The button label changes to 'Pause'\n・Clicking the 'Pause' button pauses the rendering. The button label changes to 'Play'\n・While paused, you can change the keyframe position with the keyframe number field or slider\n・The keyframe number field and slider can adjust the number up and down with the middle mouse wheel"
+    },
+    {
+        "id": "コントローラーウィンドウの使い方",
+        "translation": "How to use the Controller Window"
+    },
+    {
+        "id": "コントローラーウィンドウの使い方メッセージ",
+        "translation": "・Click on the name of each form part to display how to use that part in the message area."
+    },
+    {
+        "id": "予期せぬエラーヘッダー",
+        "translation": "An unexpected error has occurred. The app will now close.\nIf the issue persists, please contact us through the community.\n    App Name: {{.AppName}}, App Version: {{.AppVersion}}"
+    },
+    {
+        "id": "エラーをコピー",
+        "translation": "Copy error"
+    },
+    {
+        "id": "エラーをダウンロード",
+        "translation": "Download error"
+    },
+    {
+        "id": "コミュニティで報告",
+        "translation": "Report to the community"
+    },
+    {
+        "id": "テキストファイル",
+        "translation": "Text files"
+    },
+    {
+        "id": "すべてのファイル",
+        "translation": "All files"
+    },
+    {
+        "id": "アプリを終了",
+        "translation": "Close the app"
+    },
+    {
+        "id": "エラーダイアログ起動失敗",
+        "translation": "Failed to launch error dialog"
+    },
+    {
+        "id": "クリップボードコピー失敗",
+        "translation": "Failed to copy to clipboard"
+    },
+    {
+        "id": "&ハイスペックモード",
+        "translation": "&High Spec Mode"
+    },
+    {
+        "id": "モデル名エンコードエラー",
+        "translation": "Since the model name ({{.Name}}) contains characters that are unreadable in Japanese or English (environment-dependent characters, foreign language characters, etc.), a temporary model name will be set."
+    },
+    {
+        "id": "ボーン名エンコードエラー",
+        "translation": "Since the bone name ({{.Name}}) contains characters that are unreadable in Japanese or English (environment-dependent characters, foreign language characters, etc.), it will be skipped."
+    },
+    {
+        "id": "ファイルクローズエラー",
+        "translation": "Failed to output the file to the file path ({{.Path}})."
+    },
+    {
+        "id": "ボーンフレーム書き込みエラー",
+        "translation": "Failed to write the bone data."
+    },
+    {
+        "id": "モーフフレーム書き込みエラー",
+        "translation": "Failed to write the morph data."
+    },
+    {
+        "id": "&IK冗長ログ表示",
+        "translation": "&IK verbose log display"
+    },
+    {
+        "id": "固定ビュー表示",
+        "translation": "Fixed view display"
+    },
+    {
+        "id": "固定ビュー非表示",
+        "translation": "Hide fixed view"
+    },
+    {
+        "id": "固定ビューウィジェット生成エラー",
+        "translation": "Fixed view widget generation error"
+    },
+    {
+        "id": "正面",
+        "translation": "Front"
+    },
+    {
+        "id": "左面",
+        "translation": "Left"
+    },
+    {
+        "id": "右面",
+        "translation": "Right"
+    },
+    {
+        "id": "背面",
+        "translation": "Back"
+    },
+    {
+        "id": "&ワイヤーフレーム表示",
+        "translation": "&Wireframe Display"
+    },
+    {
+        "id": "&前面表示",
+        "translation": "&Front Display"
+    },
+    {
+        "id": "&埋め込み表示",
+        "translation": "&Embedded Display"
+    },
+    {
+        "id": "&情報表示",
+        "translation": "&Display Information"
+    },
+    {
+        "id": "&fps制限",
+        "translation": "&FPS Limit"
+    },
+    {
+        "id": "&30fps制限",
+        "translation": "&30 FPS Limit"
+    },
+    {
+        "id": "&60fps制限",
+        "translation": "&60 FPS Limit"
+    },
+    {
+        "id": "&fps無制限",
+        "translation": "&Unlimited FPS"
+    },
+    {
+        "id": "&頂点ライン選択",
+        "translation": "&Vertex Line Selection"
+    },
+    {
+        "id": "&頂点ライン選択使い方",
+        "translation": "&How to Use Vertex Line Selection"
+    },
+    {
+        "id": "頂点ライン選択使い方メッセージ",
+        "translation": "With the vertex line selection turned ON, you can select vertices by moving the cursor over them while holding down the left mouse button. Selected vertices are displayed in orange. The cursor's path is displayed in pale yellow. You can deselect vertices by tracing over them again with the left mouse button while holding down the Ctrl key."
+    },
+    {
+        "id": "ミップマップ生成エラー",
+        "translation": "Mipmaps will not be generated because the texture size is not a power of two. Texture name: {{.Name}}"
+    },
+    {
+        "id": "アイコン生成エラー",
+        "translation": "Icon generation error"
+    },
+    {
+        "id": "終了確認",
+        "translation": "Exit Confirmation"
+    },
+    {
+        "id": "終了確認メッセージ",
+        "translation": "Are you sure you want to exit the app?"
+    },
+    {
+        "id": "言語変更",
+        "translation": "Language Change"
+    },
+    {
+        "id": "言語変更メッセージ",
+        "translation": "The language change on the screen will take effect after restarting.\nDo you want to exit the app?"
+    },
+    {
+        "id": "&サブビューワーオーバーレイ",
+        "translation": "&Subviewer Overlay"
+    },
+    {
+        "id": "&サブビューワーオーバーレイの使い方",
+        "translation": "&How to use the sub-viewer overlay"
+    },
+    {
+        "id": "サブビューワーオーバーレイの使い方メッセージ",
+        "translation": "Enable to overlay rendering and sync sub-viewer movement.\nYou can switch alignment between upper and lower body."
+    },
+    {
+        "id": "&カメラ同期",
+        "translation": "&Camera Sync"
+    },
+    {
+        "id": "再生キーフレ説明",
+        "translation": "・The frame number field displays the currently rendered frame number.\n・You can increase or decrease the frame number by using the mouse wheel in the field or pressing the button to the right of the field."
+    },
+    {
+        "id": "再生スライダー説明",
+        "translation": "・The playback slider shows the corresponding position of the currently rendered frame number.\n・You can increase or decrease the frame number by using the mouse wheel over the slider."
+    },
+    {
+        "id": "再生ボタン説明",
+        "translation": "・Clicking the playback button allows you to play the motion.\n・Other buttons or operations cannot be used during playback."
+    },
+    {
+        "id": "ファイル存在エラー",
+        "translation": "The file does not exist\nInput file path: {{.Path}}"
+    },
+    {
+        "id": "拡張子エラー",
+        "translation": "The input file path has an unsupported file extension\nInput file path: {{.Path}}, Allowed extensions: {{.Ext}}"
+    },
+    {
+        "id": "&ビューワー冗長ログ表示",
+        "translation": "&Viewer Verbose Log Display"
+    },
+    {
+        "id": "保存開始",
+        "translation": "Start saving {{.Type}}\nOutput file path: {{.Path}}"
+    },
+    {
+        "id": "保存終了",
+        "translation": "Finished saving {{.Type}}"
+    },
+    {
+        "id": "読み込み開始",
+        "translation": "Start loading {{.Type}}\nInput file path: {{.Path}}"
+    },
+    {
+        "id": "読み込み終了",
+        "translation": "Finished loading {{.Type}}"
+    },
+    {
+        "id": "読み込み途中完了",
+        "translation": "-- 【{{.Type}}】Loading complete"
+    },
+    {
+        "id": "読み込み途中",
+        "translation": "---- 【{{.Type}}】Loading [{{.Index}}/{{.Total}}]"
+    },
+    {
+        "id": "保存途中完了",
+        "translation": "-- 【{{.Type}}】Saving complete"
+    },
+    {
+        "id": "保存途中",
+        "translation": "---- 【{{.Type}}】Saving [{{.Index}}/{{.Total}}]"
+    },
+    {
+        "id": "頂点",
+        "translation": "Vertex"
+    },
+    {
+        "id": "頂点Index",
+        "translation": "Vertex Index"
+    },
+    {
+        "id": "座標",
+        "translation": "Position"
+    },
+    {
+        "id": "面",
+        "translation": "Face"
+    },
+    {
+        "id": "材質",
+        "translation": "Material"
+    },
+    {
+        "id": "ボーン",
+        "translation": "Bone"
+    },
+    {
+        "id": "モーフ",
+        "translation": "Morph"
+    },
+    {
+        "id": "表示枠",
+        "translation": "Display frame"
+    },
+    {
+        "id": "剛体",
+        "translation": "Rigid body"
+    },
+    {
+        "id": "ジョイント",
+        "translation": "Joint"
+    },
+    {
+        "id": "&画面移動連結",
+        "translation": "&Screen movement link"
+    },
+    {
+        "id": "日本語名称",
+        "translation": "Japanese Name"
+    },
+    {
+        "id": "英語名称",
+        "translation": "English Name"
+    },
+    {
+        "id": "ウェイト1",
+        "translation": "Weight1"
+    },
+    {
+        "id": "ウェイト2",
+        "translation": "Weight2"
+    },
+    {
+        "id": "ウェイト3",
+        "translation": "Weight3"
+    },
+    {
+        "id": "ウェイト4",
+        "translation": "Weight4"
+    },
+    {
+        "id": "有効テクスチャ",
+        "translation": "Enable Texture"
+    },
+    {
+        "id": "テクスチャ",
+        "translation": "Texture"
+    },
+    {
+        "id": "有効Toon",
+        "translation": "Enable Toon"
+    },
+    {
+        "id": "有効スフィア",
+        "translation": "Enable Sphere"
+    },
+    {
+        "id": "スフィア",
+        "translation": "Sphere"
+    },
+    {
+        "id": "システム用ボーン追加失敗",
+        "translation": "Failed to add system bone"
+    },
+    {
+        "id": "&上半身合わせ",
+        "translation": "&Upper Body Alignment"
+    },
+    {
+        "id": "&下半身合わせ",
+        "translation": "&Lower Body Alignment"
+    },
+    {
+        "id": "&カメラ合わせなし",
+        "translation": "&No Camera Alignment"
+    },
+    {
+        "id": "&ツールについて",
+        "translation": "&About the Tool"
+    },
+    {
+        "id": "中間MSAA差し替え",
+        "translation": "Since the default FBO sample count is not 4, MSAA is replaced with a type using an intermediate FBO"
+    },
+    {
+        "id": "焼き込み再生ループ再開: 焼き込み履歴INDEX[%d]",
+        "translation": "Resume Bake Playback Loop: Bake History INDEX [%d]"
+    },
+    {
+        "id": "&ボーン表示の使い方",
+        "translation": "&How to Use Bone Display"
+    },
+    {
+        "id": "ボーン表示の使い方メッセージ",
+        "translation": "Bone display shows bones by type; multiple types can be shown.\nHover near a bone square to display the bone name tooltip."
+    },
+    {
+        "id": "&剛体表示の使い方",
+        "translation": "&How to Use Rigid Body Display"
+    },
+    {
+        "id": "剛体表示の使い方メッセージ",
+        "translation": "Rigid-body display shows rigid bodies; front/embedded modes are available.\nHover near the rigid-body center to show its name tooltip."
+    },
+    {
+        "id": "表示名",
+        "translation": "Display Name"
+    },
+    {
+        "id": "閉じる",
+        "translation": "Close"
+    },
+    {
+        "id": "保存失敗",
+        "translation": "Save Failed"
+    },
+    {
+        "id": "&ログ保存",
+        "translation": "&Save Log"
+    },
+    {
+        "id": "ログ保存",
+        "translation": "Save Log"
+    },
+    {
+        "id": "&モーション冗長ログ表示",
+        "translation": "&Motion Verbose Log"
+    },
+    {
+        "id": "&物理冗長ログ表示",
+        "translation": "&Physics Verbose Log"
+    },
+    {
+        "id": "&画面移動連動",
+        "translation": "&Link Window Movement"
+    },
+    {
+        "id": "&選択頂点表示",
+        "translation": "&Selected Vertex Display"
+    },
+    {
+        "id": "&頂点選択",
+        "translation": "&Vertex Selection"
+    },
+    {
+        "id": "&ボックス選択",
+        "translation": "&Box Selection"
+    },
+    {
+        "id": "&ポイント選択",
+        "translation": "&Point Selection"
+    },
+    {
+        "id": "音楽ファイル",
+        "translation": "Audio File"
+    },
+    {
+        "id": "音楽ファイルを選択してください",
+        "translation": "Please select an audio file"
+    },
+    {
+        "id": "音量",
+        "translation": "Volume"
+    },
+    {
+        "id": "音量説明",
+        "translation": "Adjust volume from 0 to 100"
+    },
+    {
+        "id": "音楽ファイル読み込み失敗",
+        "translation": "Audio file load failed"
+    },
+    {
+        "id": "アプリアイコンの読込に失敗しました: %s",
+        "translation": "Failed to load the app icon: %s"
+    },
+    {
+        "id": "アプリアイコンの生成に失敗しました: %s",
+        "translation": "Failed to create the app icon: %s"
+    },
+    {
+        "id": "共有状態の初期化に失敗しました",
+        "translation": "Failed to initialize shared state"
+    },
+    {
+        "id": "GLFWの初期化に失敗しました: %w",
+        "translation": "Failed to initialize GLFW: %w"
+    },
+    {
+        "id": "モデル読み込みリポジトリがありません",
+        "translation": "No model repository is available"
+    },
+    {
+        "id": "モデル形式が不正です",
+        "translation": "Invalid model format"
+    },
+    {
+        "id": "モーション読み込みリポジトリがありません",
+        "translation": "No motion repository is available"
+    },
+    {
+        "id": "モーション形式が不正です",
+        "translation": "Invalid motion format"
+    },
+    {
+        "id": "テクスチャ読み込みに失敗しました: %v",
+        "translation": "Failed to load texture: %v"
+    },
+    {
+        "id": "テクスチャインデックスが範囲外です: %d",
+        "translation": "Texture index is out of range: %d"
+    },
+    {
+        "id": "ミップマップ生成エラー: %s",
+        "translation": "Mipmap generation error: %s"
+    },
+    {
+        "id": "トゥーンテクスチャの読み込みに失敗しました: %v",
+        "translation": "Failed to load toon texture: %v"
+    },
+    {
+        "id": "テクスチャの読み込みに失敗しました: %v",
+        "translation": "Failed to load texture: %v"
+    },
+    {
+        "id": "物理デバッグシェーダーが未初期化のため描画をスキップしました",
+        "translation": "Skipped drawing because the physics debug shader is not initialized"
+    },
+    {
+        "id": "中間MSAAのマルチサンプルFBOが不完全です",
+        "translation": "Intermediate MSAA multisample FBO is incomplete"
+    },
+    {
+        "id": "中間MSAAの中間FBOが不完全です",
+        "translation": "Intermediate MSAA FBO is incomplete"
+    },
+    {
+        "id": "NotoSansJPフォントの読み込みに失敗しました: %v",
+        "translation": "Failed to load NotoSansJP font: %v"
+    },
+    {
+        "id": "NotoSansJPフォントの初期化に失敗しました: %v",
+        "translation": "Failed to initialize NotoSansJP font: %v"
+    },
+    {
+        "id": "オーバーライドFBOの初期化に失敗しました: %v",
+        "translation": "Failed to initialize override FBO: %v"
+    },
+    {
+        "id": "共有テクスチャが未設定のためオーバーライド合成をスキップします",
+        "translation": "Skipping override composition because the shared texture is not set"
+    },
+    {
+        "id": "MSAA初期化エラー: %v",
+        "translation": "MSAA initialization error: %v"
+    },
+    {
+        "id": "オーバーライド描画の初期化エラー: %v",
+        "translation": "Override rendering initialization error: %v"
+    },
+    {
+        "id": "シェーダープログラム生成に失敗: %v (%v)",
+        "translation": "Failed to create shader program: %v (%v)"
+    },
+    {
+        "id": "トゥーンテクスチャの変換に失敗しました: %s",
+        "translation": "Failed to convert toon texture: %s"
+    },
+    {
+        "id": "テクスチャ名が不正です",
+        "translation": "Texture name is invalid"
+    },
+    {
+        "id": "テクスチャの変換に失敗しました: %s",
+        "translation": "Failed to convert texture: %s"
+    },
+    {
+        "id": "トゥーンテクスチャの読み込みに失敗しました: %s",
+        "translation": "Failed to load toon texture: %s"
+    },
+    {
+        "id": "テクスチャファイルの読み込みに失敗しました: %s",
+        "translation": "Failed to load texture file: %s"
+    },
+    {
+        "id": "未対応の画像形式です: %s",
+        "translation": "Unsupported image format: %s"
+    },
+    {
+        "id": "テクスチャのデコードに失敗しました: %s",
+        "translation": "Failed to decode texture: %s"
+    },
+    {
+        "id": "音楽ファイルの読み込みは未実装です",
+        "translation": "Audio file loading is not implemented"
+    },
+    {
+        "id": "通常エラーが発生しました",
+        "translation": "An error has occurred"
+    },
+    {
+        "id": "通常エラーヘッダー",
+        "translation": "Error"
+    },
+    {
+        "id": "エラーダイアログを閉じる",
+        "translation": "Close error dialog"
+    },
+    {
+        "id": "オーバーライド用フレームバッファが不完全です: %s",
+        "translation": "Override framebuffer is incomplete: %s"
+    },
+    {
+        "id": "言語設定の保存に失敗しました: %s",
+        "translation": "Failed to save language settings: %s"
+    },
+    {
+        "id": "ログ保存に失敗しました: %s",
+        "translation": "Failed to save log: %s"
+    },
+    {
+        "id": "ログを保存しました: %s",
+        "translation": "Log saved: %s"
+    },
+    {
+        "id": "冗長ログの開始に失敗しました: %s",
+        "translation": "Failed to start verbose logging: %s"
+    },
+    {
+        "id": "音楽ファイル読み込み失敗: %s",
+        "translation": "Audio file load failed: %s"
+    },
+    {
+        "id": "音量設定に失敗しました: %s",
+        "translation": "Failed to set volume: %s"
+    },
+    {
+        "id": "履歴保存に失敗しました: %s",
+        "translation": "Failed to save history: %s"
+    },
+    {
+        "id": "履歴読込に失敗しました",
+        "translation": "Failed to load history"
+    },
+    {
+        "id": "ビューワープロファイル開始に失敗しました: %s",
+        "translation": "Failed to start viewer profiling: %s"
+    },
+    {
+        "id": "ビューワープロファイル開始: %s",
+        "translation": "Viewer profiling started: %s"
+    },
+    {
+        "id": "ビューワープロファイル保存に失敗しました: %s",
+        "translation": "Failed to save viewer profiling: %s"
+    },
+    {
+        "id": "ビューワープロファイル出力: %s",
+        "translation": "Viewer profile output: %s"
+    },
+    {
+        "id": "ProgressBarの初期化に失敗しました",
+        "translation": "Failed to initialize ProgressBar"
+    },
+    {
+        "id": "ConsoleViewの初期化に失敗しました",
+        "translation": "Failed to initialize ConsoleView"
+    },
+    {
+        "id": "コントローラーウィンドウの初期化に失敗しました",
+        "translation": "Failed to initialize controller window"
+    },
+    {
+        "id": "名前解決に失敗",
+        "translation": "Name resolution failed"
+    },
+    {
+        "id": "インデックスが無効",
+        "translation": "Invalid index"
+    },
+    {
+        "id": "親要素が見つからない",
+        "translation": "Parent element not found"
+    },
+    {
+        "id": "インデックスが範囲外",
+        "translation": "Index out of range"
+    },
+    {
+        "id": "名称が既存要素と衝突",
+        "translation": "Name conflicts with existing element"
+    },
+    {
+        "id": "名称が一致しない",
+        "translation": "Name does not match"
+    },
+    {
+        "id": "不変条件違反/NaNなどプログラム的異常",
+        "translation": "Invariant violation / NaN or other programmatic anomaly"
+    },
+    {
+        "id": "osパッケージでエラーが発生",
+        "translation": "Error occurred in os package"
+    },
+    {
+        "id": "jsonパッケージでエラーが発生",
+        "translation": "Error occurred in json package"
+    },
+    {
+        "id": "imageパッケージでエラーが発生",
+        "translation": "Error occurred in image package"
+    },
+    {
+        "id": "io/fsパッケージでエラーが発生",
+        "translation": "Error occurred in io/fs package"
+    },
+    {
+        "id": "go-deepcopyパッケージでエラーが発生",
+        "translation": "Error occurred in go-deepcopy package"
+    },
+    {
+        "id": "前提不足で処理開始できない",
+        "translation": "Cannot start processing due to missing prerequisites"
+    },
+    {
+        "id": "入力ファイルが存在しない",
+        "translation": "Input file does not exist"
+    },
+    {
+        "id": "拡張子が不正",
+        "translation": "Invalid file extension"
+    },
+    {
+        "id": "形式/バージョンが非対応",
+        "translation": "Unsupported format/version"
+    },
+    {
+        "id": "未知のエンコード方式",
+        "translation": "Unknown encoding"
+    },
+    {
+        "id": "ファイル内容の解析に失敗",
+        "translation": "Failed to parse file contents"
+    },
+    {
+        "id": "出力データのエンコードに失敗",
+        "translation": "Failed to encode output data"
+    },
+    {
+        "id": "名前のエンコードに失敗",
+        "translation": "Failed to encode name"
+    },
+    {
+        "id": "ファイル保存に失敗",
+        "translation": "Failed to save file"
+    },
+    {
+        "id": "ユーザー中止で終了処理へ移行",
+        "translation": "Transitioning to termination due to user cancellation"
+    },
+    {
+        "id": "シェーダソース読込に失敗",
+        "translation": "Failed to load shader source"
+    },
+    {
+        "id": "シェーダのコンパイルに失敗",
+        "translation": "Failed to compile shader"
+    },
+    {
+        "id": "シェーダのリンクに失敗",
+        "translation": "Failed to link shader"
+    },
+    {
+        "id": "Framebufferが不完全",
+        "translation": "Framebuffer is incomplete"
+    },
+    {
+        "id": "OpenGLエラーが発生",
+        "translation": "OpenGL error occurred"
+    },
+    {
+        "id": "OpenGLコンテキスト初期化に失敗",
+        "translation": "Failed to initialize OpenGL context"
+    },
+    {
+        "id": "数学型のコピーに失敗",
+        "translation": "Failed to copy math type"
+    },
+    {
+        "id": "配列長が一致しない",
+        "translation": "Array lengths do not match"
+    },
+    {
+        "id": "CalculateXに失敗",
+        "translation": "CalculateX failed"
+    },
+    {
+        "id": "Quaternion.Logに失敗",
+        "translation": "Quaternion.Log failed"
+    },
+    {
+        "id": "平面との交点計算に失敗",
+        "translation": "Failed to compute intersection with plane"
+    },
+    {
+        "id": "曲線フィットに失敗",
+        "translation": "Curve fitting failed"
+    },
+    {
+        "id": "モデルコピーに失敗",
+        "translation": "Failed to copy model"
+    },
+    {
+        "id": "モーションコピーに失敗",
+        "translation": "Failed to copy motion"
+    },
+    {
+        "id": "エラー基底型",
+        "translation": "Base error type"
+    },
+    {
+        "id": "app_config.json読込に失敗",
+        "translation": "Failed to load app_config.json"
+    },
+    {
+        "id": "user_config.json保存に失敗",
+        "translation": "Failed to save user_config.json"
+    },
+    {
+        "id": "アプリルート取得に失敗",
+        "translation": "Failed to resolve app root"
+    },
+    {
+        "id": "設定値の型が未対応",
+        "translation": "Unsupported config value type"
+    },
+    {
+        "id": "VERBOSE書き込みに失敗",
+        "translation": "Failed to write VERBOSE output"
+    },
+    {
+        "id": "VERBOSE出力のクローズに失敗",
+        "translation": "Failed to close VERBOSE output"
+    },
+    {
+        "id": "ファイルが存在しない",
+        "translation": "File does not exist"
+    },
+    {
+        "id": "ファイル読込に失敗",
+        "translation": "Failed to read file"
+    },
+    {
+        "id": "画像デコードに失敗",
+        "translation": "Failed to decode image"
+    },
+    {
+        "id": "数値パースに失敗",
+        "translation": "Failed to parse number"
+    },
+    {
+        "id": "ログストリームの作成に失敗",
+        "translation": "Failed to create log stream"
+    },
+    {
+        "id": "ログスナップショット保存に失敗",
+        "translation": "Failed to save log snapshot"
+    },
+    {
+        "id": "画像形式が未対応",
+        "translation": "Unsupported image format"
+    },
+    {
+        "id": "音楽ファイルが指定されていない",
+        "translation": "No audio file specified"
+    },
+    {
+        "id": "並列処理中のエラー",
+        "translation": "Error during parallel processing"
+    },
+    {
+        "id": "GLFWの初期化に失敗",
+        "translation": "Failed to initialize GLFW"
+    },
+    {
+        "id": "panicを検知",
+        "translation": "Panic detected"
+    },
+    {
+        "id": "Controllerウィンドウ初期化に失敗",
+        "translation": "Failed to initialize Controller window"
+    },
+    {
+        "id": "ConsoleView初期化に失敗",
+        "translation": "Failed to initialize ConsoleView"
+    },
+    {
+        "id": "ProgressBar初期化に失敗",
+        "translation": "Failed to initialize ProgressBar"
+    },
+    {
+        "id": "読み込みリポジトリが未設定",
+        "translation": "Load repository is not configured"
+    },
+    {
+        "id": "モデルが読み込まれていない",
+        "translation": "Model is not loaded"
+    },
+    {
+        "id": "保存先パスが不正",
+        "translation": "Invalid save path"
+    },
+    {
+        "id": "インデックスの定義を確認してください",
+        "translation": "Check the index definition"
+    },
+    {
+        "id": "前提を満たしてから再実行してください",
+        "translation": "Satisfy prerequisites and retry"
+    },
+    {
+        "id": "パスを確認して再指定する",
+        "translation": "Check the path and specify again"
+    },
+    {
+        "id": "拡張子を対応形式に修正する",
+        "translation": "Change the extension to a supported format"
+    },
+    {
+        "id": "対応形式/バージョンに変換してください",
+        "translation": "Convert to a supported format/version"
+    },
+    {
+        "id": "対応エンコードで保存してください",
+        "translation": "Save with a supported encoding"
+    },
+    {
+        "id": "ファイル形式/破損を確認する",
+        "translation": "Check file format/corruption"
+    },
+    {
+        "id": "出力内容/文字コードを確認してください",
+        "translation": "Check output contents/character encoding"
+    },
+    {
+        "id": "名称/文字コードを確認してください",
+        "translation": "Check name/character encoding"
+    },
+    {
+        "id": "出力先/権限/ディスク容量を確認する",
+        "translation": "Check destination/permissions/disk space"
+    },
+    {
+        "id": "ファイルパス/配布物を確認してください",
+        "translation": "Check file path/distribution"
+    },
+    {
+        "id": "シェーダの文法/対応GLSLを確認してください",
+        "translation": "Check shader syntax/supported GLSL"
+    },
+    {
+        "id": "シェーダの入出力整合性を確認してください",
+        "translation": "Check shader input/output consistency"
+    },
+    {
+        "id": "MSAA/FBO設定を確認してください",
+        "translation": "Check MSAA/FBO settings"
+    },
+    {
+        "id": "ドライバ/GL状態/描画順序を確認してください",
+        "translation": "Check driver/GL state/render order"
+    },
+    {
+        "id": "ファイル/権限/エンコードを確認する",
+        "translation": "Check file/permissions/encoding"
+    },
+    {
+        "id": "画像形式/破損を確認する",
+        "translation": "Check image format/corruption"
+    },
+    {
+        "id": "入力文字列を確認してください",
+        "translation": "Check the input string"
+    },
+    {
+        "id": "画像形式/拡張子を確認する",
+        "translation": "Check image format/extension"
+    },
+    {
+        "id": "cmd でリポジトリを注入してください",
+        "translation": "Inject repository via cmd"
+    },
+    {
+        "id": "モデルを読み込んでから保存してください",
+        "translation": "Load the model before saving"
+    },
+    {
+        "id": "保存先/権限/ファイル名を確認する",
+        "translation": "Check destination/permissions/file name"
+    },
+    {
+        "id": "エラーID",
+        "translation": "Error ID"
+    },
+    {
+        "id": "対処方法",
+        "translation": "Remedy"
+    },
+    {
+        "id": "詳細",
+        "translation": "Details"
+    },
+    {
+        "id": "読み込みリポジトリがありません: %s",
+        "translation": "Load repository is missing: %s"
+    },
+    {
+        "id": "panicを検知しました: %s\n%s",
+        "translation": "Panic detected: %s\n%s"
+    },
+    {
+        "id": "パスを確認して再指定してください。絵文字/特殊記号が含まれる場合は英数字のみのパスへ移動してください。",
+        "translation": "Please check the path and specify it again. If it contains emoji or special characters, move it to a path with only alphanumerics."
+    },
+    {
+        "id": "ファイル/権限/エンコードを確認してください。パスに絵文字/特殊記号がある場合は英数字のみのパスへ移動してください。",
+        "translation": "Please check the file/permissions/encoding. If the path contains emoji or special characters, move it to a path with only alphanumerics."
+    },
+    {
+        "id": "ファイル形式/破損を確認してください。パスに絵文字/特殊記号がある場合は英数字のみのパスへ移動してください。",
+        "translation": "Please check the file format/corruption. If the path contains emoji or special characters, move it to a path with only alphanumerics."
+    },
+    {
+        "id": "保存先/権限/ファイル名を確認してください。絵文字/特殊記号が含まれる場合は英数字のみのパスに変更してください。",
+        "translation": "Please check the destination/permissions/file name. If it contains emoji or special characters, change to a path with only alphanumerics."
+    },
+    {
+        "id": "出力先/権限/ディスク容量を確認してください。パスに絵文字/特殊記号がある場合は英数字のみのパスへ保存してください。",
+        "translation": "Please check the destination/permissions/disk space. If the path contains emoji or special characters, save to a path with only alphanumerics."
+    },
+    {
+        "id": "拡張子を対応形式に修正してください。パスに絵文字/特殊記号がある場合は英数字のみのパスへ移動してください。",
+        "translation": "Please change the extension to a supported format. If the path contains emoji or special characters, move it to a path with only alphanumerics."
+    },
+    {
+        "id": "画像形式/拡張子を確認してください。パスに絵文字/特殊記号がある場合は英数字のみのパスへ移動してください。",
+        "translation": "Please check the image format/extension. If the path contains emoji or special characters, move it to a path with only alphanumerics."
+    },
+    {
+        "id": "画像形式/破損を確認してください。パスに絵文字/特殊記号がある場合は英数字のみのパスへ移動してください。",
+        "translation": "Please check the image format/corruption. If the path contains emoji or special characters, move it to a path with only alphanumerics."
+    },
+    {
+        "id": "CalculateXに失敗しました",
+        "translation": "Failed to calculate X"
+    },
+    {
+        "id": "MCIエラーが発生しました",
+        "translation": "An MCI error occurred"
+    },
+    {
+        "id": "MCIエラーが発生しました: %s",
+        "translation": "An MCI error occurred: %s"
+    },
+    {
+        "id": "Quaternion.Logに失敗しました",
+        "translation": "Quaternion.Log failed"
+    },
+    {
+        "id": "app_config.jsonの解析に失敗しました: %s",
+        "translation": "Failed to parse app_config.json: %s"
+    },
+    {
+        "id": "app_config.jsonの読込に失敗しました: %s",
+        "translation": "Failed to read app_config.json: %s"
+    },
+    {
+        "id": "file.Closeに失敗しました",
+        "translation": "file.Close failed"
+    },
+    {
+        "id": "file.WriteStringに失敗しました",
+        "translation": "file.WriteString failed"
+    },
+    {
+        "id": "history.jsonの読込に失敗しました: %s",
+        "translation": "Failed to read history.json: %s"
+    },
+    {
+        "id": "i18nメッセージ解析に失敗しました: %s",
+        "translation": "Failed to parse i18n messages: %s"
+    },
+    {
+        "id": "i18nメッセージ読込に失敗しました: %s",
+        "translation": "Failed to read i18n messages: %s"
+    },
+    {
+        "id": "io.ReadAllに失敗しました",
+        "translation": "io.ReadAll failed"
+    },
+    {
+        "id": "os.Createに失敗しました",
+        "translation": "os.Create failed"
+    },
+    {
+        "id": "os.Executableに失敗しました",
+        "translation": "os.Executable failed"
+    },
+    {
+        "id": "os.MkdirAllに失敗しました",
+        "translation": "os.MkdirAll failed"
+    },
+    {
+        "id": "os.Openに失敗しました",
+        "translation": "os.Open failed"
+    },
+    {
+        "id": "os.Statに失敗しました",
+        "translation": "os.Stat failed"
+    },
+    {
+        "id": "os.WriteFileに失敗しました",
+        "translation": "os.WriteFile failed"
+    },
+    {
+        "id": "user_config.jsonの保存用JSON生成に失敗しました",
+        "translation": "Failed to generate JSON for saving user_config.json"
+    },
+    {
+        "id": "user_config.jsonの書き込みに失敗しました: %s",
+        "translation": "Failed to write user_config.json: %s"
+    },
+    {
+        "id": "user_config.jsonの読込に失敗しました: %s",
+        "translation": "Failed to read user_config.json: %s"
+    },
+    {
+        "id": "アプリアイコンのデコードに失敗しました: %s",
+        "translation": "Failed to decode app icon: %s"
+    },
+    {
+        "id": "インデックスが無効です: %d",
+        "translation": "Invalid index: %d"
+    },
+    {
+        "id": "平面との交点計算に失敗しました",
+        "translation": "Failed to compute intersection with plane"
+    },
+    {
+        "id": "曲線フィットに失敗しました",
+        "translation": "Curve fitting failed"
+    },
+    {
+        "id": "画像のデコードに失敗しました: %s",
+        "translation": "Failed to decode image: %s"
+    },
+    {
+        "id": "画像ファイルのクローズに失敗しました: %s",
+        "translation": "Failed to close image file: %s"
+    },
+    {
+        "id": "画像ファイルの読み込みに失敗しました: %s",
+        "translation": "Failed to load image file: %s"
+    },
+    {
+        "id": "画像形式が未対応です: %s",
+        "translation": "Unsupported image format: %s"
+    },
+    {
+        "id": "設定JSONの解析に失敗しました: %s",
+        "translation": "Failed to parse settings JSON: %s"
+    },
+    {
+        "id": "音量設定に失敗しました: code=%d",
+        "translation": "Failed to set volume: code=%d"
+    },
+    {
+        "id": "音声シークに失敗しました: %s",
+        "translation": "Failed to seek audio: %s"
+    },
+    {
+        "id": "音声再生に失敗しました: %s",
+        "translation": "Failed to play audio: %s"
+    },
+    {
+        "id": "音声一時停止に失敗しました: %s",
+        "translation": "Failed to pause audio: %s"
+    },
+    {
+        "id": "ボーンフレームのコピーに失敗しました: %s",
+        "translation": "Failed to copy bone frames: %s"
+    },
+    {
+        "id": "描画用モデルの複製に失敗しました: %v",
+        "translation": "Failed to duplicate render model: %v"
+    },
+    {
+        "id": "Framebuffer is not complete: %v",
+        "translation": "Framebuffer is not complete: %v"
+    },
+    {
+        "id": "#",
+        "translation": "#"
+    },
+    {
+        "id": "No.",
+        "translation": "No."
+    },
+    {
+        "id": "Toon",
+        "translation": "Toon"
+    },
+    {
+        "id": "OK",
+        "translation": "OK"
+    },
+    {
+        "id": "キャンセル",
+        "translation": "Cancel"
+    },
+    {
+        "id": "%s %s",
+        "translation": "%s %s"
+    },
+    {
+        "id": "%s: %s",
+        "translation": "%s: %s"
+    },
+    {
+        "id": "---------------------------------",
+        "translation": "---------------------------------"
+    },
+    {
+        "id": "■■■■■ %s ■■■■■",
+        "translation": "■■■■■ %s ■■■■■"
+    },
+    {
+        "id": "~~~~~~~~~~ %s ~~~~~~~~~~",
+        "translation": "~~~~~~~~~~ %s ~~~~~~~~~~"
+    },
+    {
+        "id": "********** %s **********",
+        "translation": "********** %s **********"
+    },
+    {
+        "id": "!!!!!!!!!! %s !!!!!!!!!!",
+        "translation": "!!!!!!!!!! %s !!!!!!!!!!"
+    },
+    {
+        "id": "エラーメッセージ: %s",
+        "translation": "Error Message: %s"
+    },
+    {
+        "id": "スタックトレース:\n%s",
+        "translation": "Stack Trace:\n%s"
+    },
+    {
+        "id": "設定の保存に失敗しました: %s",
+        "translation": "Failed to save settings: %s"
+    },
+    {
+        "id": "カメラ操作",
+        "translation": "Camera Controls"
+    },
+    {
+        "id": "カメラ操作メッセージ",
+        "translation": "Use the mouse wheel to change FOV, middle-button drag to move, right-button drag to rotate.\nHold Shift for larger changes, Ctrl for smaller.\nUse numpad 1/2/4/5/6/8 to switch views like MMD."
+    },
+    {
+        "id": "フレームドロップONメッセージ",
+        "translation": "Switch playback to \"real-time priority / allow frame drops\".\nUncheck to disallow frame drops and render every frame."
+    },
+    {
+        "id": "30fps制限メッセージ",
+        "translation": "Limit rendering updates to 30 fps."
+    },
+    {
+        "id": "60fps制限メッセージ",
+        "translation": "Limit rendering updates to 60 fps."
+    },
+    {
+        "id": "fps無制限メッセージ",
+        "translation": "Remove the rendering FPS limit."
+    },
+    {
+        "id": "情報表示メッセージ",
+        "translation": "Show FPS in the window title (in dev builds, draw/physics FPS)."
+    },
+    {
+        "id": "物理ON/OFFメッセージ",
+        "translation": "Toggle physics simulation on/off."
+    },
+    {
+        "id": "物理リセットメッセージ",
+        "translation": "Reset physics state."
+    },
+    {
+        "id": "全ボーンメッセージ",
+        "translation": "Show all bones."
+    },
+    {
+        "id": "IKボーンメッセージ",
+        "translation": "Show IK-related bones."
+    },
+    {
+        "id": "付与親ボーンメッセージ",
+        "translation": "Show effector/parent bones (including external parents)."
+    },
+    {
+        "id": "軸制限ボーンメッセージ",
+        "translation": "Show axis-limited bones."
+    },
+    {
+        "id": "回転ボーンメッセージ",
+        "translation": "Show rotatable bones."
+    },
+    {
+        "id": "移動ボーンメッセージ",
+        "translation": "Show translatable bones."
+    },
+    {
+        "id": "表示ボーンメッセージ",
+        "translation": "Show bones with the visible flag."
+    },
+    {
+        "id": "前面表示メッセージ",
+        "translation": "Show rigid-body wireframes/contact points in front of the model."
+    },
+    {
+        "id": "埋め込み表示メッセージ",
+        "translation": "Show only the protruding parts of rigid bodies."
+    },
+    {
+        "id": "ジョイント表示メッセージ",
+        "translation": "Show joint constraints/limits as wires.\nHover near a joint center to show the joint name tooltip."
+    },
+    {
+        "id": "法線表示メッセージ",
+        "translation": "Show normals as lines."
+    },
+    {
+        "id": "ワイヤーフレーム表示メッセージ",
+        "translation": "Show meshes as wireframes.\nAutomatically turns on when vertex selection is enabled."
+    },
+    {
+        "id": "ポイント選択メッセージ",
+        "translation": "Left-drag to draw a cursor trail and select nearby vertices.\nCtrl removes selection (selected vertices are orange; trail is pale yellow)."
+    },
+    {
+        "id": "ボックス選択メッセージ",
+        "translation": "Left-drag to draw a selection rectangle and select visible vertices inside. Ctrl removes selection (selected vertices are orange; trail is pale yellow)."
+    },
+    {
+        "id": "カメラ同期メッセージ",
+        "translation": "Synchronize cameras across viewers (mutually exclusive with upper/lower overlay)."
+    },
+    {
+        "id": "上半身合わせメッセージ",
+        "translation": "Overlay the sub-viewer and match scale based on the upper body."
+    },
+    {
+        "id": "下半身合わせメッセージ",
+        "translation": "Overlay the sub-viewer and match scale based on the lower body."
+    },
+    {
+        "id": "カメラ合わせなしメッセージ",
+        "translation": "Overlay without camera synchronization."
+    },
+    {
+        "id": "要素の説明",
+        "translation": "Element Descriptions"
+    },
+    {
+        "id": "要素の説明メッセージ",
+        "translation": "Click the name field of each element to show its usage in the message area."
+    },
+    {
+        "id": "再生ボタン",
+        "translation": "Play Button"
+    },
+    {
+        "id": "再生ボタンメッセージ",
+        "translation": "Toggle play/pause. Other controls are restricted during playback."
+    },
+    {
+        "id": "キーフレーム番号",
+        "translation": "Keyframe Number"
+    },
+    {
+        "id": "キーフレーム番号メッセージ",
+        "translation": "View/change the current frame number. Adjust with the spinner or mouse wheel."
+    },
+    {
+        "id": "再生スライダー",
+        "translation": "Playback Slider"
+    },
+    {
+        "id": "再生スライダーメッセージ",
+        "translation": "Move the playback position. You can also adjust with the mouse wheel."
+    },
+    {
+        "id": "音楽",
+        "translation": "Audio"
+    },
+    {
+        "id": "音楽ファイルメッセージ",
+        "translation": "Enter a wav/mp3 file and playback will sync when playing."
+    },
+    {
+        "id": "音量メッセージ",
+        "translation": "Adjust volume from 0 to 100."
+    },
+    {
+        "id": "ファイル操作",
+        "translation": "File Operations"
+    },
+    {
+        "id": "ファイル操作メッセージ",
+        "translation": "Besides Open, you can set file paths via drag-and-drop or history."
+    }
+]

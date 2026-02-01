@@ -1,180 +1,248 @@
+// 指示: miu200521358
 package delta
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/domain/model"
 )
 
+// VertexMorphDelta は頂点モーフ差分を表す。
 type VertexMorphDelta struct {
 	Index         int
-	Position      *mmath.MVec3
-	Uv            *mmath.MVec2
-	Uv1           *mmath.MVec2
-	AfterPosition *mmath.MVec3
+	Position      *mmath.Vec3
+	Uv            *mmath.Vec2
+	Uv1           *mmath.Vec2
+	AfterPosition *mmath.Vec3
 }
 
+// NewVertexMorphDelta はVertexMorphDeltaを生成する。
 func NewVertexMorphDelta(index int) *VertexMorphDelta {
-	return &VertexMorphDelta{
-		Index:         index,
-		Position:      nil,
-		Uv:            nil,
-		Uv1:           nil,
-		AfterPosition: nil,
-	}
+	return &VertexMorphDelta{Index: index}
 }
 
-func (vd *VertexMorphDelta) IsZero() bool {
-	return vd == nil ||
-		((vd.Position == nil || vd.Position.NearEquals(mmath.MVec3Zero, 1e-4)) &&
-			(vd.Uv == nil || vd.Uv.NearEquals(mmath.MVec2Zero, 1e-4)) &&
-			(vd.Uv1 == nil || vd.Uv1.NearEquals(mmath.MVec2Zero, 1e-4)) &&
-			(vd.AfterPosition == nil || vd.AfterPosition.NearEquals(mmath.MVec3Zero, 1e-4)))
+// IsZero はゼロ差分か判定する。
+func (d *VertexMorphDelta) IsZero() bool {
+	return d == nil ||
+		((d.Position == nil || d.Position.NearEquals(mmath.ZERO_VEC3, 1e-4)) &&
+			(d.Uv == nil || d.Uv.NearEquals(mmath.ZERO_VEC2, 1e-4)) &&
+			(d.Uv1 == nil || d.Uv1.NearEquals(mmath.ZERO_VEC2, 1e-4)) &&
+			(d.AfterPosition == nil || d.AfterPosition.NearEquals(mmath.ZERO_VEC3, 1e-4)))
 }
 
+// BoneMorphDelta はボーンモーフ差分を表す。
 type BoneMorphDelta struct {
 	BoneIndex               int
-	FramePosition           *mmath.MVec3       // キーフレ位置の変動量
-	FrameCancelablePosition *mmath.MVec3       // キャンセル位置の変動量
-	FrameRotation           *mmath.MQuaternion // キーフレ回転の変動量
-	FrameCancelableRotation *mmath.MQuaternion // キャンセル回転の変動量
-	FrameScale              *mmath.MVec3       // キーフレスケールの変動量
-	FrameCancelableScale    *mmath.MVec3       // キャンセルスケールの変動量
-	FrameLocalMat           *mmath.MMat4       // キーフレのローカル変動行列
+	FramePosition           *mmath.Vec3
+	FrameCancelablePosition *mmath.Vec3
+	FrameRotation           *mmath.Quaternion
+	FrameCancelableRotation *mmath.Quaternion
+	FrameScale              *mmath.Vec3
+	FrameCancelableScale    *mmath.Vec3
+	FrameLocalMat           *mmath.Mat4
 }
 
+// NewBoneMorphDelta はBoneMorphDeltaを生成する。
 func NewBoneMorphDelta(boneIndex int) *BoneMorphDelta {
-	return &BoneMorphDelta{
-		BoneIndex: boneIndex,
+	return &BoneMorphDelta{BoneIndex: boneIndex}
+}
+
+// FilledMorphPosition はモーフ位置を返す。
+func (d *BoneMorphDelta) FilledMorphPosition() mmath.Vec3 {
+	if d == nil || d.FramePosition == nil {
+		return mmath.NewVec3()
 	}
+	return *d.FramePosition
 }
 
-func (boneMorphDelta *BoneMorphDelta) Get(boneIndex int) *BoneMorphDelta {
-	return boneMorphDelta
-}
-
-func (boneMorphDelta *BoneMorphDelta) FilledMorphPosition() *mmath.MVec3 {
-	if boneMorphDelta.FramePosition == nil {
-		boneMorphDelta.FramePosition = mmath.NewMVec3()
+// FilledMorphCancelablePosition はモーフキャンセル位置を返す。
+func (d *BoneMorphDelta) FilledMorphCancelablePosition() mmath.Vec3 {
+	if d == nil || d.FrameCancelablePosition == nil {
+		return mmath.NewVec3()
 	}
-	return boneMorphDelta.FramePosition
+	return *d.FrameCancelablePosition
 }
 
-func (boneMorphDelta *BoneMorphDelta) FilledMorphCancelablePosition() *mmath.MVec3 {
-	if boneMorphDelta.FrameCancelablePosition == nil {
-		boneMorphDelta.FrameCancelablePosition = mmath.NewMVec3()
+// FilledMorphRotation はモーフ回転を返す。
+func (d *BoneMorphDelta) FilledMorphRotation() mmath.Quaternion {
+	if d == nil || d.FrameRotation == nil {
+		return mmath.NewQuaternion()
 	}
-	return boneMorphDelta.FrameCancelablePosition
+	return *d.FrameRotation
 }
 
-func (boneMorph *BoneMorphDelta) FilledMorphRotation() *mmath.MQuaternion {
-	if boneMorph.FrameRotation == nil {
-		boneMorph.FrameRotation = mmath.NewMQuaternion()
+// FilledMorphCancelableRotation はモーフキャンセル回転を返す。
+func (d *BoneMorphDelta) FilledMorphCancelableRotation() mmath.Quaternion {
+	if d == nil || d.FrameCancelableRotation == nil {
+		return mmath.NewQuaternion()
 	}
-	return boneMorph.FrameRotation
+	return *d.FrameCancelableRotation
 }
 
-func (boneMorph *BoneMorphDelta) FilledMorphCancelableRotation() *mmath.MQuaternion {
-	if boneMorph.FrameCancelableRotation == nil {
-		boneMorph.FrameCancelableRotation = mmath.NewMQuaternion()
+// FilledMorphScale はモーフスケールを返す。
+func (d *BoneMorphDelta) FilledMorphScale() mmath.Vec3 {
+	if d == nil || d.FrameScale == nil {
+		return mmath.ONE_VEC3
 	}
-	return boneMorph.FrameCancelableRotation
+	return *d.FrameScale
 }
 
-func (boneMorphDelta *BoneMorphDelta) FilledMorphScale() *mmath.MVec3 {
-	if boneMorphDelta.FrameScale == nil {
-		boneMorphDelta.FrameScale = mmath.NewMVec3()
+// FilledMorphCancelableScale はモーフキャンセルスケールを返す。
+func (d *BoneMorphDelta) FilledMorphCancelableScale() mmath.Vec3 {
+	if d == nil || d.FrameCancelableScale == nil {
+		return mmath.ONE_VEC3
 	}
-	return boneMorphDelta.FrameScale
+	return *d.FrameCancelableScale
 }
 
-func (boneMorphDelta *BoneMorphDelta) FilledMorphCancelableScale() *mmath.MVec3 {
-	if boneMorphDelta.FrameCancelableScale == nil {
-		boneMorphDelta.FrameCancelableScale = mmath.NewMVec3()
+// FilledMorphLocalMat はモーフローカル行列を返す。
+func (d *BoneMorphDelta) FilledMorphLocalMat() mmath.Mat4 {
+	if d == nil || d.FrameLocalMat == nil {
+		return mmath.NewMat4()
 	}
-	return boneMorphDelta.FrameCancelableScale
+	return *d.FrameLocalMat
 }
 
-func (boneMorphDelta *BoneMorphDelta) FilledMorphLocalMat() *mmath.MMat4 {
-	if boneMorphDelta.FrameLocalMat == nil {
-		boneMorphDelta.FrameLocalMat = mmath.NewMMat4()
+// Copy は差分を複製する。
+func (d *BoneMorphDelta) Copy() (BoneMorphDelta, error) {
+	if d == nil {
+		return BoneMorphDelta{}, nil
 	}
-	return boneMorphDelta.FrameLocalMat
-}
-
-func (boneMorphDelta *BoneMorphDelta) Copy() *BoneMorphDelta {
-	return &BoneMorphDelta{
-		FramePosition:           boneMorphDelta.FilledMorphPosition().Copy(),
-		FrameCancelablePosition: boneMorphDelta.FilledMorphCancelablePosition().Copy(),
-		FrameRotation:           boneMorphDelta.FilledMorphRotation().Copy(),
-		FrameCancelableRotation: boneMorphDelta.FilledMorphCancelableRotation().Copy(),
-		FrameScale:              boneMorphDelta.FilledMorphScale().Copy(),
-		FrameCancelableScale:    boneMorphDelta.FilledMorphCancelableScale().Copy(),
-		FrameLocalMat:           boneMorphDelta.FilledMorphLocalMat().Copy(),
+	copyDelta := BoneMorphDelta{BoneIndex: d.BoneIndex}
+	{
+		pos := d.FilledMorphPosition()
+		copyDelta.FramePosition = &pos
 	}
+	{
+		pos := d.FilledMorphCancelablePosition()
+		copyDelta.FrameCancelablePosition = &pos
+	}
+	{
+		rot := d.FilledMorphRotation()
+		copyDelta.FrameRotation = &rot
+	}
+	{
+		rot := d.FilledMorphCancelableRotation()
+		copyDelta.FrameCancelableRotation = &rot
+	}
+	{
+		scale := d.FilledMorphScale()
+		copyDelta.FrameScale = &scale
+	}
+	{
+		scale := d.FilledMorphCancelableScale()
+		copyDelta.FrameCancelableScale = &scale
+	}
+	{
+		mat := d.FilledMorphLocalMat()
+		copyDelta.FrameLocalMat = &mat
+	}
+	return copyDelta, nil
 }
 
+// MaterialMorphDelta は材質モーフ差分を表す。
 type MaterialMorphDelta struct {
-	*pmx.Material
-	AddMaterial *pmx.Material
-	MulMaterial *pmx.Material
+	Material    model.Material
+	AddMaterial model.Material
+	MulMaterial model.Material
 }
 
-func NewMaterialMorphDelta(m *pmx.Material) *MaterialMorphDelta {
-	mm := &MaterialMorphDelta{
-		Material: m.Copy().(*pmx.Material),
-		AddMaterial: &pmx.Material{
-			Diffuse:  &mmath.MVec4{},
-			Specular: &mmath.MVec4{},
-			Ambient:  &mmath.MVec3{},
-			Edge:     &mmath.MVec4{},
-			EdgeSize: 0,
-		},
-		MulMaterial: &pmx.Material{
-			Diffuse:  &mmath.MVec4{X: 1, Y: 1, Z: 1, W: 1},
-			Specular: &mmath.MVec4{X: 1, Y: 1, Z: 1, W: 1},
-			Ambient:  &mmath.MVec3{X: 1, Y: 1, Z: 1},
-			Edge:     &mmath.MVec4{X: 1, Y: 1, Z: 1, W: 1},
-			EdgeSize: 1,
-		},
+// NewMaterialMorphDelta はMaterialMorphDeltaを生成する。
+func NewMaterialMorphDelta(material *model.Material) *MaterialMorphDelta {
+	base := model.NewMaterial()
+	if material != nil {
+		base = copyMaterial(material)
 	}
-
-	return mm
+	add := model.NewMaterial()
+	mul := model.NewMaterial()
+	mul.Diffuse = mmath.Vec4{X: 1, Y: 1, Z: 1, W: 1}
+	mul.Specular = mmath.Vec4{X: 1, Y: 1, Z: 1, W: 1}
+	mul.Ambient = mmath.ONE_VEC3
+	mul.Edge = mmath.Vec4{X: 1, Y: 1, Z: 1, W: 1}
+	mul.EdgeSize = 1
+	mul.TextureFactor = mmath.ONE_VEC4
+	mul.SphereTextureFactor = mmath.ONE_VEC4
+	mul.ToonTextureFactor = mmath.ONE_VEC4
+	return &MaterialMorphDelta{
+		Material:    *base,
+		AddMaterial: *add,
+		MulMaterial: *mul,
+	}
 }
 
-func (materialMorphDelta *MaterialMorphDelta) Add(m *pmx.MaterialMorphOffset, ratio float64) {
-	materialMorphDelta.AddMaterial.Diffuse.X += m.Diffuse.X * ratio
-	materialMorphDelta.AddMaterial.Diffuse.Y += m.Diffuse.Y * ratio
-	materialMorphDelta.AddMaterial.Diffuse.Z += m.Diffuse.Z * ratio
-	materialMorphDelta.AddMaterial.Diffuse.W += m.Diffuse.W * ratio
-	materialMorphDelta.AddMaterial.Specular.X += m.Specular.X * ratio
-	materialMorphDelta.AddMaterial.Specular.Y += m.Specular.Y * ratio
-	materialMorphDelta.AddMaterial.Specular.Z += m.Specular.Z * ratio
-	materialMorphDelta.AddMaterial.Specular.W += m.Specular.W * ratio
-	materialMorphDelta.AddMaterial.Ambient.X += m.Ambient.X * ratio
-	materialMorphDelta.AddMaterial.Ambient.Y += m.Ambient.Y * ratio
-	materialMorphDelta.AddMaterial.Ambient.Z += m.Ambient.Z * ratio
-	materialMorphDelta.AddMaterial.Edge.X += m.Edge.X * ratio
-	materialMorphDelta.AddMaterial.Edge.Y += m.Edge.Y * ratio
-	materialMorphDelta.AddMaterial.Edge.Z += m.Edge.Z * ratio
-	materialMorphDelta.AddMaterial.Edge.W += m.Edge.W * ratio
-	materialMorphDelta.AddMaterial.EdgeSize += m.EdgeSize * ratio
+// Add は加算差分を反映する。
+func (d *MaterialMorphDelta) Add(offset *model.MaterialMorphOffset, ratio float64) {
+	if d == nil || offset == nil {
+		return
+	}
+	d.AddMaterial.Diffuse = d.AddMaterial.Diffuse.Added(offset.Diffuse.MuledScalar(ratio))
+	d.AddMaterial.Specular = d.AddMaterial.Specular.Added(offset.Specular.MuledScalar(ratio))
+	d.AddMaterial.Ambient = d.AddMaterial.Ambient.Added(offset.Ambient.MuledScalar(ratio))
+	d.AddMaterial.Edge = d.AddMaterial.Edge.Added(offset.Edge.MuledScalar(ratio))
+	d.AddMaterial.EdgeSize += offset.EdgeSize * ratio
+	d.AddMaterial.TextureFactor = d.AddMaterial.TextureFactor.Added(offset.TextureFactor.MuledScalar(ratio))
+	d.AddMaterial.SphereTextureFactor = d.AddMaterial.SphereTextureFactor.Added(offset.SphereTextureFactor.MuledScalar(ratio))
+	d.AddMaterial.ToonTextureFactor = d.AddMaterial.ToonTextureFactor.Added(offset.ToonTextureFactor.MuledScalar(ratio))
 }
 
-func (materialMorphDelta *MaterialMorphDelta) Mul(m *pmx.MaterialMorphOffset, ratio float64) {
-	materialMorphDelta.MulMaterial.Diffuse.X *= mmath.Lerp(1, m.Diffuse.X, ratio)
-	materialMorphDelta.MulMaterial.Diffuse.Y *= mmath.Lerp(1, m.Diffuse.Y, ratio)
-	materialMorphDelta.MulMaterial.Diffuse.Z *= mmath.Lerp(1, m.Diffuse.Z, ratio)
-	materialMorphDelta.MulMaterial.Diffuse.W *= mmath.Lerp(1, m.Diffuse.W, ratio)
-	materialMorphDelta.MulMaterial.Specular.X *= mmath.Lerp(1, m.Specular.X, ratio)
-	materialMorphDelta.MulMaterial.Specular.Y *= mmath.Lerp(1, m.Specular.Y, ratio)
-	materialMorphDelta.MulMaterial.Specular.Z *= mmath.Lerp(1, m.Specular.Z, ratio)
-	materialMorphDelta.MulMaterial.Specular.W *= mmath.Lerp(1, m.Specular.W, ratio)
-	materialMorphDelta.MulMaterial.Ambient.X *= mmath.Lerp(1, m.Ambient.X, ratio)
-	materialMorphDelta.MulMaterial.Ambient.Y *= mmath.Lerp(1, m.Ambient.Y, ratio)
-	materialMorphDelta.MulMaterial.Ambient.Z *= mmath.Lerp(1, m.Ambient.Z, ratio)
-	materialMorphDelta.MulMaterial.Edge.X *= mmath.Lerp(1, m.Edge.X, ratio)
-	materialMorphDelta.MulMaterial.Edge.Y *= mmath.Lerp(1, m.Edge.Y, ratio)
-	materialMorphDelta.MulMaterial.Edge.Z *= mmath.Lerp(1, m.Edge.Z, ratio)
-	materialMorphDelta.MulMaterial.Edge.W *= mmath.Lerp(1, m.Edge.W, ratio)
-	materialMorphDelta.MulMaterial.EdgeSize *= mmath.Lerp(1, m.EdgeSize, ratio)
+// Mul は乗算差分を反映する。
+func (d *MaterialMorphDelta) Mul(offset *model.MaterialMorphOffset, ratio float64) {
+	if d == nil || offset == nil {
+		return
+	}
+	d.MulMaterial.Diffuse = d.MulMaterial.Diffuse.Muled(lerpVec4(offset.Diffuse, ratio))
+	d.MulMaterial.Specular = d.MulMaterial.Specular.Muled(lerpVec4(offset.Specular, ratio))
+	d.MulMaterial.Ambient = d.MulMaterial.Ambient.Muled(lerpVec3(offset.Ambient, ratio))
+	d.MulMaterial.Edge = d.MulMaterial.Edge.Muled(lerpVec4(offset.Edge, ratio))
+	d.MulMaterial.EdgeSize *= mmath.Lerp(1, offset.EdgeSize, ratio)
+	d.MulMaterial.TextureFactor = d.MulMaterial.TextureFactor.Muled(lerpVec4(offset.TextureFactor, ratio))
+	d.MulMaterial.SphereTextureFactor = d.MulMaterial.SphereTextureFactor.Muled(lerpVec4(offset.SphereTextureFactor, ratio))
+	d.MulMaterial.ToonTextureFactor = d.MulMaterial.ToonTextureFactor.Muled(lerpVec4(offset.ToonTextureFactor, ratio))
+}
+
+// copyMaterial は材質を複製する。
+func copyMaterial(src *model.Material) *model.Material {
+	dst := model.NewMaterial()
+	if src == nil {
+		return dst
+	}
+	// index/name はメソッド経由で複製する。
+	dst.SetIndex(src.Index())
+	dst.SetName(src.Name())
+	dst.EnglishName = src.EnglishName
+	dst.Memo = src.Memo
+	dst.Diffuse = src.Diffuse
+	dst.Specular = src.Specular
+	dst.Ambient = src.Ambient
+	dst.DrawFlag = src.DrawFlag
+	dst.Edge = src.Edge
+	dst.EdgeSize = src.EdgeSize
+	dst.TextureFactor = src.TextureFactor
+	dst.SphereTextureFactor = src.SphereTextureFactor
+	dst.ToonTextureFactor = src.ToonTextureFactor
+	dst.TextureIndex = src.TextureIndex
+	dst.SphereTextureIndex = src.SphereTextureIndex
+	dst.SphereMode = src.SphereMode
+	dst.ToonSharingFlag = src.ToonSharingFlag
+	dst.ToonTextureIndex = src.ToonTextureIndex
+	dst.VerticesCount = src.VerticesCount
+	return dst
+}
+
+// lerpVec3 は乗算用の補間ベクトルを返す。
+func lerpVec3(v mmath.Vec3, ratio float64) mmath.Vec3 {
+	out := mmath.NewVec3()
+	out.X = mmath.Lerp(1, v.X, ratio)
+	out.Y = mmath.Lerp(1, v.Y, ratio)
+	out.Z = mmath.Lerp(1, v.Z, ratio)
+	return out
+}
+
+// lerpVec4 は乗算用の補間ベクトルを返す。
+func lerpVec4(v mmath.Vec4, ratio float64) mmath.Vec4 {
+	return mmath.Vec4{
+		X: mmath.Lerp(1, v.X, ratio),
+		Y: mmath.Lerp(1, v.Y, ratio),
+		Z: mmath.Lerp(1, v.Z, ratio),
+		W: mmath.Lerp(1, v.W, ratio),
+	}
 }

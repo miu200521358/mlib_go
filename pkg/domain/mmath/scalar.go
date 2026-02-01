@@ -1,13 +1,32 @@
+// 指示: miu200521358
 package mmath
 
 import (
-	"fmt"
 	"math"
 	"slices"
+	"sort"
+
+	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 )
 
-// Sum 合計値を返します
-func Sum[T Number](values []T) T {
+// INumber は数値型の制約を表す。
+type INumber interface {
+	~int | ~int8 | ~int16 | ~int32 | ~int64 |
+		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr |
+		~float32 | ~float64
+}
+
+const (
+	mathCalculateXFailedErrorID = "92103"
+)
+
+// newMathCalculateXFailed はCalculateX失敗エラーを生成する。
+func newMathCalculateXFailed() error {
+	return merr.NewCommonError(mathCalculateXFailedErrorID, merr.ErrorKindInternal, "CalculateXに失敗しました", nil)
+}
+
+// Sum は合計を返す。
+func Sum[T INumber](values []T) T {
 	sum := 0.0
 	for _, v := range values {
 		sum += float64(v)
@@ -15,148 +34,185 @@ func Sum[T Number](values []T) T {
 	return T(sum)
 }
 
-// Ratio 割合を返します
-func Ratio[T Number](total T, values []T) []float64 {
+// Ratio は比率配列を返す。
+func Ratio[T INumber](total T, values []T) []float64 {
+	denom := float64(total)
+	if denom == 0 || math.IsNaN(denom) || math.IsInf(denom, 0) {
+		return make([]float64, len(values))
+	}
 	ratios := make([]float64, len(values))
 	for i, v := range values {
-		ratios[i] = float64(v) / float64(total)
+		ratio := float64(v) / denom
+		if math.IsNaN(ratio) || math.IsInf(ratio, 0) {
+			ratio = 0
+		}
+		ratios[i] = ratio
 	}
 	return ratios
 }
 
-// Effective 有効数字を返します
-func Effective[T Number](v T) T {
+// Effective は無効値を0に補正する。
+func Effective[T INumber](v T) T {
 	if math.IsNaN(float64(v)) || math.IsInf(float64(v), 0) {
 		return 0
 	}
 	return v
 }
 
-// Unique 重複を削除したスライスを返します
-func Unique[T Number](values []T) []T {
+// Unique は重複を除いた配列を返す。
+func Unique[T comparable](values []T) []T {
 	encountered := map[T]bool{}
-	result := []T{}
-
+	result := make([]T, 0, len(values))
 	for _, v := range values {
 		if !encountered[v] {
 			encountered[v] = true
 			result = append(result, v)
 		}
 	}
-
 	return result
 }
 
-// Mean 平均値を返します
-func Mean[T Number](values []T) float64 {
+// Mean は平均を返す。
+func Mean[T INumber](values []T) float64 {
+	if len(values) == 0 {
+		return 0
+	}
 	sum := 0.0
 	for _, v := range values {
 		sum += float64(v)
 	}
-	return sum / float64(len(values))
+	if math.IsNaN(sum) || math.IsInf(sum, 0) {
+		return 0
+	}
+	result := sum / float64(len(values))
+	if math.IsNaN(result) || math.IsInf(result, 0) {
+		return 0
+	}
+	return result
 }
 
-// Median 中央値計算
-func Median[T Number](values []T) T {
+// Median は中央値を返す。
+func Median[T INumber](values []T) T {
+	if len(values) == 0 {
+		var zero T
+		return zero
+	}
 	sorted := make([]T, len(values))
 	copy(sorted, values)
-
 	Sort(sorted)
 	middle := len(sorted) / 2
 	if len(sorted)%2 == 0 {
-		return (sorted[middle-1] + sorted[middle]) / 2
-	} else {
-		return sorted[middle]
+		result := (sorted[middle-1] + sorted[middle]) / 2
+		if isNaN(result) {
+			var zero T
+			return zero
+		}
+		return result
 	}
+	result := sorted[middle]
+	if isNaN(result) {
+		var zero T
+		return zero
+	}
+	return result
 }
 
-// Std 標準偏差
-func Std[T Number](values []T) float64 {
+// Std は標準偏差を返す。
+func Std[T INumber](values []T) float64 {
+	if len(values) == 0 {
+		return 0
+	}
 	mean := T(Mean(values))
 	variance := 0.0
 	for _, num := range values {
 		variance += math.Pow(float64(num-mean), 2)
 	}
-	return math.Sqrt(variance / float64(len(values)))
+	result := math.Sqrt(variance / float64(len(values)))
+	if math.IsNaN(result) || math.IsInf(result, 0) {
+		return 0
+	}
+	return result
 }
 
-// Lerp 線形補間
-func Lerp(v1, v2 float64, t float64) float64 {
+// Lerp は線形補間する。
+func Lerp(v1, v2, t float64) float64 {
 	if t <= 0 {
 		return v1
-	} else if t >= 1 {
+	}
+	if t >= 1 {
 		return v2
 	}
 	return v1 + ((v2 - v1) * t)
 }
 
-// Sign 符号を返します
-func Sign[T Number](v T) float64 {
+// Sign は符号を返す。
+func Sign[T INumber](v T) float64 {
 	if v < 0 {
 		return -1
 	}
 	return 1
 }
 
-// NearEquals 2つの値がepsilon以内であるかどうかを返します
-func NearEquals[T Number](v T, other T, epsilon float64) bool {
+// NearEquals は誤差内で等しいか判定する。
+func NearEquals[T INumber](v, other T, epsilon float64) bool {
 	return math.Abs(float64(v)-float64(other)) <= epsilon
 }
 
-// Utility functions to convert between degrees and radians
+// DegToRad は度からラジアンに変換する。
 func DegToRad(deg float64) float64 {
 	return deg * math.Pi / 180
 }
 
+// RadToDeg はラジアンから度に変換する。
 func RadToDeg(rad float64) float64 {
 	return rad * 180 / math.Pi
 }
 
+// ThetaToRad はシータ値をラジアンに変換する。
 func ThetaToRad(theta float64) float64 {
 	return math.Asin(math.Max(-1.0, math.Min(1.0, theta)))
 }
 
-// Clamped ベクトルの各要素をmin～maxの範囲内にクランプします
-func Clamped[T Number](v T, min T, max T) T {
+// Clamped は範囲内に収めた値を返す。
+func Clamped[T INumber](v, min, max T) T {
 	if v < min {
 		return min
-	} else if v > max {
+	}
+	if v > max {
 		return max
 	}
 	return v
 }
 
-// Clamped01 ベクトルの各要素を0～1の範囲内にクランプします
-func Clamped01[T Number](v T) T {
+// Clamped01 は0〜1に収めた値を返す。
+func Clamped01[T INumber](v T) T {
 	if v < 0 {
 		return 0
-	} else if v > 1 {
+	}
+	if v > 1 {
 		return 1
 	}
 	return v
 }
 
-// Contains slices.Contains の高速版
-func Contains[T Number](s []T, v T) bool {
-	if len(s) <= 1000 {
-		return slices.Contains(s, v)
+// Contains は含まれているか判定する。
+func Contains[T comparable](values []T, v T) bool {
+	if len(values) <= 1000 {
+		return slices.Contains(values, v)
 	}
-
-	set := make(map[T]bool, len(s))
-	for _, s := range s {
-		set[s] = true
+	set := make(map[T]bool, len(values))
+	for _, value := range values {
+		set[value] = true
 	}
-
 	_, exists := set[v]
 	return exists
 }
 
-// Max 最大値を返します
-func Max[T Number](arr []T) T {
+// Max は最大値を返す。
+func Max[T INumber](arr []T) T {
 	if len(arr) == 0 {
 		return 0
 	}
-
 	max := arr[0]
 	for _, v := range arr {
 		if v > max {
@@ -166,12 +222,11 @@ func Max[T Number](arr []T) T {
 	return max
 }
 
-// Min 最小値を返します
-func Min[T Number](arr []T) T {
+// Min は最小値を返す。
+func Min[T INumber](arr []T) T {
 	if len(arr) == 0 {
 		return 0
 	}
-
 	min := arr[0]
 	for _, v := range arr {
 		if v < min {
@@ -181,25 +236,25 @@ func Min[T Number](arr []T) T {
 	return min
 }
 
-// IntRanges 0からmaxまでの整数スライスを返します
+// IntRanges は0からの範囲配列を返す。
 func IntRanges(max int) []int {
 	return IntRangesByStep(0, max, 1)
 }
 
-// IntRanges 0からmaxまでの整数スライスを返します
+// IntRangesByStep は刻み幅付きの範囲配列を返す。
 func IntRangesByStep(min, max, step int) []int {
 	values := make([]int, 0, int(max/step)+step)
 	for i := min; i <= max; i += step {
-		if i > max {
-			break
-		}
 		values = append(values, i)
 	}
 	return values
 }
 
-// 二次元配列の平均値計算(列基準)
+// Mean2DVertical は縦方向の平均を返す。
 func Mean2DVertical(nums [][]float64) []float64 {
+	if len(nums) == 0 || len(nums[0]) == 0 {
+		return nil
+	}
 	vertical := make([]float64, len(nums[0]))
 	for _, num := range nums {
 		for i, n := range num {
@@ -207,70 +262,77 @@ func Mean2DVertical(nums [][]float64) []float64 {
 		}
 	}
 	for i, n := range vertical {
-		vertical[i] = n / float64(len(nums))
+		val := n / float64(len(nums))
+		if math.IsNaN(val) || math.IsInf(val, 0) {
+			val = 0
+		}
+		vertical[i] = val
 	}
 	return vertical
 }
 
-// 二次元配列の平均値計算(行基準)
+// Mean2DHorizontal は横方向の平均を返す。
 func Mean2DHorizontal(nums [][]float64) []float64 {
+	if len(nums) == 0 {
+		return nil
+	}
 	horizontal := make([]float64, len(nums))
 	for i, num := range nums {
-		horizontal[i] = Mean(num)
+		val := Mean(num)
+		if math.IsNaN(val) || math.IsInf(val, 0) {
+			val = 0
+		}
+		horizontal[i] = val
 	}
 	return horizontal
 }
 
-// ClampIfVerySmall ベクトルの各要素がとても小さい場合、ゼロを設定する
-func ClampIfVerySmall[T Number](v T) T {
+// ClampIfVerySmall は微小値を0に丸める。
+func ClampIfVerySmall[T INumber](v T) T {
 	epsilon := 1e-6
 	if math.Abs(float64(v)) < epsilon {
 		return 0
 	}
-
 	return v
 }
 
-// Round 四捨五入
+// Round は丸める。
 func Round(v, threshold float64) float64 {
 	if math.IsNaN(v) || math.IsInf(v, 0) {
 		return 0
 	}
-
 	vv := v * (1 / threshold)
 	return math.Round(vv) * threshold
 }
 
-// IsAllSameValues すべての値が同じかどうかを返します
+// IsAllSameValues は全要素が同じか判定する。
 func IsAllSameValues(values []float64) bool {
-	// すべて同じ値の場合、線形補間になる
 	for n := range values {
 		if values[0] != values[n] {
-			// 厳密にイコールであることをチェックする
 			return false
 		}
 	}
 	return true
 }
 
-// IsAlmostAllSameValues ほぼすべての値が同じかどうかを返します
+// IsAlmostAllSameValues は誤差内で同一か判定する。
 func IsAlmostAllSameValues(values []float64, threshold float64) bool {
-	// すべて同じ値の場合、線形補間になる
 	for n := range values {
 		if !NearEquals(values[0], values[n], threshold) {
-			// 大体イコールであることをチェックする
 			return false
 		}
 	}
 	return true
 }
 
-func DeepCopy[T Number](values []T) []T {
+// DeepCopy はスライスを深いコピーで複製する。
+func DeepCopy[T any](values []T) []T {
 	copied := make([]T, len(values))
 	copy(copied, values)
 	return copied
 }
 
+// IsPowerOfTwo は2の累乗か判定する。
 func IsPowerOfTwo(n int) bool {
 	if n <= 0 {
 		return false
@@ -278,6 +340,7 @@ func IsPowerOfTwo(n int) bool {
 	return (n & (n - 1)) == 0
 }
 
+// BoolToInt はboolをintに変換する。
 func BoolToInt(b bool) int {
 	if b {
 		return 1
@@ -285,6 +348,7 @@ func BoolToInt(b bool) int {
 	return 0
 }
 
+// BoolToFlag はboolをフラグ値に変換する。
 func BoolToFlag(b bool) float64 {
 	if b {
 		return 1.0
@@ -292,27 +356,39 @@ func BoolToFlag(b bool) float64 {
 	return -1.0
 }
 
-// calculateX は与えられたベクトルの長さ length と既知の y, z から
-// x の正負両方の候補を返す関数です。
-// ベクトルの長さ L と座標 y, z に対して、
-// x^2 = L^2 - y^2 - z^2
-// の解を計算します。
+// CalculateX は三平方からXを計算する。
 func CalculateX(length, y, z float64) (float64, error) {
-	// ルートの中身となる項を計算
 	squareTerm := length*length - y*y - z*z
 	if squareTerm < 0 {
-		return 0, fmt.Errorf("与えられた値では実数解が存在しません")
+		return 0, newMathCalculateXFailed()
 	}
-	// 正の解と負の解を計算
-	xPos := math.Sqrt(squareTerm)
-	return xPos, nil
+	return math.Sqrt(squareTerm), nil
 }
 
-func Flatten[T any](slices [][]T) []T {
-	// 二次元スライスを一次元にフラット化
-	flattened := make([]T, 0, len(slices)*len(slices[0]))
-	for _, slice := range slices {
+// Flatten は2次元スライスを平坦化する。
+func Flatten[T any](slices2 [][]T) []T {
+	if len(slices2) == 0 {
+		return nil
+	}
+	total := 0
+	for _, slice := range slices2 {
+		total += len(slice)
+	}
+	flattened := make([]T, 0, total)
+	for _, slice := range slices2 {
 		flattened = append(flattened, slice...)
 	}
 	return flattened
+}
+
+// Sort は昇順に並び替える。
+func Sort[T INumber](values []T) {
+	sort.Slice(values, func(i, j int) bool {
+		return values[i] < values[j] || (isNaN(values[i]) && !isNaN(values[j]))
+	})
+}
+
+// isNaN はNaNか判定する。
+func isNaN[T INumber](v T) bool {
+	return math.IsNaN(float64(v))
 }

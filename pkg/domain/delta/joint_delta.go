@@ -1,45 +1,61 @@
+// 指示: miu200521358
 package delta
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/domain/pmx"
+	"github.com/miu200521358/mlib_go/pkg/domain/model"
+	"github.com/miu200521358/mlib_go/pkg/shared/contracts/mtime"
 )
 
-// JointDelta は1つのボーンにおける変形（ポジション・回転・スケールなど）の差分を表す
+// JointDelta はジョイント差分を表す。
 type JointDelta struct {
-	Joint                     *pmx.Joint
-	Frame                     float32
-	TranslationLimitMin       *mmath.MVec3 // 移動制限-下限(x,y,z)
-	TranslationLimitMax       *mmath.MVec3 // 移動制限-上限(x,y,z)
-	RotationLimitMin          *mmath.MVec3 // 回転制限-下限
-	RotationLimitMax          *mmath.MVec3 // 回転制限-上限
-	SpringConstantTranslation *mmath.MVec3 // バネ定数-移動(x,y,z)
-	SpringConstantRotation    *mmath.MVec3 // バネ定数-回転(x,y,z)
+	Joint                     *model.Joint
+	Frame                     mtime.Frame
+	TranslationLimitMin       mmath.Vec3
+	TranslationLimitMax       mmath.Vec3
+	RotationLimitMin          mmath.Vec3
+	RotationLimitMax          mmath.Vec3
+	SpringConstantTranslation mmath.Vec3
+	SpringConstantRotation    mmath.Vec3
 }
 
-// NewJointDelta は新規の JointDelta を生成するコンストラクタ
-func NewJointDelta(bone *pmx.Joint, frame float32) *JointDelta {
+// NewJointDelta はJointDeltaを生成する。
+func NewJointDelta(joint *model.Joint, frame mtime.Frame) *JointDelta {
+	if joint == nil {
+		return nil
+	}
+	param := joint.Param
 	return &JointDelta{
-		Joint: bone,
-		Frame: frame,
+		Joint:                     joint,
+		Frame:                     frame,
+		TranslationLimitMin:       param.TranslationLimitMin,
+		TranslationLimitMax:       param.TranslationLimitMax,
+		RotationLimitMin:          param.RotationLimitMin,
+		RotationLimitMax:          param.RotationLimitMax,
+		SpringConstantTranslation: param.SpringConstantTranslation,
+		SpringConstantRotation:    param.SpringConstantRotation,
 	}
 }
 
-// NewJointDelta は新規の JointDelta を生成するコンストラクタ
+// NewJointDeltaByValue は値を指定してJointDeltaを生成する。
 func NewJointDeltaByValue(
-	bone *pmx.Joint, frame float32,
-	translationLimitMin, translationLimitMax *mmath.MVec3,
-	rotationLimitMin, rotationLimitMax *mmath.MVec3,
-	springConstantTranslation, springConstantRotation *mmath.MVec3,
+	joint *model.Joint,
+	frame mtime.Frame,
+	translationMin, translationMax mmath.Vec3,
+	rotationMin, rotationMax mmath.Vec3,
+	springTrans, springRot mmath.Vec3,
 ) *JointDelta {
+	if joint == nil {
+		return nil
+	}
 	return &JointDelta{
-		Joint:                     bone,
+		Joint:                     joint,
 		Frame:                     frame,
-		TranslationLimitMin:       translationLimitMin,
-		TranslationLimitMax:       translationLimitMax,
-		RotationLimitMin:          rotationLimitMin,
-		RotationLimitMax:          rotationLimitMax,
-		SpringConstantTranslation: springConstantTranslation,
-		SpringConstantRotation:    springConstantRotation,
+		TranslationLimitMin:       translationMin,
+		TranslationLimitMax:       translationMax,
+		RotationLimitMin:          rotationMin,
+		RotationLimitMax:          rotationMax,
+		SpringConstantTranslation: springTrans,
+		SpringConstantRotation:    springRot,
 	}
 }

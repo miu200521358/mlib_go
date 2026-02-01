@@ -1,78 +1,102 @@
+// 指示: miu200521358
 package delta
 
-import "github.com/miu200521358/mlib_go/pkg/domain/pmx"
+import "github.com/miu200521358/mlib_go/pkg/domain/model"
 
-// BoneDeltas は BoneDelta の集合を管理する
+// BoneDeltas はボーン差分の集合を表す。
 type BoneDeltas struct {
 	data  []*BoneDelta
-	bones *pmx.Bones
+	bones *model.BoneCollection
 }
 
-// NewBoneDeltas はボーン数に合わせて BoneDelta のスライスを用意する
-func NewBoneDeltas(bones *pmx.Bones) *BoneDeltas {
+// NewBoneDeltas はボーンコレクションに合わせて生成する。
+func NewBoneDeltas(bones *model.BoneCollection) *BoneDeltas {
+	length := 0
+	if bones != nil {
+		length = bones.Len()
+	}
 	return &BoneDeltas{
-		data:  make([]*BoneDelta, bones.Length()),
+		data:  make([]*BoneDelta, length),
 		bones: bones,
 	}
 }
 
-func (bds *BoneDeltas) Length() int {
-	return len(bds.data)
+// Len は要素数を返す。
+func (b *BoneDeltas) Len() int {
+	if b == nil {
+		return 0
+	}
+	return len(b.data)
 }
 
-// Get は boneIndex に対応する BoneDelta を返す
-func (bds *BoneDeltas) Get(boneIndex int) *BoneDelta {
-	if boneIndex < 0 || boneIndex >= len(bds.data) {
+// Get はindexのBoneDeltaを返す。
+func (b *BoneDeltas) Get(index int) *BoneDelta {
+	if b == nil || index < 0 || index >= len(b.data) {
 		return nil
 	}
-	return bds.data[boneIndex]
+	return b.data[index]
 }
 
-// GetByName はボーン名に対応する BoneDelta を返す
-func (bds *BoneDeltas) GetByName(boneName string) *BoneDelta {
-	if bone, err := bds.bones.GetByName(boneName); err == nil {
-		return bds.Get(bone.Index())
+// GetByName は名前に対応するBoneDeltaを返す。
+func (b *BoneDeltas) GetByName(name string) *BoneDelta {
+	if b == nil || b.bones == nil {
+		return nil
 	}
-
-	return nil
+	bone, err := b.bones.GetByName(name)
+	if err != nil {
+		return nil
+	}
+	return b.Get(bone.Index())
 }
 
-// Delete は指定のインデックスの BoneDelta を削除する
-func (bds *BoneDeltas) Delete(boneIndex int) {
-	if boneIndex < 0 || boneIndex >= len(bds.data) {
+// Update はBoneDeltaを更新する。
+func (b *BoneDeltas) Update(delta *BoneDelta) {
+	if b == nil || delta == nil || delta.Bone == nil {
 		return
 	}
-	bds.data[boneIndex] = nil
-}
-
-// Update は BoneDelta をデータにセットする
-func (bds *BoneDeltas) Update(bd *BoneDelta) {
-	if bd == nil || bd.Bone == nil {
+	idx := delta.Bone.Index()
+	if idx < 0 || idx >= len(b.data) {
 		return
 	}
-	idx := bd.Bone.Index()
-	if idx >= 0 && idx < len(bds.data) {
-		bds.data[idx] = bd
+	b.data[idx] = delta
+}
+
+// Delete はindexのBoneDeltaを削除する。
+func (b *BoneDeltas) Delete(index int) {
+	if b == nil || index < 0 || index >= len(b.data) {
+		return
 	}
+	b.data[index] = nil
 }
 
-// Contains は指定のインデックスに BoneDelta が存在するかを返す
-func (bds *BoneDeltas) Contains(boneIndex int) bool {
-	return boneIndex >= 0 && boneIndex < len(bds.data) && bds.data[boneIndex] != nil
-}
-
-func (bds *BoneDeltas) ContainsByName(boneName string) bool {
-	if bone, err := bds.bones.GetByName(boneName); err == nil {
-		return bds.Contains(bone.Index())
+// Contains はindexの差分が存在するか判定する。
+func (b *BoneDeltas) Contains(index int) bool {
+	if b == nil || index < 0 || index >= len(b.data) {
+		return false
 	}
-	return false
+	return b.data[index] != nil
 }
 
-// ForEach は全ての値をコールバック関数に渡します
-func (bds *BoneDeltas) ForEach(callback func(index int, value *BoneDelta) bool) {
-	for i, v := range bds.data {
-		if !callback(i, v) {
-			break
+// ContainsByName は名前に対応する差分が存在するか判定する。
+func (b *BoneDeltas) ContainsByName(name string) bool {
+	if b == nil || b.bones == nil {
+		return false
+	}
+	bone, err := b.bones.GetByName(name)
+	if err != nil {
+		return false
+	}
+	return b.Contains(bone.Index())
+}
+
+// ForEach は全要素を走査する。
+func (b *BoneDeltas) ForEach(fn func(index int, delta *BoneDelta) bool) {
+	if b == nil || fn == nil {
+		return
+	}
+	for i, v := range b.data {
+		if !fn(i, v) {
+			return
 		}
 	}
 }

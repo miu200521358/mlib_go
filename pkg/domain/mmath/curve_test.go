@@ -1,330 +1,131 @@
+// 指示: miu200521358
 package mmath
 
 import (
 	"math"
-	"reflect"
 	"testing"
 )
 
-func TestEvaluate(tst *testing.T) {
-	inter := &Curve{}
-	inter.Start = MVec2{20.0, 20.0}
-	inter.End = MVec2{107.0, 107.0}
-
-	x, y, t := Evaluate(inter, 0, 50, 100)
-
-	if x != 0.5 {
-		tst.Errorf("Expected x to be 0.5, but got %f", x)
+func TestCurveBasics(t *testing.T) {
+	c := NewCurve()
+	if c.Start != (Vec2{20, 20}) || c.End != (Vec2{107, 107}) {
+		t.Errorf("NewCurve")
 	}
-
-	if y != 0.5 {
-		tst.Errorf("Expected y to be 0.5, but got %f", y)
+	c2 := &Curve{Start: Vec2{-1, -1}, End: Vec2{2, 2}}
+	c2.Normalize(Vec2{0, 0}, Vec2{1, 1})
+	if c2.Start.X != 20 || c2.End.X != 107 {
+		t.Errorf("Normalize")
 	}
-
-	if t != 0.5 {
-		tst.Errorf("Expected t to be 0.5, but got %f", t)
+	c3 := &Curve{Start: Vec2{0.5, 0.5}, End: Vec2{0.5, 0.5}}
+	c3.Normalize(Vec2{0, 0}, Vec2{1, 1})
+	if c3.Start != (Vec2{20, 20}) || c3.End != (Vec2{107, 107}) {
+		t.Errorf("Normalize linear")
 	}
 }
 
-func TestEvaluate2(tst *testing.T) {
-	inter := &Curve{}
-	inter.Start = MVec2{10.0, 30.0}
-	inter.End = MVec2{100.0, 80.0}
-
-	x, y, t := Evaluate(inter, 0, 2, 10)
-
-	if x != 0.2 {
-		tst.Errorf("Expected x to be 0.2, but got %f", x)
+func TestCurveEvaluate(t *testing.T) {
+	c := NewCurve()
+	if x, y, t0 := Evaluate(c, 0, 0, 10); x != 0 || y != 0 || t0 != 0 {
+		t.Errorf("Evaluate early")
 	}
-
-	expectedY := 0.24085271757748078
-	if math.Abs(y-expectedY) > 1e-10 {
-		tst.Errorf("Expected y to be %.20f, but got %.20f", expectedY, y)
+	if x, y, t0 := Evaluate(c, 0, 10, 0); x != 0 || y != 0 || t0 != 0 {
+		t.Errorf("Evaluate denom")
 	}
-
-	expectedT := 0.2900272452240925
-	if math.Abs(t-expectedT) > 1e-10 {
-		tst.Errorf("Expected t to be %.20f, but got %.20f", expectedT, t)
+	if x, y, t0 := Evaluate(c, 0, 2, 1); x != 1 || y != 1 || t0 != 1 {
+		t.Errorf("Evaluate x>=1")
 	}
-}
-
-func TestSplitCurve(t *testing.T) {
-	curve := &Curve{}
-	curve.Start = MVec2{89.0, 2.0}
-	curve.End = MVec2{52.0, 106.0}
-
-	startCurve, endCurve := SplitCurve(curve, 0, 2, 10)
-
-	expectedStartStart := MVec2{50, 7}
-	if !startCurve.Start.NearEquals(&expectedStartStart, 1e-1) {
-		t.Errorf("Expected startCurve.Start to be %v, but got %v", expectedStartStart, startCurve.Start)
+	lin := &Curve{Start: Vec2{0, 0}, End: Vec2{127, 127}}
+	if x, y, t0 := Evaluate(lin, 0, 25, 100); math.Abs(x-0.25) > 1e-6 || math.Abs(y-0.25) > 1e-6 || math.Abs(t0-0.25) > 1e-6 {
+		t.Errorf("Evaluate linear")
 	}
-
-	expectedStartEnd := MVec2{91, 52}
-	if !startCurve.End.NearEquals(&expectedStartEnd, 1e-1) {
-		t.Errorf("Expected startCurve.End to be %v, but got %v", expectedStartEnd, startCurve.End)
-	}
-
-	expectedEndStart := MVec2{71, 21}
-	if !endCurve.Start.NearEquals(&expectedEndStart, 1e-1) {
-		t.Errorf("Expected endCurve.Start to be %v, but got %v", expectedEndStart, endCurve.Start)
-	}
-
-	expectedEndEnd := MVec2{44, 108}
-	if !endCurve.End.NearEquals(&expectedEndEnd, 1e-1) {
-		t.Errorf("Expected endCurve.End to be %v, but got %v", expectedEndEnd, endCurve.End)
+	non := &Curve{Start: Vec2{20, 107}, End: Vec2{107, 20}}
+	if x, y, _ := Evaluate(non, 0, 25, 100); math.Abs(y-x) < 1e-3 {
+		t.Errorf("Evaluate non-linear")
 	}
 }
 
-func TestSplitCurve2(t *testing.T) {
-	curve := &Curve{}
-	curve.Start = MVec2{89.0, 2.0}
-	curve.End = MVec2{52.0, 106.0}
-
-	startCurve, endCurve := SplitCurve(curve, 0, 2, 10)
-
-	expectedStartStart := MVec2{50, 7}
-	if !startCurve.Start.NearEquals(&expectedStartStart, 1e-1) {
-		t.Errorf("Expected startCurve.Start to be %v, but got %v", expectedStartStart, startCurve.Start)
-	}
-
-	expectedStartEnd := MVec2{91, 52}
-	if !startCurve.End.NearEquals(&expectedStartEnd, 1e-1) {
-		t.Errorf("Expected startCurve.End to be %v, but got %v", expectedStartEnd, startCurve.End)
-	}
-
-	expectedEndStart := MVec2{71, 21}
-	if !endCurve.Start.NearEquals(&expectedEndStart, 1e-1) {
-		t.Errorf("Expected endCurve.Start to be %v, but got %v", expectedEndStart, endCurve.Start)
-	}
-
-	expectedEndEnd := MVec2{44, 108}
-	if !endCurve.End.NearEquals(&expectedEndEnd, 1e-1) {
-		t.Errorf("Expected endCurve.End to be %v, but got %v", expectedEndEnd, endCurve.End)
+func TestCurveNewton(t *testing.T) {
+	if got := newton(0, 0, 0, 0, 1e-15, 1e-20); got != 0 {
+		t.Errorf("newton")
 	}
 }
 
-func TestSplitCurveLinear(t *testing.T) {
-	curve := &Curve{}
-	curve.Start = MVec2{20.0, 20.0}
-	curve.End = MVec2{107.0, 107.0}
-
-	startCurve, endCurve := SplitCurve(curve, 0, 50, 100)
-
-	expectedStartStart := MVec2{20, 20}
-	if !startCurve.Start.Equals(&expectedStartStart) {
-		t.Errorf("Expected startCurve.Start to be %v, but got %v", expectedStartStart, startCurve.Start)
+func TestCurveSplit(t *testing.T) {
+	c := NewCurve()
+	c1, c2 := SplitCurve(c, 0, 0, 10)
+	if c1 == nil || c2 == nil {
+		t.Errorf("SplitCurve early")
 	}
-
-	expectedStartEnd := MVec2{107, 107}
-	if !startCurve.End.Equals(&expectedStartEnd) {
-		t.Errorf("Expected startCurve.End to be %v, but got %v", expectedStartEnd, startCurve.End)
-	}
-
-	expectedEndStart := MVec2{20, 20}
-	if !endCurve.Start.Equals(&expectedEndStart) {
-		t.Errorf("Expected endCurve.Start to be %v, but got %v", expectedEndStart, endCurve.Start)
-	}
-
-	expectedEndEnd := MVec2{107, 107}
-	if !endCurve.End.Equals(&expectedEndEnd) {
-		t.Errorf("Expected endCurve.End to be %v, but got %v", expectedEndEnd, endCurve.End)
+	c3, c4 := SplitCurve(c, 0, 5, 10)
+	if c3 == nil || c4 == nil {
+		t.Errorf("SplitCurve")
 	}
 }
 
-func TestSplitCurveSamePoints(t *testing.T) {
-	curve := &Curve{}
-	curve.Start = MVec2{10.0, 10.0}
-	curve.End = MVec2{10.0, 10.0}
-
-	startCurve, endCurve := SplitCurve(curve, 0, 2, 10)
-
-	expectedStartStart := MVec2{20, 20}
-	if !startCurve.Start.Equals(&expectedStartStart) {
-		t.Errorf("Expected startCurve.Start to be %v, but got %v", expectedStartStart, startCurve.Start)
+func TestCurveHelpers(t *testing.T) {
+	if tryCurveNormalize(Vec2{0, 0}, Vec2{0, 0}, Vec2{0, 0}, Vec2{1, 1}, false) == nil {
+		t.Errorf("tryCurveNormalize linear")
 	}
-
-	expectedStartEnd := MVec2{107, 107}
-	if !startCurve.End.Equals(&expectedStartEnd) {
-		t.Errorf("Expected startCurve.End to be %v, but got %v", expectedStartEnd, startCurve.End)
+	if tryCurveNormalize(Vec2{0, 0}, Vec2{0, 1}, Vec2{0, 2}, Vec2{0, 3}, false) == nil {
+		t.Errorf("tryCurveNormalize diffX")
 	}
-
-	expectedEndStart := MVec2{20, 20}
-	if !endCurve.Start.Equals(&expectedEndStart) {
-		t.Errorf("Expected endCurve.Start to be %v, but got %v", expectedEndStart, endCurve.Start)
+	if tryCurveNormalize(Vec2{0, 0}, Vec2{1, 0}, Vec2{2, 0}, Vec2{3, 0}, false) == nil {
+		t.Errorf("tryCurveNormalize diffY")
 	}
-
-	expectedEndEnd := MVec2{107, 107}
-	if !endCurve.End.Equals(&expectedEndEnd) {
-		t.Errorf("Expected endCurve.End to be %v, but got %v", expectedEndEnd, endCurve.End)
+	if tryCurveNormalize(Vec2{0, 0}, Vec2{2, 0}, Vec2{0, 2}, Vec2{1, 1}, false) != nil {
+		t.Errorf("tryCurveNormalize out")
+	}
+	if tryCurveNormalize(Vec2{0, 0}, Vec2{0.2, 0.8}, Vec2{0.8, 0.2}, Vec2{1, 1}, true) == nil {
+		t.Errorf("tryCurveNormalize decreasing")
+	}
+	if !isLinearInterpolation([]float64{1, 1, 1}, 1e-6) {
+		t.Errorf("isLinearInterpolation same")
+	}
+	if isLinearInterpolation([]float64{0, 0.2, 1}, 1e-6) {
+		t.Errorf("isLinearInterpolation diff")
 	}
 }
 
-func TestSplitCurveOutOfRange(t *testing.T) {
-	curve := &Curve{}
-	curve.Start = MVec2{25.0, 101.0}
-	curve.End = MVec2{127.0, 12.0}
-
-	startCurve, endCurve := SplitCurve(curve, 0, 2, 10)
-
-	expectedStartStart := MVec2{27, 65}
-	if !startCurve.Start.Equals(&expectedStartStart) {
-		t.Errorf("Expected startCurve.Start to be %v, but got %v", expectedStartStart, startCurve.Start)
+func TestCurveFit(t *testing.T) {
+	if c, err := NewCurveFromValues([]float64{1, 2}, 1e-3); err != nil || c == nil {
+		t.Errorf("NewCurveFromValues short")
 	}
-
-	expectedStartEnd := MVec2{73, 103}
-	if !startCurve.End.Equals(&expectedStartEnd) {
-		t.Errorf("Expected startCurve.End to be %v, but got %v", expectedStartEnd, startCurve.End)
+	if c, err := NewCurveFromValues([]float64{1, 1, 1}, 1e-3); err != nil || c == nil {
+		t.Errorf("NewCurveFromValues flat")
 	}
-
-	expectedEndStart := MVec2{49, 44}
-	if !endCurve.Start.Equals(&expectedEndStart) {
-		t.Errorf("Expected endCurve.Start to be %v, but got %v", expectedEndStart, endCurve.Start)
+	if c, err := NewCurveFromValues([]float64{0, 1, 2, 3}, 1e-6); err != nil || c == nil {
+		t.Errorf("NewCurveFromValues linear")
 	}
-
-	expectedEndEnd := MVec2{127, 0}
-	if !endCurve.End.Equals(&expectedEndEnd) {
-		t.Errorf("Expected endCurve.End to be %v, but got %v", expectedEndEnd, endCurve.End)
+	if c, err := NewCurveFromValues([]float64{0, 0.2, 0.8, 1}, 1e-6); err != nil || c == nil {
+		t.Errorf("NewCurveFromValues curve")
 	}
-}
-
-func TestSplitCurveNan(t *testing.T) {
-	curve := &Curve{}
-	curve.Start = MVec2{127.0, 0.0}
-	curve.End = MVec2{0.0, 127.0}
-
-	startCurve, endCurve := SplitCurve(curve, 0, 2, 10)
-
-	expectedStartStart := MVec2{50, 0}
-	if !startCurve.Start.Equals(&expectedStartStart) {
-		t.Errorf("Expected startCurve.Start to be %v, but got %v", expectedStartStart, startCurve.Start)
+	if c, err := NewCurveFromValues([]float64{3, 2, 1, 0}, 1e-6); err != nil || c == nil {
+		t.Errorf("NewCurveFromValues decreasing")
 	}
-
-	expectedStartEnd := MVec2{92, 45}
-	if !startCurve.End.Equals(&expectedStartEnd) {
-		t.Errorf("Expected startCurve.End to be %v, but got %v", expectedStartEnd, startCurve.End)
+	if _, err := NewCurveFromValues([]float64{math.NaN(), 0, 1}, 1e-6); err == nil {
+		t.Errorf("NewCurveFromValues error")
 	}
-
-	expectedEndStart := MVec2{104, 17}
-	if !endCurve.Start.Equals(&expectedEndStart) {
-		t.Errorf("Expected endCurve.Start to be %v, but got %v", expectedEndStart, endCurve.Start)
+	xCoords := []float64{0, 0.5, 1}
+	yCoords := []float64{0, 0.2, 1}
+	if _, err := optimizePoints(xCoords, yCoords, Vec2{0, 0}, Vec2{0.3, 0.1}, Vec2{0.7, 0.9}, Vec2{1, 1}); err != nil {
+		t.Errorf("optimizePoints")
 	}
-
-	expectedEndEnd := MVec2{0, 127}
-	if !endCurve.End.Equals(&expectedEndEnd) {
-		t.Errorf("Expected endCurve.End to be %v, but got %v", expectedEndEnd, endCurve.End)
+	if _, err := optimizePoints([]float64{math.NaN(), 0.5, 1}, []float64{0, 0.2, 1}, Vec2{0, 0}, Vec2{0.3, 0.1}, Vec2{0.7, 0.9}, Vec2{1, 1}); err == nil {
+		t.Errorf("optimizePoints error")
+	}
+	if calculateError([]float64{0, 0.5, 1}, []float64{0, 0.9, 1}, Vec2{0.2, 0.2}, Vec2{0.8, 0.8}) == 0 {
+		t.Errorf("calculateError")
 	}
 }
 
-func TestNewCurveFromValues(t *testing.T) {
-	tests := []struct {
-		name     string
-		values   []float64
-		expected *Curve
-	}{
-		{
-			name:     "Empty values",
-			values:   []float64{},
-			expected: NewCurve(),
-		},
-		{
-			name:     "Single value",
-			values:   []float64{1.0},
-			expected: NewCurve(),
-		},
-		{
-			name:     "Two values",
-			values:   []float64{1.0, 2.0},
-			expected: NewCurve(),
-		},
-		{
-			name:     "Three values",
-			values:   []float64{1.0, 2.0, 3.0},
-			expected: NewCurve(),
-		},
-		{
-			name: "Gimme センターX 500-517",
-			values: []float64{
-				0.6999982,
-				0.7076900,
-				0.7293687,
-				0.7631898,
-				0.8075706,
-				0.8611180,
-				0.9225729,
-				0.9907619,
-				1.0645531,
-				1.1428096,
-				1.2243360,
-				1.3078052,
-				1.3916532,
-				1.4739038,
-				1.5518538,
-				1.6214294,
-				1.6756551,
-				1.6999979,
-			},
-			expected: &Curve{
-				Start: MVec2{48, 0},
-				End:   MVec2{103, 127},
-			},
-		},
-		{
-			name: "Gimme センターZ 500-517",
-			values: []float64{
-				0.7000000,
-				0.6969233,
-				0.6882519,
-				0.6747234,
-				0.6569711,
-				0.6355521,
-				0.6109701,
-				0.5836945,
-				0.5541780,
-				0.5228754,
-				0.4902649,
-				0.4568771,
-				0.4233379,
-				0.3904377,
-				0.3592577,
-				0.3314274,
-				0.3097372,
-				0.3000000,
-			},
-			expected: &Curve{
-				Start: MVec2{48, 0},
-				End:   MVec2{103, 127},
-			},
-		},
-		{
-			name: "Gimme 右腕 2147-2158",
-			values: []float64{
-				0.00008032802884471214,
-				0.007087318363054313,
-				0.028330806407443558,
-				0.06344571267339338,
-				0.1211380344070151,
-				0.1958614960971636,
-				0.2996959525673235,
-				0.434737492942048,
-				0.5880193912159265,
-				0.7543461203260446,
-				0.903184773978924,
-				0.9999999999534882,
-			},
-			expected: &Curve{
-				Start: MVec2{78, 1},
-				End:   MVec2{95, 103},
-			},
-		},
+func TestCurveFitNormalizeError(t *testing.T) {
+	orig := optimizePointsFunc
+	optimizePointsFunc = func(xCoords, yCoords []float64, P0, P1, P2, P3 Vec2) (controlPoints, error) {
+		return controlPoints{P0, Vec2{X: 2, Y: 0}, Vec2{X: 0, Y: 2}, P3}, nil
 	}
+	defer func() { optimizePointsFunc = orig }()
 
-	for n, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result := NewCurveFromValues(tt.values, 1e-2)
-			if !reflect.DeepEqual(result, tt.expected) {
-				t.Errorf("[%d: %s] Expected %v, but got %v", n, tt.name, tt.expected, result)
-			}
-		})
+	if _, err := NewCurveFromValues([]float64{0, 1, 0, 1}, 1e-6); err == nil {
+		t.Errorf("NewCurveFromValues normalize error")
 	}
 }

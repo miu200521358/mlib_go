@@ -3,7 +3,7 @@
   // 既存の属性の説明をホバーして表示します。
   // 詳細情報は次を確認してください: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
-  "configurations-disabled": [
+  "configurations": [
     {
       "name": "Launch",
       "type": "go",
@@ -13,6 +13,7 @@
       "preLaunchTask": "go: mod tidy",
       "env": {
         "WORKSPACE_FOLDER": "${workspaceFolder}",
+        "GOEXPERIMENT": "nodwarf5",
         "ENV": "debug"
       },
     },
