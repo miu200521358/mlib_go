@@ -688,11 +688,6 @@ func resolveWorkerCount(workerCount int, total int) int {
 	if workerCount <= 0 {
 		workerCount = 1
 	}
-	// UI応答性を確保するため、最大でも1コア分は空ける。
-	maxWorkers := max(1, runtime.GOMAXPROCS(0)-1)
-	if workerCount > maxWorkers {
-		workerCount = maxWorkers
-	}
 	if total > 0 && workerCount > total {
 		workerCount = total
 	}
@@ -710,8 +705,8 @@ func resolveBatchSize(total int, workerCount int, defaultSize int) int {
 	if workerCount <= 0 {
 		workerCount = 1
 	}
-	// ワーカー1つあたり約4バッチになるように調整し、細かい分割を抑える。
-	target := total / (workerCount * 4)
+	// ワーカー1つあたり約8バッチになるように調整する。
+	target := total / (workerCount * 8)
 	if target < defaultSize {
 		return defaultSize
 	}

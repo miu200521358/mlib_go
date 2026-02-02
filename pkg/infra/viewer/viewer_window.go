@@ -473,6 +473,7 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 		cursorDepths := []float32(nil)
 		removeCursorPositions := []float32(nil)
 		removeCursorDepths := []float32(nil)
+		applySelectionForModel := false
 		selectionRequest := (*render.VertexSelectionRequest)(nil)
 		if showSelectedVertex && selectionEnabled {
 			selectionRequest = &render.VertexSelectionRequest{
@@ -507,6 +508,7 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 					selectionRequest.Apply = true
 					selectionRequest.Remove = boxSelectionRemove
 					selectionRequest.HasRect = true
+					applySelectionForModel = true
 				}
 			default:
 				if applyPointSelection && selectionRequest != nil {
@@ -525,21 +527,21 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 					selectionRequest.RemoveCursorDepths = removeCursorDepths
 					selectionRequest.Apply = true
 					selectionRequest.Remove = removePointSelection
+					applySelectionForModel = true
 				}
 			}
 		}
-		updatedSelected, hoverIndex, selectionUpdated := renderer.RenderSelection(
+		updatedSelected, hoverIndex := renderer.RenderSelection(
 			vw.shader,
 			vw.list.shared,
 			selectedVertexIndexes,
 			selectionRequest,
 			base,
 		)
-		skipSelectionUpdate := hoverIndex == render.HoverIndexSkip
-		if selectionUpdated && !skipSelectionUpdate {
+		if applySelectionForModel {
 			vw.list.shared.SetSelectedVertexIndexes(vw.windowIndex, i, updatedSelected)
 		}
-		if showSelectedVertex && selectionEnabled && i == 0 && !skipSelectionUpdate {
+		if showSelectedVertex && selectionEnabled && i == 0 {
 			vw.updateSelectedVertexHover(i, hoverIndex)
 		}
 	}
