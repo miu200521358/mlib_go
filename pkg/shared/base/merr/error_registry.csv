@@ -57,6 +57,6 @@ ID,Kind,Layer,Module,ErrorName,Summary,Remedy,SourcePaths
 95501,Internal,infra,55,ControllerWindowInitFailed,Controllerウィンドウ初期化に失敗,,-
 95502,Internal,infra,55,ConsoleViewInitFailed,ConsoleView初期化に失敗,,-
 95503,Internal,infra,55,ProgressBarInitFailed,ProgressBar初期化に失敗,,-
-95504,Internal,infra,55,RepositoryNotConfiguredError,読み込みリポジトリが未設定,cmd でリポジトリを注入してください,mlib_go_t4/pkg/adapter/mcontroller/ui/tab_page.go
-95505,Validate,infra,55,ModelNotLoadedError,モデルが読み込まれていない,モデルを読み込んでから保存してください,mu_model_viewer/pkg/adapter/mcontroller/ui/tab_page.go
-95506,Validate,infra,55,SavePathInvalidError,保存先パスが不正,保存先/権限/ファイル名を確認してください。絵文字/特殊記号が含まれる場合は英数字のみのパスに変更してください。,mu_model_viewer/pkg/adapter/mcontroller/ui/tab_page.go
+95504,Internal,infra,55,RepositoryNotConfiguredError,読み込みリポジトリが未設定,cmd でリポジトリを注入してください,mlib_go_t4/pkg/infra/controller/ui/tab_page.go
+95505,Validate,infra,55,ModelNotLoadedError,モデルが読み込まれていない,モデルを読み込んでから保存してください,mu_model_viewer/pkg/infra/controller/ui/tab_page.go
+95506,Validate,infra,55,SavePathInvalidError,保存先パスが不正,保存先/権限/ファイル名を確認してください。絵文字/特殊記号が含まれる場合は英数字のみのパスに変更してください。,mu_model_viewer/pkg/infra/controller/ui/tab_page.go
