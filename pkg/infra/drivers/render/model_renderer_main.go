@@ -35,6 +35,9 @@ type VertexSelectionRequest struct {
 	HasRect                   bool
 }
 
+// HoverIndexSkip はホバー更新をスキップするための返却値。
+const HoverIndexSkip = -2
+
 // ModelRenderer は、PMXモデル全体の描画処理を統括する構造体です。
 // バッファの初期化は model_renderer_buffer.go に、描画処理は model_renderer_draw.go に分割して実装します。
 type ModelRenderer struct {
@@ -63,6 +66,8 @@ type ModelRenderer struct {
 	selectedMaterialMask []bool
 	// 選択材質の更新バージョン
 	selectedMaterialVersion uint64
+	// pendingSelection はreadback待ちの選択要求を保持する。
+	pendingSelection *vertexSelectionPending
 }
 
 // ModelRenderBaseResult はベース描画の結果を表す。
@@ -282,15 +287,15 @@ func (mr *ModelRenderer) RenderSelection(
 	selectedVertexIndexes []int,
 	selectionRequest *VertexSelectionRequest,
 	base *ModelRenderBaseResult,
-) ([]int, int) {
+) ([]int, int, bool) {
 	if mr == nil || shader == nil || shared == nil || base == nil {
-		return selectedVertexIndexes, -1
+		return selectedVertexIndexes, -1, false
 	}
 	if !shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) {
-		return selectedVertexIndexes, -1
+		return selectedVertexIndexes, -1, false
 	}
 	if !mr.ensureSelectedVertexBuffers() {
-		return selectedVertexIndexes, -1
+		return selectedVertexIndexes, -1, false
 	}
 	return mr.drawSelectedVertex(
 		mr.windowIndex,
@@ -351,7 +356,8 @@ func (mr *ModelRenderer) Render(
 	if base == nil {
 		return selectedVertexIndexes, -1
 	}
-	return mr.RenderSelection(shader, shared, selectedVertexIndexes, selectionRequest, base)
+	updatedSelected, hoverIndex, _ := mr.RenderSelection(shader, shared, selectedVertexIndexes, selectionRequest, base)
+	return updatedSelected, hoverIndex
 }
 
 // resolveTextureTypesForRender は材質参照に基づいてテクスチャ種別を決定する。

@@ -46,11 +46,11 @@ const (
 
 // modelRendererLoadState はモデル描画の非同期読み込み状態を保持する。
 type modelRendererLoadState struct {
-	token         uint64
-	hash          string
-	sourceModel   *model.PmxModel
-	cancel        context.CancelFunc
-	inProgress    bool
+	token       uint64
+	hash        string
+	sourceModel *model.PmxModel
+	cancel      context.CancelFunc
+	inProgress  bool
 }
 
 // modelRendererLoadResult は非同期読み込みの完了結果を保持する。
@@ -473,7 +473,6 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 		cursorDepths := []float32(nil)
 		removeCursorPositions := []float32(nil)
 		removeCursorDepths := []float32(nil)
-		applySelectionForModel := false
 		selectionRequest := (*render.VertexSelectionRequest)(nil)
 		if showSelectedVertex && selectionEnabled {
 			selectionRequest = &render.VertexSelectionRequest{
@@ -508,7 +507,6 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 					selectionRequest.Apply = true
 					selectionRequest.Remove = boxSelectionRemove
 					selectionRequest.HasRect = true
-					applySelectionForModel = true
 				}
 			default:
 				if applyPointSelection && selectionRequest != nil {
@@ -527,21 +525,21 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 					selectionRequest.RemoveCursorDepths = removeCursorDepths
 					selectionRequest.Apply = true
 					selectionRequest.Remove = removePointSelection
-					applySelectionForModel = true
 				}
 			}
 		}
-		updatedSelected, hoverIndex := renderer.RenderSelection(
+		updatedSelected, hoverIndex, selectionUpdated := renderer.RenderSelection(
 			vw.shader,
 			vw.list.shared,
 			selectedVertexIndexes,
 			selectionRequest,
 			base,
 		)
-		if applySelectionForModel {
+		skipSelectionUpdate := hoverIndex == render.HoverIndexSkip
+		if selectionUpdated && !skipSelectionUpdate {
 			vw.list.shared.SetSelectedVertexIndexes(vw.windowIndex, i, updatedSelected)
 		}
-		if showSelectedVertex && selectionEnabled && i == 0 {
+		if showSelectedVertex && selectionEnabled && i == 0 && !skipSelectionUpdate {
 			vw.updateSelectedVertexHover(i, hoverIndex)
 		}
 	}

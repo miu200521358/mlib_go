@@ -22,6 +22,8 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/shared/state"
 )
 
+const ssboReadbackBufferCount = 2
+
 // ModelDrawer は、モデル全体の描画処理のうち、バッファ初期化以外の各描画処理を担当する。
 // このファイルでは、法線描画、ボーン描画、選択頂点描画、カーソルライン描画などの処理を実装する。
 type ModelDrawer struct {
@@ -59,8 +61,66 @@ type ModelDrawer struct {
 	// SSBO
 	ssbo uint32
 
+	// ssboReadbackPbos はSSBO非同期readback用のPBOを保持する。
+	ssboReadbackPbos [ssboReadbackBufferCount]uint32
+	// ssboReadbackFences はPBOのreadback完了待ちフェンスを保持する。
+	ssboReadbackFences [ssboReadbackBufferCount]uintptr
+	// ssboReadbackSize はPBOの確保サイズ（バイト）を保持する。
+	ssboReadbackSize int
+	// ssboReadbackWriteIndex は次に書き込むPBOのインデックスを保持する。
+	ssboReadbackWriteIndex int
+
 	// cursorPositionLimit はカーソル位置の上限数。
 	cursorPositionLimit int
+}
+
+// vertexSelectionPending はreadback待ちの選択要求を保持する。
+type vertexSelectionPending struct {
+	Mode                  state.SelectedVertexMode
+	DepthMode             state.SelectedVertexDepthMode
+	Apply                 bool
+	Remove                bool
+	CursorPositions       []float32
+	CursorDepths          []float32
+	RemoveCursorPositions []float32
+	RemoveCursorDepths    []float32
+	ScreenWidth           int
+	ScreenHeight          int
+	RectMin               mmath.Vec2
+	RectMax               mmath.Vec2
+	HasRect               bool
+}
+
+// newVertexSelectionPending は選択要求をreadback待ち用に複製する。
+func newVertexSelectionPending(request *VertexSelectionRequest) *vertexSelectionPending {
+	if request == nil {
+		return nil
+	}
+	return &vertexSelectionPending{
+		Mode:                  request.Mode,
+		DepthMode:             request.DepthMode,
+		Apply:                 request.Apply,
+		Remove:                request.Remove,
+		CursorPositions:       cloneFloat32Slice(request.CursorPositions),
+		CursorDepths:          cloneFloat32Slice(request.CursorDepths),
+		RemoveCursorPositions: cloneFloat32Slice(request.RemoveCursorPositions),
+		RemoveCursorDepths:    cloneFloat32Slice(request.RemoveCursorDepths),
+		ScreenWidth:           request.ScreenWidth,
+		ScreenHeight:          request.ScreenHeight,
+		RectMin:               request.RectMin,
+		RectMax:               request.RectMax,
+		HasRect:               request.HasRect,
+	}
+}
+
+// cloneFloat32Slice はfloat32スライスを複製する。
+func cloneFloat32Slice(src []float32) []float32 {
+	if len(src) == 0 {
+		return nil
+	}
+	dst := make([]float32, len(src))
+	copy(dst, src)
+	return dst
 }
 
 // delete はModelDrawerが保持するリソースを解放します
@@ -100,6 +160,133 @@ func (md *ModelDrawer) delete() {
 		gl.DeleteBuffers(1, &md.ssbo)
 		md.ssbo = 0
 	}
+	md.resetSsboReadback()
+}
+
+// resetSsboReadback はSSBO readback用リソースを解放する。
+func (md *ModelDrawer) resetSsboReadback() {
+	if md == nil {
+		return
+	}
+	for i := range md.ssboReadbackFences {
+		if md.ssboReadbackFences[i] != 0 {
+			gl.DeleteSync(md.ssboReadbackFences[i])
+			md.ssboReadbackFences[i] = 0
+		}
+	}
+	for i := range md.ssboReadbackPbos {
+		if md.ssboReadbackPbos[i] != 0 {
+			gl.DeleteBuffers(1, &md.ssboReadbackPbos[i])
+			md.ssboReadbackPbos[i] = 0
+		}
+	}
+	md.ssboReadbackSize = 0
+	md.ssboReadbackWriteIndex = 0
+}
+
+// ensureSsboReadbackBuffers はSSBO readback用のPBOを確保する。
+func (md *ModelDrawer) ensureSsboReadbackBuffers(byteSize int) {
+	if md == nil || byteSize <= 0 {
+		return
+	}
+	if md.ssboReadbackSize == byteSize && md.ssboReadbackPbos[0] != 0 {
+		return
+	}
+	md.resetSsboReadback()
+
+	gl.GenBuffers(ssboReadbackBufferCount, &md.ssboReadbackPbos[0])
+	for i := 0; i < ssboReadbackBufferCount; i++ {
+		gl.BindBuffer(gl.PIXEL_PACK_BUFFER, md.ssboReadbackPbos[i])
+		gl.BufferData(gl.PIXEL_PACK_BUFFER, byteSize, nil, gl.STREAM_READ)
+	}
+	gl.BindBuffer(gl.PIXEL_PACK_BUFFER, 0)
+
+	md.ssboReadbackSize = byteSize
+}
+
+// issueSsboReadback はSSBOの内容をPBOに非同期でコピーする。
+func (md *ModelDrawer) issueSsboReadback(byteSize int) bool {
+	if md == nil || md.ssbo == 0 || byteSize <= 0 {
+		return false
+	}
+	md.ensureSsboReadbackBuffers(byteSize)
+	if md.ssboReadbackPbos[0] == 0 {
+		return false
+	}
+
+	index := md.ssboReadbackWriteIndex
+	if index < 0 || index >= ssboReadbackBufferCount {
+		index = 0
+	}
+	if fence := md.ssboReadbackFences[index]; fence != 0 {
+		if !isFenceSignaled(fence) {
+			return false
+		}
+		gl.DeleteSync(fence)
+		md.ssboReadbackFences[index] = 0
+	}
+
+	gl.MemoryBarrier(gl.SHADER_STORAGE_BARRIER_BIT)
+	gl.BindBuffer(gl.COPY_READ_BUFFER, md.ssbo)
+	gl.BindBuffer(gl.COPY_WRITE_BUFFER, md.ssboReadbackPbos[index])
+	gl.CopyBufferSubData(gl.COPY_READ_BUFFER, gl.COPY_WRITE_BUFFER, 0, 0, byteSize)
+	md.ssboReadbackFences[index] = gl.FenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0)
+	gl.BindBuffer(gl.COPY_READ_BUFFER, 0)
+	gl.BindBuffer(gl.COPY_WRITE_BUFFER, 0)
+	gl.Flush()
+
+	md.ssboReadbackWriteIndex = (index + 1) % ssboReadbackBufferCount
+	return true
+}
+
+// tryConsumeSsboReadback は完了済みのPBOから頂点位置を取得する。
+func (md *ModelDrawer) tryConsumeSsboReadback(vertexCount int) ([]float32, bool) {
+	if md == nil || vertexCount <= 0 {
+		return nil, false
+	}
+	byteSize := vertexCount * 4 * 4
+	if byteSize <= 0 {
+		return nil, false
+	}
+	for i := 0; i < ssboReadbackBufferCount; i++ {
+		fence := md.ssboReadbackFences[i]
+		if fence == 0 || !isFenceSignaled(fence) {
+			continue
+		}
+		pbo := md.ssboReadbackPbos[i]
+		if pbo == 0 {
+			gl.DeleteSync(fence)
+			md.ssboReadbackFences[i] = 0
+			continue
+		}
+
+		gl.BindBuffer(gl.PIXEL_PACK_BUFFER, pbo)
+		ptr := gl.MapBufferRange(gl.PIXEL_PACK_BUFFER, 0, byteSize, gl.MAP_READ_BIT)
+		if ptr == nil {
+			gl.BindBuffer(gl.PIXEL_PACK_BUFFER, 0)
+			gl.DeleteSync(fence)
+			md.ssboReadbackFences[i] = 0
+			continue
+		}
+		positions := make([]float32, vertexCount*4)
+		copy(positions, unsafe.Slice((*float32)(ptr), vertexCount*4))
+		gl.UnmapBuffer(gl.PIXEL_PACK_BUFFER)
+		gl.BindBuffer(gl.PIXEL_PACK_BUFFER, 0)
+
+		gl.DeleteSync(fence)
+		md.ssboReadbackFences[i] = 0
+		return positions, true
+	}
+	return nil, false
+}
+
+// isFenceSignaled はフェンスの完了状態を判定する。
+func isFenceSignaled(fence uintptr) bool {
+	if fence == 0 {
+		return false
+	}
+	status := gl.ClientWaitSync(fence, 0, 0)
+	return status == gl.ALREADY_SIGNALED || status == gl.CONDITION_SATISFIED
 }
 
 // drawNormal 描画処理：法線表示
@@ -263,7 +450,7 @@ func (mr *ModelRenderer) drawCursorLine(shader graphics_api.IShader, cursorPosit
 }
 
 // drawSelectedVertex は、選択頂点およびカーソルによる頂点選択の描画処理を行い、
-// 更新後の選択頂点インデックスとホバー対象の頂点を返します。
+// 更新後の選択頂点インデックスとホバー対象の頂点、選択更新の有無を返します。
 func (mr *ModelRenderer) drawSelectedVertex(
 	windowIndex int,
 	vertices *model.VertexCollection,
@@ -274,7 +461,7 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	paddedMatrixes []float32,
 	width, height int,
 	selectionRequest *VertexSelectionRequest,
-) ([]int, int) {
+) ([]int, int, bool) {
 	selectionMode := state.SELECTED_VERTEX_MODE_POINT
 	depthMode := state.SELECTED_VERTEX_DEPTH_MODE_ALL
 	applySelection := false
@@ -291,6 +478,31 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	rectMax := mmath.Vec2{}
 	hasRect := false
 	if selectionRequest != nil {
+		cursorLinePositions = selectionRequest.CursorLinePositions
+		removeCursorLinePositions = selectionRequest.RemoveCursorLinePositions
+	}
+	if selectionRequest != nil && selectionRequest.Apply {
+		mr.pendingSelection = newVertexSelectionPending(selectionRequest)
+	}
+	pendingRequest := (*vertexSelectionPending)(nil)
+	if selectionRequest == nil || !selectionRequest.Apply {
+		pendingRequest = mr.pendingSelection
+	}
+	if pendingRequest != nil {
+		selectionMode = pendingRequest.Mode
+		depthMode = pendingRequest.DepthMode
+		applySelection = pendingRequest.Apply
+		removeSelection = pendingRequest.Remove
+		cursorPositions = pendingRequest.CursorPositions
+		cursorDepths = pendingRequest.CursorDepths
+		removeCursorPositions = pendingRequest.RemoveCursorPositions
+		removeCursorDepths = pendingRequest.RemoveCursorDepths
+		screenWidth = pendingRequest.ScreenWidth
+		screenHeight = pendingRequest.ScreenHeight
+		rectMin = pendingRequest.RectMin
+		rectMax = pendingRequest.RectMax
+		hasRect = pendingRequest.HasRect
+	} else if selectionRequest != nil {
 		selectionMode = selectionRequest.Mode
 		depthMode = selectionRequest.DepthMode
 		applySelection = selectionRequest.Apply
@@ -299,8 +511,6 @@ func (mr *ModelRenderer) drawSelectedVertex(
 		cursorDepths = selectionRequest.CursorDepths
 		removeCursorPositions = selectionRequest.RemoveCursorPositions
 		removeCursorDepths = selectionRequest.RemoveCursorDepths
-		cursorLinePositions = selectionRequest.CursorLinePositions
-		removeCursorLinePositions = selectionRequest.RemoveCursorLinePositions
 		screenWidth = selectionRequest.ScreenWidth
 		screenHeight = selectionRequest.ScreenHeight
 		rectMin = selectionRequest.RectMin
@@ -413,7 +623,7 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	}
 	if len(selectedMaterialIndexes) == 0 {
 		// 材質が全て未選択の場合、頂点の選択/ホバーは無効化する。
-		return selectedSetToSlice(selectedSet), -1
+		return selectedSetToSlice(selectedSet), -1, false
 	}
 	truncatedCursorPositions := cursorPositions
 	if len(truncatedCursorPositions) > maxValueCount {
@@ -424,22 +634,16 @@ func (mr *ModelRenderer) drawSelectedVertex(
 		needCursorPositions = true
 	}
 	if vertexCount == 0 || mr.ssbo == 0 || !needCursorPositions {
-		return selectedSetToSlice(selectedSet), -1
+		return selectedSetToSlice(selectedSet), -1, false
 	}
 
-	// SSBOから同期読み出しして選択判定に利用する。
-	positions := make([]float32, vertexCount*4)
+	// SSBOから非同期readbackを行い、取得できないフレームは更新をスキップする。
 	byteSize := vertexCount * 4 * 4
-	gl.MemoryBarrier(gl.SHADER_STORAGE_BARRIER_BIT)
-	gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, mr.ssbo)
-	ptr := gl.MapBufferRange(gl.SHADER_STORAGE_BUFFER, 0, byteSize, gl.MAP_READ_BIT)
-	if ptr == nil {
-		gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, 0)
-		return selectedSetToSlice(selectedSet), -1
+	mr.issueSsboReadback(byteSize)
+	positions, ready := mr.tryConsumeSsboReadback(vertexCount)
+	if !ready {
+		return selectedSetToSlice(selectedSet), HoverIndexSkip, false
 	}
-	copy(positions, unsafe.Slice((*float32)(ptr), vertexCount*4))
-	gl.UnmapBuffer(gl.SHADER_STORAGE_BUFFER)
-	gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, 0)
 
 	if applySelection {
 		switch {
@@ -647,6 +851,10 @@ func (mr *ModelRenderer) drawSelectedVertex(
 		}
 	}
 
+	if applySelection {
+		mr.pendingSelection = nil
+	}
+
 	hoverIndex := -1
 	hoverDistance := float32(math.MaxFloat32)
 	for i := 0; i+3 < len(positions); i += 4 {
@@ -668,7 +876,7 @@ func (mr *ModelRenderer) drawSelectedVertex(
 	}
 
 	// 選択頂点インデックスの更新結果を返す。
-	return selectedSetToSlice(selectedSet), hoverIndex
+	return selectedSetToSlice(selectedSet), hoverIndex, applySelection
 }
 
 // vertexSelectionCandidate は選択対象の候補情報を保持する。
