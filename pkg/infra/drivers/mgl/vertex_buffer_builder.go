@@ -217,6 +217,8 @@ type VertexBufferHandle struct {
 	StrideSize int
 	FloatSize  int
 	Attributes []graphics_api.VertexAttribute
+	// vertexDeltaApplied は頂点デルタがGPUに反映済みかを保持する。
+	vertexDeltaApplied bool
 }
 
 // Bind はVAOとVBOをバインドする。
@@ -239,11 +241,15 @@ func (h *VertexBufferHandle) Delete() {
 
 // UpdateVertexDeltas はバッファに頂点デルタを適用する。
 func (h *VertexBufferHandle) UpdateVertexDeltas(vertices *delta.VertexMorphDeltas) {
-	// 頂点モーフ用の頂点数が 0 なら、元の頂点データを再設定するなどの処理
-	if vertices == nil || vertices.Len() == 0 {
+	// 差分が無い場合は、必要時のみ元データへ戻す。
+	if vertices == nil || !vertices.HasNonZero() {
+		if !h.vertexDeltaApplied {
+			return
+		}
 		h.VBO.Bind()
 		// 元のデータに戻すなら、BufferDataで再アップロード
 		gl.BufferData(h.VBO.target, h.VBO.size, h.VBO.ptr, gl.STATIC_DRAW)
+		h.vertexDeltaApplied = false
 		return
 	}
 
@@ -286,11 +292,15 @@ func (h *VertexBufferHandle) UpdateVertexDeltas(vertices *delta.VertexMorphDelta
 		copy(mappedSlice[offsetStride:offsetStride+len(vd)], vd)
 		return true
 	})
+	h.vertexDeltaApplied = true
 }
 
 // UpdateBoneDeltas はボーン変形のデルタを一括更新する。
 func (h *VertexBufferHandle) UpdateBoneDeltas(boneIndexes []int, boneDeltas [][]float32) {
 	if boneIndexes == nil || boneDeltas == nil {
+		return
+	}
+	if len(boneIndexes) == 0 || len(boneDeltas) == 0 {
 		return
 	}
 

@@ -64,7 +64,8 @@ func (m *MorphDeltas) Bones() *BoneMorphDeltas {
 
 // VertexMorphDeltas は頂点モーフ差分の集合を表す。
 type VertexMorphDeltas struct {
-	data []*VertexMorphDelta
+	data       []*VertexMorphDelta
+	hasNonZero bool
 }
 
 // Len は要素数を返す。
@@ -93,11 +94,22 @@ func (d *VertexMorphDeltas) Update(delta *VertexMorphDelta) {
 	if d == nil || delta == nil {
 		return
 	}
+	if !delta.IsZero() {
+		d.hasNonZero = true
+	}
 	idx := delta.Index
 	if idx < 0 || idx >= len(d.data) {
 		return
 	}
 	d.data[idx] = delta
+}
+
+// HasNonZero は非ゼロ差分が存在するかを返す。
+func (d *VertexMorphDeltas) HasNonZero() bool {
+	if d == nil {
+		return false
+	}
+	return d.hasNonZero
 }
 
 // ForEach は全要素を走査する。
