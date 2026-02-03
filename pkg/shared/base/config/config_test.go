@@ -93,3 +93,33 @@ func TestAppConfigEnvVariants(t *testing.T) {
 		t.Errorf("CloseConfirm default: expected false")
 	}
 }
+
+// TestApplyBuildEnv はビルド環境値の反映を確認する。
+func TestApplyBuildEnv(t *testing.T) {
+	ApplyBuildEnv(nil, "prod")
+
+	tests := []struct {
+		name     string
+		initial  AppEnv
+		buildEnv string
+		want     AppEnv
+	}{
+		{name: "空は維持", initial: APP_ENV_STG, buildEnv: "", want: APP_ENV_STG},
+		{name: "空白は維持", initial: APP_ENV_STG, buildEnv: "  ", want: APP_ENV_STG},
+		{name: "dev設定", initial: APP_ENV_PROD, buildEnv: "dev", want: APP_ENV_DEV},
+		{name: "debugはdev", initial: APP_ENV_PROD, buildEnv: "debug", want: APP_ENV_DEV},
+		{name: "大文字prod", initial: APP_ENV_DEV, buildEnv: "PrOd", want: APP_ENV_PROD},
+		{name: "stg設定", initial: APP_ENV_DEV, buildEnv: "stg", want: APP_ENV_STG},
+		{name: "不明は維持", initial: APP_ENV_STG, buildEnv: "unknown", want: APP_ENV_STG},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := &AppConfig{EnvValue: tt.initial}
+			ApplyBuildEnv(cfg, tt.buildEnv)
+			if cfg.EnvValue != tt.want {
+				t.Errorf("ApplyBuildEnv: got=%v want=%v", cfg.EnvValue, tt.want)
+			}
+		})
+	}
+}

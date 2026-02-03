@@ -1,7 +1,10 @@
 // 指示: miu200521358
 package config
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"strings"
+)
 
 // WindowSize はウィンドウサイズを表す。
 type WindowSize struct {
@@ -100,6 +103,28 @@ func (ac *AppConfig) IsStg() bool {
 // IsProd は本番環境か判定する。
 func (ac *AppConfig) IsProd() bool {
 	return ac.Env() == APP_ENV_PROD
+}
+
+// ApplyBuildEnv はビルド時の環境値をアプリ設定へ反映する。
+func ApplyBuildEnv(appConfig *AppConfig, buildEnv string) {
+	if appConfig == nil {
+		return
+	}
+	normalized := strings.TrimSpace(strings.ToLower(buildEnv))
+	if normalized == "" {
+		return
+	}
+	switch normalized {
+	case string(APP_ENV_DEV), "debug":
+		// 旧実装との互換性維持のため、debugはdevとして扱う。
+		appConfig.EnvValue = APP_ENV_DEV
+	case string(APP_ENV_STG):
+		appConfig.EnvValue = APP_ENV_STG
+	case string(APP_ENV_PROD):
+		appConfig.EnvValue = APP_ENV_PROD
+	default:
+		// 想定外の値は既存設定を維持する。
+	}
 }
 
 // IsCloseConfirmEnabled は終了確認の有効可否を返す。
