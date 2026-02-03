@@ -50,7 +50,29 @@ func (mp *PhysicsEngine) initRigidBodiesByBoneDeltas(
 			continue
 		}
 		bone := mp.getRigidBodyBone(pmxModel.Bones, rigidBody)
-		if bone == nil || !boneDeltas.Contains(bone.Index()) {
+		if bone == nil {
+			if rigidBody.BoneIndex < 0 {
+				var rigidBodyDelta *delta.RigidBodyDelta
+				if rigidBodyDeltas != nil {
+					rigidBodyDelta = rigidBodyDeltas.Get(rigidBody.Index())
+				}
+				btRigidBodyTransform, _ := mp.resolveBoneLessRigidBodyTransform(
+					pmxModel,
+					boneDeltas,
+					rigidBody,
+				)
+				if btRigidBodyTransform == nil {
+					btRigidBodyTransform = bt.NewBtTransform(
+						newBulletFromRad(rigidBody.Rotation),
+						newBulletFromVec(rigidBody.Position),
+					)
+				}
+				mp.initRigidBody(modelIndex, pmxModel.Bones, rigidBody, btRigidBodyTransform, rigidBodyDelta)
+				continue
+			}
+			continue
+		}
+		if !boneDeltas.Contains(bone.Index()) {
 			continue
 		}
 
@@ -74,6 +96,111 @@ func (mp *PhysicsEngine) initRigidBodiesByBoneDeltas(
 
 		mp.initRigidBody(modelIndex, pmxModel.Bones, rigidBody, btRigidBodyTransform, rigidBodyDelta)
 	}
+}
+
+// resolveBoneLessRigidBodyTransform はボーン未紐付け剛体の初期変換を参照剛体から推定する。
+func (mp *PhysicsEngine) resolveBoneLessRigidBodyTransform(
+	pmxModel *model.PmxModel,
+	boneDeltas *delta.BoneDeltas,
+	rigidBody *model.RigidBody,
+) (bt.BtTransform, *model.RigidBody) {
+	if pmxModel == nil || pmxModel.Joints == nil || pmxModel.Bones == nil || boneDeltas == nil || rigidBody == nil {
+		return nil, nil
+	}
+	refRigidBody := mp.findReferenceRigidBody(pmxModel, boneDeltas, rigidBody.Index())
+	if refRigidBody == nil {
+		return nil, nil
+	}
+	refBone := mp.getRigidBodyBone(pmxModel.Bones, refRigidBody)
+	if refBone == nil || !boneDeltas.Contains(refBone.Index()) {
+		return nil, nil
+	}
+	refBoneDelta := boneDeltas.Get(refBone.Index())
+	if refBoneDelta == nil {
+		return nil, nil
+	}
+
+	// 参照剛体の現在ワールド変換を算出する。
+	refBoneTransform := bt.NewBtTransform()
+	defer bt.DeleteBtTransform(refBoneTransform)
+	mat := newMglMat4FromMat4(refBoneDelta.FilledGlobalMatrix())
+	refBoneTransform.SetFromOpenGLMatrix(&mat[0])
+
+	refLocalPos := refRigidBody.Position.Subed(refBone.Position)
+	refLocalTransform := bt.NewBtTransform(
+		newBulletFromRad(refRigidBody.Rotation),
+		newBulletFromVec(refLocalPos),
+	)
+	defer bt.DeleteBtTransform(refLocalTransform)
+
+	refCurrentTransform := bt.NewBtTransform()
+	defer bt.DeleteBtTransform(refCurrentTransform)
+	refCurrentTransform.Mult(refBoneTransform, refLocalTransform)
+
+	// 参照剛体のレスト変換と対象剛体のレスト変換から相対変換を算出する。
+	refRestTransform := bt.NewBtTransform(
+		newBulletFromRad(refRigidBody.Rotation),
+		newBulletFromVec(refRigidBody.Position),
+	)
+	defer bt.DeleteBtTransform(refRestTransform)
+
+	targetRestTransform := bt.NewBtTransform(
+		newBulletFromRad(rigidBody.Rotation),
+		newBulletFromVec(rigidBody.Position),
+	)
+	defer bt.DeleteBtTransform(targetRestTransform)
+
+	invRefRestTransform := refRestTransform.Inverse()
+	defer bt.DeleteBtTransform(invRefRestTransform)
+
+	relativeTransform := bt.NewBtTransform()
+	defer bt.DeleteBtTransform(relativeTransform)
+	relativeTransform.Mult(invRefRestTransform, targetRestTransform)
+
+	targetCurrentTransform := bt.NewBtTransform()
+	targetCurrentTransform.Mult(refCurrentTransform, relativeTransform)
+	return targetCurrentTransform, refRigidBody
+}
+
+// findReferenceRigidBody はボーン未紐付け剛体の参照剛体をジョイントから探索する。
+func (mp *PhysicsEngine) findReferenceRigidBody(
+	pmxModel *model.PmxModel,
+	boneDeltas *delta.BoneDeltas,
+	rigidBodyIndex int,
+) *model.RigidBody {
+	if pmxModel == nil || pmxModel.Joints == nil || pmxModel.RigidBodies == nil || pmxModel.Bones == nil || boneDeltas == nil {
+		return nil
+	}
+	for _, joint := range pmxModel.Joints.Values() {
+		if joint == nil {
+			continue
+		}
+		otherIndex := -1
+		if joint.RigidBodyIndexA == rigidBodyIndex {
+			otherIndex = joint.RigidBodyIndexB
+		} else if joint.RigidBodyIndexB == rigidBodyIndex {
+			otherIndex = joint.RigidBodyIndexA
+		}
+		if otherIndex < 0 {
+			continue
+		}
+		refRigidBody, err := pmxModel.RigidBodies.Get(otherIndex)
+		if err != nil || refRigidBody == nil {
+			continue
+		}
+		if refRigidBody.BoneIndex < 0 {
+			continue
+		}
+		refBone, err := pmxModel.Bones.Get(refRigidBody.BoneIndex)
+		if err != nil || refBone == nil {
+			continue
+		}
+		if !boneDeltas.Contains(refBone.Index()) {
+			continue
+		}
+		return refRigidBody
+	}
+	return nil
 }
 
 // initRigidBody は個別の剛体を初期化します。
@@ -245,7 +372,11 @@ func (mp *PhysicsEngine) UpdateTransform(
 	defer bt.DeleteBtTransform(currentTransform)
 
 	currentTransform.Mult(boneTransform, btRigidBodyLocalTransform)
+	// 物理シミュレーションに反映させるため、剛体とモーションステートの両方を更新する。
+	btRigidBody.SetWorldTransform(currentTransform)
+	btRigidBody.SetInterpolationWorldTransform(currentTransform)
 	motionState.SetWorldTransform(currentTransform)
+	btRigidBody.Activate(true)
 }
 
 // GetRigidBodyBoneMatrix は剛体に基づいてボーン行列を取得します。
@@ -257,8 +388,20 @@ func (mp *PhysicsEngine) GetRigidBodyBoneMatrix(
 		return nil
 	}
 
-	btRigidBody := mp.rigidBodies[modelIndex][rigidBody.Index()].BtRigidBody
-	btRigidBodyLocalTransform := *mp.rigidBodies[modelIndex][rigidBody.Index()].BtLocalTransform
+	bodies, ok := mp.rigidBodies[modelIndex]
+	if !ok || bodies == nil {
+		return nil
+	}
+	rigidBodyIndex := rigidBody.Index()
+	if rigidBodyIndex < 0 || rigidBodyIndex >= len(bodies) {
+		return nil
+	}
+	body := bodies[rigidBodyIndex]
+	if body == nil || body.BtRigidBody == nil || body.BtLocalTransform == nil {
+		return nil
+	}
+	btRigidBody := body.BtRigidBody
+	btRigidBodyLocalTransform := *body.BtLocalTransform
 
 	motionState := btRigidBody.GetMotionState().(bt.BtMotionState)
 
