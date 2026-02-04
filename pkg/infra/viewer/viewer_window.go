@@ -8,7 +8,10 @@ import (
 	"context"
 	"fmt"
 	"image"
+	"image/png"
 	"math"
+	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
@@ -576,6 +579,7 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 		vw.shader.OverrideRenderer().Resolve()
 	}
 
+	vw.captureScreenshotIfRequested(fbW, fbH)
 	vw.SwapBuffers()
 	if !showSelectedVertex {
 		vw.resetBoxSelection()
@@ -591,6 +595,77 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 			vw.leftCursorRemoveWorldHistoryPositions = make([]*mmath.Vec3, 0)
 		}
 	}
+}
+
+// captureScreenshotIfRequested はスクリーンショット要求があれば保存する。
+func (vw *ViewerWindow) captureScreenshotIfRequested(width, height int) {
+	if vw == nil || vw.list == nil || vw.list.shared == nil {
+		return
+	}
+	request, ok := vw.list.shared.DequeueScreenshot(vw.windowIndex)
+	if !ok {
+		return
+	}
+	err := vw.saveScreenshot(request.Path, width, height)
+	errMessage := ""
+	if err != nil {
+		errMessage = err.Error()
+		logging.DefaultLogger().Warn("スクリーンショット保存に失敗しました: %s", errMessage)
+	}
+	vw.list.shared.CompleteScreenshot(state.ScreenshotResult{
+		ID:         request.ID,
+		Path:       request.Path,
+		ErrMessage: errMessage,
+	})
+}
+
+// saveScreenshot は現在のフレームバッファを画像として保存する。
+func (vw *ViewerWindow) saveScreenshot(path string, width, height int) error {
+	if path == "" {
+		return fmt.Errorf("保存先パスが空です")
+	}
+	if width <= 0 || height <= 0 {
+		return fmt.Errorf("スクリーンショットサイズが不正です: %dx%d", width, height)
+	}
+
+	pixels := make([]uint8, width*height*4)
+
+	var prevReadBuffer int32
+	gl.GetIntegerv(gl.READ_BUFFER, &prevReadBuffer)
+	gl.ReadBuffer(gl.BACK)
+
+	var prevPackAlign int32
+	gl.GetIntegerv(gl.PACK_ALIGNMENT, &prevPackAlign)
+	gl.PixelStorei(gl.PACK_ALIGNMENT, 1)
+
+	gl.ReadPixels(0, 0, int32(width), int32(height), gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(&pixels[0]))
+
+	gl.PixelStorei(gl.PACK_ALIGNMENT, prevPackAlign)
+	gl.ReadBuffer(uint32(prevReadBuffer))
+
+	img := image.NewNRGBA(image.Rect(0, 0, width, height))
+	for y := 0; y < height; y++ {
+		srcOffset := (height - 1 - y) * width * 4
+		dstOffset := y * img.Stride
+		copy(img.Pix[dstOffset:dstOffset+width*4], pixels[srcOffset:srcOffset+width*4])
+	}
+
+	dir := filepath.Dir(path)
+	if dir != "." && dir != "" {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			return err
+		}
+	}
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	if err := png.Encode(file, img); err != nil {
+		return err
+	}
+	return nil
 }
 
 // cleanupResources はビューワーが保持するOpenGLリソースを解放する。

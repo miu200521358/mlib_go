@@ -221,6 +221,19 @@ type stateIndexSlot struct {
 	Version uint64
 }
 
+// ScreenshotRequest はスクリーンショット要求を表す。
+type ScreenshotRequest struct {
+	ID   uint64
+	Path string
+}
+
+// ScreenshotResult はスクリーンショット処理結果を表す。
+type ScreenshotResult struct {
+	ID         uint64
+	Path       string
+	ErrMessage string
+}
+
 // SharedState は共有状態の実装。
 type SharedState struct {
 	mu                      sync.Mutex
@@ -254,6 +267,10 @@ type SharedState struct {
 	physicsModelMotions     [][]atomic.Value
 	windMotions             []atomic.Value
 	physicsResetType        atomic.Int32
+	screenshotMu            sync.Mutex
+	screenshotSeq           uint64
+	screenshotQueues        [][]ScreenshotRequest
+	screenshotResults       map[uint64]ScreenshotResult
 }
 
 // NewSharedState は共有状態を生成する。
@@ -272,6 +289,8 @@ func NewSharedState(viewerCount int) *SharedState {
 		physicsWorldMotions:   make([]atomic.Value, viewerCount),
 		physicsModelMotions:   make([][]atomic.Value, viewerCount),
 		windMotions:           make([]atomic.Value, viewerCount),
+		screenshotQueues:      make([][]ScreenshotRequest, viewerCount),
+		screenshotResults:     map[uint64]ScreenshotResult{},
 	}
 
 	ss.frameValue.Store(mtime.Frame(0))
@@ -922,6 +941,76 @@ func (ss *SharedState) PhysicsResetType() PhysicsResetType {
 // SetPhysicsResetType は物理リセット種別を設定する。
 func (ss *SharedState) SetPhysicsResetType(resetType PhysicsResetType) {
 	ss.physicsResetType.Store(int32(resetType))
+}
+
+// EnqueueScreenshot はスクリーンショット要求を追加する。
+func (ss *SharedState) EnqueueScreenshot(viewerIndex int, path string) (uint64, bool) {
+	if ss == nil || path == "" {
+		return 0, false
+	}
+	if viewerIndex < 0 || viewerIndex >= len(ss.screenshotQueues) {
+		return 0, false
+	}
+	ss.screenshotMu.Lock()
+	defer ss.screenshotMu.Unlock()
+	ss.screenshotSeq++
+	request := ScreenshotRequest{ID: ss.screenshotSeq, Path: path}
+	ss.screenshotQueues[viewerIndex] = append(ss.screenshotQueues[viewerIndex], request)
+	return request.ID, true
+}
+
+// DequeueScreenshot はスクリーンショット要求を取り出す。
+func (ss *SharedState) DequeueScreenshot(viewerIndex int) (ScreenshotRequest, bool) {
+	if ss == nil {
+		return ScreenshotRequest{}, false
+	}
+	if viewerIndex < 0 || viewerIndex >= len(ss.screenshotQueues) {
+		return ScreenshotRequest{}, false
+	}
+	ss.screenshotMu.Lock()
+	defer ss.screenshotMu.Unlock()
+	queue := ss.screenshotQueues[viewerIndex]
+	if len(queue) == 0 {
+		return ScreenshotRequest{}, false
+	}
+	request := queue[0]
+	if len(queue) == 1 {
+		ss.screenshotQueues[viewerIndex] = nil
+	} else {
+		ss.screenshotQueues[viewerIndex] = queue[1:]
+	}
+	return request, true
+}
+
+// CompleteScreenshot はスクリーンショットの処理結果を保存する。
+func (ss *SharedState) CompleteScreenshot(result ScreenshotResult) {
+	if ss == nil || result.ID == 0 {
+		return
+	}
+	ss.screenshotMu.Lock()
+	defer ss.screenshotMu.Unlock()
+	if ss.screenshotResults == nil {
+		ss.screenshotResults = map[uint64]ScreenshotResult{}
+	}
+	ss.screenshotResults[result.ID] = result
+}
+
+// FetchScreenshotResult はスクリーンショット結果を取得して破棄する。
+func (ss *SharedState) FetchScreenshotResult(id uint64) (ScreenshotResult, bool) {
+	if ss == nil || id == 0 {
+		return ScreenshotResult{}, false
+	}
+	ss.screenshotMu.Lock()
+	defer ss.screenshotMu.Unlock()
+	if ss.screenshotResults == nil {
+		return ScreenshotResult{}, false
+	}
+	result, ok := ss.screenshotResults[id]
+	if !ok {
+		return ScreenshotResult{}, false
+	}
+	delete(ss.screenshotResults, id)
+	return result, true
 }
 
 // ensureModelSlot はモデルスロットを確保する。

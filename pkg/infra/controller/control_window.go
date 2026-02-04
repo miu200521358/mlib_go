@@ -404,6 +404,28 @@ func (cw *ControlWindow) SetSaveDeltaIndex(windowIndex int, index int) {
 	cw.shared.SetDeltaSaveIndex(windowIndex, index)
 }
 
+// RequestScreenshot はスクリーンショットの保存要求を送信する。
+func (cw *ControlWindow) RequestScreenshot(windowIndex int, path string) (uint64, error) {
+	if cw == nil || cw.shared == nil {
+		return 0, fmt.Errorf("スクリーンショット要求に失敗しました")
+	}
+	if path == "" {
+		return 0, fmt.Errorf("スクリーンショット保存先が未指定です")
+	}
+	if id, ok := cw.shared.EnqueueScreenshot(windowIndex, path); ok {
+		return id, nil
+	}
+	return 0, fmt.Errorf("スクリーンショット要求に失敗しました")
+}
+
+// FetchScreenshotResult はスクリーンショット結果を取得して破棄する。
+func (cw *ControlWindow) FetchScreenshotResult(id uint64) (state.ScreenshotResult, bool) {
+	if cw == nil || cw.shared == nil {
+		return state.ScreenshotResult{}, false
+	}
+	return cw.shared.FetchScreenshotResult(id)
+}
+
 // SetFpsLimit はFPS制限を設定する。
 func (cw *ControlWindow) SetFpsLimit(limit FpsLimit) {
 	interval := mtime.Seconds(-1)
