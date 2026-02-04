@@ -1077,6 +1077,7 @@ func (cw *ControlWindow) triggerLogLevelDebug() {
 	enabled := cw.actionChecked(cw.logLevelDebugAction)
 	cw.resetVerboseActions()
 	cw.updateActionChecked(cw.logLevelDebugAction, enabled)
+	logging.SetDebugStackEnabled(enabled)
 	level := logging.LOG_LEVEL_INFO
 	if enabled {
 		level = logging.LOG_LEVEL_DEBUG
@@ -1327,6 +1328,7 @@ func (cw *ControlWindow) resetVerboseActions() {
 	cw.updateActionChecked(cw.logLevelIkVerboseAction, false)
 	cw.updateActionChecked(cw.logLevelPhysicsVerboseAction, false)
 	cw.updateActionChecked(cw.logLevelViewerVerboseAction, false)
+	logging.SetDebugStackEnabled(false)
 	cw.loggerOrDefault().SetLevel(logging.LOG_LEVEL_INFO)
 	cw.disableVerbose(logging.VERBOSE_INDEX_MOTION)
 	cw.disableVerbose(logging.VERBOSE_INDEX_IK)

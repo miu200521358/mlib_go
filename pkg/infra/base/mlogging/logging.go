@@ -225,7 +225,7 @@ func (l *Logger) ErrorTitle(title string, err error, msg string, params ...any) 
 			if remedy := l.formatErrorRemedy(errID); remedy != "" {
 				log.Printf("%s: %s", l.translateKey("対処方法"), remedy)
 			}
-		} else {
+		} else if logging.IsDebugStackEnabled() {
 			log.Printf(l.translateKey("スタックトレース:\n%s"), dumpAllGoroutines())
 		}
 	}
@@ -251,7 +251,7 @@ func (l *Logger) FatalTitle(title string, err error, msg string, params ...any) 
 			if remedy := l.formatErrorRemedy(errID); remedy != "" {
 				log.Printf("%s: %s", l.translateKey("対処方法"), remedy)
 			}
-		} else {
+		} else if logging.IsDebugStackEnabled() {
 			log.Printf(l.translateKey("スタックトレース:\n%s"), dumpAllGoroutines())
 		}
 	}
