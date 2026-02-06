@@ -117,10 +117,11 @@ func NewQuaternionFromRadians(xPitch, yHead, zRoll float64) Quaternion {
 	cy, sy := math.Cos(yHead*0.5), math.Sin(yHead*0.5)
 	cz, sz := math.Cos(zRoll*0.5), math.Sin(zRoll*0.5)
 
-	w := cx*cy*cz - sx*sy*sz
-	x := sx*cy*cz + cx*sy*sz
-	y := cx*sy*cz - sx*cy*sz
-	z := cx*cy*sz + sx*sy*cz
+	// MMDの回転合成順（YXZ）に合わせて、qy * qx * qz の順で合成する。
+	w := cy*cz*cx + sy*sz*sx
+	x := cy*cz*sx + sy*sz*cx
+	y := sy*cz*cx - cy*sz*sx
+	z := cy*sz*cx - sy*cz*sx
 
 	return NewQuaternionByValues(x, y, z, w).Normalized()
 }
