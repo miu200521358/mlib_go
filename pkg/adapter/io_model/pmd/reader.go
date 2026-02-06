@@ -39,6 +39,10 @@ type pmdReader struct {
 const (
 	// pmdIkUnitRotationScale はPMDのIK単位角をPMX互換に補正する倍率。
 	pmdIkUnitRotationScale = 4.0
+	// pmdShadowDisabledAlpha はセルフ影系フラグ無効を表すPMD材質Alpha値。
+	pmdShadowDisabledAlpha = 0.98
+	// pmdMaterialAlphaTolerance はPMD材質Alpha比較時の許容誤差。
+	pmdMaterialAlphaTolerance = 1e-4
 )
 
 // newPmdReader はpmdReaderを生成する。
@@ -282,22 +286,23 @@ func (p *pmdReader) readMaterials(modelData *model.PmxModel) error {
 		material.Specular = mmath.Vec4{X: specularColor.X, Y: specularColor.Y, Z: specularColor.Z, W: specularity}
 		material.Ambient = ambient
 		edgeEnabled := edgeFlag != 0
-		// PMD材質は明示フラグが少ないため、nanoemの判定ロジックに合わせて描画フラグを構築する。
-		drawFlag := model.DRAW_FLAG_DRAWING_SELF_SHADOWS
-		// nanoemのCullingDisabled相当: 透過がある場合は両面描画扱い。
+		// PMD材質は alpha と edgeFlag しか持たないため、
+		// PmxEditor の PMX->PMD 変換則を逆算した規則で描画フラグを再構築する。
+		shadowDisabled := math.Abs(alpha-pmdShadowDisabledAlpha) < pmdMaterialAlphaTolerance
+		drawFlag := model.DrawFlag(0)
+		// alpha が 1.0 未満なら両面描画を立てる。
 		if alpha < 1.0 {
 			drawFlag |= model.DRAW_FLAG_DOUBLE_SIDED_DRAWING
 		}
+		// PMD の edgeFlag は PMX の地面影/エッジが OR された結果として扱う。
 		if edgeEnabled {
-			drawFlag |= model.DRAW_FLAG_DRAWING_EDGE
 			drawFlag |= model.DRAW_FLAG_GROUND_SHADOW
+			drawFlag |= model.DRAW_FLAG_DRAWING_EDGE
 		}
-		// alpha=0.98付近はセルフシャドウマップ無効扱い。
-		if alpha >= 0.98 && alpha < 0.99 {
-			// alpha=0.98付近はセルフシャドウも無効扱い。
-			drawFlag &^= model.DRAW_FLAG_DRAWING_SELF_SHADOWS
-		} else {
+		// alpha=0.98 のときはセルフ影マップ/セルフ影を無効、それ以外は有効にする。
+		if !shadowDisabled {
 			drawFlag |= model.DRAW_FLAG_DRAWING_ON_SELF_SHADOW_MAPS
+			drawFlag |= model.DRAW_FLAG_DRAWING_SELF_SHADOWS
 		}
 		material.DrawFlag = drawFlag
 		material.EdgeSize = 0.0
