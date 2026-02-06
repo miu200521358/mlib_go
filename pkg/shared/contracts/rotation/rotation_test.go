@@ -8,7 +8,7 @@ func TestRotationPolicyDefault(t *testing.T) {
 	if DEFAULT_ROTATION_POLICY.QuaternionOrder != QUATERNION_ORDER_XYZW {
 		t.Errorf("QuaternionOrder: got=%v", DEFAULT_ROTATION_POLICY.QuaternionOrder)
 	}
-	if DEFAULT_ROTATION_POLICY.EulerOrder != EULER_ORDER_XYZ {
+	if DEFAULT_ROTATION_POLICY.EulerOrder != EULER_ORDER_YXZ {
 		t.Errorf("EulerOrder: got=%v", DEFAULT_ROTATION_POLICY.EulerOrder)
 	}
 	orders := DEFAULT_ROTATION_POLICY.IkLimitEulerOrders

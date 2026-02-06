@@ -149,6 +149,14 @@ func TestQuaternionConversions(t *testing.T) {
 	if !qd.IsIdent() {
 		t.Errorf("FromDegrees")
 	}
+	qyxz := NewQuaternionFromDegrees(10, 20, 30)
+	expectedYxz := NewQuaternionByValues(0.12767944069578063, 0.14487812541736914, 0.2392983377447303, 0.9515485246437885)
+	if !qyxz.NearEquals(expectedYxz, 1e-8) {
+		t.Errorf("FromDegrees YXZ: expected=%v got=%v", expectedYxz, qyxz)
+	}
+	if !qyxz.ToDegrees().NearEquals(Vec3{r3Vec(10, 20, 30)}, 1e-8) {
+		t.Errorf("FromDegrees->ToDegrees YXZ: got=%v", qyxz.ToDegrees())
+	}
 	if q.ToRadians() != (Vec3{r3Vec(0, 0, 0)}) {
 		t.Errorf("ToRadians")
 	}
