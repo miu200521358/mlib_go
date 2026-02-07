@@ -181,7 +181,7 @@ func (mr *ModelRenderer) drawBone(windowIndex int, shader graphics_api.IShader, 
 	gl.PointSize(5.0)
 	gl.DrawElements(
 		gl.POINTS,
-		int32(bones.Len()),
+		int32(mr.bonePointCount),
 		gl.UNSIGNED_INT,
 		nil,
 	)

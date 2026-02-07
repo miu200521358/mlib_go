@@ -474,8 +474,8 @@ func createAllBoneDebugData(modelData *model.PmxModel) ([]float32, []uint32, []i
 	boneLineIndexes := make([]int, modelData.Bones.Len()*2)
 
 	bonePoints := make([]float32, 0)
-	bonePointFaces := make([]uint32, modelData.Bones.Len())
-	bonePointIndexes := make([]int, modelData.Bones.Len())
+	bonePointFaces := make([]uint32, 0, modelData.Bones.Len())
+	bonePointIndexes := make([]int, 0, modelData.Bones.Len())
 
 	n := 0
 	for _, bone := range modelData.Bones.Values() {
@@ -490,8 +490,11 @@ func createAllBoneDebugData(modelData *model.PmxModel) ([]float32, []uint32, []i
 		boneLineIndexes[n+1] = bone.Index()
 
 		bonePoints = append(bonePoints, newBoneGl(bone)...)
-		bonePointFaces[bone.Index()] = uint32(bone.Index())
-		bonePointIndexes[bone.Index()] = bone.Index()
+		// ボーンの内部保持順と Bone.Index は一致しない場合があるため、
+		// 頂点スロットは append 順で管理し、スロット→Bone.Index 対応を別配列で保持する。
+		pointVertexIndex := len(bonePointIndexes)
+		bonePointFaces = append(bonePointFaces, uint32(pointVertexIndex))
+		bonePointIndexes = append(bonePointIndexes, bone.Index())
 
 		n += 2
 	}
