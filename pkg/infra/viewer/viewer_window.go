@@ -110,6 +110,7 @@ type ViewerWindow struct {
 	modelRendererLoads []modelRendererLoadState
 	loadResults        chan *modelRendererLoadResult
 	motions            []*motion.VmdMotion
+	cameraMotion       *motion.VmdMotion
 	vmdDeltas          []*delta.VmdDeltas
 	physicsModelHashes []string
 
@@ -981,6 +982,23 @@ func (vw *ViewerWindow) loadMotions() {
 			vw.motions[i] = motionData
 		}
 	}
+	vw.loadCameraMotion()
+}
+
+// loadCameraMotion はカメラ専用モーションを共有状態から同期する。
+func (vw *ViewerWindow) loadCameraMotion() {
+	if vw == nil || vw.list == nil || vw.list.shared == nil {
+		return
+	}
+	if raw := vw.list.shared.CameraMotion(vw.windowIndex); raw != nil {
+		if cameraMotion, ok := raw.(*motion.VmdMotion); ok && cameraMotion != nil {
+			if vw.cameraMotion == nil || vw.cameraMotion.Hash() != cameraMotion.Hash() {
+				vw.cameraMotion = cameraMotion
+			}
+			return
+		}
+	}
+	vw.cameraMotion = nil
 }
 
 // applyCameraMotion は現在フレームのカメラモーションをカメラへ適用する。
@@ -1011,16 +1029,7 @@ func (vw *ViewerWindow) resolveCameraMotion() *motion.VmdMotion {
 	if vw == nil {
 		return nil
 	}
-	for _, motionData := range vw.motions {
-		if motionData == nil || motionData.CameraFrames == nil {
-			continue
-		}
-		if motionData.CameraFrames.Len() == 0 {
-			continue
-		}
-		return motionData
-	}
-	return nil
+	return vw.cameraMotion
 }
 
 // closeCallback はウィンドウ終了時の処理を行う。

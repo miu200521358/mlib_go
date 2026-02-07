@@ -42,6 +42,9 @@ func TestNewSharedStateDefaults(t *testing.T) {
 	if wind.WindEnabled || wind.WindDirection != [3]float32{0, 0, 0} {
 		t.Errorf("Wind defaults: got=%v", wind)
 	}
+	if ss.CameraMotion(0) != nil {
+		t.Errorf("CameraMotion default should be nil")
+	}
 }
 
 // TestFlagUpdate はフラグ更新を確認する。

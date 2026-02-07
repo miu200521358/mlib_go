@@ -527,6 +527,21 @@ func (cw *ControlWindow) Motion(windowIndex, modelIndex int) *motion.VmdMotion {
 	return nil
 }
 
+// SetCameraMotion はカメラ専用モーションを設定する。
+func (cw *ControlWindow) SetCameraMotion(windowIndex int, motionData *motion.VmdMotion) {
+	cw.shared.SetCameraMotion(windowIndex, motionData)
+}
+
+// CameraMotion はカメラ専用モーションを取得する。
+func (cw *ControlWindow) CameraMotion(windowIndex int) *motion.VmdMotion {
+	if raw := cw.shared.CameraMotion(windowIndex); raw != nil {
+		if m, ok := raw.(*motion.VmdMotion); ok {
+			return m
+		}
+	}
+	return nil
+}
+
 // SetPhysicsWorldMotion は物理ワールド用モーションを設定する。
 func (cw *ControlWindow) SetPhysicsWorldMotion(windowIndex int, motionData *motion.VmdMotion) {
 	cw.shared.SetPhysicsWorldMotion(windowIndex, motionData)

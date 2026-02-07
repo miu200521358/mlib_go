@@ -101,6 +101,17 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 		},
 	)
 
+	cameraVmdLoad11Picker := widget.NewVmdLoadFilePicker(
+		userConfig,
+		translator,
+		config.UserConfigKeyVmdHistory,
+		i18n.TranslateOrMark(translator, messages.LabelCameraMotionFile11),
+		i18n.TranslateOrMark(translator, messages.LabelCameraMotionFileTip),
+		func(cw *controller.ControlWindow, rep io_common.IFileReader, path string) {
+			loadCameraMotion(logger, translator, cw, rep, player, path, 0)
+		},
+	)
+
 	pmxLoad21Picker := widget.NewPmxPmdXLoadFilePicker(
 		userConfig,
 		translator,
@@ -123,8 +134,19 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 		},
 	)
 
-	mWidgets.Widgets = append(mWidgets.Widgets, player, pmxLoad11Picker, vmdLoad11Picker,
-		pmxLoad21Picker, vmdLoad21Picker, materialView, allMaterialButton, invertMaterialButton, vertexView)
+	cameraVmdLoad21Picker := widget.NewVmdLoadFilePicker(
+		userConfig,
+		translator,
+		config.UserConfigKeyVmdHistory,
+		i18n.TranslateOrMark(translator, messages.LabelCameraMotionFile21),
+		i18n.TranslateOrMark(translator, messages.LabelCameraMotionFileTip),
+		func(cw *controller.ControlWindow, rep io_common.IFileReader, path string) {
+			loadCameraMotion(logger, translator, cw, rep, player, path, 1)
+		},
+	)
+
+	mWidgets.Widgets = append(mWidgets.Widgets, player, pmxLoad11Picker, vmdLoad11Picker, cameraVmdLoad11Picker,
+		pmxLoad21Picker, vmdLoad21Picker, cameraVmdLoad21Picker, materialView, allMaterialButton, invertMaterialButton, vertexView)
 
 	mWidgets.SetOnLoaded(func() {
 		if mWidgets == nil || mWidgets.Window() == nil {
@@ -154,9 +176,11 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 					declarative.TextLabel{Text: i18n.TranslateOrMark(translator, messages.HelpDisplayModelSetting)},
 					pmxLoad11Picker.Widgets(),
 					vmdLoad11Picker.Widgets(),
+					cameraVmdLoad11Picker.Widgets(),
 					declarative.VSeparator{},
 					pmxLoad21Picker.Widgets(),
 					vmdLoad21Picker.Widgets(),
+					cameraVmdLoad21Picker.Widgets(),
 					declarative.VSeparator{},
 					player.Widgets(),
 					declarative.VSpacer{},
@@ -288,6 +312,37 @@ func loadMotion(logger logging.ILogger, translator i18n.II18n, cw *controller.Co
 		player.Reset(maxFrame)
 	}
 	cw.SetMotion(windowIndex, modelIndex, motionData)
+}
+
+// loadCameraMotion はカメラモーション読み込み結果をControlWindowへ反映する。
+func loadCameraMotion(logger logging.ILogger, translator i18n.II18n, cw *controller.ControlWindow, rep io_common.IFileReader, player *widget.MotionPlayer, path string, windowIndex int) {
+	if cw == nil {
+		return
+	}
+	if path == "" {
+		cw.SetCameraMotion(windowIndex, nil)
+		return
+	}
+	motionResult, err := usecase.LoadCameraMotionWithMeta(rep, path)
+	if err != nil {
+		logLoadFailed(logger, translator, err)
+		cw.SetCameraMotion(windowIndex, nil)
+		return
+	}
+	motionData := (*motion.VmdMotion)(nil)
+	maxFrame := motion.Frame(0)
+	if motionResult != nil {
+		motionData = motionResult.Motion
+		maxFrame = motionResult.MaxFrame
+	}
+	if motionData == nil {
+		cw.SetCameraMotion(windowIndex, nil)
+		return
+	}
+	if player != nil {
+		player.Reset(maxFrame)
+	}
+	cw.SetCameraMotion(windowIndex, motionData)
 }
 
 // logLoadFailed は読み込み失敗ログを出力する。

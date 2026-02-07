@@ -182,6 +182,8 @@ type ISharedState interface {
 	Model(viewerIndex, modelIndex int) IStateModel
 	SetMotion(viewerIndex, modelIndex int, motion IStateMotion)
 	Motion(viewerIndex, modelIndex int) IStateMotion
+	SetCameraMotion(viewerIndex int, motion IStateMotion)
+	CameraMotion(viewerIndex int) IStateMotion
 	SelectedMaterialIndexes(viewerIndex, modelIndex int) []int
 	SetSelectedMaterialIndexes(viewerIndex, modelIndex int, indexes []int)
 	SelectedVertexIndexes(viewerIndex, modelIndex int) []int
@@ -263,6 +265,7 @@ type SharedState struct {
 	deltaSaveEnabled        []atomic.Bool
 	deltaSaveIndexes        []atomic.Int32
 	deltaMotions            [][][]atomic.Value
+	cameraMotions           []atomic.Value
 	physicsWorldMotions     []atomic.Value
 	physicsModelMotions     [][]atomic.Value
 	windMotions             []atomic.Value
@@ -286,6 +289,7 @@ func NewSharedState(viewerCount int) *SharedState {
 		deltaSaveEnabled:      make([]atomic.Bool, viewerCount),
 		deltaSaveIndexes:      make([]atomic.Int32, viewerCount),
 		deltaMotions:          make([][][]atomic.Value, viewerCount),
+		cameraMotions:         make([]atomic.Value, viewerCount),
 		physicsWorldMotions:   make([]atomic.Value, viewerCount),
 		physicsModelMotions:   make([][]atomic.Value, viewerCount),
 		windMotions:           make([]atomic.Value, viewerCount),
@@ -311,6 +315,7 @@ func NewSharedState(viewerCount int) *SharedState {
 	ss.physicsResetType.Store(int32(PHYSICS_RESET_TYPE_NONE))
 
 	for i := 0; i < viewerCount; i++ {
+		ss.cameraMotions[i].Store(stateMotionSlot{Motion: nil})
 		ss.physicsWorldMotions[i].Store(stateMotionSlot{Motion: newDefaultPhysicsWorldMotion()})
 		ss.windMotions[i].Store(stateMotionSlot{Motion: newDefaultWindMotion()})
 	}
@@ -699,6 +704,23 @@ func (ss *SharedState) Motion(viewerIndex, modelIndex int) IStateMotion {
 		return nil
 	}
 	slot := ss.motions[viewerIndex][modelIndex].Load().(stateMotionSlot)
+	return slot.Motion
+}
+
+// SetCameraMotion はカメラ専用モーションを設定する。
+func (ss *SharedState) SetCameraMotion(viewerIndex int, motion IStateMotion) {
+	if viewerIndex < 0 || viewerIndex >= len(ss.cameraMotions) {
+		return
+	}
+	ss.cameraMotions[viewerIndex].Store(stateMotionSlot{Motion: motion})
+}
+
+// CameraMotion はカメラ専用モーションを取得する。
+func (ss *SharedState) CameraMotion(viewerIndex int) IStateMotion {
+	if viewerIndex < 0 || viewerIndex >= len(ss.cameraMotions) {
+		return nil
+	}
+	slot := ss.cameraMotions[viewerIndex].Load().(stateMotionSlot)
 	return slot.Motion
 }
 

@@ -34,6 +34,46 @@ func LoadMotionWithMeta(rep portio.IFileReader, path string) (*MotionLoadResult,
 	return result, nil
 }
 
+// LoadCameraMotionWithMeta はカメラフレームのみを採用してモーションを読み込み、最大フレームを返す。
+func LoadCameraMotionWithMeta(rep portio.IFileReader, path string) (*MotionLoadResult, error) {
+	motionData, err := LoadMotion(rep, path)
+	if err != nil {
+		return nil, err
+	}
+	cameraMotion, err := extractCameraMotion(motionData)
+	if err != nil {
+		return nil, err
+	}
+	result := &MotionLoadResult{Motion: cameraMotion}
+	if cameraMotion == nil {
+		return result, nil
+	}
+	result.MaxFrame = cameraMotion.MaxFrame()
+	return result, nil
+}
+
+// extractCameraMotion は入力モーションからカメラフレームのみを複製して返す。
+func extractCameraMotion(source *motion.VmdMotion) (*motion.VmdMotion, error) {
+	if source == nil {
+		return nil, nil
+	}
+	cameraMotion := motion.NewVmdMotion(source.Path())
+	cameraMotion.SetName(source.Name())
+	cameraMotion.SetFileModTime(source.FileModTime())
+	cameraMotion.Signature = source.Signature
+
+	if source.CameraFrames != nil {
+		cameraFrames, err := source.CameraFrames.Copy()
+		if err != nil {
+			return nil, err
+		}
+		cameraMotion.CameraFrames = &cameraFrames
+	}
+
+	cameraMotion.UpdateHash()
+	return cameraMotion, nil
+}
+
 // CanLoadPath はリポジトリが指定パスを読み込み可能か判定する。
 func CanLoadPath(rep portio.IFileReader, path string) bool {
 	if rep == nil || path == "" {

@@ -72,12 +72,24 @@
         "translation": "Motion File 2-1"
     },
     {
+        "id": "カメラモーションファイル1",
+        "translation": "Camera Motion File 1"
+    },
+    {
+        "id": "カメラモーションファイル2",
+        "translation": "Camera Motion File 2"
+    },
+    {
         "id": "モデルファイルを選択してください",
         "translation": "Please select a model file"
     },
     {
         "id": "モーションファイルを選択してください",
         "translation": "Please select a motion file"
+    },
+    {
+        "id": "カメラモーションファイルを選択してください",
+        "translation": "Please select a camera motion file"
     },
     {
         "id": "材質ビュー",

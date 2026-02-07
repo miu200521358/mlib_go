@@ -297,6 +297,15 @@ func TestSharedStateDeltaAndPhysics(t *testing.T) {
 		t.Errorf("WindMotion should be set")
 	}
 
+	if ss.CameraMotion(-1) != nil {
+		t.Errorf("CameraMotion out-of-range should be nil")
+	}
+	ss.SetCameraMotion(-1, newTestMotion())
+	ss.SetCameraMotion(0, newTestMotion())
+	if ss.CameraMotion(0) == nil {
+		t.Errorf("CameraMotion should be set")
+	}
+
 	if ss.PhysicsResetType() != PHYSICS_RESET_TYPE_NONE {
 		t.Errorf("PhysicsResetType default mismatch")
 	}
