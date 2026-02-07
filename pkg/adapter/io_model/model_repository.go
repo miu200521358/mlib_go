@@ -8,6 +8,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_model/pmd"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_model/pmx"
+	"github.com/miu200521358/mlib_go/pkg/adapter/io_model/vrm"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_model/x"
 	"github.com/miu200521358/mlib_go/pkg/shared/hashable"
 )
@@ -16,6 +17,7 @@ import (
 type ModelRepository struct {
 	pmxRepository *pmx.PmxRepository
 	pmdRepository *pmd.PmdRepository
+	vrmRepository *vrm.VrmRepository
 	xRepository   io_common.IFileReader
 }
 
@@ -24,6 +26,7 @@ func NewModelRepository() *ModelRepository {
 	return &ModelRepository{
 		pmxRepository: pmx.NewPmxRepository(),
 		pmdRepository: pmd.NewPmdRepository(),
+		vrmRepository: vrm.NewVrmRepository(),
 		xRepository:   x.NewXRepository(),
 	}
 }
@@ -40,7 +43,7 @@ func (r *ModelRepository) SetXRepository(repository io_common.IFileReader) {
 func (r *ModelRepository) CanLoad(path string) bool {
 	ext := strings.ToLower(filepath.Ext(path))
 	switch ext {
-	case ".pmx", ".pmd", ".x":
+	case ".pmx", ".pmd", ".x", ".vrm":
 		return true
 	default:
 		return false
@@ -55,6 +58,8 @@ func (r *ModelRepository) Load(path string) (hashable.IHashable, error) {
 		return r.pmxRepository.Load(path)
 	case ".pmd":
 		return r.pmdRepository.Load(path)
+	case ".vrm":
+		return r.vrmRepository.Load(path)
 	case ".x":
 		if r.xRepository != nil {
 			return r.xRepository.Load(path)
