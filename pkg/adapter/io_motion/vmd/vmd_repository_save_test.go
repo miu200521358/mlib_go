@@ -24,6 +24,16 @@ func TestVmdRepository_Save1(t *testing.T) {
 	bf.Rotation = &rot
 	motionData.AppendBoneFrame(model.CENTER.String(), bf)
 
+	cf := motion.NewCameraFrame(motion.Frame(0))
+	camPos := vec3(10, 20, 30)
+	camDeg := vec3(15, -35, 7)
+	cf.Position = &camPos
+	cf.Degrees = &camDeg
+	cf.Distance = -42
+	cf.ViewOfAngle = 35
+	cf.IsPerspectiveOff = false
+	motionData.AppendCameraFrame(cf)
+
 	r := NewVmdRepository()
 
 	if err := r.Save("", motionData, io_common.SaveOptions{}); err != nil {
@@ -54,6 +64,26 @@ func TestVmdRepository_Save1(t *testing.T) {
 	}
 	if !reloadBf.Position.NearEquals(pos, 1e-8) {
 		t.Errorf("Expected position to be %v, got %v", pos, reloadBf.Position.MMD())
+	}
+
+	if !reloadMotion.CameraFrames.Has(motion.Frame(0)) {
+		t.Fatalf("Expected camera frame 0 to exist")
+	}
+	reloadCf := reloadMotion.CameraFrames.Get(motion.Frame(0))
+	if reloadCf == nil || reloadCf.Position == nil || reloadCf.Degrees == nil {
+		t.Fatalf("Expected camera frame values to be not nil")
+	}
+	if !reloadCf.Position.NearEquals(camPos, 1e-6) {
+		t.Errorf("Expected camera position to be %v, got %v", camPos, reloadCf.Position)
+	}
+	if !reloadCf.Degrees.NearEquals(camDeg, 1e-5) {
+		t.Errorf("Expected camera degrees to be %v, got %v", camDeg, reloadCf.Degrees)
+	}
+	if !mmath.NearEquals(reloadCf.Distance, cf.Distance, 1e-6) {
+		t.Errorf("Expected camera distance to be %.5f, got %.5f", cf.Distance, reloadCf.Distance)
+	}
+	if reloadCf.ViewOfAngle != cf.ViewOfAngle {
+		t.Errorf("Expected camera FOV to be %d, got %d", cf.ViewOfAngle, reloadCf.ViewOfAngle)
 	}
 }
 

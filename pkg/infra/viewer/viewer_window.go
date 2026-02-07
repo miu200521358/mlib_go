@@ -371,6 +371,7 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 	// マルチサンプル有効化
 	gl.Enable(gl.MULTISAMPLE)
 
+	vw.applyCameraMotion(frame)
 	vw.shader.UpdateCamera()
 
 	vw.renderFloor()
@@ -980,6 +981,46 @@ func (vw *ViewerWindow) loadMotions() {
 			vw.motions[i] = motionData
 		}
 	}
+}
+
+// applyCameraMotion は現在フレームのカメラモーションをカメラへ適用する。
+func (vw *ViewerWindow) applyCameraMotion(frame motion.Frame) {
+	if vw == nil || vw.shader == nil {
+		return
+	}
+	cameraMotion := vw.resolveCameraMotion()
+	if cameraMotion == nil || cameraMotion.CameraFrames == nil || cameraMotion.CameraFrames.Len() == 0 {
+		return
+	}
+
+	cf := cameraMotion.CameraFrames.Get(frame)
+	if cf == nil || cf.Position == nil || cf.Degrees == nil {
+		return
+	}
+
+	cam := vw.shader.Camera()
+	if cam == nil {
+		return
+	}
+	cam.SetByMotionValues(*cf.Position, *cf.Degrees, cf.Distance, cf.ViewOfAngle)
+	vw.shader.SetCamera(cam)
+}
+
+// resolveCameraMotion はカメラフレームを持つモーションを返す。
+func (vw *ViewerWindow) resolveCameraMotion() *motion.VmdMotion {
+	if vw == nil {
+		return nil
+	}
+	for _, motionData := range vw.motions {
+		if motionData == nil || motionData.CameraFrames == nil {
+			continue
+		}
+		if motionData.CameraFrames.Len() == 0 {
+			continue
+		}
+		return motionData
+	}
+	return nil
 }
 
 // closeCallback はウィンドウ終了時の処理を行う。

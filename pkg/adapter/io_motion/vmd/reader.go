@@ -168,10 +168,14 @@ func (v *vmdReader) readCameraFrames(motionData *motion.VmdMotion) error {
 			return io_common.NewIoParseFailed("VMDカメラ位置の読み込みに失敗しました", err)
 		}
 		frame.Position = &pos
-		deg, err := v.reader.ReadVec3()
+		rotRad, err := v.reader.ReadVec3()
 		if err != nil {
 			return io_common.NewIoParseFailed("VMDカメラ回転の読み込みに失敗しました", err)
 		}
+		deg := mmath.Vec3{}
+		deg.X = mmath.RadToDeg(rotRad.X)
+		deg.Y = mmath.RadToDeg(rotRad.Y)
+		deg.Z = mmath.RadToDeg(rotRad.Z)
 		frame.Degrees = &deg
 		curveRaw, err := v.reader.ReadBytes(24)
 		if err != nil {

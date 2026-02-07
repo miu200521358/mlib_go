@@ -232,7 +232,11 @@ func (v *vmdWriter) writeCameraFrame(frame *motion.CameraFrame) error {
 	if frame.Degrees != nil {
 		deg = *frame.Degrees
 	}
-	if err := v.writeVec3(deg); err != nil {
+	rotRad := mmath.Vec3{}
+	rotRad.X = mmath.DegToRad(deg.X)
+	rotRad.Y = mmath.DegToRad(deg.Y)
+	rotRad.Z = mmath.DegToRad(deg.Z)
+	if err := v.writeVec3(rotRad); err != nil {
 		return err
 	}
 	curves := buildCameraCurves(frame)

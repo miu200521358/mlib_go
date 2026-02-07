@@ -131,6 +131,48 @@ func (c *Camera) ResetPosition(yaw, pitch float64) {
 	c.applyOrientation(radius)
 }
 
+// SetByMotionValues はVMDカメラ値からカメラ状態を設定する。
+func (c *Camera) SetByMotionValues(center, degrees mmath.Vec3, distance float64, viewOfAngle int) {
+	if c == nil {
+		return
+	}
+	c.ensureState()
+
+	// 参照実装に合わせ、MMDカメラ角度から姿勢クォータニオンを生成する。
+	orientationFromMotion := NewMmdCameraQuaternionFromDegrees(degrees)
+	eye := center.Added(orientationFromMotion.MulVec3(mmath.UNIT_Z_VEC3).MuledScalar(distance))
+	up := orientationFromMotion.MulVec3(mmath.UNIT_Y_VEC3).Normalized()
+	if up.LengthSqr() == 0 {
+		up = mmath.UNIT_Y_VEC3
+	}
+
+	c.LookAtCenter.X = center.X
+	c.LookAtCenter.Y = center.Y
+	c.LookAtCenter.Z = center.Z
+	c.Position.X = eye.X
+	c.Position.Y = eye.Y
+	c.Position.Z = eye.Z
+	c.Up.X = up.X
+	c.Up.Y = up.Y
+	c.Up.Z = up.Z
+	if viewOfAngle > 0 {
+		c.FieldOfView = float32(viewOfAngle)
+	}
+
+	forward := center.Subed(eye).Normalized()
+	if forward.LengthSqr() == 0 {
+		c.Orientation = orientationFromMotion
+		return
+	}
+	c.Orientation = mmath.NewQuaternionFromDirection(forward, up).Normalized()
+}
+
+// NewMmdCameraQuaternionFromDegrees はMMDカメラ角度（度）から姿勢クォータニオンを生成する。
+func NewMmdCameraQuaternionFromDegrees(degrees mmath.Vec3) mmath.Quaternion {
+	base := mmath.NewQuaternionFromDegrees(-degrees.X, degrees.Y, degrees.Z)
+	return mmath.NewQuaternionByValues(-base.X(), base.Y(), base.Z(), -base.W()).Normalized()
+}
+
 // RotateOrbit は軌道回転を加算してカメラ姿勢を更新する。
 func (c *Camera) RotateOrbit(yawDelta, pitchDelta float64) {
 	if c == nil {

@@ -133,22 +133,25 @@ func (m *VmdMotion) MaxFrame() Frame {
 	}
 	boneMax := Frame(0)
 	morphMax := Frame(0)
+	cameraMax := Frame(0)
 	if m.BoneFrames != nil {
 		boneMax = m.BoneFrames.MaxFrame()
 	}
 	if m.MorphFrames != nil {
 		morphMax = m.MorphFrames.MaxFrame()
 	}
-	if boneMax == 0 {
-		return morphMax
+	if m.CameraFrames != nil {
+		cameraMax = m.CameraFrames.MaxFrame()
 	}
-	if morphMax == 0 {
-		return boneMax
+
+	maxFrame := boneMax
+	if morphMax > maxFrame {
+		maxFrame = morphMax
 	}
-	if boneMax > morphMax {
-		return boneMax
+	if cameraMax > maxFrame {
+		maxFrame = cameraMax
 	}
-	return morphMax
+	return maxFrame
 }
 
 // MinFrame は最小フレーム番号を返す。
@@ -158,21 +161,30 @@ func (m *VmdMotion) MinFrame() Frame {
 	}
 	hasBone := m.BoneFrames != nil && m.BoneFrames.Len() > 0
 	hasMorph := m.MorphFrames != nil && m.MorphFrames.Len() > 0
-	if !hasBone && !hasMorph {
+	hasCamera := m.CameraFrames != nil && m.CameraFrames.Len() > 0
+	if !hasBone && !hasMorph && !hasCamera {
 		return 0
 	}
-	if !hasBone {
-		return m.MorphFrames.MinFrame()
+	minFrame := Frame(0)
+	minSet := false
+	if hasBone {
+		minFrame = m.BoneFrames.MinFrame()
+		minSet = true
 	}
-	if !hasMorph {
-		return m.BoneFrames.MinFrame()
+	if hasMorph {
+		morphMin := m.MorphFrames.MinFrame()
+		if !minSet || morphMin < minFrame {
+			minFrame = morphMin
+			minSet = true
+		}
 	}
-	boneMin := m.BoneFrames.MinFrame()
-	morphMin := m.MorphFrames.MinFrame()
-	if boneMin < morphMin {
-		return boneMin
+	if hasCamera {
+		cameraMin := m.CameraFrames.MinFrame()
+		if !minSet || cameraMin < minFrame {
+			minFrame = cameraMin
+		}
 	}
-	return morphMin
+	return minFrame
 }
 
 // Indexes はボーン/モーフの全フレーム番号を返す。
@@ -186,6 +198,9 @@ func (m *VmdMotion) Indexes() []int {
 	}
 	if m.MorphFrames != nil {
 		indexes = append(indexes, m.MorphFrames.Indexes()...)
+	}
+	if m.CameraFrames != nil {
+		indexes = append(indexes, m.CameraFrames.Indexes()...)
 	}
 	indexes = uniqueSortedInts(indexes)
 	return indexes

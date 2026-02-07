@@ -195,6 +195,20 @@ func (c *CameraFrames) Copy() (CameraFrames, error) {
 	return deepCopy(*c)
 }
 
+// Indexes はフレーム番号一覧を返す。
+func (c *CameraFrames) Indexes() []int {
+	if c == nil {
+		return nil
+	}
+	indexes := make([]int, 0, c.Len())
+	c.ForEach(func(frame Frame, _ *CameraFrame) bool {
+		indexes = append(indexes, int(frame))
+		return true
+	})
+	mmath.Sort(indexes)
+	return indexes
+}
+
 // nilCameraFrame は既定の空フレームを返す。
 func nilCameraFrame() *CameraFrame {
 	return nil

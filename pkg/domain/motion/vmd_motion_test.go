@@ -41,7 +41,7 @@ func TestVmdMotionIndexes(t *testing.T) {
 	motion.MorphFrames.Get("m").Append(NewMorphFrame(10))
 	motion.CameraFrames.Append(NewCameraFrame(20))
 	indexes := motion.Indexes()
-	if len(indexes) != 2 || indexes[0] != 0 || indexes[1] != 10 {
+	if len(indexes) != 3 || indexes[0] != 0 || indexes[1] != 10 || indexes[2] != 20 {
 		t.Fatalf("Indexes: got=%v", indexes)
 	}
 }
@@ -53,6 +53,24 @@ func TestVmdMotionMinFrame(t *testing.T) {
 	motion.MorphFrames.Get("m").Append(NewMorphFrame(5))
 	if motion.MinFrame() != 0 {
 		t.Fatalf("MinFrame: got=%v", motion.MinFrame())
+	}
+}
+
+// TestVmdMotionMaxFrameWithCameraOnly はカメラのみの最大フレームを確認する。
+func TestVmdMotionMaxFrameWithCameraOnly(t *testing.T) {
+	motion := NewVmdMotion("path.vmd")
+	motion.CameraFrames.Append(NewCameraFrame(120))
+	if motion.MaxFrame() != 120 {
+		t.Fatalf("MaxFrame(camera only): got=%v", motion.MaxFrame())
+	}
+}
+
+// TestVmdMotionMinFrameWithCameraOnly はカメラのみの最小フレームを確認する。
+func TestVmdMotionMinFrameWithCameraOnly(t *testing.T) {
+	motion := NewVmdMotion("path.vmd")
+	motion.CameraFrames.Append(NewCameraFrame(12))
+	if motion.MinFrame() != 12 {
+		t.Fatalf("MinFrame(camera only): got=%v", motion.MinFrame())
 	}
 }
 
