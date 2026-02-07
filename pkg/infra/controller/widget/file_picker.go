@@ -5,6 +5,10 @@
 package widget
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"io"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -46,6 +50,7 @@ type FilePicker struct {
 	historyDialog     *walk.Dialog
 	historyListBox    *walk.ListBox
 	prevPath          string
+	prevPathHash      string
 	onPathChanged     func(*controller.ControlWindow, io_common.IFileReader, string)
 }
 
@@ -337,7 +342,8 @@ func (fp *FilePicker) Widgets() declarative.Composite {
 				fp.handlePathChanged(fp.pathEdit.Text())
 			},
 			OnEditingFinished: func() {
-				fp.handlePathConfirmed(fp.pathEdit.Text())
+				// フォーカス喪失時にも発火するため、同一パスの再適用は行わない。
+				fp.handlePathChanged(fp.pathEdit.Text())
 			},
 			OnDropFiles: func(files []string) {
 				fp.handleDropFiles(files)
@@ -434,9 +440,9 @@ func (fp *FilePicker) handlePathChanged(path string) {
 	fp.applyPath(path, false)
 }
 
-// handlePathConfirmed はEnter確定時にパス変更処理を実行する。
+// handlePathConfirmed は明示確定時にパス変更処理を実行する。
 func (fp *FilePicker) handlePathConfirmed(path string) {
-	// Enter確定時は同一パスでも再適用する。
+	// 明示確定時は同一パスでも再適用する。
 	fp.applyPath(path, true)
 }
 
@@ -465,7 +471,9 @@ func (fp *FilePicker) applyPath(path string, allowSame bool) {
 	if cleaned == "" {
 		return
 	}
-	if !allowSame && cleaned == fp.prevPath {
+	// 同一パス時は前回読込時の内容ハッシュ差分がない限り再適用しない。
+	currentHash := fp.computeFileHash(cleaned)
+	if !allowSame && cleaned == fp.prevPath && currentHash == fp.prevPathHash {
 		return
 	}
 	if fp.historyKey != "" && fp.repository != nil && !fp.repository.CanLoad(cleaned) {
@@ -473,8 +481,12 @@ func (fp *FilePicker) applyPath(path string, allowSame bool) {
 	}
 
 	fp.prevPath = cleaned
+	fp.prevPathHash = currentHash
 	if fp.pathEdit != nil {
-		fp.pathEdit.SetText(cleaned)
+		// 同値再設定による不要なTextChanged発火を避ける。
+		if fp.pathEdit.Text() != cleaned {
+			fp.pathEdit.SetText(cleaned)
+		}
 	}
 	if fp.nameEdit != nil && fp.repository != nil {
 		fp.nameEdit.SetText(fp.repository.InferName(cleaned))
@@ -635,6 +647,24 @@ func (fp *FilePicker) cleanPath(path string) string {
 	path = strings.TrimSpace(path)
 	path = strings.Trim(path, ".")
 	return path
+}
+
+// computeFileHash はファイル内容のSHA-256ハッシュを返す。
+func (fp *FilePicker) computeFileHash(path string) string {
+	if path == "" {
+		return ""
+	}
+	file, err := os.Open(path)
+	if err != nil {
+		return ""
+	}
+	defer file.Close()
+
+	hash := sha256.New()
+	if _, err := io.Copy(hash, file); err != nil {
+		return ""
+	}
+	return hex.EncodeToString(hash.Sum(nil))
 }
 
 // dedupe は重複を排除したスライスを返す。
