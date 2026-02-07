@@ -21,11 +21,13 @@ func TestRigidBodyFrameLerp(t *testing.T) {
 	prev := NewRigidBodyFrame(0)
 	prev.Position = vec3Ptr(0, 0, 0)
 	prev.Size = vec3Ptr(1, 1, 1)
-	prev.Mass = 1
+	prevMass := 1.0
+	prev.Mass = &prevMass
 	next := NewRigidBodyFrame(10)
 	next.Position = vec3Ptr(10, 0, 0)
 	next.Size = vec3Ptr(2, 2, 2)
-	next.Mass = 3
+	nextMass := 3.0
+	next.Mass = &nextMass
 	out := next.lerpFrame(prev, 5)
 	if out.Position == nil || out.Position.X < 4.9 || out.Position.X > 5.1 {
 		t.Fatalf("Position lerp")
@@ -33,7 +35,7 @@ func TestRigidBodyFrameLerp(t *testing.T) {
 	if out.Size == nil || out.Size.X < 1.4 || out.Size.X > 1.6 {
 		t.Fatalf("Size lerp")
 	}
-	if out.Mass < 1.9 || out.Mass > 2.1 {
+	if out.Mass == nil || *out.Mass < 1.9 || *out.Mass > 2.1 {
 		t.Fatalf("Mass lerp")
 	}
 }

@@ -40,6 +40,9 @@ type RigidBodyValue struct {
 	Group            int
 	PrevBoneMatrix   mmath.Mat4
 	HasPrevBone      bool
+	AppliedSize      mmath.Vec3
+	AppliedMass      float64
+	HasAppliedParams bool
 }
 
 // PhysicsEngine は Bullet 物理エンジンの実装本体。
@@ -140,12 +143,14 @@ func (mp *PhysicsEngine) AddModelByDeltas(
 		return
 	}
 	var rigidBodyDeltas *delta.RigidBodyDeltas
+	var jointDeltas *delta.JointDeltas
 	if physicsDeltas != nil {
 		rigidBodyDeltas = physicsDeltas.RigidBodies
+		jointDeltas = physicsDeltas.Joints
 	}
 
 	mp.initRigidBodiesByBoneDeltas(modelIndex, model, boneDeltas, rigidBodyDeltas)
-	mp.initJointsByBoneDeltas(modelIndex, model, boneDeltas, nil)
+	mp.initJointsByBoneDeltas(modelIndex, model, boneDeltas, jointDeltas)
 }
 
 // DeleteModel はモデルを物理エンジンから削除する。
@@ -183,6 +188,7 @@ func createWorld(gravity mmath.Vec3) bt.BtDiscreteDynamicsWorld {
 	dispatcher := bt.NewBtCollisionDispatcher(collisionConfiguration)
 	solver := bt.NewBtSequentialImpulseConstraintSolver()
 	world := bt.NewBtDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration)
+	// MMD互換の重力スケールに合わせるため、Y成分は10倍でBulletへ渡す。
 	world.SetGravity(bt.NewBtVector3(float32(gravity.X), float32(gravity.Y*10), float32(gravity.Z)))
 
 	groundShape := bt.NewBtStaticPlaneShape(bt.NewBtVector3(float32(0), float32(1), float32(0)), float32(0))

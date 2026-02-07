@@ -318,9 +318,7 @@ func updateRigidBodyShapeMass(core physics.IPhysicsCore, modelIndex int, modelDa
 		if rigidDelta == nil {
 			continue
 		}
-		if !rigidDelta.Size.IsZero() || rigidDelta.Mass != 0.0 {
-			core.UpdateRigidBodyShapeMass(modelIndex, rigidBody, rigidDelta)
-		}
+		core.UpdateRigidBodyShapeMass(modelIndex, rigidBody, rigidDelta)
 	}
 }
 

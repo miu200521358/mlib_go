@@ -226,6 +226,7 @@ func (mp *PhysicsEngine) initRigidBody(
 
 	group := 1 << int(rigidBody.CollisionGroup.Group)
 	mask := int(rigidBody.CollisionGroup.Mask)
+	appliedSize, appliedMass := mp.resolveAppliedShapeMass(rigidBody, rigidBodyDelta)
 	mp.world.AddRigidBody(btRigidBody, group, mask)
 	mp.rigidBodies[modelIndex][rigidBody.Index()] = &RigidBodyValue{
 		RigidBody:        rigidBody,
@@ -233,6 +234,9 @@ func (mp *PhysicsEngine) initRigidBody(
 		BtLocalTransform: &btRigidBodyLocalTransform,
 		Mask:             mask,
 		Group:            group,
+		AppliedSize:      appliedSize,
+		AppliedMass:      appliedMass,
+		HasAppliedParams: true,
 	}
 
 	mp.updateFlag(modelIndex, rigidBody)
@@ -283,6 +287,23 @@ func (mp *PhysicsEngine) calculateMassAndInertia(
 	}
 
 	return mass, localInertia
+}
+
+// resolveAppliedShapeMass は剛体に適用すべきサイズと質量を返します。
+func (mp *PhysicsEngine) resolveAppliedShapeMass(
+	rigidBody *model.RigidBody,
+	rigidBodyDelta *delta.RigidBodyDelta,
+) (mmath.Vec3, float64) {
+	size := rigidBody.Size
+	mass := rigidBody.Param.Mass
+	if rigidBodyDelta != nil {
+		size = rigidBodyDelta.Size
+		mass = rigidBodyDelta.Mass
+	}
+	if rigidBody.PhysicsType == model.PHYSICS_TYPE_STATIC {
+		mass = 0
+	}
+	return size, mass
 }
 
 // getRigidBodyBone は剛体に紐づくボーンを取得します。
@@ -566,16 +587,17 @@ func (mp *PhysicsEngine) UpdateRigidBodyShapeMass(
 		return
 	}
 
-	massChanged := !mmath.NearEquals(rigidBodyDelta.Mass, rigidBody.Param.Mass, 1e-10)
-	sizeChanged := !rigidBodyDelta.Size.NearEquals(rigidBody.Size, 1e-10)
-	if !massChanged && !sizeChanged {
-		return
-	}
-
 	r := mp.rigidBodies[modelIndex][rigidBody.Index()]
 	if r == nil || r.BtRigidBody == nil {
 		return
 	}
+	nextSize, nextMass := mp.resolveAppliedShapeMass(rigidBody, rigidBodyDelta)
+	if r.HasAppliedParams &&
+		nextSize.NearEquals(r.AppliedSize, 1e-10) &&
+		mmath.NearEquals(nextMass, r.AppliedMass, 1e-10) {
+		return
+	}
+	sizeChanged := !r.HasAppliedParams || !nextSize.NearEquals(r.AppliedSize, 1e-10)
 
 	btRigidBody := r.BtRigidBody
 	motionState := btRigidBody.GetMotionState().(bt.BtMotionState)
@@ -585,15 +607,7 @@ func (mp *PhysicsEngine) UpdateRigidBodyShapeMass(
 
 	currentLinearVel := btRigidBody.GetLinearVelocity()
 	currentAngularVel := btRigidBody.GetAngularVelocity()
-	currentMass := float32(0.0)
-	if btRigidBody.GetInvMass() != 0 {
-		currentMass = 1.0 / btRigidBody.GetInvMass()
-	}
-
-	newMass := currentMass
-	if rigidBody.PhysicsType != model.PHYSICS_TYPE_STATIC {
-		newMass = float32(mmath.Clamped(rigidBodyDelta.Mass, 0, math.MaxFloat64))
-	}
+	newMass := float32(mmath.Clamped(nextMass, 0, math.MaxFloat64))
 
 	needShapeUpdate := sizeChanged
 	if needShapeUpdate {
@@ -633,6 +647,9 @@ func (mp *PhysicsEngine) UpdateRigidBodyShapeMass(
 
 	mp.updateFlag(modelIndex, rigidBody)
 	btRigidBody.Activate(true)
+	r.AppliedSize = nextSize
+	r.AppliedMass = nextMass
+	r.HasAppliedParams = true
 }
 
 // findRigidBodyByCollisionObject は衝突オブジェクトから剛体参照を取得します。
