@@ -152,8 +152,9 @@ func BuildForPhysics(
 			counters.HardSyncStatic++
 			core.UpdateTransform(modelIndex, bone, &global, rigidBody)
 		case model.PHYSICS_TYPE_DYNAMIC_BONE:
-			counters.FollowDynamicBone++
-			core.FollowDeltaTransform(modelIndex, bone, &global, rigidBody)
+			// 旧 mlib と同等に、動的ボーン追従剛体も毎フレームの姿勢同期はハード更新で扱う。
+			counters.HardSyncDynamicBone++
+			core.UpdateTransform(modelIndex, bone, &global, rigidBody)
 		case model.PHYSICS_TYPE_DYNAMIC:
 			counters.SkippedDynamic++
 		}
@@ -161,7 +162,7 @@ func BuildForPhysics(
 	if logSummary && logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
 		logger.Verbose(
 			logging.VERBOSE_INDEX_PHYSICS,
-			"物理検証同期要約: model=%d frame=%v enabled=%t resetType=%d total=%d static=%d dynamic=%d dynamicBone=%d hardStatic=%d hardReset=%d follow=%d skipDynamic=%d skipDisabled=%d missingBone=%d missingBoneDelta=%d",
+			"物理検証同期要約: model=%d frame=%v enabled=%t resetType=%d total=%d static=%d dynamic=%d dynamicBone=%d hardStatic=%d hardDynamicBone=%d hardReset=%d skipDynamic=%d skipDisabled=%d missingBone=%d missingBoneDelta=%d",
 			modelIndex,
 			frame,
 			enabled,
@@ -171,8 +172,8 @@ func BuildForPhysics(
 			counters.Dynamic,
 			counters.DynamicBone,
 			counters.HardSyncStatic,
+			counters.HardSyncDynamicBone,
 			counters.HardSyncByReset,
-			counters.FollowDynamicBone,
 			counters.SkippedDynamic,
 			counters.SkippedByPhysicsDisabled,
 			counters.MissingBone,
@@ -367,8 +368,8 @@ type physicsSyncCounters struct {
 	Dynamic                  int
 	DynamicBone              int
 	HardSyncStatic           int
+	HardSyncDynamicBone      int
 	HardSyncByReset          int
-	FollowDynamicBone        int
 	SkippedDynamic           int
 	SkippedByPhysicsDisabled int
 	MissingBone              int
