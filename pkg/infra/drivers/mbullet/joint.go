@@ -64,7 +64,7 @@ func (mp *PhysicsEngine) initJoints(modelIndex int, pmxModel *model.PmxModel) {
 		if !mp.canCreateJoint(joint, pmxModel.RigidBodies) {
 			continue
 		}
-		jointTransform := bt.NewBtTransform(newBulletFromRad(joint.Param.Rotation), newBulletFromVec(joint.Param.Position))
+		jointTransform := newBulletTransform(joint.Param.Rotation, joint.Param.Position)
 		mp.initJoint(modelIndex, joint, jointTransform, nil)
 	}
 }
@@ -98,10 +98,7 @@ func (mp *PhysicsEngine) initJointsByBoneDeltas(
 		if bone != nil && boneDeltas.Contains(bone.Index()) {
 			jointTransform = mp.calculateJointTransform(joint, bone, boneDeltas)
 		} else {
-			jointTransform = bt.NewBtTransform(
-				newBulletFromRad(joint.Param.Rotation),
-				newBulletFromVec(joint.Param.Position),
-			)
+			jointTransform = newBulletTransform(joint.Param.Rotation, joint.Param.Position)
 			logger := logging.DefaultLogger()
 			if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
 				logger.Verbose(
@@ -175,10 +172,8 @@ func (mp *PhysicsEngine) calculateJointTransform(
 	boneTransform.SetFromOpenGLMatrix(&mat[0])
 
 	jointLocalPos := joint.Param.Position.Subed(bone.Position)
-	btJointLocalTransform := bt.NewBtTransform(
-		newBulletFromRad(joint.Param.Rotation),
-		newBulletFromVec(jointLocalPos),
-	)
+	btJointLocalTransform := newBulletTransform(joint.Param.Rotation, jointLocalPos)
+	defer bt.DeleteBtTransform(btJointLocalTransform)
 
 	jointTransform.Mult(boneTransform, btJointLocalTransform)
 	return jointTransform
@@ -191,15 +186,26 @@ func (mp *PhysicsEngine) initJoint(
 	jointTransform bt.BtTransform,
 	jointDelta *delta.JointDelta,
 ) {
+	if jointTransform != nil {
+		defer bt.DeleteBtTransform(jointTransform)
+	}
 	if !mp.validateJointRigidBodies(modelIndex, joint) {
 		return
 	}
 
-	rigidBodyB := mp.rigidBodies[modelIndex][joint.RigidBodyIndexB].RigidBody
-	btRigidBodyA := mp.rigidBodies[modelIndex][joint.RigidBodyIndexA].BtRigidBody
-	btRigidBodyB := mp.rigidBodies[modelIndex][joint.RigidBodyIndexB].BtRigidBody
+	rigidBodyValueA := mp.getRigidBodyValueByIndex(modelIndex, joint.RigidBodyIndexA)
+	rigidBodyValueB := mp.getRigidBodyValueByIndex(modelIndex, joint.RigidBodyIndexB)
+	if rigidBodyValueA == nil || rigidBodyValueB == nil {
+		return
+	}
+
+	rigidBodyB := rigidBodyValueB.RigidBody
+	btRigidBodyA := rigidBodyValueA.BtRigidBody
+	btRigidBodyB := rigidBodyValueB.BtRigidBody
 
 	jointLocalTransformA, jointLocalTransformB := mp.calculateJointLocalTransforms(btRigidBodyA, btRigidBodyB, jointTransform)
+	defer bt.DeleteBtTransform(jointLocalTransformA)
+	defer bt.DeleteBtTransform(jointLocalTransformB)
 	constraint := mp.createJointConstraint(btRigidBodyA, btRigidBodyB, jointLocalTransformA, jointLocalTransformB)
 	constraintConfig := mp.resolveJointConstraintConfig(modelIndex)
 
@@ -207,6 +213,11 @@ func (mp *PhysicsEngine) initJoint(
 
 	// 連結剛体同士の自己衝突有無はモデル単位設定で切り替える。
 	mp.world.AddConstraint(constraint, constraintConfig.DisableCollisionsBetweenLinkedBody)
+	if joint.Index() < 0 || joint.Index() >= len(mp.joints[modelIndex]) {
+		mp.world.RemoveConstraint(constraint)
+		bt.DeleteBtTypedConstraint(constraint)
+		return
+	}
 	mp.joints[modelIndex][joint.Index()] = &jointValue{joint: joint, btJoint: constraint}
 }
 
@@ -215,10 +226,12 @@ func (mp *PhysicsEngine) validateJointRigidBodies(modelIndex int, joint *model.J
 	if joint == nil {
 		return false
 	}
-	return mp.rigidBodies[modelIndex][joint.RigidBodyIndexB] != nil &&
-		mp.rigidBodies[modelIndex][joint.RigidBodyIndexA] != nil &&
-		mp.rigidBodies[modelIndex][joint.RigidBodyIndexB].RigidBody != nil &&
-		mp.rigidBodies[modelIndex][joint.RigidBodyIndexA].RigidBody != nil
+	rigidBodyValueA := mp.getRigidBodyValueByIndex(modelIndex, joint.RigidBodyIndexA)
+	rigidBodyValueB := mp.getRigidBodyValueByIndex(modelIndex, joint.RigidBodyIndexB)
+	return rigidBodyValueA != nil &&
+		rigidBodyValueB != nil &&
+		rigidBodyValueA.RigidBody != nil &&
+		rigidBodyValueB.RigidBody != nil
 }
 
 // calculateJointLocalTransforms は剛体のローカル座標系におけるジョイント変換を計算します。
@@ -230,12 +243,16 @@ func (mp *PhysicsEngine) calculateJointLocalTransforms(
 	worldTransformA := btRigidBodyA.GetWorldTransform().(bt.BtTransform)
 	jointLocalTransformA := bt.NewBtTransform()
 	jointLocalTransformA.SetIdentity()
-	jointLocalTransformA.Mult(worldTransformA.Inverse(), jointTransform)
+	invWorldTransformA := worldTransformA.Inverse()
+	defer bt.DeleteBtTransform(invWorldTransformA)
+	jointLocalTransformA.Mult(invWorldTransformA, jointTransform)
 
 	worldTransformB := btRigidBodyB.GetWorldTransform().(bt.BtTransform)
 	jointLocalTransformB := bt.NewBtTransform()
 	jointLocalTransformB.SetIdentity()
-	jointLocalTransformB.Mult(worldTransformB.Inverse(), jointTransform)
+	invWorldTransformB := worldTransformB.Inverse()
+	defer bt.DeleteBtTransform(invWorldTransformB)
+	jointLocalTransformB.Mult(invWorldTransformB, jointTransform)
 
 	return jointLocalTransformA, jointLocalTransformB
 }
@@ -271,27 +288,37 @@ func (mp *PhysicsEngine) configureJointConstraint(
 		rotationLimitMax = jointDelta.RotationLimitMax
 	}
 
-	constraint.SetLinearLowerLimit(bt.NewBtVector3(
+	linearLowerLimit := bt.NewBtVector3(
 		float32(translationLimitMin.X),
 		float32(translationLimitMin.Y),
 		float32(translationLimitMin.Z),
-	))
-	constraint.SetLinearUpperLimit(bt.NewBtVector3(
+	)
+	defer bt.DeleteBtVector3(linearLowerLimit)
+	constraint.SetLinearLowerLimit(linearLowerLimit)
+
+	linearUpperLimit := bt.NewBtVector3(
 		float32(translationLimitMax.X),
 		float32(translationLimitMax.Y),
 		float32(translationLimitMax.Z),
-	))
+	)
+	defer bt.DeleteBtVector3(linearUpperLimit)
+	constraint.SetLinearUpperLimit(linearUpperLimit)
 
-	constraint.SetAngularLowerLimit(bt.NewBtVector3(
+	angularLowerLimit := bt.NewBtVector3(
 		float32(rotationLimitMin.X),
 		float32(rotationLimitMin.Y),
 		float32(rotationLimitMin.Z),
-	))
-	constraint.SetAngularUpperLimit(bt.NewBtVector3(
+	)
+	defer bt.DeleteBtVector3(angularLowerLimit)
+	constraint.SetAngularLowerLimit(angularLowerLimit)
+
+	angularUpperLimit := bt.NewBtVector3(
 		float32(rotationLimitMax.X),
 		float32(rotationLimitMax.Y),
 		float32(rotationLimitMax.Z),
-	))
+	)
+	defer bt.DeleteBtVector3(angularUpperLimit)
+	constraint.SetAngularUpperLimit(angularUpperLimit)
 
 	mp.configureJointSprings(constraint, joint, rigidBodyB, jointDelta)
 	mp.configureBasicJointParams(constraint, constraintConfig)
@@ -353,7 +380,7 @@ func (mp *PhysicsEngine) UpdateJointParameters(
 		return
 	}
 
-	j := mp.joints[modelIndex][joint.Index()]
+	j := mp.getJointValueByIndex(modelIndex, joint.Index())
 	if j == nil || j.btJoint == nil {
 		return
 	}
@@ -363,31 +390,43 @@ func (mp *PhysicsEngine) UpdateJointParameters(
 		return
 	}
 
-	rigidBodyB := mp.rigidBodies[modelIndex][joint.RigidBodyIndexB].RigidBody
-	if rigidBodyB == nil {
+	rigidBodyValueB := mp.getRigidBodyValueByIndex(modelIndex, joint.RigidBodyIndexB)
+	if rigidBodyValueB == nil || rigidBodyValueB.RigidBody == nil {
 		return
 	}
+	rigidBodyB := rigidBodyValueB.RigidBody
 
-	constraint.SetLinearLowerLimit(bt.NewBtVector3(
+	linearLowerLimit := bt.NewBtVector3(
 		float32(jointDelta.TranslationLimitMin.X),
 		float32(jointDelta.TranslationLimitMin.Y),
 		float32(jointDelta.TranslationLimitMin.Z),
-	))
-	constraint.SetLinearUpperLimit(bt.NewBtVector3(
+	)
+	defer bt.DeleteBtVector3(linearLowerLimit)
+	constraint.SetLinearLowerLimit(linearLowerLimit)
+
+	linearUpperLimit := bt.NewBtVector3(
 		float32(jointDelta.TranslationLimitMax.X),
 		float32(jointDelta.TranslationLimitMax.Y),
 		float32(jointDelta.TranslationLimitMax.Z),
-	))
-	constraint.SetAngularLowerLimit(bt.NewBtVector3(
+	)
+	defer bt.DeleteBtVector3(linearUpperLimit)
+	constraint.SetLinearUpperLimit(linearUpperLimit)
+
+	angularLowerLimit := bt.NewBtVector3(
 		float32(jointDelta.RotationLimitMin.X),
 		float32(jointDelta.RotationLimitMin.Y),
 		float32(jointDelta.RotationLimitMin.Z),
-	))
-	constraint.SetAngularUpperLimit(bt.NewBtVector3(
+	)
+	defer bt.DeleteBtVector3(angularLowerLimit)
+	constraint.SetAngularLowerLimit(angularLowerLimit)
+
+	angularUpperLimit := bt.NewBtVector3(
 		float32(jointDelta.RotationLimitMax.X),
 		float32(jointDelta.RotationLimitMax.Y),
 		float32(jointDelta.RotationLimitMax.Z),
-	))
+	)
+	defer bt.DeleteBtVector3(angularUpperLimit)
+	constraint.SetAngularUpperLimit(angularUpperLimit)
 
 	if rigidBodyB.PhysicsType != model.PHYSICS_TYPE_STATIC {
 		constraint.EnableSpring(0, true)
@@ -405,6 +444,22 @@ func (mp *PhysicsEngine) UpdateJointParameters(
 		constraint.SetStiffness(5, float32(jointDelta.SpringConstantRotation.Z))
 	}
 	mp.configureBasicJointParams(constraint, mp.resolveJointConstraintConfig(modelIndex))
+}
+
+// getJointValueByIndex は物理エンジン内のジョイント情報をインデックスで取得する。
+func (mp *PhysicsEngine) getJointValueByIndex(modelIndex int, jointIndex int) *jointValue {
+	joints, ok := mp.joints[modelIndex]
+	if !ok || joints == nil {
+		return nil
+	}
+	if jointIndex < 0 || jointIndex >= len(joints) {
+		return nil
+	}
+	jointValue := joints[jointIndex]
+	if jointValue == nil || jointValue.btJoint == nil || jointValue.joint == nil {
+		return nil
+	}
+	return jointValue
 }
 
 // UpdateJointsSelectively は変更が必要なジョイントのみを選択的に更新します。

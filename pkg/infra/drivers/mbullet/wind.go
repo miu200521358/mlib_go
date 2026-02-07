@@ -60,6 +60,7 @@ func (mp *PhysicsEngine) applyWindForces(dt float32) {
 	windSpeed := float64(mp.windCfg.Speed) * gust
 	windVecMmd := dir.MuledScalar(windSpeed)
 	windVecBt := newBulletFromVec(windVecMmd)
+	defer bt.DeleteBtVector3(windVecBt)
 
 	windX := float64(windVecBt.GetX())
 	windY := float64(windVecBt.GetY())
@@ -91,7 +92,7 @@ func (mp *PhysicsEngine) applyWindForces(dt float32) {
 			}
 
 			speed := math.Sqrt(speed2)
-			area := mp.approxCrossSectionArea(rb.RigidBody, dir)
+			area := mp.approxCrossSectionArea(rb, dir)
 
 			invSpeed := 1.0 / speed
 			nrx := relX * invSpeed
@@ -157,12 +158,16 @@ func (mp *PhysicsEngine) applyWindForces(dt float32) {
 }
 
 // approxCrossSectionArea は風向きに対する見かけの断面積を近似計算します。
-func (mp *PhysicsEngine) approxCrossSectionArea(r *model.RigidBody, dir mmath.Vec3) float32 {
-	if r == nil {
+func (mp *PhysicsEngine) approxCrossSectionArea(r *RigidBodyValue, dir mmath.Vec3) float32 {
+	if r == nil || r.RigidBody == nil {
 		return 1.0
 	}
 	if dir.IsZero() {
 		return 1.0
+	}
+	size := r.RigidBody.Size
+	if r.HasAppliedParams {
+		size = r.AppliedSize
 	}
 
 	d := dir.Normalized()
@@ -170,25 +175,25 @@ func (mp *PhysicsEngine) approxCrossSectionArea(r *model.RigidBody, dir mmath.Ve
 	absY := math.Abs(d.Y)
 	absZ := math.Abs(d.Z)
 
-	switch r.Shape {
+	switch r.RigidBody.Shape {
 	case model.SHAPE_SPHERE:
-		rads := float64(r.Size.X)
+		rads := float64(size.X)
 		return float32(math.Pi * rads * rads)
 	case model.SHAPE_BOX:
-		wx := float64(2.0 * r.Size.X)
-		wy := float64(2.0 * r.Size.Y)
-		wz := float64(2.0 * r.Size.Z)
+		wx := float64(2.0 * size.X)
+		wy := float64(2.0 * size.Y)
+		wz := float64(2.0 * size.Z)
 		area := absX*(wy*wz) + absY*(wx*wz) + absZ*(wx*wy)
 		return float32(area)
 	case model.SHAPE_CAPSULE:
-		rad := float64(r.Size.X)
-		h := float64(r.Size.Y)
+		rad := float64(size.X)
+		h := float64(size.Y)
 		aAxis := math.Pi * rad * rad
 		aPerp := 2*rad*h + math.Pi*rad*rad
 		w := absY
 		return float32(w*aAxis + (1.0-w)*aPerp)
 	default:
-		rads := float64(r.Size.X)
+		rads := float64(size.X)
 		return float32(math.Pi * rads * rads)
 	}
 }

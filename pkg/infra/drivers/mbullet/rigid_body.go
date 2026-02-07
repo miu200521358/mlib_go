@@ -17,10 +17,6 @@ import (
 )
 
 const (
-	// boneLessRelativePositionScoreRatioThreshold は相対候補採用に必要な改善比率。
-	boneLessRelativePositionScoreRatioThreshold = 0.7
-	// boneLessRelativePositionScoreDeltaThreshold は相対候補採用に必要な最小改善量。
-	boneLessRelativePositionScoreDeltaThreshold = 0.3
 	// boneLessReferenceResolveScoreThreshold は参照補正を試行するジョイント整合スコア閾値。
 	boneLessReferenceResolveScoreThreshold = 5.0
 	// boneLessPoseMovedTranslationThreshold は姿勢移動検知に用いる平行移動閾値。
@@ -41,7 +37,7 @@ func (mp *PhysicsEngine) initRigidBodies(modelIndex int, pmxModel *model.PmxMode
 		if rigidBody == nil {
 			continue
 		}
-		btRigidBodyTransform := bt.NewBtTransform(newBulletFromRad(rigidBody.Rotation), newBulletFromVec(rigidBody.Position))
+		btRigidBodyTransform := newBulletTransform(rigidBody.Rotation, rigidBody.Position)
 		mp.initRigidBody(modelIndex, pmxModel.Bones, rigidBody, btRigidBodyTransform, nil)
 	}
 }
@@ -71,10 +67,7 @@ func (mp *PhysicsEngine) initRigidBodiesByBoneDeltas(
 				if rigidBodyDeltas != nil {
 					rigidBodyDelta = rigidBodyDeltas.Get(rigidBody.Index())
 				}
-				btRigidBodyTransform := bt.NewBtTransform(
-					newBulletFromRad(rigidBody.Rotation),
-					newBulletFromVec(rigidBody.Position),
-				)
+				btRigidBodyTransform := newBulletTransform(rigidBody.Rotation, rigidBody.Position)
 				var referenceRigidBody *model.RigidBody
 				rawScore, hasRawScore := mp.scoreBoneLessRigidBodyPositionByJoint(
 					pmxModel,
@@ -117,6 +110,11 @@ func (mp *PhysicsEngine) initRigidBodiesByBoneDeltas(
 						centerTransform := mp.resolveBoneLessRigidBodyTransformByCenter(pmxModel, boneDeltas, rigidBody)
 						if centerTransform != nil {
 							btRigidBodyTransform = centerTransform
+						} else {
+							bone0Transform := mp.resolveBoneLessRigidBodyTransformByBone0(pmxModel, boneDeltas, rigidBody)
+							if bone0Transform != nil {
+								btRigidBodyTransform = bone0Transform
+							}
 						}
 					}
 				}
@@ -158,7 +156,7 @@ func (mp *PhysicsEngine) initRigidBodiesByBoneDeltas(
 		boneTransform.SetFromOpenGLMatrix(&mat[0])
 
 		rigidBodyLocalPos := rigidBody.Position.Subed(bone.Position)
-		btRigidBodyLocalTransform := bt.NewBtTransform(newBulletFromRad(rigidBody.Rotation), newBulletFromVec(rigidBodyLocalPos))
+		btRigidBodyLocalTransform := newBulletTransform(rigidBody.Rotation, rigidBodyLocalPos)
 		defer bt.DeleteBtTransform(btRigidBodyLocalTransform)
 
 		btRigidBodyTransform.Mult(boneTransform, btRigidBodyLocalTransform)
@@ -202,10 +200,7 @@ func (mp *PhysicsEngine) resolveBoneLessRigidBodyTransform(
 	refBoneTransform.SetFromOpenGLMatrix(&mat[0])
 
 	refLocalPos := refRigidBody.Position.Subed(refBone.Position)
-	refLocalTransform := bt.NewBtTransform(
-		newBulletFromRad(refRigidBody.Rotation),
-		newBulletFromVec(refLocalPos),
-	)
+	refLocalTransform := newBulletTransform(refRigidBody.Rotation, refLocalPos)
 	defer bt.DeleteBtTransform(refLocalTransform)
 
 	refCurrentTransform := bt.NewBtTransform()
@@ -213,17 +208,11 @@ func (mp *PhysicsEngine) resolveBoneLessRigidBodyTransform(
 	refCurrentTransform.Mult(refBoneTransform, refLocalTransform)
 
 	// 参照剛体のレスト変換と対象剛体のレスト変換から相対変換を算出する。
-	refRestTransform := bt.NewBtTransform(
-		newBulletFromRad(refRigidBody.Rotation),
-		newBulletFromVec(refRigidBody.Position),
-	)
+	refRestTransform := newBulletTransform(refRigidBody.Rotation, refRigidBody.Position)
 	defer bt.DeleteBtTransform(refRestTransform)
 
-	targetRestPosition := mp.resolveBoneLessRigidBodyRestPosition(pmxModel, rigidBody, refBone)
-	targetRestTransform := bt.NewBtTransform(
-		newBulletFromRad(rigidBody.Rotation),
-		newBulletFromVec(targetRestPosition),
-	)
+	targetRestPosition := mp.resolveBoneLessRigidBodyRestPosition(pmxModel, rigidBody)
+	targetRestTransform := newBulletTransform(rigidBody.Rotation, targetRestPosition)
 	defer bt.DeleteBtTransform(targetRestTransform)
 
 	invRefRestTransform := refRestTransform.Inverse()
@@ -238,50 +227,66 @@ func (mp *PhysicsEngine) resolveBoneLessRigidBodyTransform(
 	return targetCurrentTransform, refRigidBody
 }
 
-// resolveBoneLessRigidBodyRestPosition はボーン未紐付け剛体のレスト位置候補を評価して返す。
+// resolveBoneLessRigidBodyRestPosition はボーン未紐付け剛体のレスト位置を優先順で解釈して返す。
 func (mp *PhysicsEngine) resolveBoneLessRigidBodyRestPosition(
 	pmxModel *model.PmxModel,
 	rigidBody *model.RigidBody,
-	refBone *model.Bone,
 ) mmath.Vec3 {
 	if rigidBody == nil {
 		return mmath.ZERO_VEC3
 	}
-	if pmxModel == nil || pmxModel.Joints == nil || refBone == nil {
-		return rigidBody.Position
-	}
 	rawPosition := rigidBody.Position
-	relativeToRefBonePosition := rawPosition.Added(refBone.Position)
-
+	if pmxModel == nil || pmxModel.Bones == nil {
+		return rawPosition
+	}
 	rawScore, hasRawScore := mp.scoreBoneLessRigidBodyPositionByJoint(
 		pmxModel,
 		rigidBody.Index(),
 		rawPosition,
 	)
-	relativeScore, hasRelativeScore := mp.scoreBoneLessRigidBodyPositionByJoint(
-		pmxModel,
-		rigidBody.Index(),
-		relativeToRefBonePosition,
-	)
-	if !hasRawScore && !hasRelativeScore {
-		return rawPosition
+
+	// 第1候補: センターボーンからの相対位置を絶対位置に変換する。
+	if centerBone, err := pmxModel.Bones.GetCenter(); err == nil && centerBone != nil {
+		centerCandidate := rawPosition.Added(centerBone.Position)
+		centerScore, hasCenterScore := mp.scoreBoneLessRigidBodyPositionByJoint(
+			pmxModel,
+			rigidBody.Index(),
+			centerCandidate,
+		)
+		if shouldAdoptBoneLessRestCandidate(hasRawScore, rawScore, hasCenterScore, centerScore) {
+			return centerCandidate
+		}
+	}
+	// 第2候補: bone_index=0 からの相対位置を絶対位置に変換する。
+	if bone0, err := pmxModel.Bones.Get(0); err == nil && bone0 != nil {
+		bone0Candidate := rawPosition.Added(bone0.Position)
+		bone0Score, hasBone0Score := mp.scoreBoneLessRigidBodyPositionByJoint(
+			pmxModel,
+			rigidBody.Index(),
+			bone0Candidate,
+		)
+		if shouldAdoptBoneLessRestCandidate(hasRawScore, rawScore, hasBone0Score, bone0Score) {
+			return bone0Candidate
+		}
+	}
+	// 最終候補: 変換できない場合は raw のまま使う。
+	return rawPosition
+}
+
+// shouldAdoptBoneLessRestCandidate は未紐付け剛体の位置候補を採用すべきか判定する。
+func shouldAdoptBoneLessRestCandidate(
+	hasRawScore bool,
+	rawScore float64,
+	hasCandidateScore bool,
+	candidateScore float64,
+) bool {
+	if !hasCandidateScore {
+		return false
 	}
 	if !hasRawScore {
-		return relativeToRefBonePosition
+		return true
 	}
-	if !hasRelativeScore {
-		return rawPosition
-	}
-	scoreDelta := rawScore - relativeScore
-	scoreRatio := 1.0
-	if rawScore > 1e-6 {
-		scoreRatio = relativeScore / rawScore
-	}
-	if scoreDelta > boneLessRelativePositionScoreDeltaThreshold &&
-		scoreRatio < boneLessRelativePositionScoreRatioThreshold {
-		return relativeToRefBonePosition
-	}
-	return rawPosition
+	return candidateScore <= rawScore+boneLessReferenceScoreEpsilon
 }
 
 // scoreBoneLessRigidBodyPositionByJoint は候補位置と接続ジョイント位置の一致度を評価する。
@@ -337,15 +342,49 @@ func (mp *PhysicsEngine) resolveBoneLessRigidBodyTransformByCenter(
 	centerTransform.SetFromOpenGLMatrix(&mat[0])
 	defer bt.DeleteBtTransform(centerTransform)
 
-	localPos := rigidBody.Position.Subed(centerBone.Position)
-	localTransform := bt.NewBtTransform(
-		newBulletFromRad(rigidBody.Rotation),
-		newBulletFromVec(localPos),
-	)
+	restAbsPos := mp.resolveBoneLessRigidBodyRestPosition(pmxModel, rigidBody)
+	localPos := restAbsPos.Subed(centerBone.Position)
+	localTransform := newBulletTransform(rigidBody.Rotation, localPos)
 	defer bt.DeleteBtTransform(localTransform)
 
 	targetTransform := bt.NewBtTransform()
 	targetTransform.Mult(centerTransform, localTransform)
+	return targetTransform
+}
+
+// resolveBoneLessRigidBodyTransformByBone0 は bone_index=0 姿勢を使って剛体初期変換を推定する。
+func (mp *PhysicsEngine) resolveBoneLessRigidBodyTransformByBone0(
+	pmxModel *model.PmxModel,
+	boneDeltas *delta.BoneDeltas,
+	rigidBody *model.RigidBody,
+) bt.BtTransform {
+	if pmxModel == nil || pmxModel.Bones == nil || boneDeltas == nil || rigidBody == nil {
+		return nil
+	}
+	bone0, err := pmxModel.Bones.Get(0)
+	if err != nil || bone0 == nil {
+		return nil
+	}
+	if !boneDeltas.Contains(bone0.Index()) {
+		return nil
+	}
+	bone0Delta := boneDeltas.Get(bone0.Index())
+	if bone0Delta == nil {
+		return nil
+	}
+
+	bone0Transform := bt.NewBtTransform()
+	mat := newMglMat4FromMat4(bone0Delta.FilledGlobalMatrix())
+	bone0Transform.SetFromOpenGLMatrix(&mat[0])
+	defer bt.DeleteBtTransform(bone0Transform)
+
+	restAbsPos := mp.resolveBoneLessRigidBodyRestPosition(pmxModel, rigidBody)
+	localPos := restAbsPos.Subed(bone0.Position)
+	localTransform := newBulletTransform(rigidBody.Rotation, localPos)
+	defer bt.DeleteBtTransform(localTransform)
+
+	targetTransform := bt.NewBtTransform()
+	targetTransform.Mult(bone0Transform, localTransform)
 	return targetTransform
 }
 
@@ -553,13 +592,17 @@ func (mp *PhysicsEngine) initRigidBody(
 	btRigidBodyTransform bt.BtTransform,
 	rigidBodyDelta *delta.RigidBodyDelta,
 ) {
+	if btRigidBodyTransform != nil {
+		defer bt.DeleteBtTransform(btRigidBodyTransform)
+	}
 	btCollisionShape := mp.createCollisionShape(rigidBody, rigidBodyDelta)
 	mass, localInertia := mp.calculateMassAndInertia(rigidBody, btCollisionShape, rigidBodyDelta)
+	defer bt.DeleteBtVector3(localInertia)
 
 	bonePos := mp.getBonePosition(bones, rigidBody)
-	btRigidBodyLocalTransform := bt.NewBtTransform(
-		newBulletFromRad(rigidBody.Rotation),
-		newBulletFromVec(rigidBody.Position.Subed(bonePos)),
+	btRigidBodyLocalTransform := newBulletTransform(
+		rigidBody.Rotation,
+		rigidBody.Position.Subed(bonePos),
 	)
 
 	motionState := bt.NewBtDefaultMotionState(btRigidBodyTransform)
@@ -570,6 +613,13 @@ func (mp *PhysicsEngine) initRigidBody(
 	mask := int(rigidBody.CollisionGroup.Mask)
 	appliedSize, appliedMass := mp.resolveAppliedShapeMass(rigidBody, rigidBodyDelta)
 	mp.world.AddRigidBody(btRigidBody, group, mask)
+	if rigidBody.Index() < 0 || rigidBody.Index() >= len(mp.rigidBodies[modelIndex]) {
+		mp.world.RemoveRigidBody(btRigidBody)
+		bt.DeleteBtMotionState(motionState)
+		bt.DeleteBtCollisionShape(btCollisionShape)
+		bt.DeleteBtRigidBody(btRigidBody)
+		return
+	}
 	mp.rigidBodies[modelIndex][rigidBody.Index()] = &RigidBodyValue{
 		RigidBody:        rigidBody,
 		BtRigidBody:      btRigidBody,
@@ -599,7 +649,9 @@ func (mp *PhysicsEngine) createCollisionShape(
 	case model.SHAPE_SPHERE:
 		return bt.NewBtSphereShape(float32(size.X))
 	case model.SHAPE_BOX:
-		return bt.NewBtBoxShape(bt.NewBtVector3(float32(size.X), float32(size.Y), float32(size.Z)))
+		sizeVec := bt.NewBtVector3(float32(size.X), float32(size.Y), float32(size.Z))
+		defer bt.DeleteBtVector3(sizeVec)
+		return bt.NewBtBoxShape(sizeVec)
 	case model.SHAPE_CAPSULE:
 		return bt.NewBtCapsuleShape(float32(size.X), float32(size.Y))
 	default:
@@ -685,14 +737,35 @@ func (mp *PhysicsEngine) deleteRigidBodies(modelIndex int) {
 			continue
 		}
 		mp.world.RemoveRigidBody(r.BtRigidBody)
+		motionStateAny := r.BtRigidBody.GetMotionState()
+		if motionStateAny != nil {
+			if motionState, ok := motionStateAny.(bt.BtMotionState); ok && motionState != nil {
+				bt.DeleteBtMotionState(motionState)
+			}
+		}
+		shapeAny := r.BtRigidBody.GetCollisionShape()
+		if shapeAny != nil {
+			if shape, ok := shapeAny.(bt.BtCollisionShape); ok && shape != nil {
+				bt.DeleteBtCollisionShape(shape)
+			}
+		}
+		if r.BtLocalTransform != nil {
+			bt.DeleteBtTransform(*r.BtLocalTransform)
+			r.BtLocalTransform = nil
+		}
 		bt.DeleteBtRigidBody(r.BtRigidBody)
+		r.BtRigidBody = nil
 	}
 	mp.rigidBodies[modelIndex] = nil
 }
 
 // updateFlag は剛体の物理フラグを更新します。
 func (mp *PhysicsEngine) updateFlag(modelIndex int, rigidBody *model.RigidBody) {
-	btRigidBody := mp.rigidBodies[modelIndex][rigidBody.Index()].BtRigidBody
+	body := mp.getRigidBodyValue(modelIndex, rigidBody)
+	if body == nil {
+		return
+	}
+	btRigidBody := body.BtRigidBody
 
 	if rigidBody.PhysicsType == model.PHYSICS_TYPE_STATIC {
 		btRigidBody.SetCollisionFlags(
@@ -715,11 +788,15 @@ func (mp *PhysicsEngine) getRigidBodyValue(modelIndex int, rigidBody *model.Rigi
 	if rigidBody == nil {
 		return nil
 	}
+	return mp.getRigidBodyValueByIndex(modelIndex, rigidBody.Index())
+}
+
+// getRigidBodyValueByIndex は物理エンジン内の剛体情報をインデックスで取得する。
+func (mp *PhysicsEngine) getRigidBodyValueByIndex(modelIndex int, rigidBodyIndex int) *RigidBodyValue {
 	bodies, ok := mp.rigidBodies[modelIndex]
 	if !ok || bodies == nil {
 		return nil
 	}
-	rigidBodyIndex := rigidBody.Index()
 	if rigidBodyIndex < 0 || rigidBodyIndex >= len(bodies) {
 		return nil
 	}
@@ -937,7 +1014,7 @@ func (mp *PhysicsEngine) UpdateRigidBodyShapeMass(
 		return
 	}
 
-	r := mp.rigidBodies[modelIndex][rigidBody.Index()]
+	r := mp.getRigidBodyValue(modelIndex, rigidBody)
 	if r == nil || r.BtRigidBody == nil {
 		return
 	}
@@ -975,6 +1052,7 @@ func (mp *PhysicsEngine) UpdateRigidBodyShapeMass(
 	}
 
 	newInertia := bt.NewBtVector3(float32(0.0), float32(0.0), float32(0.0))
+	defer bt.DeleteBtVector3(newInertia)
 	if newMass > 0 && rigidBody.PhysicsType != model.PHYSICS_TYPE_STATIC {
 		currentShape := btRigidBody.GetCollisionShape()
 		if currentShape != nil {
@@ -1010,25 +1088,10 @@ func (mp *PhysicsEngine) findRigidBodyByCollisionObject(
 	if hitObj == nil || !hasHit {
 		return -1, -1, false
 	}
-	defer func() {
-		if r := recover(); r != nil {
-			modelIndex = -1
-			rigidBodyIndex = -1
-			ok = false
-		}
-	}()
 
 	modelIndex = hitObj.GetUserIndex()
 	rigidBodyIndex = hitObj.GetUserIndex2()
-
-	bodies, exists := mp.rigidBodies[modelIndex]
-	if !exists {
-		return -1, -1, false
-	}
-	if rigidBodyIndex < 0 || rigidBodyIndex >= len(bodies) {
-		return -1, -1, false
-	}
-	if bodies[rigidBodyIndex] == nil || bodies[rigidBodyIndex].BtRigidBody == nil {
+	if mp.getRigidBodyValueByIndex(modelIndex, rigidBodyIndex) == nil {
 		return -1, -1, false
 	}
 
