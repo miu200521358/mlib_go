@@ -5,7 +5,7 @@
 package ui
 
 import (
-	"github.com/miu200521358/mlib_go/pkg/adapter/mpresenter/messages"
+	"github.com/miu200521358/mlib_go/cmd/pkg/adapter/mpresenter/messages"
 	"github.com/miu200521358/mlib_go/pkg/infra/controller"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
