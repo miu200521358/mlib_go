@@ -13,6 +13,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/mbullet/bt"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 )
 
 // initRigidBodies はモデルの剛体を初期化します。
@@ -57,6 +58,7 @@ func (mp *PhysicsEngine) initRigidBodiesByBoneDeltas(
 					rigidBodyDelta = rigidBodyDeltas.Get(rigidBody.Index())
 				}
 				btRigidBodyTransform, _ := mp.resolveBoneLessRigidBodyTransform(
+					modelIndex,
 					pmxModel,
 					boneDeltas,
 					rigidBody,
@@ -100,6 +102,7 @@ func (mp *PhysicsEngine) initRigidBodiesByBoneDeltas(
 
 // resolveBoneLessRigidBodyTransform はボーン未紐付け剛体の初期変換を参照剛体から推定する。
 func (mp *PhysicsEngine) resolveBoneLessRigidBodyTransform(
+	modelIndex int,
 	pmxModel *model.PmxModel,
 	boneDeltas *delta.BoneDeltas,
 	rigidBody *model.RigidBody,
@@ -107,7 +110,7 @@ func (mp *PhysicsEngine) resolveBoneLessRigidBodyTransform(
 	if pmxModel == nil || pmxModel.Joints == nil || pmxModel.Bones == nil || boneDeltas == nil || rigidBody == nil {
 		return nil, nil
 	}
-	refRigidBody := mp.findReferenceRigidBody(pmxModel, boneDeltas, rigidBody.Index())
+	refRigidBody := mp.findReferenceRigidBody(modelIndex, pmxModel, boneDeltas, rigidBody.Index())
 	if refRigidBody == nil {
 		return nil, nil
 	}
@@ -164,6 +167,7 @@ func (mp *PhysicsEngine) resolveBoneLessRigidBodyTransform(
 
 // findReferenceRigidBody はボーン未紐付け剛体の参照剛体をジョイントから探索する。
 func (mp *PhysicsEngine) findReferenceRigidBody(
+	modelIndex int,
 	pmxModel *model.PmxModel,
 	boneDeltas *delta.BoneDeltas,
 	rigidBodyIndex int,
@@ -171,6 +175,9 @@ func (mp *PhysicsEngine) findReferenceRigidBody(
 	if pmxModel == nil || pmxModel.Joints == nil || pmxModel.RigidBodies == nil || pmxModel.Bones == nil || boneDeltas == nil {
 		return nil
 	}
+
+	candidates := make([]referenceRigidBodyCandidate, 0)
+	candidateBodies := make(map[int]*model.RigidBody)
 	for _, joint := range pmxModel.Joints.Values() {
 		if joint == nil {
 			continue
@@ -198,9 +205,37 @@ func (mp *PhysicsEngine) findReferenceRigidBody(
 		if !boneDeltas.Contains(refBone.Index()) {
 			continue
 		}
-		return refRigidBody
+
+		candidates = append(candidates, referenceRigidBodyCandidate{
+			JointIndex:     joint.Index(),
+			RigidBodyIndex: otherIndex,
+		})
+		candidateBodies[otherIndex] = refRigidBody
 	}
-	return nil
+	// 優先順位は「ジョイントindex昇順」->「剛体index昇順」で固定し、候補が複数でも決定的に選ぶ。
+	selected, sortedCandidates, ok := selectReferenceRigidBodyCandidate(candidates)
+	if !ok {
+		return nil
+	}
+	if len(sortedCandidates) > 1 {
+		candidateIndexes := make([]int, 0, len(sortedCandidates))
+		for _, candidate := range sortedCandidates {
+			candidateIndexes = append(candidateIndexes, candidate.RigidBodyIndex)
+		}
+		logger := logging.DefaultLogger()
+		if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
+			logger.Verbose(
+				logging.VERBOSE_INDEX_PHYSICS,
+				"ボーン未紐付け剛体の参照候補が複数あるため優先順位で選択: model=%d target=%d selected=%d candidates=%v",
+				modelIndex,
+				rigidBodyIndex,
+				selected.RigidBodyIndex,
+				candidateIndexes,
+			)
+		}
+	}
+
+	return candidateBodies[selected.RigidBodyIndex]
 }
 
 // initRigidBody は個別の剛体を初期化します。
@@ -499,15 +534,30 @@ func (mp *PhysicsEngine) FollowDeltaTransform(
 	normalizedDeltaRotation := deltaRotation.Normalized()
 	defer bt.DeleteBtQuaternion(normalizedDeltaRotation)
 
-	linearVelocity := btRigidBody.GetLinearVelocity()
-	angularVelocity := btRigidBody.GetAngularVelocity()
-	rotatedLinearVelocity := bt.QuatRotate(normalizedDeltaRotation, linearVelocity)
-	rotatedAngularVelocity := bt.QuatRotate(normalizedDeltaRotation, angularVelocity)
-	defer bt.DeleteBtVector3(rotatedLinearVelocity)
-	defer bt.DeleteBtVector3(rotatedAngularVelocity)
+	deltaRotationAngle := resolveQuaternionRotationAngleFromW(float64(normalizedDeltaRotation.GetW()))
+	if shouldRotateVelocityByDeltaRotation(deltaRotationAngle, mp.followDeltaVelocityRotationMaxRad) {
+		linearVelocity := btRigidBody.GetLinearVelocity()
+		angularVelocity := btRigidBody.GetAngularVelocity()
+		rotatedLinearVelocity := bt.QuatRotate(normalizedDeltaRotation, linearVelocity)
+		rotatedAngularVelocity := bt.QuatRotate(normalizedDeltaRotation, angularVelocity)
+		defer bt.DeleteBtVector3(rotatedLinearVelocity)
+		defer bt.DeleteBtVector3(rotatedAngularVelocity)
 
-	btRigidBody.SetLinearVelocity(rotatedLinearVelocity)
-	btRigidBody.SetAngularVelocity(rotatedAngularVelocity)
+		btRigidBody.SetLinearVelocity(rotatedLinearVelocity)
+		btRigidBody.SetAngularVelocity(rotatedAngularVelocity)
+	} else {
+		logger := logging.DefaultLogger()
+		if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
+			logger.Verbose(
+				logging.VERBOSE_INDEX_PHYSICS,
+				"FollowDeltaTransform 速度回転を抑制: model=%d rigid=%d deltaDeg=%.3f maxDeg=%.3f",
+				modelIndex,
+				rigidBody.Index(),
+				mmath.RadToDeg(deltaRotationAngle),
+				mmath.RadToDeg(mp.followDeltaVelocityRotationMaxRad),
+			)
+		}
+	}
 	btRigidBody.Activate(true)
 
 	body.PrevBoneMatrix = *boneGlobalMatrix

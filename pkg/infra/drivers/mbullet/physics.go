@@ -19,6 +19,15 @@ type PhysicsConfig struct {
 	FixedTimeStep float32
 }
 
+// JointConstraintConfig はジョイント拘束の共通設定を表す。
+type JointConstraintConfig struct {
+	ERP                                float32
+	StopERP                            float32
+	CFM                                float32
+	StopCFM                            float32
+	DisableCollisionsBetweenLinkedBody bool
+}
+
 // WindConfig は風のパラメータ設定。
 type WindConfig struct {
 	Enabled          bool
@@ -55,8 +64,13 @@ type PhysicsEngine struct {
 	PhysicsSpf  float32
 	joints      map[int][]*jointValue
 	rigidBodies map[int][]*RigidBodyValue
-	windCfg     WindConfig
-	simTimeAcc  float32
+	jointConfig JointConstraintConfig
+	modelJoints map[int]JointConstraintConfig
+	// FollowDeltaTransform で速度回転を許容する最大角度[rad]。
+	// キーフレームの大ジャンプで速度まで回すとエネルギー注入が起きやすいため、しきい値で抑制する。
+	followDeltaVelocityRotationMaxRad float64
+	windCfg                           WindConfig
+	simTimeAcc                        float32
 }
 
 // NewPhysicsEngine は物理エンジンのインスタンスを生成する。
@@ -74,6 +88,16 @@ func NewPhysicsEngine(gravity *mmath.Vec3) *PhysicsEngine {
 		},
 		rigidBodies: make(map[int][]*RigidBodyValue),
 		joints:      make(map[int][]*jointValue),
+		// 既定では拘束を硬めにし、必要時のみモデル単位で上書きする。
+		jointConfig: JointConstraintConfig{
+			ERP:                                float32(0.8),
+			StopERP:                            float32(0.8),
+			CFM:                                float32(0.01),
+			StopCFM:                            float32(0.01),
+			DisableCollisionsBetweenLinkedBody: false,
+		},
+		modelJoints:                       make(map[int]JointConstraintConfig),
+		followDeltaVelocityRotationMaxRad: defaultFollowDeltaVelocityRotationMaxRadians,
 		windCfg: WindConfig{
 			Enabled:          false,
 			Direction:        mmath.UNIT_X_VEC3,
@@ -157,6 +181,7 @@ func (mp *PhysicsEngine) AddModelByDeltas(
 func (mp *PhysicsEngine) DeleteModel(modelIndex int) {
 	mp.deleteJoints(modelIndex)
 	mp.deleteRigidBodies(modelIndex)
+	delete(mp.modelJoints, modelIndex)
 }
 
 // clearModelFollowBoneCache はモデル単位の追従行列キャッシュを破棄する。
@@ -179,6 +204,11 @@ func (mp *PhysicsEngine) resetFollowBoneCache() {
 	for modelIndex := range mp.rigidBodies {
 		mp.clearModelFollowBoneCache(modelIndex)
 	}
+}
+
+// SetFollowDeltaVelocityRotationMaxRadians はFollowDeltaTransformの速度回転許容角度[rad]を設定する。
+func (mp *PhysicsEngine) SetFollowDeltaVelocityRotationMaxRadians(maxAngleRad float64) {
+	mp.followDeltaVelocityRotationMaxRad = clampFollowDeltaVelocityRotationMaxRadians(maxAngleRad)
 }
 
 // createWorld は Bullet ワールドを生成する。
