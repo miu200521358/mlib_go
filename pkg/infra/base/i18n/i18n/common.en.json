@@ -1480,6 +1480,26 @@
         "translation": "Use the mouse wheel to change FOV, middle-button drag to move, right-button drag to rotate.\nHold Shift for larger changes, Ctrl for smaller.\nUse numpad 1/2/4/5/6/8 to switch views like MMD."
     },
     {
+        "id": "カメラ手動操作(テンキー視点切替)",
+        "translation": "Numpad view switch"
+    },
+    {
+        "id": "カメラ手動操作(右ドラッグ回転)",
+        "translation": "Right-drag rotate"
+    },
+    {
+        "id": "カメラ手動操作(中クリックドラッグ移動)",
+        "translation": "Middle-drag pan"
+    },
+    {
+        "id": "カメラ手動操作(ホイール視野角変更)",
+        "translation": "Wheel FOV change"
+    },
+    {
+        "id": "カメラ手動操作スキップ警告",
+        "translation": "Skipped %s because camera motion is playing. Manual camera controls are available only while playback is stopped."
+    },
+    {
         "id": "フレームドロップONメッセージ",
         "translation": "Switch playback to \"real-time priority / allow frame drops\".\nUncheck to disallow frame drops and render every frame."
     },

@@ -22,11 +22,13 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/graphics_api"
+	"github.com/miu200521358/mlib_go/pkg/adapter/mpresenter/messages"
 	"github.com/miu200521358/mlib_go/pkg/adapter/physics_api"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
+	"github.com/miu200521358/mlib_go/pkg/infra/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/mbullet"
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/mgl"
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/render"
@@ -45,6 +47,8 @@ const (
 	rigidBodyHoverMinPixelRadius = 6.0
 	// collisionAllFilterMask は全ての剛体を対象にするフィルタマスク。
 	collisionAllFilterMask = int(^uint32(0))
+	// cameraOperationBlockedWarnCooldown はカメラ操作ブロック警告の最小通知間隔。
+	cameraOperationBlockedWarnCooldown = time.Second
 )
 
 // modelRendererLoadState はモデル描画の非同期読み込み状態を保持する。
@@ -105,6 +109,7 @@ type ViewerWindow struct {
 	selectedVertexHoverIndex      int
 	selectedVertexHoverModelIndex int
 	lastSelectedVertexHoverAt     time.Time
+	lastCameraBlockedWarnAt       time.Time
 
 	modelRenderers       []*render.ModelRenderer
 	modelRendererLoads   []modelRendererLoadState
@@ -1189,6 +1194,9 @@ func (vw *ViewerWindow) keyCallback(_ *glfw.Window, key glfw.Key, _ int, action 
 	}
 
 	if preset, ok := cameraPresets[key]; ok {
+		if vw.shouldSkipCameraManualOperation(messages.ViewerWindowKey001) {
+			return
+		}
 		vw.resetCameraPositionForPreset(preset.Yaw, preset.Pitch)
 		if verbose {
 			cam := vw.shader.Camera()
@@ -1281,9 +1289,13 @@ func (vw *ViewerWindow) cursorPosCallback(_ *glfw.Window, xpos, ypos float64) {
 		return
 	}
 	if vw.rightButtonPressed {
-		vw.updateCameraAngleByCursor(xpos, ypos)
+		if !vw.shouldSkipCameraManualOperation(messages.ViewerWindowKey002) {
+			vw.updateCameraAngleByCursor(xpos, ypos)
+		}
 	} else if vw.middleButtonPressed {
-		vw.updateCameraPositionByCursor(xpos, ypos)
+		if !vw.shouldSkipCameraManualOperation(messages.ViewerWindowKey003) {
+			vw.updateCameraPositionByCursor(xpos, ypos)
+		}
 	}
 	if selectionEnabled && vw.leftButtonPressed && vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) {
 		if vw.selectedVertexMode() == state.SELECTED_VERTEX_MODE_BOX {
@@ -2546,6 +2558,9 @@ func (vw *ViewerWindow) scrollCallback(_ *glfw.Window, _ float64, yoff float64) 
 	if cam == nil {
 		return
 	}
+	if vw.shouldSkipCameraManualOperation(messages.ViewerWindowKey004) {
+		return
+	}
 	vw.markCameraManualOverride()
 	if yoff > 0 {
 		cam.FieldOfView -= step
@@ -2577,6 +2592,28 @@ func (vw *ViewerWindow) markCameraManualOverride() {
 		return
 	}
 	vw.cameraManualOverride = true
+}
+
+// shouldSkipCameraManualOperation は再生中カメラモーション適用時に手動カメラ操作を抑止する。
+func (vw *ViewerWindow) shouldSkipCameraManualOperation(operationKey string) bool {
+	if vw == nil || !vw.isPlaying() {
+		return false
+	}
+	cameraMotion := vw.resolveCameraMotion()
+	if cameraMotion == nil || cameraMotion.CameraFrames == nil || cameraMotion.CameraFrames.Len() == 0 {
+		return false
+	}
+	now := time.Now()
+	if vw.lastCameraBlockedWarnAt.IsZero() || now.Sub(vw.lastCameraBlockedWarnAt) >= cameraOperationBlockedWarnCooldown {
+		vw.lastCameraBlockedWarnAt = now
+		operation := i18n.T(operationKey)
+		warnMessage := i18n.T(messages.ViewerWindowKey005)
+		logging.DefaultLogger().Warn(
+			warnMessage,
+			operation,
+		)
+	}
+	return true
 }
 
 // focusCallback はフォーカス連動の通知を行う。
