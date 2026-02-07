@@ -7,11 +7,12 @@ package widget
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"github.com/miu200521358/mlib_go/pkg/adapter/mpresenter/messages"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/miu200521358/mlib_go/pkg/adapter/mpresenter/messages"
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_audio"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"

@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/miu200521358/mlib_go/pkg/adapter/mpresenter/messages"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
@@ -165,7 +166,7 @@ func (l *Logger) Line() {
 	if !l.shouldOutput(logging.LOG_LEVEL_INFO) {
 		return
 	}
-	log.Print(l.translateKey("---------------------------------"))
+	log.Print(l.translateKey(messages.LoggingKey001))
 }
 
 // InfoLine は区切り線付き情報ログを出力する。
@@ -189,7 +190,7 @@ func (l *Logger) InfoTitle(title, msg string, params ...any) {
 	if !l.shouldOutput(logging.LOG_LEVEL_INFO) {
 		return
 	}
-	log.Printf(l.translateKey("■■■■■ %s ■■■■■"), title)
+	log.Printf(l.translateKey(messages.LoggingKey002), title)
 	log.Printf(l.formatMessage(logging.LOG_LEVEL_INFO, msg), params...)
 }
 
@@ -204,7 +205,7 @@ func (l *Logger) WarnTitle(title, msg string, params ...any) {
 	if !l.shouldOutput(logging.LOG_LEVEL_WARN) {
 		return
 	}
-	log.Printf(l.translateKey("~~~~~~~~~~ %s ~~~~~~~~~~"), title)
+	log.Printf(l.translateKey(messages.LoggingKey003), title)
 	log.Printf(l.formatMessage(logging.LOG_LEVEL_WARN, msg), params...)
 }
 
@@ -213,20 +214,20 @@ func (l *Logger) ErrorTitle(title string, err error, msg string, params ...any) 
 	if !l.shouldOutput(logging.LOG_LEVEL_ERROR) {
 		return
 	}
-	log.Printf(l.translateKey("********** %s **********"), title)
+	log.Printf(l.translateKey(messages.LoggingKey004), title)
 	if err != nil {
 		// ErrorID/対処法/スタックの制御はエラー種別で分岐する。
 		errID := merr.ExtractErrorID(err)
 		if errID != "" {
-			log.Printf("%s: %s", l.translateKey("エラーID"), errID)
+			log.Printf("%s: %s", l.translateKey(messages.ErrorCommonKey001), errID)
 		}
-		log.Printf(l.translateKey("エラーメッセージ: %s"), l.formatErrorMessage(err))
+		log.Printf(l.translateKey(messages.LoggingKey006), l.formatErrorMessage(err))
 		if extractErrorKind(err) == merr.ErrorKindValidate {
 			if remedy := l.formatErrorRemedy(errID); remedy != "" {
-				log.Printf("%s: %s", l.translateKey("対処方法"), remedy)
+				log.Printf("%s: %s", l.translateKey(messages.ErrorCommonKey002), remedy)
 			}
 		} else if logging.IsDebugStackEnabled() {
-			log.Printf(l.translateKey("スタックトレース:\n%s"), dumpAllGoroutines())
+			log.Printf(l.translateKey(messages.LoggingKey007), dumpAllGoroutines())
 		}
 	}
 	if msg != "" {
@@ -239,20 +240,20 @@ func (l *Logger) FatalTitle(title string, err error, msg string, params ...any) 
 	if !l.shouldOutput(logging.LOG_LEVEL_FATAL) {
 		return
 	}
-	log.Printf(l.translateKey("!!!!!!!!!! %s !!!!!!!!!!"), title)
+	log.Printf(l.translateKey(messages.LoggingKey005), title)
 	if err != nil {
 		// ErrorID/対処法/スタックの制御はエラー種別で分岐する。
 		errID := merr.ExtractErrorID(err)
 		if errID != "" {
-			log.Printf("%s: %s", l.translateKey("エラーID"), errID)
+			log.Printf("%s: %s", l.translateKey(messages.ErrorCommonKey001), errID)
 		}
-		log.Printf(l.translateKey("エラーメッセージ: %s"), l.formatErrorMessage(err))
+		log.Printf(l.translateKey(messages.LoggingKey006), l.formatErrorMessage(err))
 		if extractErrorKind(err) == merr.ErrorKindValidate {
 			if remedy := l.formatErrorRemedy(errID); remedy != "" {
-				log.Printf("%s: %s", l.translateKey("対処方法"), remedy)
+				log.Printf("%s: %s", l.translateKey(messages.ErrorCommonKey002), remedy)
 			}
 		} else if logging.IsDebugStackEnabled() {
-			log.Printf(l.translateKey("スタックトレース:\n%s"), dumpAllGoroutines())
+			log.Printf(l.translateKey(messages.LoggingKey007), dumpAllGoroutines())
 		}
 	}
 	if msg != "" {
@@ -331,7 +332,7 @@ func (l *Logger) formatErrorMessage(err error) string {
 	if detail == "" || detail == summary {
 		return summary
 	}
-	return summary + "\n" + fmt.Sprintf("%s: %s", l.translateKey("詳細"), detail)
+	return summary + "\n" + fmt.Sprintf("%s: %s", l.translateKey(messages.ErrorCommonKey003), detail)
 }
 
 // formatErrorRemedy はエラー管理表から対処法メッセージを取得する。

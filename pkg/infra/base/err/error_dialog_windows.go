@@ -187,11 +187,11 @@ func buildErrorText(translator sharedi18n.II18n, err error) string {
 		msg = err.Error()
 	}
 	if errID != "" {
-		msg = fmt.Sprintf("%s: %s\n%s", translateKey(translator, "エラーID"), errID, msg)
+		msg = fmt.Sprintf("%s: %s\n%s", translateKey(translator, messages.ErrorCommonKey001), errID, msg)
 	}
 	if extractErrorKind(err) == merr.ErrorKindValidate {
 		if remedy := formatErrorRemedy(translator, errID); remedy != "" {
-			msg += "\n\n" + fmt.Sprintf("%s:\n%s", translateKey(translator, "対処方法"), remedy)
+			msg += "\n\n" + fmt.Sprintf("%s:\n%s", translateKey(translator, messages.ErrorCommonKey002), remedy)
 		}
 	}
 	return msg
@@ -207,7 +207,7 @@ func formatErrorMessage(translator sharedi18n.II18n, err error) string {
 	if detail == "" || detail == summary {
 		return summary
 	}
-	return summary + "\n" + fmt.Sprintf("%s: %s", translateKey(translator, "詳細"), detail)
+	return summary + "\n" + fmt.Sprintf("%s: %s", translateKey(translator, messages.ErrorCommonKey003), detail)
 }
 
 // formatErrorRemedy はエラー管理表から対処法メッセージを取得する。
