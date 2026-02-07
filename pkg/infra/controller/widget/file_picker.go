@@ -17,6 +17,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_model"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_model/pmd"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_model/pmx"
+	io_model_vrm "github.com/miu200521358/mlib_go/pkg/adapter/io_model/vrm"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_motion"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_motion/vmd"
 	baseerr "github.com/miu200521358/mlib_go/pkg/infra/base/err"
@@ -124,6 +125,23 @@ func NewPmxPmdLoadFilePicker(userConfig iCommonUserConfig, translator i18n.II18n
 			{extension: "*.*", description: "All Files (*.*)"},
 		},
 		io_model.NewPmxPmdRepository(),
+	)
+}
+
+// NewVrmLoadFilePicker はVRM読み込み用のFilePickerを生成する。
+func NewVrmLoadFilePicker(userConfig iCommonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
+	return newFilePicker(
+		userConfig,
+		translator,
+		historyKey,
+		title,
+		tooltip,
+		onPathChanged,
+		[]filterExtension{
+			{extension: "*.vrm", description: "Vrm Files (*.vrm)"},
+			{extension: "*.*", description: "All Files (*.*)"},
+		},
+		io_model_vrm.NewVrmRepository(),
 	)
 }
 
