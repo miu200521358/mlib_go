@@ -168,8 +168,14 @@ func TestVrmRepositoryLoadVrm1PreferredAndBoneMapping(t *testing.T) {
 	if err != nil || extra == nil {
 		t.Fatalf("expected extra_node bone: %v", err)
 	}
-	if extra.Position.Z >= 0 {
-		t.Fatalf("expected z to be converted to minus, got %f", extra.Position.Z)
+	if extra.Position.X >= 0 {
+		t.Fatalf("expected x to be converted to minus for VRoid profile, got %f", extra.Position.X)
+	}
+	if extra.Position.Z <= 0 {
+		t.Fatalf("expected z to keep plus direction for VRoid profile, got %f", extra.Position.Z)
+	}
+	if extra.Position.X > -1.2 || extra.Position.X < -1.3 {
+		t.Fatalf("expected x to be scaled by 12.5, got %f", extra.Position.X)
 	}
 }
 
@@ -237,6 +243,160 @@ func TestExportArtifactsWritesGltfAndTextures(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(textureDir, result.TextureNames[0])); err != nil {
 		t.Fatalf("texture output not found: %v", err)
+	}
+}
+
+func TestVrmRepositoryLoadCreatesMeshFromPrimitive(t *testing.T) {
+	repository := NewVrmRepository()
+	tempDir := t.TempDir()
+	path := filepath.Join(tempDir, "mesh.vrm")
+
+	positions := []float32{
+		0.0, 0.0, 0.0,
+		0.0, 1.0, 0.0,
+		1.0, 0.0, 0.0,
+	}
+	normals := []float32{
+		0.0, 0.0, 1.0,
+		0.0, 0.0, 1.0,
+		0.0, 0.0, 1.0,
+	}
+	uvs := []float32{
+		0.0, 0.0,
+		0.0, 1.0,
+		1.0, 0.0,
+	}
+	indices := []uint16{0, 1, 2}
+
+	binChunk := buildInterleavedBinForMeshTest(t, positions, normals, uvs, indices)
+	doc := map[string]any{
+		"asset": map[string]any{
+			"version":   "2.0",
+			"generator": "VRM Test",
+		},
+		"extensionsUsed": []string{"VRMC_vrm"},
+		"nodes": []any{
+			map[string]any{
+				"name": "hips_node",
+			},
+			map[string]any{
+				"name": "mesh_node",
+				"mesh": 0,
+				"skin": 0,
+			},
+		},
+		"skins": []any{
+			map[string]any{
+				"joints": []int{0},
+			},
+		},
+		"meshes": []any{
+			map[string]any{
+				"name": "mesh0",
+				"primitives": []any{
+					map[string]any{
+						"attributes": map[string]any{
+							"POSITION":   0,
+							"NORMAL":     1,
+							"TEXCOORD_0": 2,
+						},
+						"indices":  3,
+						"material": 0,
+						"mode":     4,
+					},
+				},
+			},
+		},
+		"materials": []any{
+			map[string]any{
+				"name": "body",
+				"pbrMetallicRoughness": map[string]any{
+					"baseColorFactor": []float64{1.0, 1.0, 1.0, 1.0},
+				},
+			},
+		},
+		"buffers": []any{
+			map[string]any{
+				"byteLength": len(binChunk),
+			},
+		},
+		"bufferViews": []any{
+			map[string]any{
+				"buffer":     0,
+				"byteOffset": 0,
+				"byteLength": len(positions) * 4,
+			},
+			map[string]any{
+				"buffer":     0,
+				"byteOffset": len(positions) * 4,
+				"byteLength": len(normals) * 4,
+			},
+			map[string]any{
+				"buffer":     0,
+				"byteOffset": (len(positions) + len(normals)) * 4,
+				"byteLength": len(uvs) * 4,
+			},
+			map[string]any{
+				"buffer":     0,
+				"byteOffset": (len(positions) + len(normals) + len(uvs)) * 4,
+				"byteLength": len(indices) * 2,
+			},
+		},
+		"accessors": []any{
+			map[string]any{
+				"bufferView":    0,
+				"componentType": 5126,
+				"count":         3,
+				"type":          "VEC3",
+			},
+			map[string]any{
+				"bufferView":    1,
+				"componentType": 5126,
+				"count":         3,
+				"type":          "VEC3",
+			},
+			map[string]any{
+				"bufferView":    2,
+				"componentType": 5126,
+				"count":         3,
+				"type":          "VEC2",
+			},
+			map[string]any{
+				"bufferView":    3,
+				"componentType": 5123,
+				"count":         3,
+				"type":          "SCALAR",
+			},
+		},
+		"extensions": map[string]any{
+			"VRMC_vrm": map[string]any{
+				"specVersion": "1.0",
+				"humanoid": map[string]any{
+					"humanBones": map[string]any{
+						"hips": map[string]any{"node": 0},
+					},
+				},
+			},
+		},
+	}
+	writeGLBFileForUsecaseMeshTest(t, path, doc, binChunk)
+
+	hashableModel, err := repository.Load(path)
+	if err != nil {
+		t.Fatalf("load failed: %v", err)
+	}
+	pmxModel, ok := hashableModel.(*model.PmxModel)
+	if !ok {
+		t.Fatalf("expected *model.PmxModel, got %T", hashableModel)
+	}
+	if pmxModel.Vertices.Len() != 3 {
+		t.Fatalf("expected 3 vertices, got %d", pmxModel.Vertices.Len())
+	}
+	if pmxModel.Faces.Len() != 1 {
+		t.Fatalf("expected 1 face, got %d", pmxModel.Faces.Len())
+	}
+	if pmxModel.Materials.Len() != 1 {
+		t.Fatalf("expected 1 material, got %d", pmxModel.Materials.Len())
 	}
 }
 
@@ -333,4 +493,37 @@ func writeGLBFileForTestWithBin(t *testing.T, path string, doc map[string]any, b
 	if err := os.WriteFile(path, buf.Bytes(), 0o644); err != nil {
 		t.Fatalf("write file failed: %v", err)
 	}
+}
+
+// buildInterleavedBinForMeshTest はメッシュ検証用のBINチャンクを構築する。
+func buildInterleavedBinForMeshTest(t *testing.T, positions []float32, normals []float32, uvs []float32, indices []uint16) []byte {
+	t.Helper()
+	var buf bytes.Buffer
+	for _, value := range positions {
+		if err := binary.Write(&buf, binary.LittleEndian, value); err != nil {
+			t.Fatalf("write position failed: %v", err)
+		}
+	}
+	for _, value := range normals {
+		if err := binary.Write(&buf, binary.LittleEndian, value); err != nil {
+			t.Fatalf("write normal failed: %v", err)
+		}
+	}
+	for _, value := range uvs {
+		if err := binary.Write(&buf, binary.LittleEndian, value); err != nil {
+			t.Fatalf("write uv failed: %v", err)
+		}
+	}
+	for _, value := range indices {
+		if err := binary.Write(&buf, binary.LittleEndian, value); err != nil {
+			t.Fatalf("write index failed: %v", err)
+		}
+	}
+	return buf.Bytes()
+}
+
+// writeGLBFileForUsecaseMeshTest はテスト用JSON/BINをGLBとして書き込む。
+func writeGLBFileForUsecaseMeshTest(t *testing.T, path string, doc map[string]any, binChunk []byte) {
+	t.Helper()
+	writeGLBFileForTestWithBin(t, path, doc, binChunk)
 }

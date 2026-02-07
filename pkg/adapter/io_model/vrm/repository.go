@@ -62,9 +62,9 @@ func (r *VrmRepository) Load(path string) (hashable.IHashable, error) {
 		}
 		return nil, io_common.NewIoParseFailed("VRMファイルの読み取りに失敗しました", err)
 	}
-	jsonChunk, err := parseGLBJSONChunk(b)
+	jsonChunk, binChunk, err := parseGLBChunks(b)
 	if err != nil {
-		return nil, err
+		return nil, io_common.NewIoParseFailed("VRM GLBチャンクの解析に失敗しました", err)
 	}
 	doc := gltfDocument{}
 	if err := json.Unmarshal(jsonChunk, &doc); err != nil {
@@ -82,7 +82,7 @@ func (r *VrmRepository) Load(path string) (hashable.IHashable, error) {
 	if err != nil {
 		return nil, err
 	}
-	modelData, err := buildPmxModel(path, &doc, worldPositions, parentIndexes, humanBoneNames, vrmData, r.InferName(path))
+	modelData, err := buildPmxModel(path, &doc, binChunk, worldPositions, parentIndexes, humanBoneNames, vrmData, r.InferName(path))
 	if err != nil {
 		return nil, err
 	}
@@ -99,6 +99,14 @@ func (r *VrmRepository) Load(path string) (hashable.IHashable, error) {
 // gltfDocument はVRM読込時に必要なglTFトップレベル要素を表す。
 type gltfDocument struct {
 	Asset          gltfAsset                  `json:"asset"`
+	Buffers        []gltfBuffer               `json:"buffers"`
+	BufferViews    []gltfBufferView           `json:"bufferViews"`
+	Accessors      []gltfAccessor             `json:"accessors"`
+	Meshes         []gltfMesh                 `json:"meshes"`
+	Skins          []gltfSkin                 `json:"skins"`
+	Materials      []gltfMaterial             `json:"materials"`
+	Textures       []gltfTexture              `json:"textures"`
+	Images         []gltfImage                `json:"images"`
 	ExtensionsUsed []string                   `json:"extensionsUsed"`
 	Nodes          []gltfNode                 `json:"nodes"`
 	Extensions     map[string]json.RawMessage `json:"extensions"`
@@ -120,11 +128,84 @@ type gltfScene struct {
 // gltfNode はglTF node要素を表す。
 type gltfNode struct {
 	Name        string    `json:"name"`
+	Mesh        *int      `json:"mesh"`
+	Skin        *int      `json:"skin"`
 	Children    []int     `json:"children"`
 	Matrix      []float64 `json:"matrix"`
 	Translation []float64 `json:"translation"`
 	Rotation    []float64 `json:"rotation"`
 	Scale       []float64 `json:"scale"`
+}
+
+// gltfBuffer はglTF buffer要素を表す。
+type gltfBuffer struct {
+	ByteLength int `json:"byteLength"`
+}
+
+// gltfBufferView はglTF bufferView要素を表す。
+type gltfBufferView struct {
+	Buffer     int `json:"buffer"`
+	ByteOffset int `json:"byteOffset"`
+	ByteLength int `json:"byteLength"`
+	ByteStride int `json:"byteStride"`
+}
+
+// gltfAccessor はglTF accessor要素を表す。
+type gltfAccessor struct {
+	BufferView    *int   `json:"bufferView"`
+	ByteOffset    int    `json:"byteOffset"`
+	ComponentType int    `json:"componentType"`
+	Count         int    `json:"count"`
+	Type          string `json:"type"`
+	Normalized    bool   `json:"normalized"`
+}
+
+// gltfMesh はglTF mesh要素を表す。
+type gltfMesh struct {
+	Name       string          `json:"name"`
+	Primitives []gltfPrimitive `json:"primitives"`
+}
+
+// gltfPrimitive はglTF mesh primitive要素を表す。
+type gltfPrimitive struct {
+	Attributes map[string]int `json:"attributes"`
+	Indices    *int           `json:"indices"`
+	Material   *int           `json:"material"`
+	Mode       *int           `json:"mode"`
+}
+
+// gltfSkin はglTF skin要素を表す。
+type gltfSkin struct {
+	Joints []int `json:"joints"`
+}
+
+// gltfMaterial はglTF material要素を表す。
+type gltfMaterial struct {
+	Name                 string                   `json:"name"`
+	DoubleSided          bool                     `json:"doubleSided"`
+	PbrMetallicRoughness gltfPbrMetallicRoughness `json:"pbrMetallicRoughness"`
+}
+
+// gltfPbrMetallicRoughness はPBR基本材質情報を表す。
+type gltfPbrMetallicRoughness struct {
+	BaseColorFactor  []float64       `json:"baseColorFactor"`
+	BaseColorTexture *gltfTextureRef `json:"baseColorTexture"`
+}
+
+// gltfTextureRef は材質から参照されるテクスチャ参照を表す。
+type gltfTextureRef struct {
+	Index int `json:"index"`
+}
+
+// gltfTexture はglTF texture要素を表す。
+type gltfTexture struct {
+	Source *int `json:"source"`
+}
+
+// gltfImage はglTF image要素を表す。
+type gltfImage struct {
+	Name string `json:"name"`
+	URI  string `json:"uri"`
 }
 
 // vrm0Extension はVRM0拡張の必要要素を表す。
@@ -642,12 +723,14 @@ func humanBonePriority(humanBoneName string) int {
 func buildPmxModel(
 	path string,
 	doc *gltfDocument,
+	binChunk []byte,
 	worldPositions []mmath.Vec3,
 	parentIndexes []int,
 	humanBoneNames map[int]string,
 	vrmData *modelvrm.VrmData,
 	inferredName string,
 ) (*model.PmxModel, error) {
+	conversion := buildVrmConversion(vrmData)
 	modelData := model.NewPmxModel()
 	modelData.SetPath(path)
 	modelData.SetName(inferredName)
@@ -659,7 +742,7 @@ func buildPmxModel(
 		boneName := resolveNodeBoneName(nodeIndex, node.Name, humanBoneNames)
 		boneName = ensureUniqueBoneName(boneName, usedNames)
 		bone := &model.Bone{
-			Position:         convertVrmPositionToPmx(worldPositions[nodeIndex]),
+			Position:         convertVrmPositionToPmx(worldPositions[nodeIndex], conversion),
 			ParentIndex:      -1,
 			TailIndex:        -1,
 			EffectIndex:      -1,
@@ -709,6 +792,10 @@ func buildPmxModel(
 		bone.TailPosition = generateTailOffset(bone, parentBone)
 	}
 
+	if err := appendMeshData(modelData, doc, binChunk, nodeToBoneIndex, conversion); err != nil {
+		return nil, err
+	}
+
 	return modelData, nil
 }
 
@@ -739,8 +826,14 @@ func ensureUniqueBoneName(name string, used map[string]int) string {
 }
 
 // convertVrmPositionToPmx はOpenGL系の座標をPMX向けへ変換する。
-func convertVrmPositionToPmx(v mmath.Vec3) mmath.Vec3 {
-	return mmath.Vec3{Vec: r3.Vec{X: v.X, Y: v.Y, Z: -v.Z}}
+func convertVrmPositionToPmx(v mmath.Vec3, conversion vrmConversion) mmath.Vec3 {
+	return mmath.Vec3{
+		Vec: r3.Vec{
+			X: v.X * conversion.Scale * conversion.Axis.X,
+			Y: v.Y * conversion.Scale * conversion.Axis.Y,
+			Z: v.Z * conversion.Scale * conversion.Axis.Z,
+		},
+	}
 }
 
 // findTailBoneIndex は子node一覧から末端接続先のボーンindexを返す。
