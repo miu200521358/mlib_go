@@ -470,15 +470,14 @@ func (mp *PhysicsEngine) UpdateTransform(
 	btRigidBodyLocalTransform := *body.BtLocalTransform
 
 	motionState := btRigidBody.GetMotionState().(bt.BtMotionState)
-	currentTransform := bt.NewBtTransform()
-	defer bt.DeleteBtTransform(currentTransform)
+	worldTransform := bt.NewBtTransform()
+	defer bt.DeleteBtTransform(worldTransform)
 
-	currentTransform.Mult(boneTransform, btRigidBodyLocalTransform)
-	// 物理シミュレーションに反映させるため、剛体とモーションステートの両方を更新する。
-	btRigidBody.SetWorldTransform(currentTransform)
-	btRigidBody.SetInterpolationWorldTransform(currentTransform)
-	motionState.SetWorldTransform(currentTransform)
-	btRigidBody.Activate(true)
+	worldTransform.Mult(boneTransform, btRigidBodyLocalTransform)
+	// 旧 mlib と同等に、剛体追従は MotionState 更新を基準とする。
+	// 動的剛体へ直接 SetWorldTransform を繰り返すとソルバの warm start を崩して不安定化しやすいため、
+	// ここでは MotionState の更新に限定する。
+	motionState.SetWorldTransform(worldTransform)
 	body.PrevBoneMatrix = *boneGlobalMatrix
 	body.HasPrevBone = true
 }
