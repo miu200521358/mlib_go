@@ -106,13 +106,14 @@ type ViewerWindow struct {
 	selectedVertexHoverModelIndex int
 	lastSelectedVertexHoverAt     time.Time
 
-	modelRenderers     []*render.ModelRenderer
-	modelRendererLoads []modelRendererLoadState
-	loadResults        chan *modelRendererLoadResult
-	motions            []*motion.VmdMotion
-	cameraMotion       *motion.VmdMotion
-	vmdDeltas          []*delta.VmdDeltas
-	physicsModelHashes []string
+	modelRenderers       []*render.ModelRenderer
+	modelRendererLoads   []modelRendererLoadState
+	loadResults          chan *modelRendererLoadResult
+	motions              []*motion.VmdMotion
+	cameraMotion         *motion.VmdMotion
+	cameraManualOverride bool
+	vmdDeltas            []*delta.VmdDeltas
+	physicsModelHashes   []string
 
 	leftButtonPressed               bool
 	middleButtonPressed             bool
@@ -278,6 +279,7 @@ func (vw *ViewerWindow) resetCameraPosition(yaw, pitch float64) {
 	if cam == nil {
 		return
 	}
+	vw.markCameraManualOverride()
 	cam.ResetPosition(yaw, pitch)
 	if cam.FieldOfView == 0 {
 		cam.FieldOfView = graphics_api.FieldOfViewAngle
@@ -292,6 +294,7 @@ func (vw *ViewerWindow) resetCameraPositionForPreset(yaw, pitch float64) {
 	if cam == nil {
 		return
 	}
+	vw.markCameraManualOverride()
 	cam.ResetPosition(yaw, pitch)
 	cam.FieldOfView = graphics_api.FieldOfViewAngle
 	vw.shader.SetCamera(cam)
@@ -750,7 +753,98 @@ func (vw *ViewerWindow) syncPhysicsModel(modelIndex int, modelData *model.PmxMod
 		}
 		vw.physics.AddModelByDeltas(modelIndex, modelData, vmdDeltas.Bones, physicsDeltas)
 		vw.physicsModelHashes[modelIndex] = modelHash
+		vw.logPhysicsVerificationModelSync(modelIndex, modelData, physicsDeltas)
 	}
+}
+
+// logPhysicsVerificationModelSync は物理検証用にモデル同期時の要約情報を出力する。
+func (vw *ViewerWindow) logPhysicsVerificationModelSync(modelIndex int, modelData *model.PmxModel, physicsDeltas *delta.PhysicsDeltas) {
+	logger := logging.DefaultLogger()
+	if !logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) || modelData == nil {
+		return
+	}
+
+	rigidTotal := 0
+	staticCount := 0
+	dynamicCount := 0
+	dynamicBoneCount := 0
+	boneLessCount := 0
+	if modelData.RigidBodies != nil {
+		for _, rigidBody := range modelData.RigidBodies.Values() {
+			if rigidBody == nil {
+				continue
+			}
+			rigidTotal++
+			if rigidBody.BoneIndex < 0 {
+				boneLessCount++
+			}
+			switch rigidBody.PhysicsType {
+			case model.PHYSICS_TYPE_STATIC:
+				staticCount++
+			case model.PHYSICS_TYPE_DYNAMIC:
+				dynamicCount++
+			case model.PHYSICS_TYPE_DYNAMIC_BONE:
+				dynamicBoneCount++
+			}
+		}
+	}
+
+	jointTotal := 0
+	if modelData.Joints != nil {
+		for _, joint := range modelData.Joints.Values() {
+			if joint == nil {
+				continue
+			}
+			jointTotal++
+		}
+	}
+
+	rigidDeltaCount := countRigidBodyDeltaEntries(physicsDeltas)
+	jointDeltaCount := countJointDeltaEntries(physicsDeltas)
+	logger.Verbose(
+		logging.VERBOSE_INDEX_PHYSICS,
+		"物理検証モデル同期: window=%d model=%d rigid(total=%d static=%d dynamic=%d dynamicBone=%d boneLess=%d) joint=%d deltas(rigid=%d joint=%d)",
+		vw.windowIndex,
+		modelIndex,
+		rigidTotal,
+		staticCount,
+		dynamicCount,
+		dynamicBoneCount,
+		boneLessCount,
+		jointTotal,
+		rigidDeltaCount,
+		jointDeltaCount,
+	)
+}
+
+// countRigidBodyDeltaEntries は剛体差分の非nil件数を返す。
+func countRigidBodyDeltaEntries(physicsDeltas *delta.PhysicsDeltas) int {
+	if physicsDeltas == nil || physicsDeltas.RigidBodies == nil {
+		return 0
+	}
+	count := 0
+	physicsDeltas.RigidBodies.ForEach(func(index int, rigidBodyDelta *delta.RigidBodyDelta) bool {
+		if rigidBodyDelta != nil {
+			count++
+		}
+		return true
+	})
+	return count
+}
+
+// countJointDeltaEntries はジョイント差分の非nil件数を返す。
+func countJointDeltaEntries(physicsDeltas *delta.PhysicsDeltas) int {
+	if physicsDeltas == nil || physicsDeltas.Joints == nil {
+		return 0
+	}
+	count := 0
+	physicsDeltas.Joints.ForEach(func(index int, jointDelta *delta.JointDelta) bool {
+		if jointDelta != nil {
+			count++
+		}
+		return true
+	})
+	return count
 }
 
 // loadModelRenderers はモデルレンダラを共有状態から同期し、描画停止が必要か返す。
@@ -994,11 +1088,13 @@ func (vw *ViewerWindow) loadCameraMotion() {
 		if cameraMotion, ok := raw.(*motion.VmdMotion); ok && cameraMotion != nil {
 			if vw.cameraMotion == nil || vw.cameraMotion.Hash() != cameraMotion.Hash() {
 				vw.cameraMotion = cameraMotion
+				vw.cameraManualOverride = false
 			}
 			return
 		}
 	}
 	vw.cameraMotion = nil
+	vw.cameraManualOverride = false
 }
 
 // applyCameraMotion は現在フレームのカメラモーションをカメラへ適用する。
@@ -1008,6 +1104,12 @@ func (vw *ViewerWindow) applyCameraMotion(frame motion.Frame) {
 	}
 	cameraMotion := vw.resolveCameraMotion()
 	if cameraMotion == nil || cameraMotion.CameraFrames == nil || cameraMotion.CameraFrames.Len() == 0 {
+		return
+	}
+	if !vw.isPlaying() {
+		vw.cameraManualOverride = false
+	}
+	if vw.cameraManualOverride {
 		return
 	}
 
@@ -1081,6 +1183,9 @@ func (vw *ViewerWindow) keyCallback(_ *glfw.Window, key glfw.Key, _ int, action 
 			vw.ctrlPressed = false
 			return
 		}
+	}
+	if action != glfw.Press {
+		return
 	}
 
 	if preset, ok := cameraPresets[key]; ok {
@@ -2373,6 +2478,7 @@ func (vw *ViewerWindow) updateCameraAngleByCursor(xpos, ypos float64) {
 	if cam == nil {
 		return
 	}
+	vw.markCameraManualOverride()
 	cam.RotateOrbit(xOffset, yOffset)
 	vw.shader.SetCamera(cam)
 	vw.syncCameraToOthers()
@@ -2388,6 +2494,7 @@ func (vw *ViewerWindow) updateCameraPositionByCursor(xpos, ypos float64) {
 	if cam == nil || cam.Position == nil || cam.LookAtCenter == nil {
 		return
 	}
+	vw.markCameraManualOverride()
 
 	right := cam.RightVector()
 	up := cam.UpVector()
@@ -2439,6 +2546,7 @@ func (vw *ViewerWindow) scrollCallback(_ *glfw.Window, _ float64, yoff float64) 
 	if cam == nil {
 		return
 	}
+	vw.markCameraManualOverride()
 	if yoff > 0 {
 		cam.FieldOfView -= step
 		if cam.FieldOfView < 1.0 {
@@ -2449,6 +2557,26 @@ func (vw *ViewerWindow) scrollCallback(_ *glfw.Window, _ float64, yoff float64) 
 	}
 	vw.shader.SetCamera(cam)
 	vw.syncCameraToOthers()
+}
+
+// isPlaying は再生中か判定する。
+func (vw *ViewerWindow) isPlaying() bool {
+	if vw == nil || vw.list == nil || vw.list.shared == nil {
+		return false
+	}
+	return vw.list.shared.HasFlag(state.STATE_FLAG_PLAYING)
+}
+
+// markCameraManualOverride は再生中の手動カメラ操作でモーション上書きを抑止する。
+func (vw *ViewerWindow) markCameraManualOverride() {
+	if vw == nil || !vw.isPlaying() {
+		return
+	}
+	cameraMotion := vw.resolveCameraMotion()
+	if cameraMotion == nil || cameraMotion.CameraFrames == nil || cameraMotion.CameraFrames.Len() == 0 {
+		return
+	}
+	vw.cameraManualOverride = true
 }
 
 // focusCallback はフォーカス連動の通知を行う。

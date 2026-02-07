@@ -482,19 +482,11 @@ func (vl *ViewerManager) processFrame(elapsed float64) (bool, float32) {
 		return false, 0
 	}
 
-	logger := logging.DefaultLogger()
 	frame := vl.shared.Frame()
 	maxFrame := vl.shared.MaxFrame()
 	playing := vl.shared.HasFlag(state.STATE_FLAG_PLAYING)
 	frameDrop := vl.shared.HasFlag(state.STATE_FLAG_FRAME_DROP) || !playing
 	defaultSpf := mtime.FpsToSpf(defaultFps)
-	physicsEnabled := vl.shared.HasFlag(state.STATE_FLAG_PHYSICS_ENABLED)
-
-	if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
-		logger.Verbose(logging.VERBOSE_INDEX_PHYSICS,
-			"物理フレーム開始: frame=%v playing=%t physics=%t windowCount=%d elapsed=%.4f",
-			frame, playing, physicsEnabled, len(vl.windowList), elapsed)
-	}
 
 	physicsWorldMotions := vl.physicsMotionsScratch
 	if cap(physicsWorldMotions) < len(vl.windowList) {
@@ -547,11 +539,6 @@ func (vl *ViewerManager) processFrame(elapsed float64) (bool, float32) {
 	for i := range physicsWorldMotions {
 		physicsResetType = maxResetType(physicsResetType, resolveResetTypeFromMotion(physicsWorldMotions[i], motion.Frame(frame)))
 	}
-	if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
-		logger.Verbose(logging.VERBOSE_INDEX_PHYSICS,
-			"物理リセット種別: frame=%v resetType=%d", frame, physicsResetType)
-	}
-
 	// 描画前にモデル/モーションを同期し、読み込み中は描画と物理を停止する。
 	loading := false
 	for _, vw := range vl.windowList {
@@ -569,11 +556,6 @@ func (vl *ViewerManager) processFrame(elapsed float64) (bool, float32) {
 		physicsDeltasByWindow[i] = vl.buildPhysicsDeltas(vw, motion.Frame(frame))
 		maxSubSteps := resolveMaxSubSteps(physicsWorldMotions[i], motion.Frame(frame))
 		fixedTimeStep := resolveFixedTimeStep(physicsWorldMotions[i], motion.Frame(frame))
-		if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
-			logger.Verbose(logging.VERBOSE_INDEX_PHYSICS,
-				"物理前変形: window=%d frame=%v timeStep=%.5f maxSubSteps=%d fixed=%.5f",
-				vw.windowIndex, frame, timeSteps[i], maxSubSteps, fixedTimeStep)
-		}
 		vl.deformWindow(
 			vw,
 			vw.motions,
@@ -596,11 +578,6 @@ func (vl *ViewerManager) processFrame(elapsed float64) (bool, float32) {
 			gravity := resolveGravity(physicsWorldMotions[i], motion.Frame(frame))
 			maxSubSteps := resolveMaxSubSteps(physicsWorldMotions[i], motion.Frame(frame))
 			fixedTimeStep := resolveFixedTimeStep(physicsWorldMotions[i], motion.Frame(frame))
-			if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
-				logger.Verbose(logging.VERBOSE_INDEX_PHYSICS,
-					"物理リセット開始: window=%d frame=%v resetType=%d gravity=%s",
-					vw.windowIndex, frame, physicsResetType, gravity.StringByDigits(4))
-			}
 			vl.resetPhysics(
 				vw,
 				motion.Frame(frame),
@@ -645,10 +622,6 @@ func (vl *ViewerManager) processFrame(elapsed float64) (bool, float32) {
 		}
 	}
 
-	if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
-		logger.Verbose(logging.VERBOSE_INDEX_PHYSICS,
-			"物理フレーム終了: frame=%v playing=%t physics=%t", frame, playing, physicsEnabled)
-	}
 	meanTimeStep := float32(mmath.Mean(timeSteps))
 	return true, meanTimeStep
 }
@@ -829,12 +802,8 @@ func (vl *ViewerManager) deformWindow(
 		motions = nil
 	}
 
-	logger := logging.DefaultLogger()
 	ikDebugFactory := vl.ikDebugFactory()
 	physicsEnabled := vl.shared.HasFlag(state.STATE_FLAG_PHYSICS_ENABLED)
-	if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) && vw.physics == nil {
-		logger.Verbose(logging.VERBOSE_INDEX_PHYSICS, "物理未初期化: window=%d frame=%v", vw.windowIndex, frame)
-	}
 
 	for i, renderer := range vw.modelRenderers {
 		if renderer == nil || renderer.Model == nil {
@@ -861,15 +830,6 @@ func (vl *ViewerManager) deformWindow(
 			continue
 		}
 		physicsDelta := physicsDeltaFromIndex(physicsDeltas, i)
-		if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
-			hasDelta := false
-			if physicsDelta != nil {
-				hasDelta = true
-			}
-			logger.Verbose(logging.VERBOSE_INDEX_PHYSICS,
-				"物理同期: window=%d model=%d frame=%v physicsEnabled=%t resetType=%d hasDelta=%t",
-				vw.windowIndex, i, frame, physicsEnabled, resetType, hasDelta)
-		}
 		vw.syncPhysicsModel(i, renderer.Model, vw.vmdDeltas[i], physicsDelta)
 		if vw.physics != nil && resetType == state.PHYSICS_RESET_TYPE_CONTINUE_FRAME && physicsDelta != nil {
 			vw.physics.UpdatePhysicsSelectively(i, renderer.Model, physicsDelta)
@@ -886,11 +846,6 @@ func (vl *ViewerManager) deformWindow(
 	}
 
 	if (physicsEnabled || resetType != state.PHYSICS_RESET_TYPE_NONE) && vw.physics != nil {
-		if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
-			logger.Verbose(logging.VERBOSE_INDEX_PHYSICS,
-				"物理シミュレーション: window=%d frame=%v timeStep=%.5f maxSubSteps=%d fixed=%.5f",
-				vw.windowIndex, frame, timeStep, maxSubSteps, fixedTimeStep)
-		}
 		vl.updateWind(vw, frame)
 		vw.physics.StepSimulation(timeStep, maxSubSteps, fixedTimeStep)
 	}
@@ -1024,22 +979,12 @@ func (vl *ViewerManager) resetPhysics(
 	if vw == nil || vw.physics == nil {
 		return
 	}
-	logger := logging.DefaultLogger()
 	if resetType == state.PHYSICS_RESET_TYPE_CONTINUE_FRAME {
-		if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
-			logger.Verbose(logging.VERBOSE_INDEX_PHYSICS,
-				"物理リセット(継続): window=%d frame=%v", vw.windowIndex, frame)
-		}
 		vl.updatePhysicsSelectively(vw, frame, physicsDeltas)
 		return
 	}
 
 	iterationFinishFrame, resetMotions := vl.deformForReset(vw, frame, resetType)
-	if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
-		logger.Verbose(logging.VERBOSE_INDEX_PHYSICS,
-			"物理リセット準備: window=%d frame=%v resetType=%d finishFrame=%v",
-			vw.windowIndex, frame, resetType, iterationFinishFrame)
-	}
 
 	for i, renderer := range vw.modelRenderers {
 		if renderer == nil || renderer.Model == nil {

@@ -57,12 +57,34 @@ func (mp *PhysicsEngine) initRigidBodiesByBoneDeltas(
 				if rigidBodyDeltas != nil {
 					rigidBodyDelta = rigidBodyDeltas.Get(rigidBody.Index())
 				}
-				btRigidBodyTransform, _ := mp.resolveBoneLessRigidBodyTransform(
+				btRigidBodyTransform, referenceRigidBody := mp.resolveBoneLessRigidBodyTransform(
 					modelIndex,
 					pmxModel,
 					boneDeltas,
 					rigidBody,
 				)
+				logger := logging.DefaultLogger()
+				if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
+					if referenceRigidBody != nil {
+						logger.Verbose(
+							logging.VERBOSE_INDEX_PHYSICS,
+							"物理検証ボーン未紐付け剛体: model=%d rigid=%d(%s) reference=%d(%s)",
+							modelIndex,
+							rigidBody.Index(),
+							rigidBody.Name(),
+							referenceRigidBody.Index(),
+							referenceRigidBody.Name(),
+						)
+					} else {
+						logger.Verbose(
+							logging.VERBOSE_INDEX_PHYSICS,
+							"物理検証ボーン未紐付け剛体: model=%d rigid=%d(%s) reference=none(rest使用)",
+							modelIndex,
+							rigidBody.Index(),
+							rigidBody.Name(),
+						)
+					}
+				}
 				if btRigidBodyTransform == nil {
 					btRigidBodyTransform = bt.NewBtTransform(
 						newBulletFromRad(rigidBody.Rotation),
@@ -226,7 +248,7 @@ func (mp *PhysicsEngine) findReferenceRigidBody(
 		if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
 			logger.Verbose(
 				logging.VERBOSE_INDEX_PHYSICS,
-				"ボーン未紐付け剛体の参照候補が複数あるため優先順位で選択: model=%d target=%d selected=%d candidates=%v",
+				"物理検証参照候補複数: model=%d target=%d selected=%d candidates=%v",
 				modelIndex,
 				rigidBodyIndex,
 				selected.RigidBodyIndex,
@@ -545,18 +567,6 @@ func (mp *PhysicsEngine) FollowDeltaTransform(
 
 		btRigidBody.SetLinearVelocity(rotatedLinearVelocity)
 		btRigidBody.SetAngularVelocity(rotatedAngularVelocity)
-	} else {
-		logger := logging.DefaultLogger()
-		if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
-			logger.Verbose(
-				logging.VERBOSE_INDEX_PHYSICS,
-				"FollowDeltaTransform 速度回転を抑制: model=%d rigid=%d deltaDeg=%.3f maxDeg=%.3f",
-				modelIndex,
-				rigidBody.Index(),
-				mmath.RadToDeg(deltaRotationAngle),
-				mmath.RadToDeg(mp.followDeltaVelocityRotationMaxRad),
-			)
-		}
 	}
 	btRigidBody.Activate(true)
 

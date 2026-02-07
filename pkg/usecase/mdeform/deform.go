@@ -2,7 +2,7 @@
 package mdeform
 
 import (
-	"strings"
+	"math"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/deform"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
@@ -96,38 +96,88 @@ func BuildForPhysics(
 	if core == nil || modelData == nil || deltas == nil || deltas.Bones == nil {
 		return deltas
 	}
+	frame := deltas.Frame()
+	logSummary := shouldEmitPhysicsVerificationSummary(frame)
+	logger := logging.DefaultLogger()
+	counters := physicsSyncCounters{}
 	if physicsDeltas != nil && physicsDeltas.RigidBodies != nil {
 		updateRigidBodyShapeMass(core, modelIndex, modelData, physicsDeltas)
 	}
 	if modelData.RigidBodies == nil {
+		if logSummary && logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
+			logger.Verbose(
+				logging.VERBOSE_INDEX_PHYSICS,
+				"物理検証同期要約: model=%d frame=%v rigidBodies=0",
+				modelIndex,
+				frame,
+			)
+		}
 		return deltas
 	}
 	for _, rigidBody := range modelData.RigidBodies.Values() {
 		if rigidBody == nil {
 			continue
 		}
+		counters.Total++
+		switch rigidBody.PhysicsType {
+		case model.PHYSICS_TYPE_STATIC:
+			counters.Static++
+		case model.PHYSICS_TYPE_DYNAMIC:
+			counters.Dynamic++
+		case model.PHYSICS_TYPE_DYNAMIC_BONE:
+			counters.DynamicBone++
+		}
 		bone := boneByRigidBody(modelData, rigidBody)
 		if bone == nil {
+			counters.MissingBone++
 			continue
 		}
 		boneDelta := deltas.Bones.Get(bone.Index())
 		if boneDelta == nil {
+			counters.MissingBoneDelta++
 			continue
 		}
 		global := boneDelta.FilledGlobalMatrix()
 		if resetType != state.PHYSICS_RESET_TYPE_NONE {
+			counters.HardSyncByReset++
 			core.UpdateTransform(modelIndex, bone, &global, rigidBody)
 			continue
 		}
 		if !enabled {
+			counters.SkippedByPhysicsDisabled++
 			continue
 		}
 		switch rigidBody.PhysicsType {
 		case model.PHYSICS_TYPE_STATIC:
+			counters.HardSyncStatic++
 			core.UpdateTransform(modelIndex, bone, &global, rigidBody)
 		case model.PHYSICS_TYPE_DYNAMIC_BONE:
+			counters.FollowDynamicBone++
 			core.FollowDeltaTransform(modelIndex, bone, &global, rigidBody)
+		case model.PHYSICS_TYPE_DYNAMIC:
+			counters.SkippedDynamic++
 		}
+	}
+	if logSummary && logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
+		logger.Verbose(
+			logging.VERBOSE_INDEX_PHYSICS,
+			"物理検証同期要約: model=%d frame=%v enabled=%t resetType=%d total=%d static=%d dynamic=%d dynamicBone=%d hardStatic=%d hardReset=%d follow=%d skipDynamic=%d skipDisabled=%d missingBone=%d missingBoneDelta=%d",
+			modelIndex,
+			frame,
+			enabled,
+			resetType,
+			counters.Total,
+			counters.Static,
+			counters.Dynamic,
+			counters.DynamicBone,
+			counters.HardSyncStatic,
+			counters.HardSyncByReset,
+			counters.FollowDynamicBone,
+			counters.SkippedDynamic,
+			counters.SkippedByPhysicsDisabled,
+			counters.MissingBone,
+			counters.MissingBoneDelta,
+		)
 	}
 	return deltas
 }
@@ -146,98 +196,34 @@ func BuildAfterPhysics(
 		return deltas
 	}
 	deltas.SetFrame(frame)
-	logger := logging.DefaultLogger()
-	logDetail := logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) && frame == 0
-
-	var rbTotal int
-	var rbDynamic int
-	var rbStatic int
-	var rbMissingBone int
-	var rbMissingMatrix int
-	var rbUpdated int
-	var rbNames []string
 	if core != nil && physicsEnabled {
 		// 動的剛体の結果をボーンへ反映する。
 		if modelData.RigidBodies != nil {
 			rigidBodies := modelData.RigidBodies.Values()
 			for _, rigidBody := range rigidBodies {
 				if rigidBody == nil || rigidBody.PhysicsType == model.PHYSICS_TYPE_STATIC {
-					if logDetail {
-						rbTotal++
-						rbStatic++
-					}
 					continue
-				}
-				if logDetail {
-					rbTotal++
-					rbDynamic++
 				}
 				bone := boneByRigidBody(modelData, rigidBody)
 				if bone == nil {
-					if logDetail {
-						rbMissingBone++
-					}
 					continue
 				}
 				mat := core.GetRigidBodyBoneMatrix(modelIndex, rigidBody)
 				if mat == nil {
-					if logDetail {
-						rbMissingMatrix++
-					}
 					continue
 				}
 				parent := deltas.Bones.Get(bone.ParentIndex)
 				bd := delta.NewBoneDeltaByGlobalMatrix(bone, frame, *mat, parent)
 				deltas.Bones.Update(bd)
-				if logDetail {
-					rbUpdated++
-					rbNames = append(rbNames, bone.Name())
-				}
 			}
 		}
 	}
 
 	// 物理後変形対象ボーンを再計算して反映する。
 	afterNames := afterPhysicsBoneNames(modelData)
-	if logDetail {
-		logger.Verbose(logging.VERBOSE_INDEX_PHYSICS,
-			"物理後変形: model=%d frame=%v physicsEnabled=%t rigidBodies(total=%d static=%d dynamic=%d updated=%d missingBone=%d missingMatrix=%d)",
-			modelIndex,
-			frame,
-			physicsEnabled,
-			rbTotal,
-			rbStatic,
-			rbDynamic,
-			rbUpdated,
-			rbMissingBone,
-			rbMissingMatrix,
-		)
-		if len(rbNames) > 0 {
-			logger.Verbose(logging.VERBOSE_INDEX_PHYSICS,
-				"物理剛体反映ボーン: model=%d names=%s",
-				modelIndex,
-				strings.Join(rbNames, ","),
-			)
-		}
-		if len(afterNames) > 0 {
-			logger.Verbose(logging.VERBOSE_INDEX_PHYSICS,
-				"物理後変形対象ボーン: model=%d count=%d names=%s",
-				modelIndex,
-				len(afterNames),
-				strings.Join(afterNames, ","),
-			)
-		}
-	}
 	var afterIndexes []int
 	if len(afterNames) > 0 {
 		afterIndexes = deform.UpdateAfterPhysicsBoneDeltas(modelData, motionData, deltas.Bones, frame, afterNames)
-		if logDetail {
-			logger.Verbose(logging.VERBOSE_INDEX_PHYSICS,
-				"物理後変形再計算: model=%d indexes=%d",
-				modelIndex,
-				len(afterIndexes),
-			)
-		}
 	}
 
 	// 既存のユニット行列を使い物理後変形対象のグローバル行列のみ更新する。
@@ -372,4 +358,32 @@ func mergeBoneDeltas(dst *delta.BoneDeltas, src *delta.BoneDeltas, skip map[int]
 		dst.Update(bd)
 		return true
 	})
+}
+
+// physicsSyncCounters は物理同期経路の集計値を保持する。
+type physicsSyncCounters struct {
+	Total                    int
+	Static                   int
+	Dynamic                  int
+	DynamicBone              int
+	HardSyncStatic           int
+	HardSyncByReset          int
+	FollowDynamicBone        int
+	SkippedDynamic           int
+	SkippedByPhysicsDisabled int
+	MissingBone              int
+	MissingBoneDelta         int
+}
+
+// shouldEmitPhysicsVerificationSummary は物理検証要約ログを出力すべきフレームか判定する。
+func shouldEmitPhysicsVerificationSummary(frame motion.Frame) bool {
+	rounded := motion.Frame(math.Round(float64(frame)))
+	if math.Abs(float64(frame-rounded)) > 1e-3 {
+		return false
+	}
+	frameNumber := int(rounded)
+	if frameNumber < 0 {
+		return false
+	}
+	return frameNumber == 0 || frameNumber%30 == 0
 }

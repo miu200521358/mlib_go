@@ -12,7 +12,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
-	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 )
 
 const maxEffectorRecursion = 10
@@ -32,34 +31,11 @@ func ComputeBoneDeltas(
 		return delta.NewBoneDeltas(nil), nil
 	}
 	boneDeltas := delta.NewBoneDeltas(modelData.Bones)
-	logger := logging.DefaultLogger()
-	logDetail := logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) && afterPhysics && frame == 0
-	if logDetail {
-		logger.Verbose(logging.VERBOSE_INDEX_PHYSICS,
-			"物理後変形差分計算: frame=%v boneNames=%d includeIk=%t",
-			frame,
-			len(boneNames),
-			includeIk,
-		)
-		if len(boneNames) > 0 {
-			logger.Verbose(logging.VERBOSE_INDEX_PHYSICS,
-				"物理後変形差分計算の対象名: %s",
-				strings.Join(boneNames, ","),
-			)
-		}
-	}
 	var deformBoneIndexes []int
 	if afterPhysics {
 		deformBoneIndexes = collectAfterPhysicsBoneIndexes(modelData, boneNames)
 	} else {
 		deformBoneIndexes = collectBoneIndexes(modelData, boneNames, includeIk, afterPhysics)
-	}
-	if logDetail {
-		logger.Verbose(logging.VERBOSE_INDEX_PHYSICS,
-			"物理後変形差分計算の対象index: count=%d indexes=%v",
-			len(deformBoneIndexes),
-			deformBoneIndexes,
-		)
 	}
 	boneMorphDeltas := computeBoneMorphDeltas(modelData, motionData, frame, nil)
 
