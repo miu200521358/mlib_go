@@ -7,6 +7,7 @@ package widget
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"github.com/miu200521358/mlib_go/pkg/adapter/mpresenter/messages"
 	"io"
 	"os"
 	"path/filepath"
@@ -340,7 +341,7 @@ func (fp *FilePicker) Widgets() declarative.Composite {
 					Background: declarative.SolidColorBrush{
 						Color: controller.ColorTabBackground,
 					},
-					Text:        fp.t("未設定"),
+					Text:        fp.t(messages.FilePickerKey001),
 					ToolTipText: fp.tooltip,
 					AssignTo:    &fp.nameEdit,
 				},
@@ -369,7 +370,7 @@ func (fp *FilePicker) Widgets() declarative.Composite {
 		},
 		declarative.PushButton{
 			AssignTo:    &fp.openPushButton,
-			Text:        fp.t("開く"),
+			Text:        fp.t(messages.FilePickerKey002),
 			ToolTipText: fp.tooltip,
 			OnClicked: func() {
 				fp.onOpenClicked()
@@ -382,7 +383,7 @@ func (fp *FilePicker) Widgets() declarative.Composite {
 	if fp.historyKey != "" {
 		inputWidgets = append(inputWidgets, declarative.PushButton{
 			AssignTo:    &fp.historyPushButton,
-			Text:        fp.t("履歴"),
+			Text:        fp.t(messages.FilePickerKey003),
 			ToolTipText: fp.tooltip,
 			OnClicked: func() {
 				fp.openHistoryDialog()
@@ -425,7 +426,7 @@ func (fp *FilePicker) showOpenDialog() {
 	fd.InitialDirPath = fp.resolveInitialDir()
 	ok, err := fd.ShowOpen(fp.window)
 	if err != nil {
-		walk.MsgBox(fp.window, fp.t("読み込み失敗"), baseerr.BuildErrorText(err), walk.MsgBoxIconError)
+		walk.MsgBox(fp.window, fp.t(messages.FilePickerKey004), baseerr.BuildErrorText(err), walk.MsgBoxIconError)
 		return
 	}
 	if !ok {
@@ -443,7 +444,7 @@ func (fp *FilePicker) showSaveDialog() {
 	fd.InitialDirPath = fp.resolveInitialDir()
 	ok, err := fd.ShowSave(fp.window)
 	if err != nil {
-		walk.MsgBox(fp.window, fp.t("保存失敗"), baseerr.BuildErrorText(err), walk.MsgBoxIconError)
+		walk.MsgBox(fp.window, fp.t(messages.FilePickerKey005), baseerr.BuildErrorText(err), walk.MsgBoxIconError)
 		return
 	}
 	if !ok {
@@ -603,7 +604,7 @@ func (fp *FilePicker) openHistoryDialog() {
 	}
 	if err := (declarative.Dialog{
 		AssignTo: &dlg,
-		Title:    fp.t("履歴"),
+		Title:    fp.t(messages.FilePickerKey003),
 		MinSize:  declarative.Size{Width: 800, Height: 400},
 		Layout:   declarative.VBox{},
 		Children: []declarative.Widget{
@@ -625,14 +626,14 @@ func (fp *FilePicker) openHistoryDialog() {
 				Children: []declarative.Widget{
 					declarative.PushButton{
 						AssignTo: &push,
-						Text:     fp.t("OK"),
+						Text:     fp.t(messages.FilePickerKey006),
 						Enabled:  true,
 						OnClicked: func() {
 							dlg.Accept()
 						},
 					},
 					declarative.PushButton{
-						Text: fp.t("キャンセル"),
+						Text: fp.t(messages.FilePickerKey007),
 						OnClicked: func() {
 							dlg.Cancel()
 						},

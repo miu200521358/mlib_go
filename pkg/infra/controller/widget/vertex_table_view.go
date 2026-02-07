@@ -6,6 +6,7 @@ package widget
 
 import (
 	"fmt"
+	"github.com/miu200521358/mlib_go/pkg/adapter/mpresenter/messages"
 	"slices"
 	"strings"
 	"time"
@@ -64,13 +65,13 @@ func (v *VertexTableView) Widgets() declarative.Composite {
 				Model:            v.VertexModel,
 				MinSize:          declarative.Size{Width: 500, Height: 250},
 				Columns: []declarative.TableViewColumn{
-					{Title: v.t("頂点Index"), Width: 70},
-					{Title: v.t("座標"), Width: 180},
-					{Title: v.t("材質"), Width: 140},
-					{Title: v.t("ウェイト1"), Width: 140},
-					{Title: v.t("ウェイト2"), Width: 140},
-					{Title: v.t("ウェイト3"), Width: 140},
-					{Title: v.t("ウェイト4"), Width: 140},
+					{Title: v.t(messages.VertexTableViewKey001), Width: 70},
+					{Title: v.t(messages.VertexTableViewKey002), Width: 180},
+					{Title: v.t(messages.VertexTableViewKey003), Width: 140},
+					{Title: v.t(messages.VertexTableViewKey004), Width: 140},
+					{Title: v.t(messages.VertexTableViewKey005), Width: 140},
+					{Title: v.t(messages.VertexTableViewKey006), Width: 140},
+					{Title: v.t(messages.VertexTableViewKey007), Width: 140},
 				},
 			},
 		},

@@ -145,12 +145,12 @@ func NewControlWindow(shared *state.SharedState, baseServices base.IBaseServices
 
 	menuItems := []declarative.MenuItem{
 		cw.buildViewerMenu(),
-		declarative.Menu{Text: cw.t("&コントローラーウィンドウ"), Items: controllerItems},
+		declarative.Menu{Text: cw.t(messages.ControlWindowKey001), Items: controllerItems},
 	}
 	if len(toolMenuItems) > 0 {
-		menuItems = append(menuItems, declarative.Menu{Text: cw.t("&ツールについて"), Items: toolMenuItems})
+		menuItems = append(menuItems, declarative.Menu{Text: cw.t(messages.ControlWindowKey002), Items: toolMenuItems})
 	}
-	menuItems = append(menuItems, declarative.Menu{Text: cw.t("&言語"), Items: cw.buildLanguageMenu()})
+	menuItems = append(menuItems, declarative.Menu{Text: cw.t(messages.ControlWindowKey003), Items: cw.buildLanguageMenu()})
 
 	if err := (declarative.MainWindow{
 		AssignTo: &cw.MainWindow,
@@ -191,7 +191,7 @@ func NewControlWindow(shared *state.SharedState, baseServices base.IBaseServices
 			cw.onRestore()
 		},
 	}).Create(); err != nil {
-		return nil, NewControllerWindowInitFailed(cw.t("コントローラーウィンドウの初期化に失敗しました"), err)
+		return nil, NewControllerWindowInitFailed(cw.t(messages.ControlWindowKey004), err)
 	}
 
 	cw.SetPos(positionX, positionY)
@@ -654,8 +654,8 @@ func (cw *ControlWindow) onClosing(canceled *bool) {
 	}
 	if result := walk.MsgBox(
 		cw,
-		cw.t("終了確認"),
-		cw.t("終了確認メッセージ"),
+		cw.t(messages.ControlWindowKey005),
+		cw.t(messages.ControlWindowKey006),
 		walk.MsgBoxIconQuestion|walk.MsgBoxOKCancel,
 	); result == walk.DlgCmdOK {
 		cw.shared.SetClosed(true)
@@ -714,50 +714,50 @@ func (cw *ControlWindow) onRestore() {
 // buildViewerMenu はビューワーメニューを構築する。
 func (cw *ControlWindow) buildViewerMenu() declarative.Menu {
 	return declarative.Menu{
-		Text: cw.t("&ビューワー"),
+		Text: cw.t(messages.ControlWindowKey007),
 		Items: []declarative.MenuItem{
-			declarative.Action{Text: cw.t("&フレームドロップON"), Checkable: true, OnTriggered: cw.TriggerEnabledFrameDrop, AssignTo: &cw.enabledFrameDropAction},
-			declarative.Menu{Text: cw.t("&fps制限"), Items: []declarative.MenuItem{
-				declarative.Action{Text: cw.t("&30fps制限"), Checkable: true, OnTriggered: cw.TriggerFps30Limit, AssignTo: &cw.limitFps30Action},
-				declarative.Action{Text: cw.t("&60fps制限"), Checkable: true, OnTriggered: cw.TriggerFps60Limit, AssignTo: &cw.limitFps60Action},
-				declarative.Action{Text: cw.t("&fps無制限"), Checkable: true, OnTriggered: cw.TriggerUnLimitFps, AssignTo: &cw.limitFpsUnLimitAction},
+			declarative.Action{Text: cw.t(messages.ControlWindowKey008), Checkable: true, OnTriggered: cw.TriggerEnabledFrameDrop, AssignTo: &cw.enabledFrameDropAction},
+			declarative.Menu{Text: cw.t(messages.ControlWindowKey009), Items: []declarative.MenuItem{
+				declarative.Action{Text: cw.t(messages.ControlWindowKey010), Checkable: true, OnTriggered: cw.TriggerFps30Limit, AssignTo: &cw.limitFps30Action},
+				declarative.Action{Text: cw.t(messages.ControlWindowKey011), Checkable: true, OnTriggered: cw.TriggerFps60Limit, AssignTo: &cw.limitFps60Action},
+				declarative.Action{Text: cw.t(messages.ControlWindowKey012), Checkable: true, OnTriggered: cw.TriggerUnLimitFps, AssignTo: &cw.limitFpsUnLimitAction},
 			}},
-			declarative.Action{Text: cw.t("&情報表示"), Checkable: true, OnTriggered: cw.TriggerShowInfo, AssignTo: &cw.showInfoAction},
+			declarative.Action{Text: cw.t(messages.ControlWindowKey013), Checkable: true, OnTriggered: cw.TriggerShowInfo, AssignTo: &cw.showInfoAction},
 			declarative.Separator{},
-			declarative.Action{Text: cw.t("&物理ON/OFF"), Checkable: true, OnTriggered: cw.TriggerEnabledPhysics, AssignTo: &cw.enabledPhysicsAction},
-			declarative.Action{Text: cw.t("&物理リセット"), OnTriggered: cw.TriggerPhysicsReset, AssignTo: &cw.physicsResetAction},
+			declarative.Action{Text: cw.t(messages.ControlWindowKey014), Checkable: true, OnTriggered: cw.TriggerEnabledPhysics, AssignTo: &cw.enabledPhysicsAction},
+			declarative.Action{Text: cw.t(messages.ControlWindowKey015), OnTriggered: cw.TriggerPhysicsReset, AssignTo: &cw.physicsResetAction},
 			declarative.Separator{},
-			declarative.Menu{Text: cw.t("&ボーン表示"), Items: []declarative.MenuItem{
-				declarative.Action{Text: cw.t("&全ボーン"), Checkable: true, OnTriggered: cw.TriggerShowBoneAll, AssignTo: &cw.showBoneAllAction},
-				declarative.Action{Text: cw.t("&IKボーン"), Checkable: true, OnTriggered: cw.TriggerShowBoneIk, AssignTo: &cw.showBoneIkAction},
-				declarative.Action{Text: cw.t("&付与親ボーン"), Checkable: true, OnTriggered: cw.TriggerShowBoneEffector, AssignTo: &cw.showBoneEffectorAction},
-				declarative.Action{Text: cw.t("&軸制限ボーン"), Checkable: true, OnTriggered: cw.TriggerShowBoneFixed, AssignTo: &cw.showBoneFixedAction},
-				declarative.Action{Text: cw.t("&回転ボーン"), Checkable: true, OnTriggered: cw.TriggerShowBoneRotate, AssignTo: &cw.showBoneRotateAction},
-				declarative.Action{Text: cw.t("&移動ボーン"), Checkable: true, OnTriggered: cw.TriggerShowBoneTranslate, AssignTo: &cw.showBoneTranslateAction},
-				declarative.Action{Text: cw.t("&表示ボーン"), Checkable: true, OnTriggered: cw.TriggerShowBoneVisible, AssignTo: &cw.showBoneVisibleAction},
+			declarative.Menu{Text: cw.t(messages.ControlWindowKey016), Items: []declarative.MenuItem{
+				declarative.Action{Text: cw.t(messages.ControlWindowKey017), Checkable: true, OnTriggered: cw.TriggerShowBoneAll, AssignTo: &cw.showBoneAllAction},
+				declarative.Action{Text: cw.t(messages.ControlWindowKey018), Checkable: true, OnTriggered: cw.TriggerShowBoneIk, AssignTo: &cw.showBoneIkAction},
+				declarative.Action{Text: cw.t(messages.ControlWindowKey019), Checkable: true, OnTriggered: cw.TriggerShowBoneEffector, AssignTo: &cw.showBoneEffectorAction},
+				declarative.Action{Text: cw.t(messages.ControlWindowKey020), Checkable: true, OnTriggered: cw.TriggerShowBoneFixed, AssignTo: &cw.showBoneFixedAction},
+				declarative.Action{Text: cw.t(messages.ControlWindowKey021), Checkable: true, OnTriggered: cw.TriggerShowBoneRotate, AssignTo: &cw.showBoneRotateAction},
+				declarative.Action{Text: cw.t(messages.ControlWindowKey022), Checkable: true, OnTriggered: cw.TriggerShowBoneTranslate, AssignTo: &cw.showBoneTranslateAction},
+				declarative.Action{Text: cw.t(messages.ControlWindowKey023), Checkable: true, OnTriggered: cw.TriggerShowBoneVisible, AssignTo: &cw.showBoneVisibleAction},
 			}},
-			declarative.Menu{Text: cw.t("&剛体表示"), Items: []declarative.MenuItem{
-				declarative.Action{Text: cw.t("&前面表示"), Checkable: true, OnTriggered: cw.TriggerShowRigidBodyFront, AssignTo: &cw.showRigidBodyFrontAction},
-				declarative.Action{Text: cw.t("&埋め込み表示"), Checkable: true, OnTriggered: cw.TriggerShowRigidBodyBack, AssignTo: &cw.showRigidBodyBackAction},
+			declarative.Menu{Text: cw.t(messages.ControlWindowKey024), Items: []declarative.MenuItem{
+				declarative.Action{Text: cw.t(messages.ControlWindowKey025), Checkable: true, OnTriggered: cw.TriggerShowRigidBodyFront, AssignTo: &cw.showRigidBodyFrontAction},
+				declarative.Action{Text: cw.t(messages.ControlWindowKey026), Checkable: true, OnTriggered: cw.TriggerShowRigidBodyBack, AssignTo: &cw.showRigidBodyBackAction},
 			}},
-			declarative.Action{Text: cw.t("&ジョイント表示"), Checkable: true, OnTriggered: cw.TriggerShowJoint, AssignTo: &cw.showJointAction},
+			declarative.Action{Text: cw.t(messages.ControlWindowKey027), Checkable: true, OnTriggered: cw.TriggerShowJoint, AssignTo: &cw.showJointAction},
 			declarative.Separator{},
-			declarative.Action{Text: cw.t("&法線表示"), Checkable: true, OnTriggered: cw.TriggerShowNormal, AssignTo: &cw.showNormalAction},
-			declarative.Action{Text: cw.t("&ワイヤーフレーム表示"), Checkable: true, OnTriggered: cw.TriggerShowWire, AssignTo: &cw.showWireAction},
+			declarative.Action{Text: cw.t(messages.ControlWindowKey028), Checkable: true, OnTriggered: cw.TriggerShowNormal, AssignTo: &cw.showNormalAction},
+			declarative.Action{Text: cw.t(messages.ControlWindowKey029), Checkable: true, OnTriggered: cw.TriggerShowWire, AssignTo: &cw.showWireAction},
 			declarative.Separator{},
-			declarative.Menu{Text: cw.t("&頂点選択"), Items: []declarative.MenuItem{
-				declarative.Action{Text: cw.t("&ボックス選択"), Checkable: true, OnTriggered: cw.TriggerShowSelectedVertexBox, AssignTo: &cw.showSelectedVertexBoxAction},
-				declarative.Action{Text: cw.t("&ポイント選択"), Checkable: true, OnTriggered: cw.TriggerShowSelectedVertexPoint, AssignTo: &cw.showSelectedVertexPointAction},
+			declarative.Menu{Text: cw.t(messages.ControlWindowKey030), Items: []declarative.MenuItem{
+				declarative.Action{Text: cw.t(messages.ControlWindowKey031), Checkable: true, OnTriggered: cw.TriggerShowSelectedVertexBox, AssignTo: &cw.showSelectedVertexBoxAction},
+				declarative.Action{Text: cw.t(messages.ControlWindowKey032), Checkable: true, OnTriggered: cw.TriggerShowSelectedVertexPoint, AssignTo: &cw.showSelectedVertexPointAction},
 				declarative.Separator{},
 				declarative.Action{Text: cw.t(messages.LabelSelectedVertexDepthAll), Checkable: true, OnTriggered: cw.TriggerShowSelectedVertexDepthAll, AssignTo: &cw.showSelectedVertexAllDepthAction},
 				declarative.Action{Text: cw.t(messages.LabelSelectedVertexDepthFront), Checkable: true, OnTriggered: cw.TriggerShowSelectedVertexDepthFront, AssignTo: &cw.showSelectedVertexFrontDepthAction},
 			}},
 			declarative.Separator{},
-			declarative.Action{Text: cw.t("&カメラ同期"), Checkable: true, OnTriggered: cw.TriggerCameraSync, AssignTo: &cw.cameraSyncAction},
-			declarative.Menu{Text: cw.t("&サブビューワーオーバーレイ"), Items: []declarative.MenuItem{
-				declarative.Action{Text: cw.t("&上半身合わせ"), Checkable: true, OnTriggered: cw.TriggerShowOverrideUpper, AssignTo: &cw.showOverrideUpperAction},
-				declarative.Action{Text: cw.t("&下半身合わせ"), Checkable: true, OnTriggered: cw.TriggerShowOverrideLower, AssignTo: &cw.showOverrideLowerAction},
-				declarative.Action{Text: cw.t("&カメラ合わせなし"), Checkable: true, OnTriggered: cw.TriggerShowOverrideNone, AssignTo: &cw.showOverrideNoneAction},
+			declarative.Action{Text: cw.t(messages.ControlWindowKey033), Checkable: true, OnTriggered: cw.TriggerCameraSync, AssignTo: &cw.cameraSyncAction},
+			declarative.Menu{Text: cw.t(messages.ControlWindowKey034), Items: []declarative.MenuItem{
+				declarative.Action{Text: cw.t(messages.ControlWindowKey035), Checkable: true, OnTriggered: cw.TriggerShowOverrideUpper, AssignTo: &cw.showOverrideUpperAction},
+				declarative.Action{Text: cw.t(messages.ControlWindowKey036), Checkable: true, OnTriggered: cw.TriggerShowOverrideLower, AssignTo: &cw.showOverrideLowerAction},
+				declarative.Action{Text: cw.t(messages.ControlWindowKey037), Checkable: true, OnTriggered: cw.TriggerShowOverrideNone, AssignTo: &cw.showOverrideNoneAction},
 			}},
 			declarative.Separator{},
 			cw.buildViewerHelpMenu(),
@@ -768,46 +768,46 @@ func (cw *ControlWindow) buildViewerMenu() declarative.Menu {
 // buildViewerHelpMenu はビューワーの使い方メニューを構築する。
 func (cw *ControlWindow) buildViewerHelpMenu() declarative.Menu {
 	return declarative.Menu{
-		Text: cw.t("&使い方"),
+		Text: cw.t(messages.ControlWindowKey038),
 		Items: []declarative.MenuItem{
-			cw.helpAction("カメラ操作", "カメラ操作メッセージ"),
-			cw.helpAction("&フレームドロップON", "フレームドロップONメッセージ"),
-			declarative.Menu{Text: cw.t("&fps制限"), Items: []declarative.MenuItem{
-				cw.helpAction("&30fps制限", "30fps制限メッセージ"),
-				cw.helpAction("&60fps制限", "60fps制限メッセージ"),
-				cw.helpAction("&fps無制限", "fps無制限メッセージ"),
+			cw.helpAction(messages.ControlWindowKey064, messages.ControlWindowKey065),
+			cw.helpAction(messages.ControlWindowKey008, messages.ControlWindowKey066),
+			declarative.Menu{Text: cw.t(messages.ControlWindowKey009), Items: []declarative.MenuItem{
+				cw.helpAction(messages.ControlWindowKey010, messages.ControlWindowKey067),
+				cw.helpAction(messages.ControlWindowKey011, messages.ControlWindowKey068),
+				cw.helpAction(messages.ControlWindowKey012, messages.ControlWindowKey069),
 			}},
-			cw.helpAction("&情報表示", "情報表示メッセージ"),
-			cw.helpAction("&物理ON/OFF", "物理ON/OFFメッセージ"),
-			cw.helpAction("&物理リセット", "物理リセットメッセージ"),
-			declarative.Menu{Text: cw.t("&ボーン表示"), Items: []declarative.MenuItem{
-				cw.helpAction("&全ボーン", "全ボーンメッセージ"),
-				cw.helpAction("&IKボーン", "IKボーンメッセージ"),
-				cw.helpAction("&付与親ボーン", "付与親ボーンメッセージ"),
-				cw.helpAction("&軸制限ボーン", "軸制限ボーンメッセージ"),
-				cw.helpAction("&回転ボーン", "回転ボーンメッセージ"),
-				cw.helpAction("&移動ボーン", "移動ボーンメッセージ"),
-				cw.helpAction("&表示ボーン", "表示ボーンメッセージ"),
-				cw.helpAction("&ボーン表示の使い方", "ボーン表示の使い方メッセージ"),
+			cw.helpAction(messages.ControlWindowKey013, messages.ControlWindowKey070),
+			cw.helpAction(messages.ControlWindowKey014, messages.ControlWindowKey071),
+			cw.helpAction(messages.ControlWindowKey015, messages.ControlWindowKey072),
+			declarative.Menu{Text: cw.t(messages.ControlWindowKey016), Items: []declarative.MenuItem{
+				cw.helpAction(messages.ControlWindowKey017, messages.ControlWindowKey073),
+				cw.helpAction(messages.ControlWindowKey018, messages.ControlWindowKey074),
+				cw.helpAction(messages.ControlWindowKey019, messages.ControlWindowKey075),
+				cw.helpAction(messages.ControlWindowKey020, messages.ControlWindowKey076),
+				cw.helpAction(messages.ControlWindowKey021, messages.ControlWindowKey077),
+				cw.helpAction(messages.ControlWindowKey022, messages.ControlWindowKey078),
+				cw.helpAction(messages.ControlWindowKey023, messages.ControlWindowKey079),
+				cw.helpAction(messages.ControlWindowKey057, messages.ControlWindowKey058),
 			}},
-			declarative.Menu{Text: cw.t("&剛体表示"), Items: []declarative.MenuItem{
-				cw.helpAction("&前面表示", "前面表示メッセージ"),
-				cw.helpAction("&埋め込み表示", "埋め込み表示メッセージ"),
-				cw.helpAction("&剛体表示の使い方", "剛体表示の使い方メッセージ"),
+			declarative.Menu{Text: cw.t(messages.ControlWindowKey024), Items: []declarative.MenuItem{
+				cw.helpAction(messages.ControlWindowKey025, messages.ControlWindowKey080),
+				cw.helpAction(messages.ControlWindowKey026, messages.ControlWindowKey081),
+				cw.helpAction(messages.ControlWindowKey059, messages.ControlWindowKey060),
 			}},
-			cw.helpAction("&ジョイント表示", "ジョイント表示メッセージ"),
-			cw.helpAction("&法線表示", "法線表示メッセージ"),
-			cw.helpAction("&ワイヤーフレーム表示", "ワイヤーフレーム表示メッセージ"),
-			declarative.Menu{Text: cw.t("&頂点選択"), Items: []declarative.MenuItem{
-				cw.helpAction("&ポイント選択", "ポイント選択メッセージ"),
-				cw.helpAction("&ボックス選択", "ボックス選択メッセージ"),
+			cw.helpAction(messages.ControlWindowKey027, messages.ControlWindowKey082),
+			cw.helpAction(messages.ControlWindowKey028, messages.ControlWindowKey083),
+			cw.helpAction(messages.ControlWindowKey029, messages.ControlWindowKey084),
+			declarative.Menu{Text: cw.t(messages.ControlWindowKey030), Items: []declarative.MenuItem{
+				cw.helpAction(messages.ControlWindowKey032, messages.ControlWindowKey085),
+				cw.helpAction(messages.ControlWindowKey031, messages.ControlWindowKey086),
 			}},
-			cw.helpAction("&カメラ同期", "カメラ同期メッセージ"),
-			declarative.Menu{Text: cw.t("&サブビューワーオーバーレイ"), Items: []declarative.MenuItem{
-				cw.helpAction("&上半身合わせ", "上半身合わせメッセージ"),
-				cw.helpAction("&下半身合わせ", "下半身合わせメッセージ"),
-				cw.helpAction("&カメラ合わせなし", "カメラ合わせなしメッセージ"),
-				cw.helpAction("&サブビューワーオーバーレイの使い方", "サブビューワーオーバーレイの使い方メッセージ"),
+			cw.helpAction(messages.ControlWindowKey033, messages.ControlWindowKey087),
+			declarative.Menu{Text: cw.t(messages.ControlWindowKey034), Items: []declarative.MenuItem{
+				cw.helpAction(messages.ControlWindowKey035, messages.ControlWindowKey088),
+				cw.helpAction(messages.ControlWindowKey036, messages.ControlWindowKey089),
+				cw.helpAction(messages.ControlWindowKey037, messages.ControlWindowKey090),
+				cw.helpAction(messages.ControlWindowKey055, messages.ControlWindowKey056),
 			}},
 		},
 	}
@@ -816,20 +816,20 @@ func (cw *ControlWindow) buildViewerHelpMenu() declarative.Menu {
 // buildControllerMenuItems はコントローラーメニュー項目を構築する。
 func (cw *ControlWindow) buildControllerMenuItems() []declarative.MenuItem {
 	items := []declarative.MenuItem{
-		declarative.Menu{Text: cw.t("&使い方"), Items: cw.buildControllerHelpMenuItems()},
+		declarative.Menu{Text: cw.t(messages.ControlWindowKey038), Items: cw.buildControllerHelpMenuItems()},
 		declarative.Separator{},
-		declarative.Action{Text: cw.t("&画面移動連動"), Checkable: true, OnTriggered: cw.triggerWindowLinkage, AssignTo: &cw.linkWindowAction},
+		declarative.Action{Text: cw.t(messages.ControlWindowKey039), Checkable: true, OnTriggered: cw.triggerWindowLinkage, AssignTo: &cw.linkWindowAction},
 		declarative.Separator{},
-		declarative.Action{Text: cw.t("&デバッグログ表示"), Checkable: true, OnTriggered: cw.triggerLogLevelDebug, AssignTo: &cw.logLevelDebugAction},
-		declarative.Action{Text: cw.t("&ログ保存"), OnTriggered: cw.triggerSaveLog},
+		declarative.Action{Text: cw.t(messages.ControlWindowKey040), Checkable: true, OnTriggered: cw.triggerLogLevelDebug, AssignTo: &cw.logLevelDebugAction},
+		declarative.Action{Text: cw.t(messages.ControlWindowKey041), OnTriggered: cw.triggerSaveLog},
 	}
 
 	if cw.appConfig != nil && cw.appConfig.IsDev() {
 		items = append(items,
-			declarative.Action{Text: cw.t("&モーション冗長ログ表示"), Checkable: true, OnTriggered: cw.triggerLogLevelVerbose, AssignTo: &cw.logLevelVerboseAction},
-			declarative.Action{Text: cw.t("&IK冗長ログ表示"), Checkable: true, OnTriggered: cw.triggerLogLevelIkVerbose, AssignTo: &cw.logLevelIkVerboseAction},
-			declarative.Action{Text: cw.t("&物理冗長ログ表示"), Checkable: true, OnTriggered: cw.triggerLogLevelPhysicsVerbose, AssignTo: &cw.logLevelPhysicsVerboseAction},
-			declarative.Action{Text: cw.t("&ビューワー冗長ログ表示"), Checkable: true, OnTriggered: cw.triggerLogLevelViewerVerbose, AssignTo: &cw.logLevelViewerVerboseAction},
+			declarative.Action{Text: cw.t(messages.ControlWindowKey042), Checkable: true, OnTriggered: cw.triggerLogLevelVerbose, AssignTo: &cw.logLevelVerboseAction},
+			declarative.Action{Text: cw.t(messages.ControlWindowKey043), Checkable: true, OnTriggered: cw.triggerLogLevelIkVerbose, AssignTo: &cw.logLevelIkVerboseAction},
+			declarative.Action{Text: cw.t(messages.ControlWindowKey044), Checkable: true, OnTriggered: cw.triggerLogLevelPhysicsVerbose, AssignTo: &cw.logLevelPhysicsVerboseAction},
+			declarative.Action{Text: cw.t(messages.ControlWindowKey045), Checkable: true, OnTriggered: cw.triggerLogLevelViewerVerbose, AssignTo: &cw.logLevelViewerVerboseAction},
 		)
 	}
 	return items
@@ -838,17 +838,17 @@ func (cw *ControlWindow) buildControllerMenuItems() []declarative.MenuItem {
 // buildControllerHelpMenuItems はコントローラーウィンドウの使い方メニュー項目を構築する。
 func (cw *ControlWindow) buildControllerHelpMenuItems() []declarative.MenuItem {
 	return []declarative.MenuItem{
-		cw.helpAction("要素の説明", "要素の説明メッセージ"),
-		declarative.Menu{Text: cw.t("再生"), Items: []declarative.MenuItem{
-			cw.helpAction("再生ボタン", "再生ボタンメッセージ"),
-			cw.helpAction("キーフレーム番号", "キーフレーム番号メッセージ"),
-			cw.helpAction("再生スライダー", "再生スライダーメッセージ"),
+		cw.helpAction(messages.ControlWindowKey091, messages.ControlWindowKey092),
+		declarative.Menu{Text: cw.t(messages.ControlWindowKey046), Items: []declarative.MenuItem{
+			cw.helpAction(messages.ControlWindowKey093, messages.ControlWindowKey094),
+			cw.helpAction(messages.ControlWindowKey095, messages.ControlWindowKey096),
+			cw.helpAction(messages.ControlWindowKey097, messages.ControlWindowKey098),
 		}},
-		declarative.Menu{Text: cw.t("音楽"), Items: []declarative.MenuItem{
-			cw.helpAction("音楽ファイル", "音楽ファイルメッセージ"),
-			cw.helpAction("音量", "音量メッセージ"),
+		declarative.Menu{Text: cw.t(messages.ControlWindowKey047), Items: []declarative.MenuItem{
+			cw.helpAction(messages.ControlWindowKey099, messages.ControlWindowKey100),
+			cw.helpAction(messages.ControlWindowKey101, messages.ControlWindowKey102),
 		}},
-		cw.helpAction("ファイル操作", "ファイル操作メッセージ"),
+		cw.helpAction(messages.ControlWindowKey103, messages.ControlWindowKey104),
 	}
 }
 
@@ -872,8 +872,8 @@ func (cw *ControlWindow) onChangeLanguage(lang i18n.LangCode) {
 		return
 	}
 	if _, err := cw.translator.SetLang(lang); err != nil {
-		cw.loggerOrDefault().Error(cw.t("言語設定の保存に失敗しました: %s"), err.Error())
-		walk.MsgBox(cw, cw.t("言語変更"), baseerr.BuildErrorText(err), walk.MsgBoxIconError)
+		cw.loggerOrDefault().Error(cw.t(messages.ControlWindowKey048), err.Error())
+		walk.MsgBox(cw, cw.t(messages.ControlWindowKey049), baseerr.BuildErrorText(err), walk.MsgBoxIconError)
 		return
 	}
 	cw.shared.SetClosed(true)
@@ -1141,36 +1141,36 @@ func (cw *ControlWindow) triggerSaveLog() {
 	text := logging.ConsoleText()
 	path, err := mfile.SaveConsoleSnapshot(cw.userConfig, "console", text)
 	if err != nil {
-		cw.loggerOrDefault().Error(cw.t("ログ保存に失敗しました: %s"), err.Error())
-		walk.MsgBox(cw, cw.t("ログ保存"), baseerr.BuildErrorText(err), walk.MsgBoxIconError)
+		cw.loggerOrDefault().Error(cw.t(messages.ControlWindowKey050), err.Error())
+		walk.MsgBox(cw, cw.t(messages.ControlWindowKey051), baseerr.BuildErrorText(err), walk.MsgBoxIconError)
 		return
 	}
-	cw.loggerOrDefault().Info(cw.t("ログを保存しました: %s"), path)
+	cw.loggerOrDefault().Info(cw.t(messages.ControlWindowKey052), path)
 }
 
 // showControllerHelp はコントローラーの使い方を表示する。
 func (cw *ControlWindow) showControllerHelp() {
-	cw.infoLineTitle(cw.t("コントローラーウィンドウの使い方"), cw.t("コントローラーウィンドウの使い方メッセージ"))
+	cw.infoLineTitle(cw.t(messages.ControlWindowKey053), cw.t(messages.ControlWindowKey054))
 }
 
 // showOverrideHelp はオーバーレイの使い方を表示する。
 func (cw *ControlWindow) showOverrideHelp() {
-	cw.infoLineTitle(cw.t("&サブビューワーオーバーレイの使い方"), cw.t("サブビューワーオーバーレイの使い方メッセージ"))
+	cw.infoLineTitle(cw.t(messages.ControlWindowKey055), cw.t(messages.ControlWindowKey056))
 }
 
 // showBoneHelp はボーン表示の使い方を表示する。
 func (cw *ControlWindow) showBoneHelp() {
-	cw.infoLineTitle(cw.t("&ボーン表示の使い方"), cw.t("ボーン表示の使い方メッセージ"))
+	cw.infoLineTitle(cw.t(messages.ControlWindowKey057), cw.t(messages.ControlWindowKey058))
 }
 
 // showRigidBodyHelp は剛体表示の使い方を表示する。
 func (cw *ControlWindow) showRigidBodyHelp() {
-	cw.infoLineTitle(cw.t("&剛体表示の使い方"), cw.t("剛体表示の使い方メッセージ"))
+	cw.infoLineTitle(cw.t(messages.ControlWindowKey059), cw.t(messages.ControlWindowKey060))
 }
 
 // showViewerHelp はビューワーの使い方を表示する。
 func (cw *ControlWindow) showViewerHelp() {
-	cw.infoLineTitle(cw.t("&ビューワーの使い方"), cw.t("ビューワーの使い方メッセージ"))
+	cw.infoLineTitle(cw.t(messages.ControlWindowKey061), cw.t(messages.ControlWindowKey062))
 }
 
 // updateFpsMenu はFPS制限メニューの状態を更新する。
@@ -1212,7 +1212,7 @@ func (cw *ControlWindow) saveUserBool(key string, value bool) {
 		return
 	}
 	if err := cw.userConfig.SetBool(key, value); err != nil {
-		logging.DefaultLogger().Error(cw.t("設定の保存に失敗しました: %s"), err.Error())
+		logging.DefaultLogger().Error(cw.t(messages.ControlWindowKey063), err.Error())
 	}
 }
 
@@ -1222,7 +1222,7 @@ func (cw *ControlWindow) saveUserInt(key string, value int) {
 		return
 	}
 	if err := cw.userConfig.SetInt(key, value); err != nil {
-		logging.DefaultLogger().Error(cw.t("設定の保存に失敗しました: %s"), err.Error())
+		logging.DefaultLogger().Error(cw.t(messages.ControlWindowKey063), err.Error())
 	}
 }
 

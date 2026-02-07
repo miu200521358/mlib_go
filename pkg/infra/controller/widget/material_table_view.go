@@ -6,6 +6,7 @@ package widget
 
 import (
 	"fmt"
+	"github.com/miu200521358/mlib_go/pkg/adapter/mpresenter/messages"
 	"slices"
 	"sort"
 
@@ -60,16 +61,16 @@ func (lb *MaterialTableView) Widgets() declarative.Composite {
 				Model:            lb.MaterialModel,
 				MinSize:          declarative.Size{Width: 400, Height: 200},
 				Columns: []declarative.TableViewColumn{
-					{Title: lb.t("#"), Width: 50},
-					{Title: lb.t("No."), Width: 50},
-					{Title: lb.t("日本語名称"), Width: 150},
-					{Title: lb.t("英語名称"), Width: 150},
-					{Title: lb.t("有効テクスチャ"), Width: 50},
-					{Title: lb.t("テクスチャ"), Width: 150},
-					{Title: lb.t("有効Toon"), Width: 50},
-					{Title: lb.t("Toon"), Width: 150},
-					{Title: lb.t("有効スフィア"), Width: 50},
-					{Title: lb.t("スフィア"), Width: 150},
+					{Title: lb.t(messages.MaterialTableViewKey001), Width: 50},
+					{Title: lb.t(messages.MaterialTableViewKey002), Width: 50},
+					{Title: lb.t(messages.MaterialTableViewKey003), Width: 150},
+					{Title: lb.t(messages.MaterialTableViewKey004), Width: 150},
+					{Title: lb.t(messages.MaterialTableViewKey005), Width: 50},
+					{Title: lb.t(messages.MaterialTableViewKey006), Width: 150},
+					{Title: lb.t(messages.MaterialTableViewKey007), Width: 50},
+					{Title: lb.t(messages.MaterialTableViewKey008), Width: 150},
+					{Title: lb.t(messages.MaterialTableViewKey009), Width: 50},
+					{Title: lb.t(messages.MaterialTableViewKey010), Width: 150},
 				},
 				OnMouseDown: func(x, y int, button walk.MouseButton) {
 					if button != walk.LeftButton || lb.TableView == nil || lb.MaterialModel == nil {

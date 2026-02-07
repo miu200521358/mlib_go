@@ -5,6 +5,7 @@
 package widget
 
 import (
+	"github.com/miu200521358/mlib_go/pkg/adapter/mpresenter/messages"
 	"time"
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/audio_api"
@@ -50,8 +51,8 @@ type MotionPlayer struct {
 func NewMotionPlayer(translator i18n.II18n) *MotionPlayer {
 	player := new(MotionPlayer)
 	player.translator = translator
-	player.playingText = player.t("一時停止")
-	player.stoppedText = player.t("再生")
+	player.playingText = player.t(messages.MotionPlayerKey001)
+	player.stoppedText = player.t(messages.ControlWindowKey046)
 	player.volumeInitial = audioVolumeDefault
 	player.startPlayingResetType = func() state.PhysicsResetType {
 		return state.PHYSICS_RESET_TYPE_START_FRAME
@@ -82,8 +83,8 @@ func (mp *MotionPlayer) SetAudioPlayer(player audio_api.IAudioPlayer, userConfig
 			userConfig,
 			mp.translator,
 			config.UserConfigKeyAudio,
-			mp.t("音楽ファイル"),
-			mp.t("音楽ファイルを選択してください"),
+			mp.t(messages.ControlWindowKey099),
+			mp.t(messages.MotionPlayerKey002),
 			mp.onAudioPathChanged,
 		)
 		if mp.window != nil {
@@ -107,8 +108,8 @@ func (mp *MotionPlayer) Widgets() declarative.Composite {
 		Layout: declarative.HBox{},
 		Children: []declarative.Widget{
 			declarative.TextLabel{
-				Text:        mp.t("再生"),
-				ToolTipText: mp.t("再生ウィジェットの使い方メッセージ"),
+				Text:        mp.t(messages.ControlWindowKey046),
+				ToolTipText: mp.t(messages.MotionPlayerKey003),
 			},
 			declarative.NumberEdit{
 				AssignTo:           &mp.frameEdit,
@@ -128,7 +129,7 @@ func (mp *MotionPlayer) Widgets() declarative.Composite {
 					mp.frameSlider.ChangeValue(int(mp.frameEdit.Value()))
 					mp.seekAudioByFrame(frame)
 				},
-				ToolTipText:            mp.t("再生キーフレ説明"),
+				ToolTipText:            mp.t(messages.MotionPlayerKey004),
 				StretchFactor:          3,
 				ChangedBackgroundColor: walk.ColorWhite,
 			},
@@ -146,7 +147,7 @@ func (mp *MotionPlayer) Widgets() declarative.Composite {
 					mp.frameEdit.ChangeValue(float64(mp.frameSlider.Value()))
 					mp.seekAudioByFrame(frame)
 				},
-				ToolTipText:   mp.t("再生スライダー説明"),
+				ToolTipText:   mp.t(messages.MotionPlayerKey005),
 				Value:         0,
 				StretchFactor: 20,
 			},
@@ -162,7 +163,7 @@ func (mp *MotionPlayer) Widgets() declarative.Composite {
 					}
 					mp.SetPlaying(playing)
 				},
-				ToolTipText:   mp.t("再生ボタン説明"),
+				ToolTipText:   mp.t(messages.MotionPlayerKey006),
 				StretchFactor: 2,
 			},
 		},
@@ -195,8 +196,8 @@ func (mp *MotionPlayer) volumeWidgets() declarative.Composite {
 		Layout: declarative.HBox{},
 		Children: []declarative.Widget{
 			declarative.TextLabel{
-				Text:        mp.t("音量"),
-				ToolTipText: mp.t("音量説明"),
+				Text:        mp.t(messages.ControlWindowKey101),
+				ToolTipText: mp.t(messages.MotionPlayerKey007),
 			},
 			declarative.NumberEdit{
 				AssignTo:           &mp.volumeEdit,
@@ -211,7 +212,7 @@ func (mp *MotionPlayer) volumeWidgets() declarative.Composite {
 				OnValueChanged: func() {
 					mp.handleVolumeChanged()
 				},
-				ToolTipText:            mp.t("音量説明"),
+				ToolTipText:            mp.t(messages.MotionPlayerKey007),
 				StretchFactor:          3,
 				ChangedBackgroundColor: walk.ColorWhite,
 			},

@@ -8,6 +8,7 @@ import (
 	"embed"
 	"errors"
 	"fmt"
+	"github.com/miu200521358/mlib_go/pkg/adapter/mpresenter/messages"
 	"image/png"
 	"os"
 	"os/exec"
@@ -26,12 +27,12 @@ import (
 
 // ShowErrorDialog は通常エラーのダイアログを表示する。
 func ShowErrorDialog(appConfig *config.AppConfig, err error) bool {
-	return showErrorDialog(appConfig, err, i18n.T("通常エラーが発生しました"), i18n.T("通常エラーヘッダー"), false)
+	return showErrorDialog(appConfig, err, i18n.T(messages.ErrorDialogKey001), i18n.T(messages.ErrorDialogKey002), false)
 }
 
 // ShowFatalErrorDialog は致命エラーのダイアログを表示する。
 func ShowFatalErrorDialog(appConfig *config.AppConfig, err error) bool {
-	return showErrorDialog(appConfig, err, i18n.T("予期せぬエラーが発生しました"), i18n.T("予期せぬエラーヘッダー"), true)
+	return showErrorDialog(appConfig, err, i18n.T(messages.ErrorDialogKey003), i18n.T(messages.ErrorDialogKey004), true)
 }
 
 // BuildErrorText はエラー本文を生成して返す。
@@ -63,9 +64,9 @@ func showErrorDialog(appConfig *config.AppConfig, err error, title string, heade
 		iconName = "dangerous_48dp_C62828_FILL1_wght400_GRAD0_opsz48.png"
 	}
 	errorIcon, _ := readIconFromEmbedFS(errorIcons, iconName)
-	closeText := i18n.T("エラーダイアログを閉じる")
+	closeText := i18n.T(messages.ErrorDialogKey005)
 	if terminate {
-		closeText = i18n.T("アプリを終了")
+		closeText = i18n.T(messages.ErrorDialogKey006)
 	}
 	var mw *walk.MainWindow
 	var errView *walk.TextEdit
@@ -102,20 +103,20 @@ func showErrorDialog(appConfig *config.AppConfig, err error, title string, heade
 				Layout: declarative.HBox{},
 				Children: []declarative.Widget{
 					declarative.PushButton{
-						Text: i18n.T("エラーをダウンロード"),
+						Text: i18n.T(messages.ErrorDialogKey007),
 						OnClicked: func() {
 							if errView == nil {
 								return
 							}
 							fd := new(walk.FileDialog)
-							fd.Title = i18n.T("エラーをダウンロード")
-							fd.Filter = i18n.T("テキストファイル") + " (*.txt)|*.txt|" + i18n.T("すべてのファイル") + " (*.*)|*.*"
+							fd.Title = i18n.T(messages.ErrorDialogKey007)
+							fd.Filter = i18n.T(messages.ErrorDialogKey008) + " (*.txt)|*.txt|" + i18n.T(messages.ErrorDialogKey009) + " (*.*)|*.*"
 							jst := time.FixedZone("JST", 9*60*60)
 							fd.FilePath = "mlib_error_" + time.Now().In(jst).Format("200601021504") + ".txt"
 							fd.Flags |= win.OFN_OVERWRITEPROMPT
 							ok, dlgErr := fd.ShowSave(mw)
 							if dlgErr != nil {
-								walk.MsgBox(mw, i18n.T("保存失敗"), dlgErr.Error(), walk.MsgBoxIconError)
+								walk.MsgBox(mw, i18n.T(messages.FilePickerKey005), dlgErr.Error(), walk.MsgBoxIconError)
 								return
 							}
 							if !ok {
@@ -126,13 +127,13 @@ func showErrorDialog(appConfig *config.AppConfig, err error, title string, heade
 								path += ".txt"
 							}
 							if writeErr := os.WriteFile(path, []byte(errView.Text()), 0o644); writeErr != nil {
-								walk.MsgBox(mw, i18n.T("保存失敗"), writeErr.Error(), walk.MsgBoxIconError)
+								walk.MsgBox(mw, i18n.T(messages.FilePickerKey005), writeErr.Error(), walk.MsgBoxIconError)
 								return
 							}
 						},
 					},
 					declarative.PushButton{
-						Text: i18n.T("コミュニティで報告"),
+						Text: i18n.T(messages.ErrorDialogKey010),
 						OnClicked: func() {
 							exec.Command("cmd", "/c", "start", "https://discord.gg/MW2Bn47aCN").Start()
 						},
@@ -153,7 +154,7 @@ func showErrorDialog(appConfig *config.AppConfig, err error, title string, heade
 			},
 		},
 	}).Run(); dialogErr != nil {
-		walk.MsgBox(nil, i18n.T("エラーダイアログ起動失敗"), dialogErr.Error(), walk.MsgBoxIconError)
+		walk.MsgBox(nil, i18n.T(messages.ErrorDialogKey011), dialogErr.Error(), walk.MsgBoxIconError)
 		if terminate {
 			os.Exit(1)
 		}
