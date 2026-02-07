@@ -25,31 +25,35 @@ type Camera struct {
 	Position     *mmath.Vec3
 	LookAtCenter *mmath.Vec3
 	Up           *mmath.Vec3
+	Orientation  mmath.Quaternion
 	FieldOfView  float32
 	AspectRatio  float32
 	NearPlane    float32
 	FarPlane     float32
-	Yaw          float64
-	Pitch        float64
 }
 
 // NewDefaultCamera は既定値のカメラを生成する。
 func NewDefaultCamera(width, height int) *Camera {
-	return &Camera{
-		Position:     &mmath.Vec3{Vec: r3.Vec{X: 0.0, Y: InitialCameraPositionY, Z: InitialCameraPositionZ}},
+	cam := &Camera{
+		Position:     &mmath.Vec3{},
 		LookAtCenter: &mmath.Vec3{Vec: r3.Vec{X: 0.0, Y: InitialLookAtCenterY, Z: 0.0}},
 		Up:           &mmath.Vec3{Vec: r3.Vec{X: 0.0, Y: 1.0, Z: 0.0}},
+		Orientation:  mmath.NewQuaternion(),
 		FieldOfView:  FieldOfViewAngle,
 		AspectRatio:  float32(width) / float32(height),
 		NearPlane:    0.1,
 		FarPlane:     1000.0,
 	}
+	cam.applyOrientation(math.Abs(InitialCameraPositionZ))
+	return cam
 }
 
 // String はカメラ情報を文字列化する。
 func (c *Camera) String() string {
-	return fmt.Sprintf("Camera: Position: %v, LookAtCenter: %v, Up: %v, FieldOfView: %.5f, AspectRatio: %.5f, NearPlane: %.5f, FarPlane: %.5f, Yaw: %.5f, Pitch: %.5f",
-		c.Position, c.LookAtCenter, c.Up, c.FieldOfView, c.AspectRatio, c.NearPlane, c.FarPlane, c.Yaw, c.Pitch)
+	return fmt.Sprintf(
+		"Camera: Position: %v, LookAtCenter: %v, Up: %v, Orientation: %v, FieldOfView: %.5f, AspectRatio: %.5f, NearPlane: %.5f, FarPlane: %.5f",
+		c.Position, c.LookAtCenter, c.Up, c.Orientation, c.FieldOfView, c.AspectRatio, c.NearPlane, c.FarPlane,
+	)
 }
 
 // UpdateAspectRatio はアスペクト比を更新する。
@@ -69,6 +73,7 @@ func (c *Camera) Reset(width, height int) {
 	c.Position = defaultCam.Position
 	c.LookAtCenter = defaultCam.LookAtCenter
 	c.Up = defaultCam.Up
+	c.Orientation = defaultCam.Orientation
 	c.FieldOfView = defaultCam.FieldOfView
 	c.AspectRatio = defaultCam.AspectRatio
 	c.NearPlane = defaultCam.NearPlane
@@ -116,20 +121,129 @@ func (c *Camera) ResetPosition(yaw, pitch float64) {
 	if c == nil {
 		return
 	}
-	c.Yaw = yaw
-	c.Pitch = pitch
-
-	radius := math.Abs(InitialCameraPositionZ)
+	c.ensureState()
+	radius := c.OrbitDistance()
 	yawRad := mmath.DegToRad(yaw)
 	pitchRad := mmath.DegToRad(pitch)
-	orientation := mmath.NewQuaternionFromAxisAngles(mmath.UNIT_Y_VEC3, yawRad).
-		Muled(mmath.NewQuaternionFromAxisAngles(mmath.UNIT_X_VEC3, pitchRad))
-	forwardXYZ := orientation.MulVec3(mmath.UNIT_Z_NEG_VEC3).MuledScalar(radius)
+	c.Orientation = mmath.NewQuaternionFromAxisAngles(mmath.UNIT_Y_VEC3, yawRad).
+		Muled(mmath.NewQuaternionFromAxisAngles(mmath.UNIT_X_VEC3, pitchRad)).
+		Normalized()
+	c.applyOrientation(radius)
+}
 
-	if c.Position == nil {
-		c.Position = &mmath.Vec3{}
+// RotateOrbit は軌道回転を加算してカメラ姿勢を更新する。
+func (c *Camera) RotateOrbit(yawDelta, pitchDelta float64) {
+	if c == nil {
+		return
 	}
-	c.Position.X = forwardXYZ.X
-	c.Position.Y = InitialCameraPositionY + forwardXYZ.Y
-	c.Position.Z = forwardXYZ.Z
+	c.ensureState()
+	radius := c.OrbitDistance()
+
+	// ワールドYのヨー回転と、回転後ローカルX軸のピッチ回転を順に適用する。
+	yawQuat := mmath.NewQuaternionFromAxisAngles(mmath.UNIT_Y_VEC3, mmath.DegToRad(yawDelta))
+	rotated := yawQuat.Muled(c.Orientation).Normalized()
+	rightAxis := rotated.MulVec3(mmath.UNIT_X_VEC3).Normalized()
+	if rightAxis.LengthSqr() == 0 {
+		rightAxis = mmath.UNIT_X_VEC3
+	}
+	pitchQuat := mmath.NewQuaternionFromAxisAngles(rightAxis, mmath.DegToRad(pitchDelta))
+	c.Orientation = pitchQuat.Muled(rotated).Normalized()
+	c.applyOrientation(radius)
+}
+
+// OrbitDistance は注視点からカメラまでの距離を返す。
+func (c *Camera) OrbitDistance() float64 {
+	if c == nil || c.Position == nil || c.LookAtCenter == nil {
+		return math.Abs(InitialCameraPositionZ)
+	}
+	distance := c.Position.Subed(*c.LookAtCenter).Length()
+	if distance <= 1e-8 {
+		return math.Abs(InitialCameraPositionZ)
+	}
+	return distance
+}
+
+// RightVector はカメラ右方向ベクトルを返す。
+func (c *Camera) RightVector() mmath.Vec3 {
+	if c == nil {
+		return mmath.UNIT_X_VEC3
+	}
+	c.ensureState()
+	right := c.Orientation.MulVec3(mmath.UNIT_X_VEC3).Normalized()
+	if right.LengthSqr() == 0 {
+		return mmath.UNIT_X_VEC3
+	}
+	return right
+}
+
+// UpVector はカメラ上方向ベクトルを返す。
+func (c *Camera) UpVector() mmath.Vec3 {
+	if c == nil {
+		return mmath.UNIT_Y_VEC3
+	}
+	c.ensureState()
+	up := c.Orientation.MulVec3(mmath.UNIT_Y_VEC3).Normalized()
+	if up.LengthSqr() == 0 {
+		return mmath.UNIT_Y_VEC3
+	}
+	return up
+}
+
+// ForwardVector はカメラ前方向ベクトルを返す。
+func (c *Camera) ForwardVector() mmath.Vec3 {
+	if c == nil {
+		return mmath.UNIT_Z_VEC3
+	}
+	c.ensureState()
+	forward := c.Orientation.MulVec3(mmath.UNIT_Z_VEC3).Normalized()
+	if forward.LengthSqr() == 0 {
+		return mmath.UNIT_Z_VEC3
+	}
+	return forward
+}
+
+// ensureState はカメラ内部状態を初期化・補正する。
+func (c *Camera) ensureState() {
+	if c.Position == nil {
+		c.Position = &mmath.Vec3{Vec: r3.Vec{X: 0.0, Y: InitialCameraPositionY, Z: InitialCameraPositionZ}}
+	}
+	if c.LookAtCenter == nil {
+		c.LookAtCenter = &mmath.Vec3{Vec: r3.Vec{X: 0.0, Y: InitialLookAtCenterY, Z: 0.0}}
+	}
+	if c.Up == nil {
+		c.Up = &mmath.Vec3{Vec: r3.Vec{X: 0.0, Y: 1.0, Z: 0.0}}
+	}
+	if c.Orientation.Length() <= 1e-8 {
+		forward := c.LookAtCenter.Subed(*c.Position)
+		if forward.LengthSqr() == 0 {
+			c.Orientation = mmath.NewQuaternion()
+		} else {
+			c.Orientation = mmath.NewQuaternionFromDirection(forward, *c.Up)
+		}
+	}
+	c.Orientation = c.Orientation.Normalized()
+}
+
+// applyOrientation は姿勢と距離からカメラ位置と上方向を再構成する。
+func (c *Camera) applyOrientation(distance float64) {
+	if c == nil {
+		return
+	}
+	c.ensureState()
+	if distance <= 1e-8 {
+		distance = math.Abs(InitialCameraPositionZ)
+	}
+
+	offset := c.Orientation.MulVec3(mmath.UNIT_Z_NEG_VEC3).MuledScalar(distance)
+	c.Position.X = c.LookAtCenter.X + offset.X
+	c.Position.Y = c.LookAtCenter.Y + offset.Y
+	c.Position.Z = c.LookAtCenter.Z + offset.Z
+
+	up := c.Orientation.MulVec3(mmath.UNIT_Y_VEC3).Normalized()
+	if up.LengthSqr() == 0 {
+		up = mmath.UNIT_Y_VEC3
+	}
+	c.Up.X = up.X
+	c.Up.Y = up.Y
+	c.Up.Z = up.Z
 }

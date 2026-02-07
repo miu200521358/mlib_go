@@ -72,12 +72,15 @@ func (next *CameraFrame) lerpFrame(prev *CameraFrame, index Frame) *CameraFrame 
 
 	prevDeg := vec3OrZero(prev.Degrees)
 	nextDeg := vec3OrZero(next.Degrees)
-	q1 := mmath.NewQuaternionFromDegrees(prevDeg.X, prevDeg.Y, prevDeg.Z)
-	q2 := mmath.NewQuaternionFromDegrees(nextDeg.X, nextDeg.Y, nextDeg.Z)
-	q := q1.Slerp(q2, ry)
-	cf.Quaternion = &q
-	deg := q.ToDegrees()
+	// カメラ回転は生Euler角を補間して多回転を保持する。
+	deg := vec3(
+		mmath.Lerp(prevDeg.X, nextDeg.X, ry),
+		mmath.Lerp(prevDeg.Y, nextDeg.Y, ry),
+		mmath.Lerp(prevDeg.Z, nextDeg.Z, ry),
+	)
 	cf.Degrees = &deg
+	q := mmath.NewQuaternionFromDegrees(deg.X, deg.Y, deg.Z)
+	cf.Quaternion = &q
 
 	prevPos := vec3OrZero(prev.Position)
 	nextPos := vec3OrZero(next.Position)

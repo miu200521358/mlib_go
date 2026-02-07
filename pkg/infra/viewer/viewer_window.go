@@ -281,6 +281,7 @@ func (vw *ViewerWindow) resetCameraPosition(yaw, pitch float64) {
 	if cam.FieldOfView == 0 {
 		cam.FieldOfView = graphics_api.FieldOfViewAngle
 	}
+	vw.shader.SetCamera(cam)
 	vw.syncCameraToOthers()
 }
 
@@ -2322,9 +2323,9 @@ func (vw *ViewerWindow) updateCameraAngleByCursor(xpos, ypos float64) {
 	if cam == nil {
 		return
 	}
-	newYaw := cam.Yaw + xOffset
-	newPitch := cam.Pitch + yOffset
-	vw.resetCameraPosition(newYaw, newPitch)
+	cam.RotateOrbit(xOffset, yOffset)
+	vw.shader.SetCamera(cam)
+	vw.syncCameraToOthers()
 }
 
 // updateCameraPositionByCursor はカーソル移動でカメラ位置を更新する。
@@ -2334,13 +2335,12 @@ func (vw *ViewerWindow) updateCameraPositionByCursor(xpos, ypos float64) {
 	yOffset := (vw.prevCursorPos.Y - ypos) * ratio
 
 	cam := vw.shader.Camera()
-	if cam == nil || cam.Position == nil || cam.LookAtCenter == nil || cam.Up == nil {
+	if cam == nil || cam.Position == nil || cam.LookAtCenter == nil {
 		return
 	}
 
-	forward := cam.LookAtCenter.Subed(*cam.Position)
-	right := forward.Cross(*cam.Up).Normalized()
-	up := right.Cross(forward.Normalized()).Normalized()
+	right := cam.RightVector()
+	up := cam.UpVector()
 
 	upMovement := up.MuledScalar(-yOffset)
 	rightMovement := right.MuledScalar(-xOffset)
@@ -2376,8 +2376,7 @@ func (vw *ViewerWindow) syncCameraToOthers() {
 		otherCam.AspectRatio = currentCam.AspectRatio
 		otherCam.NearPlane = currentCam.NearPlane
 		otherCam.FarPlane = currentCam.FarPlane
-		otherCam.Yaw = currentCam.Yaw
-		otherCam.Pitch = currentCam.Pitch
+		otherCam.Orientation = currentCam.Orientation
 		other.shader.SetCamera(otherCam)
 	}
 }

@@ -1,11 +1,7 @@
 // 指示: miu200521358
 package motion
 
-import (
-	"testing"
-
-	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-)
+import "testing"
 
 // TestCameraFrameLerp はカメラ補間を確認する。
 func TestCameraFrameLerp(t *testing.T) {
@@ -33,10 +29,31 @@ func TestCameraFrameLerp(t *testing.T) {
 	if out.IsPerspectiveOff != true {
 		t.Fatalf("IsPerspectiveOff should use next")
 	}
-	q1 := mmath.NewQuaternionFromDegrees(0, 0, 0)
-	q2 := mmath.NewQuaternionFromDegrees(0, 90, 0)
-	if !out.Quaternion.NearEquals(q1.Slerp(q2, 0.5), 1e-6) {
-		t.Fatalf("Quaternion lerp mismatch")
+	if out.Degrees == nil {
+		t.Fatalf("Degrees should not be nil")
+	}
+	if out.Degrees.Y < 44.9 || out.Degrees.Y > 45.1 {
+		t.Fatalf("Degrees lerp mismatch: got=%v", out.Degrees.Y)
+	}
+	if out.Quaternion == nil {
+		t.Fatalf("Quaternion should not be nil")
+	}
+}
+
+// TestCameraFrameLerpKeepsMultiRotation は多回転の角度が保持されることを確認する。
+func TestCameraFrameLerpKeepsMultiRotation(t *testing.T) {
+	prev := NewCameraFrame(0)
+	prev.Degrees = vec3Ptr(0, 0, 0)
+
+	next := NewCameraFrame(10)
+	next.Degrees = vec3Ptr(0, 720, 0)
+
+	out := next.lerpFrame(prev, 5)
+	if out == nil || out.Degrees == nil {
+		t.Fatalf("lerpFrame nil")
+	}
+	if out.Degrees.Y < 359.9 || out.Degrees.Y > 360.1 {
+		t.Fatalf("multi rotation mismatch: got=%v", out.Degrees.Y)
 	}
 }
 
