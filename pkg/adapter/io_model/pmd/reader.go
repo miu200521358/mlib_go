@@ -955,11 +955,14 @@ func (p *pmdReader) readExtensions(modelData *model.PmxModel) error {
 		}
 
 		boneIndex := int(boneRaw)
+		positionBaseBoneIndex := boneIndex
 		if boneRaw < 0 {
 			boneIndex = -1
+			// PMDの関連ボーンなし剛体はセンター(Index=0)相対として扱う。
+			positionBaseBoneIndex = 0
 		}
-		if boneIndex >= 0 {
-			bone, boneErr := modelData.Bones.Get(boneIndex)
+		if positionBaseBoneIndex >= 0 {
+			bone, boneErr := modelData.Bones.Get(positionBaseBoneIndex)
 			if boneErr == nil {
 				// PMDの剛体位置はボーン相対のため、モデル座標に変換する。
 				pos = pos.Added(bone.Position)
