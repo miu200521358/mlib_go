@@ -53,6 +53,19 @@ type accessorReadPlan struct {
 	ViewEnd       int
 }
 
+// accessorValueCache はaccessor値の再読込みを抑止するキャッシュ。
+type accessorValueCache struct {
+	floatValues  map[int][][]float64
+	intValues    map[int][][]int
+	vertexRanges map[string]primitiveVertexRange
+}
+
+// primitiveVertexRange はprimitiveで生成した頂点範囲を表す。
+type primitiveVertexRange struct {
+	Start int
+	Count int
+}
+
 // weightedBone はボーンウェイト計算用の一時構造体。
 type weightedBone struct {
 	BoneIndex int
@@ -62,23 +75,18 @@ type weightedBone struct {
 // buildVrmConversion はVRMプロファイルに応じた座標変換設定を返す。
 func buildVrmConversion(vrmData *vrm.VrmData) vrmConversion {
 	conversion := vrmConversion{
-		Scale: 1.0,
+		Scale: vroidMeterScale,
 		Axis: mmath.Vec3{
-			Vec: r3.Vec{X: 1.0, Y: 1.0, Z: -1.0},
+			Vec: r3.Vec{X: -1.0, Y: 1.0, Z: 1.0},
 		},
 	}
 	if vrmData != nil && vrmData.Profile == vrm.VRM_PROFILE_VROID {
-		conversion.Scale = vroidMeterScale
 		// VRoidはVRM0/VRM1で座標配置が異なるため、バージョンごとに軸変換を切り替える。
 		// VRM0: 既存規約どおり X 反転（-1, 1, 1）
 		// VRM1: VRoid Studio 1.x 出力の前向きを保つため標準軸（1, 1, -1）
 		if vrmData.Version == vrm.VRM_VERSION_1 {
 			conversion.Axis = mmath.Vec3{
 				Vec: r3.Vec{X: 1.0, Y: 1.0, Z: -1.0},
-			}
-		} else {
-			conversion.Axis = mmath.Vec3{
-				Vec: r3.Vec{X: -1.0, Y: 1.0, Z: 1.0},
 			}
 		}
 	}
@@ -111,6 +119,18 @@ func appendMeshData(
 	}
 
 	textureIndexesByImage := appendImageTextures(modelData, doc.Images)
+	totalPrimitives := countGltfPrimitives(doc.Meshes)
+	cache := newAccessorValueCache()
+	primitiveStep := 0
+	meshUniquePrimitiveIndex := map[int]map[string]int{}
+	logVrmStep(
+		"VRMメッシュ変換開始: nodes=%d meshes=%d primitives=%d textures=%d",
+		len(doc.Nodes),
+		len(doc.Meshes),
+		totalPrimitives,
+		len(textureIndexesByImage),
+	)
+
 	for nodeIndex, node := range doc.Nodes {
 		if node.Mesh == nil {
 			continue
@@ -121,8 +141,56 @@ func appendMeshData(
 		}
 
 		mesh := doc.Meshes[meshIndex]
+		logVrmStep(
+			"VRMメッシュ変換ステップ: node=%d mesh=%d primitives=%d",
+			nodeIndex,
+			meshIndex,
+			len(mesh.Primitives),
+		)
+		seenByKey := meshUniquePrimitiveIndex[meshIndex]
+		if seenByKey == nil {
+			seenByKey = map[string]int{}
+			meshUniquePrimitiveIndex[meshIndex] = seenByKey
+		}
 		for primitiveIndex, primitive := range mesh.Primitives {
+			primitiveStep++
 			primitiveName := resolvePrimitiveName(mesh, meshIndex, primitiveIndex)
+			if shouldSkipPrimitiveForUnsupportedTargets(primitive, primitiveIndex, seenByKey) {
+				logVrmStep(
+					"VRMプリミティブ変換スキップ: step=%d/%d node=%d mesh=%d primitive=%d name=%s reason=%s",
+					primitiveStep,
+					totalPrimitives,
+					nodeIndex,
+					meshIndex,
+					primitiveIndex,
+					primitiveName,
+					"morph targets未対応のため重複base primitiveを省略",
+				)
+				continue
+			}
+			beforeVertexCount := modelData.Vertices.Len()
+			beforeFaceCount := modelData.Faces.Len()
+			beforeMaterialCount := modelData.Materials.Len()
+			logVrmDebug(
+				"VRMプリミティブ変換開始: step=%d/%d node=%d mesh=%d primitive=%d name=%s",
+				primitiveStep,
+				totalPrimitives,
+				nodeIndex,
+				meshIndex,
+				primitiveIndex,
+				primitiveName,
+			)
+			if primitiveStep%100 == 0 {
+				logVrmStep(
+					"VRMプリミティブ変換開始: step=%d/%d node=%d mesh=%d primitive=%d name=%s",
+					primitiveStep,
+					totalPrimitives,
+					nodeIndex,
+					meshIndex,
+					primitiveIndex,
+					primitiveName,
+				)
+			}
 			if err := appendPrimitiveMeshData(
 				modelData,
 				doc,
@@ -134,11 +202,31 @@ func appendMeshData(
 				nodeToBoneIndex,
 				textureIndexesByImage,
 				conversion,
+				cache,
 			); err != nil {
 				return err
 			}
+			logVrmStep(
+				"VRMプリミティブ変換完了: step=%d/%d node=%d mesh=%d primitive=%d name=%s addVertices=%d addFaces=%d addMaterials=%d",
+				primitiveStep,
+				totalPrimitives,
+				nodeIndex,
+				meshIndex,
+				primitiveIndex,
+				primitiveName,
+				modelData.Vertices.Len()-beforeVertexCount,
+				modelData.Faces.Len()-beforeFaceCount,
+				modelData.Materials.Len()-beforeMaterialCount,
+			)
 		}
 	}
+	logVrmStep(
+		"VRMメッシュ変換完了: vertices=%d faces=%d materials=%d textures=%d",
+		modelData.Vertices.Len(),
+		modelData.Faces.Len(),
+		modelData.Materials.Len(),
+		modelData.Textures.Len(),
+	)
 	return nil
 }
 
@@ -176,6 +264,137 @@ func resolvePrimitiveName(mesh gltfMesh, meshIndex int, primitiveIndex int) stri
 	return fmt.Sprintf("%s_%03d", meshName, primitiveIndex)
 }
 
+// shouldSkipPrimitiveForUnsupportedTargets はmorph targets未対応時の重複primitiveを判定する。
+func shouldSkipPrimitiveForUnsupportedTargets(
+	primitive gltfPrimitive,
+	primitiveIndex int,
+	seenByKey map[string]int,
+) bool {
+	if seenByKey == nil {
+		return false
+	}
+	key := primitiveBaseKey(primitive)
+	if key == "" {
+		return false
+	}
+	if firstIndex, exists := seenByKey[key]; exists {
+		// targets未対応の間は同一base primitiveの重複展開を抑止する。
+		return len(primitive.Targets) > 0 && firstIndex != primitiveIndex
+	}
+	seenByKey[key] = primitiveIndex
+	return false
+}
+
+// primitiveBaseKey はtargetsを除くprimitiveの識別キーを返す。
+func primitiveBaseKey(primitive gltfPrimitive) string {
+	attributesKey := primitiveAttributesKey(primitive.Attributes)
+	if attributesKey == "" {
+		return ""
+	}
+	indices := -1
+	if primitive.Indices != nil {
+		indices = *primitive.Indices
+	}
+	material := -1
+	if primitive.Material != nil {
+		material = *primitive.Material
+	}
+	mode := gltfPrimitiveModeTriangles
+	if primitive.Mode != nil {
+		mode = *primitive.Mode
+	}
+	return fmt.Sprintf("attr=%s|idx=%d|mat=%d|mode=%d", attributesKey, indices, material, mode)
+}
+
+// primitiveAttributesKey はattribute mapの安定キーを生成する。
+func primitiveAttributesKey(attributes map[string]int) string {
+	if len(attributes) == 0 {
+		return ""
+	}
+	keys := make([]string, 0, len(attributes))
+	for key := range attributes {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	parts := make([]string, 0, len(keys))
+	for _, key := range keys {
+		parts = append(parts, fmt.Sprintf("%s:%d", key, attributes[key]))
+	}
+	return strings.Join(parts, ",")
+}
+
+// primitiveVertexKey は頂点配列を再利用するためのキーを返す。
+func primitiveVertexKey(nodeIndex int, primitive gltfPrimitive) string {
+	return fmt.Sprintf("node=%d|attrs=%s", nodeIndex, primitiveAttributesKey(primitive.Attributes))
+}
+
+// newAccessorValueCache はaccessorキャッシュを初期化する。
+func newAccessorValueCache() *accessorValueCache {
+	return &accessorValueCache{
+		floatValues:  map[int][][]float64{},
+		intValues:    map[int][][]int{},
+		vertexRanges: map[string]primitiveVertexRange{},
+	}
+}
+
+// readFloatValues はfloat accessor値をキャッシュ付きで返す。
+func (c *accessorValueCache) readFloatValues(doc *gltfDocument, accessorIndex int, binChunk []byte) ([][]float64, error) {
+	if c == nil {
+		return readAccessorFloatValues(doc, accessorIndex, binChunk)
+	}
+	if values, ok := c.floatValues[accessorIndex]; ok {
+		return values, nil
+	}
+	values, err := readAccessorFloatValues(doc, accessorIndex, binChunk)
+	if err != nil {
+		return nil, err
+	}
+	c.floatValues[accessorIndex] = values
+	return values, nil
+}
+
+// readIntValues はint accessor値をキャッシュ付きで返す。
+func (c *accessorValueCache) readIntValues(doc *gltfDocument, accessorIndex int, binChunk []byte) ([][]int, error) {
+	if c == nil {
+		return readAccessorIntValues(doc, accessorIndex, binChunk)
+	}
+	if values, ok := c.intValues[accessorIndex]; ok {
+		return values, nil
+	}
+	values, err := readAccessorIntValues(doc, accessorIndex, binChunk)
+	if err != nil {
+		return nil, err
+	}
+	c.intValues[accessorIndex] = values
+	return values, nil
+}
+
+// getVertexRange は頂点範囲キャッシュから開始indexを取得する。
+func (c *accessorValueCache) getVertexRange(key string, expectedCount int) (int, bool) {
+	if c == nil || strings.TrimSpace(key) == "" {
+		return 0, false
+	}
+	r, ok := c.vertexRanges[key]
+	if !ok {
+		return 0, false
+	}
+	if r.Count != expectedCount {
+		return 0, false
+	}
+	return r.Start, true
+}
+
+// setVertexRange は頂点範囲キャッシュを登録する。
+func (c *accessorValueCache) setVertexRange(key string, start int, count int) {
+	if c == nil || strings.TrimSpace(key) == "" || start < 0 || count <= 0 {
+		return
+	}
+	c.vertexRanges[key] = primitiveVertexRange{
+		Start: start,
+		Count: count,
+	}
+}
+
 // appendPrimitiveMeshData はprimitiveをPMX頂点・面・材質へ変換する。
 func appendPrimitiveMeshData(
 	modelData *model.PmxModel,
@@ -188,38 +407,45 @@ func appendPrimitiveMeshData(
 	nodeToBoneIndex map[int]int,
 	textureIndexesByImage []int,
 	conversion vrmConversion,
+	cache *accessorValueCache,
 ) error {
 	positionAccessor, ok := primitive.Attributes["POSITION"]
 	if !ok {
 		return io_common.NewIoParseFailed("mesh.primitive に POSITION がありません", nil)
 	}
 
-	positions, err := readAccessorFloatValues(doc, positionAccessor, binChunk)
+	positions, err := cache.readFloatValues(doc, positionAccessor, binChunk)
 	if err != nil {
-		return err
+		return io_common.NewIoParseFailed("POSITION属性の読み取りに失敗しました(accessor=%d)", err, positionAccessor)
 	}
 	if len(positions) == 0 {
 		return nil
 	}
 
-	normals, err := readOptionalFloatAttribute(doc, primitive.Attributes, "NORMAL", binChunk)
+	normals, err := readOptionalFloatAttribute(doc, primitive.Attributes, "NORMAL", binChunk, cache)
+	if err != nil {
+		logVrmWarn(
+			"VRM法線の読み取りに失敗したため既定法線で継続します: node=%d primitive=%s err=%s",
+			nodeIndex,
+			primitiveName,
+			err.Error(),
+		)
+		normals = nil
+	}
+	uvs, err := readOptionalFloatAttribute(doc, primitive.Attributes, "TEXCOORD_0", binChunk, cache)
 	if err != nil {
 		return err
 	}
-	uvs, err := readOptionalFloatAttribute(doc, primitive.Attributes, "TEXCOORD_0", binChunk)
+	joints, err := readOptionalIntAttribute(doc, primitive.Attributes, "JOINTS_0", binChunk, cache)
 	if err != nil {
 		return err
 	}
-	joints, err := readOptionalIntAttribute(doc, primitive.Attributes, "JOINTS_0", binChunk)
-	if err != nil {
-		return err
-	}
-	weights, err := readOptionalFloatAttribute(doc, primitive.Attributes, "WEIGHTS_0", binChunk)
+	weights, err := readOptionalFloatAttribute(doc, primitive.Attributes, "WEIGHTS_0", binChunk, cache)
 	if err != nil {
 		return err
 	}
 
-	indices, err := readPrimitiveIndices(doc, primitive, len(positions), binChunk)
+	indices, err := readPrimitiveIndices(doc, primitive, len(positions), binChunk, cache)
 	if err != nil {
 		return err
 	}
@@ -232,9 +458,79 @@ func appendPrimitiveMeshData(
 		return nil
 	}
 
+	vertexStart, appendedVertices := appendOrReusePrimitiveVertices(
+		modelData,
+		doc,
+		nodeIndex,
+		node,
+		primitive,
+		positions,
+		normals,
+		uvs,
+		joints,
+		weights,
+		nodeToBoneIndex,
+		conversion,
+		cache,
+	)
+	if appendedVertices == 0 {
+		logVrmDebug(
+			"VRM頂点再利用: node=%d primitive=%s vertexCount=%d",
+			nodeIndex,
+			primitiveName,
+			len(positions),
+		)
+	}
+
+	materialIndex := appendPrimitiveMaterial(modelData, doc, primitive, primitiveName, textureIndexesByImage, len(triangles)*3)
+	for _, tri := range triangles {
+		if tri[0] < 0 || tri[1] < 0 || tri[2] < 0 {
+			continue
+		}
+		if tri[0] >= len(positions) || tri[1] >= len(positions) || tri[2] >= len(positions) {
+			return io_common.NewIoParseFailed("indices が頂点数を超えています", nil)
+		}
+
+		v0 := vertexStart + tri[0]
+		v1 := vertexStart + tri[1]
+		v2 := vertexStart + tri[2]
+		if conversion.ReverseWinding {
+			v0, v2 = v2, v0
+		}
+		face := &model.Face{
+			VertexIndexes: [3]int{v0, v1, v2},
+		}
+		modelData.Faces.AppendRaw(face)
+		appendVertexMaterialIndex(modelData, v0, materialIndex)
+		appendVertexMaterialIndex(modelData, v1, materialIndex)
+		appendVertexMaterialIndex(modelData, v2, materialIndex)
+	}
+	return nil
+}
+
+// appendOrReusePrimitiveVertices はprimitive頂点を生成または既存頂点を再利用する。
+func appendOrReusePrimitiveVertices(
+	modelData *model.PmxModel,
+	doc *gltfDocument,
+	nodeIndex int,
+	node gltfNode,
+	primitive gltfPrimitive,
+	positions [][]float64,
+	normals [][]float64,
+	uvs [][]float64,
+	joints [][]int,
+	weights [][]float64,
+	nodeToBoneIndex map[int]int,
+	conversion vrmConversion,
+	cache *accessorValueCache,
+) (int, int) {
+	vertexKey := primitiveVertexKey(nodeIndex, primitive)
+	if cachedStart, ok := cache.getVertexRange(vertexKey, len(positions)); ok {
+		return cachedStart, 0
+	}
+
 	defaultBoneIndex := resolveDefaultBoneIndex(modelData, nodeToBoneIndex, nodeIndex)
 	skinJoints := resolveSkinJoints(doc, node)
-
 	vertexStart := modelData.Vertices.Len()
 	for vertexIndex := 0; vertexIndex < len(positions); vertexIndex++ {
 		position := toVec3(positions[vertexIndex], mmath.ZERO_VEC3)
@@ -268,31 +564,8 @@ func appendPrimitiveMeshData(
 		}
 		modelData.Vertices.AppendRaw(vertex)
 	}
-
-	materialIndex := appendPrimitiveMaterial(modelData, doc, primitive, primitiveName, textureIndexesByImage, len(triangles)*3)
-	for _, tri := range triangles {
-		if tri[0] < 0 || tri[1] < 0 || tri[2] < 0 {
-			continue
-		}
-		if tri[0] >= len(positions) || tri[1] >= len(positions) || tri[2] >= len(positions) {
-			return io_common.NewIoParseFailed("indices が頂点数を超えています", nil)
-		}
-
-		v0 := vertexStart + tri[0]
-		v1 := vertexStart + tri[1]
-		v2 := vertexStart + tri[2]
-		if conversion.ReverseWinding {
-			v0, v2 = v2, v0
-		}
-		face := &model.Face{
-			VertexIndexes: [3]int{v0, v1, v2},
-		}
-		modelData.Faces.AppendRaw(face)
-		appendVertexMaterialIndex(modelData, v0, materialIndex)
-		appendVertexMaterialIndex(modelData, v1, materialIndex)
-		appendVertexMaterialIndex(modelData, v2, materialIndex)
-	}
-	return nil
+	cache.setVertexRange(vertexKey, vertexStart, len(positions))
+	return vertexStart, len(positions)
 }
 
 // appendVertexMaterialIndex は頂点に材質indexを追加する。
@@ -538,6 +811,7 @@ func readPrimitiveIndices(
 	primitive gltfPrimitive,
 	vertexCount int,
 	binChunk []byte,
+	cache *accessorValueCache,
 ) ([]int, error) {
 	if primitive.Indices == nil {
 		indices := make([]int, vertexCount)
@@ -547,9 +821,9 @@ func readPrimitiveIndices(
 		return indices, nil
 	}
 	accessorIndex := *primitive.Indices
-	values, err := readAccessorIntValues(doc, accessorIndex, binChunk)
+	values, err := cache.readIntValues(doc, accessorIndex, binChunk)
 	if err != nil {
-		return nil, err
+		return nil, io_common.NewIoParseFailed("indices の読み取りに失敗しました(accessor=%d)", err, accessorIndex)
 	}
 	indices := make([]int, 0, len(values))
 	for _, row := range values {
@@ -567,6 +841,7 @@ func readOptionalFloatAttribute(
 	attributes map[string]int,
 	key string,
 	binChunk []byte,
+	cache *accessorValueCache,
 ) ([][]float64, error) {
 	if attributes == nil {
 		return nil, nil
@@ -575,7 +850,11 @@ func readOptionalFloatAttribute(
 	if !ok {
 		return nil, nil
 	}
-	return readAccessorFloatValues(doc, accessorIndex, binChunk)
+	values, err := cache.readFloatValues(doc, accessorIndex, binChunk)
+	if err != nil {
+		return nil, io_common.NewIoParseFailed("%s属性の読み取りに失敗しました(accessor=%d)", err, key, accessorIndex)
+	}
+	return values, nil
 }
 
 // readOptionalIntAttribute は任意属性accessorを読み取る。
@@ -584,6 +863,7 @@ func readOptionalIntAttribute(
 	attributes map[string]int,
 	key string,
 	binChunk []byte,
+	cache *accessorValueCache,
 ) ([][]int, error) {
 	if attributes == nil {
 		return nil, nil
@@ -592,7 +872,11 @@ func readOptionalIntAttribute(
 	if !ok {
 		return nil, nil
 	}
-	return readAccessorIntValues(doc, accessorIndex, binChunk)
+	values, err := cache.readIntValues(doc, accessorIndex, binChunk)
+	if err != nil {
+		return nil, io_common.NewIoParseFailed("%s属性の読み取りに失敗しました(accessor=%d)", err, key, accessorIndex)
+	}
+	return values, nil
 }
 
 // readAccessorFloatValues はaccessorをfloat値配列として読み取る。

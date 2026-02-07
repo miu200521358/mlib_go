@@ -14,6 +14,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/model/vrm"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"github.com/miu200521358/mlib_go/pkg/shared/hashable"
 	"gonum.org/v1/gonum/spatial/r3"
 )
@@ -54,6 +55,8 @@ func (r *VrmRepository) Load(path string) (hashable.IHashable, error) {
 	if !r.CanLoad(path) {
 		return nil, io_common.NewIoExtInvalid(path, nil)
 	}
+	loadTargetName := filepath.Base(path)
+	logVrmStep("VRM読込開始: file=%s", loadTargetName)
 
 	b, err := os.ReadFile(path)
 	if err != nil {
@@ -62,30 +65,68 @@ func (r *VrmRepository) Load(path string) (hashable.IHashable, error) {
 		}
 		return nil, io_common.NewIoParseFailed("VRMファイルの読み取りに失敗しました", err)
 	}
+	logVrmStep("VRM読込ステップ: ファイル読み取り完了 bytes=%d", len(b))
+
 	jsonChunk, binChunk, err := parseGLBChunks(b)
 	if err != nil {
 		return nil, io_common.NewIoParseFailed("VRM GLBチャンクの解析に失敗しました", err)
 	}
+	logVrmStep("VRM読込ステップ: GLBチャンク解析完了 jsonBytes=%d binBytes=%d", len(jsonChunk), len(binChunk))
+
 	doc := gltfDocument{}
 	if err := json.Unmarshal(jsonChunk, &doc); err != nil {
 		return nil, io_common.NewIoParseFailed("VRM JSONチャンクの解析に失敗しました", err)
 	}
+	logVrmStep(
+		"VRM読込ステップ: JSON解析完了 nodes=%d meshes=%d primitives=%d accessors=%d",
+		len(doc.Nodes),
+		len(doc.Meshes),
+		countGltfPrimitives(doc.Meshes),
+		len(doc.Accessors),
+	)
+
 	parentIndexes, err := buildNodeParentIndexes(doc.Nodes)
 	if err != nil {
 		return nil, err
 	}
+	logVrmStep("VRM読込ステップ: ノード親子解析完了")
+
 	worldPositions, err := buildNodeWorldPositions(doc.Nodes, parentIndexes)
 	if err != nil {
 		return nil, err
 	}
+	logVrmStep("VRM読込ステップ: ノードワールド座標計算完了")
+
 	vrmData, humanBoneNames, err := buildVrmData(&doc, parentIndexes)
 	if err != nil {
 		return nil, err
 	}
+	version := ""
+	profile := ""
+	if vrmData != nil {
+		version = string(vrmData.Version)
+		profile = string(vrmData.Profile)
+	}
+	logVrmStep(
+		"VRM読込ステップ: VRM拡張解析完了 version=%s profile=%s humanBones=%d",
+		version,
+		profile,
+		len(humanBoneNames),
+	)
+
+	logVrmStep("VRM読込ステップ: PMX構築開始")
 	modelData, err := buildPmxModel(path, &doc, binChunk, worldPositions, parentIndexes, humanBoneNames, vrmData, r.InferName(path))
 	if err != nil {
 		return nil, err
 	}
+	logVrmStep(
+		"VRM読込ステップ: PMX構築完了 bones=%d vertices=%d faces=%d materials=%d",
+		modelData.Bones.Len(),
+		modelData.Vertices.Len(),
+		modelData.Faces.Len(),
+		modelData.Materials.Len(),
+	)
+
 	modelData.CreateDefaultDisplaySlots()
 	info, err := os.Stat(path)
 	if err != nil {
@@ -93,7 +134,62 @@ func (r *VrmRepository) Load(path string) (hashable.IHashable, error) {
 	}
 	modelData.SetFileModTime(info.ModTime().UnixNano())
 	modelData.UpdateHash()
+	logVrmStep("VRM読込完了: file=%s hash=%s", loadTargetName, modelData.Hash())
 	return modelData, nil
+}
+
+// countGltfPrimitives はglTF内のprimitive総数を返す。
+func countGltfPrimitives(meshes []gltfMesh) int {
+	total := 0
+	for _, mesh := range meshes {
+		total += len(mesh.Primitives)
+	}
+	return total
+}
+
+// logVrmStep はVRM変換の進捗ログを出力する。
+func logVrmStep(format string, params ...any) {
+	logger := logging.DefaultLogger()
+	if logger == nil {
+		return
+	}
+	logger.Info(format, params...)
+	if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
+		logger.Verbose(logging.VERBOSE_INDEX_PHYSICS, format, params...)
+	}
+	if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
+		logger.Verbose(logging.VERBOSE_INDEX_VIEWER, format, params...)
+	}
+}
+
+// logVrmDebug はVRM変換のデバッグログを出力する。
+func logVrmDebug(format string, params ...any) {
+	logger := logging.DefaultLogger()
+	if logger == nil {
+		return
+	}
+	logger.Debug(format, params...)
+	if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
+		logger.Verbose(logging.VERBOSE_INDEX_PHYSICS, format, params...)
+	}
+	if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
+		logger.Verbose(logging.VERBOSE_INDEX_VIEWER, format, params...)
+	}
+}
+
+// logVrmWarn はVRM変換の警告ログを出力する。
+func logVrmWarn(format string, params ...any) {
+	logger := logging.DefaultLogger()
+	if logger == nil {
+		return
+	}
+	logger.Warn(format, params...)
+	if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
+		logger.Verbose(logging.VERBOSE_INDEX_PHYSICS, "WARN: "+format, params...)
+	}
+	if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
+		logger.Verbose(logging.VERBOSE_INDEX_VIEWER, "WARN: "+format, params...)
+	}
 }
 
 // gltfDocument はVRM読込時に必要なglTFトップレベル要素を表す。
@@ -168,10 +264,11 @@ type gltfMesh struct {
 
 // gltfPrimitive はglTF mesh primitive要素を表す。
 type gltfPrimitive struct {
-	Attributes map[string]int `json:"attributes"`
-	Indices    *int           `json:"indices"`
-	Material   *int           `json:"material"`
-	Mode       *int           `json:"mode"`
+	Attributes map[string]int   `json:"attributes"`
+	Indices    *int             `json:"indices"`
+	Material   *int             `json:"material"`
+	Mode       *int             `json:"mode"`
+	Targets    []map[string]int `json:"targets"`
 }
 
 // gltfSkin はglTF skin要素を表す。

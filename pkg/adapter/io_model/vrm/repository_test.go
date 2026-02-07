@@ -246,6 +246,73 @@ func TestVrmRepositoryLoadVrm0VroidKeepsLegacyAxisConversion(t *testing.T) {
 	}
 }
 
+func TestVrmRepositoryLoadVrm0UniVrmUsesMmdScaleConversion(t *testing.T) {
+	repository := NewVrmRepository()
+	tempDir := t.TempDir()
+	path := filepath.Join(tempDir, "avatar.vrm")
+
+	doc := map[string]any{
+		"asset": map[string]any{
+			"version":   "2.0",
+			"generator": "UniGLTF-1.28",
+		},
+		"extensionsUsed": []string{"VRM"},
+		"nodes": []any{
+			map[string]any{
+				"name":        "hips_node",
+				"translation": []float64{0, 0.9, 0},
+			},
+			map[string]any{
+				"name":        "extra_node",
+				"translation": []float64{0.1, 0.3, 0.2},
+			},
+		},
+		"extensions": map[string]any{
+			"VRM": map[string]any{
+				"exporterVersion": "UniVRM-0.51.0",
+				"humanoid": map[string]any{
+					"humanBones": []any{
+						map[string]any{"bone": "hips", "node": 0},
+					},
+				},
+			},
+		},
+	}
+	writeGLBFileForTest(t, path, doc)
+
+	hashableModel, err := repository.Load(path)
+	if err != nil {
+		t.Fatalf("load failed: %v", err)
+	}
+	pmxModel, ok := hashableModel.(*model.PmxModel)
+	if !ok {
+		t.Fatalf("expected *model.PmxModel, got %T", hashableModel)
+	}
+	if pmxModel.VrmData == nil {
+		t.Fatalf("expected vrm data")
+	}
+	if pmxModel.VrmData.Version != vrm.VRM_VERSION_0 {
+		t.Fatalf("expected VRM_VERSION_0, got %s", pmxModel.VrmData.Version)
+	}
+	if pmxModel.VrmData.Profile != vrm.VRM_PROFILE_STANDARD {
+		t.Fatalf("expected VRM_PROFILE_STANDARD, got %s", pmxModel.VrmData.Profile)
+	}
+
+	extra, err := pmxModel.Bones.GetByName("extra_node")
+	if err != nil || extra == nil {
+		t.Fatalf("expected extra_node bone: %v", err)
+	}
+	if extra.Position.X >= 0 {
+		t.Fatalf("expected x to be converted to minus for UniVRM conversion, got %f", extra.Position.X)
+	}
+	if extra.Position.Z <= 0 {
+		t.Fatalf("expected z to keep plus direction for UniVRM conversion, got %f", extra.Position.Z)
+	}
+	if extra.Position.X > -1.2 || extra.Position.X < -1.3 {
+		t.Fatalf("expected x to be scaled by 12.5, got %f", extra.Position.X)
+	}
+}
+
 func TestExportArtifactsWritesGltfAndTextures(t *testing.T) {
 	tempDir := t.TempDir()
 	vrmPath := filepath.Join(tempDir, "avatar.vrm")
@@ -464,6 +531,180 @@ func TestVrmRepositoryLoadCreatesMeshFromPrimitive(t *testing.T) {
 	}
 	if pmxModel.Materials.Len() != 1 {
 		t.Fatalf("expected 1 material, got %d", pmxModel.Materials.Len())
+	}
+}
+
+func TestVrmRepositoryLoadContinuesWhenNormalAccessorIsInvalid(t *testing.T) {
+	repository := NewVrmRepository()
+	tempDir := t.TempDir()
+	path := filepath.Join(tempDir, "mesh_invalid_normal.vrm")
+
+	positions := []float32{
+		0.0, 0.0, 0.0,
+		0.0, 1.0, 0.0,
+		1.0, 0.0, 0.0,
+	}
+	uvs := []float32{
+		0.0, 0.0,
+		0.0, 1.0,
+		1.0, 0.0,
+	}
+	indices := []uint16{0, 1, 2}
+
+	binChunk := buildInterleavedBinForMeshTest(t, positions, nil, uvs, indices)
+	doc := map[string]any{
+		"asset": map[string]any{
+			"version":   "2.0",
+			"generator": "VRM Test",
+		},
+		"extensionsUsed": []string{"VRMC_vrm"},
+		"nodes": []any{
+			map[string]any{
+				"name": "hips_node",
+			},
+			map[string]any{
+				"name": "mesh_node",
+				"mesh": 0,
+				"skin": 0,
+			},
+		},
+		"skins": []any{
+			map[string]any{
+				"joints": []int{0},
+			},
+		},
+		"meshes": []any{
+			map[string]any{
+				"name": "mesh0",
+				"primitives": []any{
+					map[string]any{
+						"attributes": map[string]any{
+							"POSITION":   0,
+							"NORMAL":     99,
+							"TEXCOORD_0": 1,
+						},
+						"indices":  2,
+						"material": 0,
+						"mode":     4,
+					},
+				},
+			},
+		},
+		"materials": []any{
+			map[string]any{
+				"name": "body",
+				"pbrMetallicRoughness": map[string]any{
+					"baseColorFactor": []float64{1.0, 1.0, 1.0, 1.0},
+				},
+			},
+		},
+		"buffers": []any{
+			map[string]any{
+				"byteLength": len(binChunk),
+			},
+		},
+		"bufferViews": []any{
+			map[string]any{
+				"buffer":     0,
+				"byteOffset": 0,
+				"byteLength": len(positions) * 4,
+			},
+			map[string]any{
+				"buffer":     0,
+				"byteOffset": len(positions) * 4,
+				"byteLength": len(uvs) * 4,
+			},
+			map[string]any{
+				"buffer":     0,
+				"byteOffset": (len(positions) + len(uvs)) * 4,
+				"byteLength": len(indices) * 2,
+			},
+		},
+		"accessors": []any{
+			map[string]any{
+				"bufferView":    0,
+				"componentType": 5126,
+				"count":         3,
+				"type":          "VEC3",
+			},
+			map[string]any{
+				"bufferView":    1,
+				"componentType": 5126,
+				"count":         3,
+				"type":          "VEC2",
+			},
+			map[string]any{
+				"bufferView":    2,
+				"componentType": 5123,
+				"count":         3,
+				"type":          "SCALAR",
+			},
+		},
+		"extensions": map[string]any{
+			"VRMC_vrm": map[string]any{
+				"specVersion": "1.0",
+				"humanoid": map[string]any{
+					"humanBones": map[string]any{
+						"hips": map[string]any{"node": 0},
+					},
+				},
+			},
+		},
+	}
+	writeGLBFileForUsecaseMeshTest(t, path, doc, binChunk)
+
+	hashableModel, err := repository.Load(path)
+	if err != nil {
+		t.Fatalf("load failed: %v", err)
+	}
+	pmxModel, ok := hashableModel.(*model.PmxModel)
+	if !ok {
+		t.Fatalf("expected *model.PmxModel, got %T", hashableModel)
+	}
+	if pmxModel.Vertices.Len() != 3 {
+		t.Fatalf("expected 3 vertices, got %d", pmxModel.Vertices.Len())
+	}
+	vertex, err := pmxModel.Vertices.Get(0)
+	if err != nil {
+		t.Fatalf("get vertex failed: %v", err)
+	}
+	if vertex == nil {
+		t.Fatalf("vertex is nil")
+	}
+	if vertex.Normal.Y < 0.99 {
+		t.Fatalf("expected fallback normal Y close to 1.0, got %f", vertex.Normal.Y)
+	}
+}
+
+func TestShouldSkipPrimitiveForUnsupportedTargets(t *testing.T) {
+	indices := 0
+	material := 0
+	mode := 4
+	seen := map[string]int{}
+	withTargets := gltfPrimitive{
+		Attributes: map[string]int{"POSITION": 1},
+		Indices:    &indices,
+		Material:   &material,
+		Mode:       &mode,
+		Targets: []map[string]int{
+			{"POSITION": 2},
+		},
+	}
+	withoutTargets := gltfPrimitive{
+		Attributes: map[string]int{"POSITION": 1},
+		Indices:    &indices,
+		Material:   &material,
+		Mode:       &mode,
+	}
+
+	if shouldSkipPrimitiveForUnsupportedTargets(withTargets, 0, seen) {
+		t.Fatalf("first target primitive should not be skipped")
+	}
+	if !shouldSkipPrimitiveForUnsupportedTargets(withTargets, 1, seen) {
+		t.Fatalf("duplicated target primitive should be skipped")
+	}
+	if shouldSkipPrimitiveForUnsupportedTargets(withoutTargets, 2, seen) {
+		t.Fatalf("primitive without targets should not be skipped")
 	}
 }
 
