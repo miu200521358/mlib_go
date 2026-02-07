@@ -2393,7 +2393,7 @@ func (vw *ViewerWindow) updateCameraPositionByCursor(xpos, ypos float64) {
 	up := cam.UpVector()
 
 	upMovement := up.MuledScalar(-yOffset)
-	rightMovement := right.MuledScalar(-xOffset)
+	rightMovement := right.MuledScalar(xOffset)
 	movement := upMovement.Added(rightMovement)
 
 	cam.Position.Add(movement)
