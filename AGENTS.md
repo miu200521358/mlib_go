@@ -18,4 +18,8 @@
 - 自分が触っていない更新を検出した場合は、完了報告時に「自分では触ってないけど更新があったファイル一覧」を必ず出力する
 - 実装完了報告前に、コンパイルエラーがない状態（起動できる状態）を必ず確認・達成する
 - 実装完了報告前に、文言ヌケモレチェック（`mlib_skills\skills\00_project\060_mlib_i18n_key_checks\scripts\check_i18n_keys.py`）を必ず実施・ヌケモレを防ぐ
+- WSL で Go テストを実行する場合は `mlib_go_t4/internal/scripts/run_go_test_wsl.sh` を必ず使用し、`go test` の直接実行は禁止する
+- テスト実行は `changed` -> `pkg`（必要時）-> `all`（完了前）の順に行い、重いボーンデフォーム系は `bone` + `-run` で対象を絞って再現する
+- テストキャッシュ無効化のため `-count=1` を必須とし、`GOPATH/GOCACHE/GOMODCACHE/GOTMPDIR` は `/tmp/mlib_go_t4_go_test/*` を使用する
+- キャッシュ疑い時は `mlib_go_t4/internal/scripts/run_go_test_wsl.sh clean-testcache` を使い、`go clean --modcache` は原則実行しない
 - 特に指定がない場合、ルートディレクトリは /mnt/c/Codex/mlib とする
