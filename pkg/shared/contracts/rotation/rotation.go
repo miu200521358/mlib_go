@@ -19,6 +19,8 @@ const (
 	EULER_ORDER_ZXY
 	// EULER_ORDER_YZX はYZX順を表す。
 	EULER_ORDER_YZX
+	// EULER_ORDER_YXZ はYXZ順を表す。
+	EULER_ORDER_YXZ
 )
 
 // IkLimitEulerOrder はIK制限用のオイラー順を表す。
@@ -55,7 +57,7 @@ const VMD_CAMERA_ROTATION_UNIT = "degree"
 // DEFAULT_ROTATION_POLICY は既定の回転ポリシー。
 var DEFAULT_ROTATION_POLICY = RotationPolicy{
 	QuaternionOrder:    QUATERNION_ORDER_XYZW,
-	EulerOrder:         EULER_ORDER_XYZ,
+	EulerOrder:         EULER_ORDER_YXZ,
 	IkLimitEulerOrders: []IkLimitEulerOrder{IK_LIMIT_EULER_ORDER_ZXY, IK_LIMIT_EULER_ORDER_XYZ, IK_LIMIT_EULER_ORDER_YZX},
 	Interpolation:      ROTATION_INTERPOLATION_SLERP,
 }

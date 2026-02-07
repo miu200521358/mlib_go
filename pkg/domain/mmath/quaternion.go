@@ -113,29 +113,25 @@ func NewQuaternionFromAxisAnglesRotate(axis Vec3, angle float64) Quaternion {
 
 // NewQuaternionFromRadians はクォータニオンを生成する。
 func NewQuaternionFromRadians(xPitch, yHead, zRoll float64) Quaternion {
-	cx, sx := math.Cos(xPitch*0.5), math.Sin(xPitch*0.5)
-	cy, sy := math.Cos(yHead*0.5), math.Sin(yHead*0.5)
-	cz, sz := math.Cos(zRoll*0.5), math.Sin(zRoll*0.5)
-
-	w := cx*cy*cz - sx*sy*sz
-	x := sx*cy*cz + cx*sy*sz
-	y := cx*sy*cz - sx*cy*sz
-	z := cx*cy*sz + sx*sy*cz
-
-	return NewQuaternionByValues(x, y, z, w).Normalized()
+	xQuat := NewQuaternionFromAxisAngles(UNIT_X_VEC3, xPitch)
+	yQuat := NewQuaternionFromAxisAngles(UNIT_Y_VEC3, yHead)
+	zQuat := NewQuaternionFromAxisAngles(UNIT_Z_VEC3, zRoll)
+	return yQuat.Muled(xQuat).Muled(zQuat).Normalized()
 }
 
 // ToRadians はラジアン角を返す。
 func (q Quaternion) ToRadians() Vec3 {
-	sx := -(2*q.Jmag*q.Kmag - 2*q.Imag*q.Real)
+	rotMat := q.Normalized().ToMat4()
+	sx := -rotMat.AxisZ().Y
 	unlocked := math.Abs(sx) < 0.99999
 	xPitch := math.Asin(math.Max(-1, math.Min(1, sx)))
 	var yHead, zRoll float64
 	if unlocked {
-		yHead = math.Atan2(2*q.Imag*q.Kmag+2*q.Jmag*q.Real, 2*q.Real*q.Real+2*q.Kmag*q.Kmag-1)
-		zRoll = math.Atan2(2*q.Imag*q.Jmag+2*q.Kmag*q.Real, 2*q.Real*q.Real+2*q.Jmag*q.Jmag-1)
+		cxInv := 1.0 / math.Cos(xPitch)
+		yHead = math.Atan2(rotMat.AxisZ().X*cxInv, rotMat.AxisZ().Z*cxInv)
+		zRoll = math.Atan2(rotMat.AxisX().Y*cxInv, rotMat.AxisY().Y*cxInv)
 	} else {
-		yHead = math.Atan2(-(2*q.Imag*q.Kmag - 2*q.Jmag*q.Real), 2*q.Real*q.Real+2*q.Imag*q.Imag-1)
+		yHead = math.Atan2(-rotMat.AxisX().Z, rotMat.AxisX().X)
 		zRoll = 0
 	}
 	return Vec3{r3.Vec{X: xPitch, Y: yHead, Z: zRoll}}
