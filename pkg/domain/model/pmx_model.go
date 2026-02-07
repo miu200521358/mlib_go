@@ -8,7 +8,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/domain/model/collection"
 	"github.com/miu200521358/mlib_go/pkg/domain/model/merrors"
-	modelvrm "github.com/miu200521358/mlib_go/pkg/domain/model/vrm"
+	"github.com/miu200521358/mlib_go/pkg/domain/model/vrm"
 	"github.com/miu200521358/mlib_go/pkg/shared/hashable"
 	"github.com/tiendc/go-deepcopy"
 )
@@ -28,7 +28,7 @@ type PmxModel struct {
 	DisplaySlots   *collection.NamedCollection[*DisplaySlot]
 	RigidBodies    *collection.NamedCollection[*RigidBody]
 	Joints         *collection.NamedCollection[*Joint]
-	VrmData        *modelvrm.VrmData
+	VrmData        *vrm.VrmData
 }
 
 // NewPmxModel は PmxModel を生成する。

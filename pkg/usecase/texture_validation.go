@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
-	portio "github.com/miu200521358/mlib_go/pkg/usecase/port/io"
+	"github.com/miu200521358/mlib_go/pkg/usecase/port/io"
 )
 
 // TextureValidationIssue はテクスチャ検証で無効だった要素を表す。
@@ -22,7 +22,7 @@ type TextureValidationResult struct {
 }
 
 // ValidateModelTextures はモデルのテクスチャ有効性を検証する。
-func ValidateModelTextures(modelData *model.PmxModel, validator portio.ITextureValidator) *TextureValidationResult {
+func ValidateModelTextures(modelData *model.PmxModel, validator io.ITextureValidator) *TextureValidationResult {
 	result := &TextureValidationResult{}
 	if modelData == nil || modelData.Textures == nil || validator == nil {
 		return result

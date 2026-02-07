@@ -12,7 +12,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
-	modelvrm "github.com/miu200521358/mlib_go/pkg/domain/model/vrm"
+	"github.com/miu200521358/mlib_go/pkg/domain/model/vrm"
 	"gonum.org/v1/gonum/spatial/r3"
 )
 
@@ -60,17 +60,26 @@ type weightedBone struct {
 }
 
 // buildVrmConversion はVRMプロファイルに応じた座標変換設定を返す。
-func buildVrmConversion(vrmData *modelvrm.VrmData) vrmConversion {
+func buildVrmConversion(vrmData *vrm.VrmData) vrmConversion {
 	conversion := vrmConversion{
 		Scale: 1.0,
 		Axis: mmath.Vec3{
 			Vec: r3.Vec{X: 1.0, Y: 1.0, Z: -1.0},
 		},
 	}
-	if vrmData != nil && vrmData.Profile == modelvrm.VRM_PROFILE_VROID {
+	if vrmData != nil && vrmData.Profile == vrm.VRM_PROFILE_VROID {
 		conversion.Scale = vroidMeterScale
-		conversion.Axis = mmath.Vec3{
-			Vec: r3.Vec{X: -1.0, Y: 1.0, Z: 1.0},
+		// VRoidはVRM0/VRM1で座標配置が異なるため、バージョンごとに軸変換を切り替える。
+		// VRM0: 既存規約どおり X 反転（-1, 1, 1）
+		// VRM1: VRoid Studio 1.x 出力の前向きを保つため標準軸（1, 1, -1）
+		if vrmData.Version == vrm.VRM_VERSION_1 {
+			conversion.Axis = mmath.Vec3{
+				Vec: r3.Vec{X: 1.0, Y: 1.0, Z: -1.0},
+			}
+		} else {
+			conversion.Axis = mmath.Vec3{
+				Vec: r3.Vec{X: -1.0, Y: 1.0, Z: 1.0},
+			}
 		}
 	}
 	conversion.ReverseWinding = conversion.Axis.X*conversion.Axis.Y*conversion.Axis.Z < 0

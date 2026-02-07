@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
-	modelvrm "github.com/miu200521358/mlib_go/pkg/domain/model/vrm"
+	"github.com/miu200521358/mlib_go/pkg/domain/model/vrm"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 )
 
@@ -129,10 +129,10 @@ func TestVrmRepositoryLoadVrm1PreferredAndBoneMapping(t *testing.T) {
 	if pmxModel.VrmData == nil {
 		t.Fatalf("expected vrm data")
 	}
-	if pmxModel.VrmData.Version != modelvrm.VRM_VERSION_1 {
+	if pmxModel.VrmData.Version != vrm.VRM_VERSION_1 {
 		t.Fatalf("expected VRM_VERSION_1, got %s", pmxModel.VrmData.Version)
 	}
-	if pmxModel.VrmData.Profile != modelvrm.VRM_PROFILE_VROID {
+	if pmxModel.VrmData.Profile != vrm.VRM_PROFILE_VROID {
 		t.Fatalf("expected VRM_PROFILE_VROID, got %s", pmxModel.VrmData.Profile)
 	}
 	if pmxModel.VrmData.Vrm1 == nil {
@@ -168,11 +168,78 @@ func TestVrmRepositoryLoadVrm1PreferredAndBoneMapping(t *testing.T) {
 	if err != nil || extra == nil {
 		t.Fatalf("expected extra_node bone: %v", err)
 	}
+	if extra.Position.X <= 0 {
+		t.Fatalf("expected x to keep plus direction for VRM1 VRoid profile, got %f", extra.Position.X)
+	}
+	if extra.Position.Z >= 0 {
+		t.Fatalf("expected z to be converted to minus for VRM1 VRoid profile, got %f", extra.Position.Z)
+	}
+	if extra.Position.X < 1.2 || extra.Position.X > 1.3 {
+		t.Fatalf("expected x to be scaled by 12.5, got %f", extra.Position.X)
+	}
+}
+
+func TestVrmRepositoryLoadVrm0VroidKeepsLegacyAxisConversion(t *testing.T) {
+	repository := NewVrmRepository()
+	tempDir := t.TempDir()
+	path := filepath.Join(tempDir, "avatar.vrm")
+
+	doc := map[string]any{
+		"asset": map[string]any{
+			"version":   "2.0",
+			"generator": "VRoid Studio v0.14.0",
+		},
+		"extensionsUsed": []string{"VRM"},
+		"nodes": []any{
+			map[string]any{
+				"name":        "hips_node",
+				"translation": []float64{0, 0.9, 0},
+			},
+			map[string]any{
+				"name":        "extra_node",
+				"translation": []float64{0.1, 0.3, 0.2},
+			},
+		},
+		"extensions": map[string]any{
+			"VRM": map[string]any{
+				"exporterVersion": "VRoid Studio v0.14.0",
+				"humanoid": map[string]any{
+					"humanBones": []any{
+						map[string]any{"bone": "hips", "node": 0},
+					},
+				},
+			},
+		},
+	}
+	writeGLBFileForTest(t, path, doc)
+
+	hashableModel, err := repository.Load(path)
+	if err != nil {
+		t.Fatalf("load failed: %v", err)
+	}
+	pmxModel, ok := hashableModel.(*model.PmxModel)
+	if !ok {
+		t.Fatalf("expected *model.PmxModel, got %T", hashableModel)
+	}
+	if pmxModel.VrmData == nil {
+		t.Fatalf("expected vrm data")
+	}
+	if pmxModel.VrmData.Version != vrm.VRM_VERSION_0 {
+		t.Fatalf("expected VRM_VERSION_0, got %s", pmxModel.VrmData.Version)
+	}
+	if pmxModel.VrmData.Profile != vrm.VRM_PROFILE_VROID {
+		t.Fatalf("expected VRM_PROFILE_VROID, got %s", pmxModel.VrmData.Profile)
+	}
+
+	extra, err := pmxModel.Bones.GetByName("extra_node")
+	if err != nil || extra == nil {
+		t.Fatalf("expected extra_node bone: %v", err)
+	}
 	if extra.Position.X >= 0 {
-		t.Fatalf("expected x to be converted to minus for VRoid profile, got %f", extra.Position.X)
+		t.Fatalf("expected x to be converted to minus for VRM0 VRoid profile, got %f", extra.Position.X)
 	}
 	if extra.Position.Z <= 0 {
-		t.Fatalf("expected z to keep plus direction for VRoid profile, got %f", extra.Position.Z)
+		t.Fatalf("expected z to keep plus direction for VRM0 VRoid profile, got %f", extra.Position.Z)
 	}
 	if extra.Position.X > -1.2 || extra.Position.X < -1.3 {
 		t.Fatalf("expected x to be scaled by 12.5, got %f", extra.Position.X)

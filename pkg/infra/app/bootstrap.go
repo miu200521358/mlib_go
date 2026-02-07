@@ -10,20 +10,19 @@ import (
 
 	"github.com/miu200521358/walk/pkg/walk"
 
-	infraConfig "github.com/miu200521358/mlib_go/pkg/infra/base/config"
+	"github.com/miu200521358/mlib_go/pkg/infra/base/config"
 	"github.com/miu200521358/mlib_go/pkg/infra/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/infra/base/mlogging"
 	"github.com/miu200521358/mlib_go/pkg/shared/base"
-	sharedconfig "github.com/miu200521358/mlib_go/pkg/shared/base/config"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 )
 
 // AppConfigAdjuster はアプリ設定の調整関数を表す。
-type AppConfigAdjuster func(appConfig *sharedconfig.AppConfig)
+type AppConfigAdjuster func(appConfig *config.AppConfig)
 
 // Result は起動時に必要な初期化結果をまとめる。
 type Result struct {
-	AppConfig    *sharedconfig.AppConfig
+	AppConfig    *config.AppConfig
 	BaseServices *base.BaseServices
 	Logger       *mlogging.Logger
 	IconImage    image.Image
@@ -32,7 +31,7 @@ type Result struct {
 
 // Init はアプリ起動に必要な設定・i18n・ログ・アイコンを初期化する。
 func Init(appFiles embed.FS, i18nFiles embed.FS, adjuster AppConfigAdjuster) (*Result, error) {
-	appConfig, err := infraConfig.LoadAppConfig(appFiles)
+	appConfig, err := config.LoadAppConfig(appFiles)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +39,7 @@ func Init(appFiles embed.FS, i18nFiles embed.FS, adjuster AppConfigAdjuster) (*R
 		adjuster(appConfig)
 	}
 
-	userConfig := infraConfig.NewUserConfigStore()
+	userConfig := config.NewUserConfigStore()
 	if err := i18n.InitI18n(i18nFiles, userConfig); err != nil {
 		return &Result{AppConfig: appConfig}, err
 	}
@@ -49,7 +48,7 @@ func Init(appFiles embed.FS, i18nFiles embed.FS, adjuster AppConfigAdjuster) (*R
 	mlogging.SetDefaultLogger(logger)
 	logging.SetDefaultLogger(logger)
 
-	configStore := infraConfig.NewConfigStore(appConfig, userConfig)
+	configStore := config.NewConfigStore(appConfig, userConfig)
 	baseServices := &base.BaseServices{
 		ConfigStore:   configStore,
 		I18nService:   i18n.Default(),
@@ -68,8 +67,8 @@ func Init(appFiles embed.FS, i18nFiles embed.FS, adjuster AppConfigAdjuster) (*R
 }
 
 // loadIcon はアプリアイコン画像とアイコンを読み込む。
-func loadIcon(appFiles embed.FS, appConfig *sharedconfig.AppConfig, logger *mlogging.Logger) (image.Image, *walk.Icon) {
-	iconImage, iconErr := infraConfig.LoadAppIconImage(appFiles, appConfig)
+func loadIcon(appFiles embed.FS, appConfig *config.AppConfig, logger *mlogging.Logger) (image.Image, *walk.Icon) {
+	iconImage, iconErr := config.LoadAppIconImage(appFiles, appConfig)
 	if iconErr != nil && logger != nil {
 		logger.Error("アプリアイコンの読込に失敗しました: %s", iconErr.Error())
 	}

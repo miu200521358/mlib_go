@@ -5,7 +5,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
-	portio "github.com/miu200521358/mlib_go/pkg/usecase/port/io"
+	"github.com/miu200521358/mlib_go/pkg/usecase/port/io"
 )
 
 // iOverrideBoneInserter は不足ボーン補完のI/F。
@@ -19,7 +19,7 @@ const (
 )
 
 // LoadModel はモデルを読み込み、型を検証して返す。
-func LoadModel(rep portio.IFileReader, path string) (*model.PmxModel, error) {
+func LoadModel(rep io.IFileReader, path string) (*model.PmxModel, error) {
 	if path == "" {
 		return nil, nil
 	}
@@ -44,7 +44,7 @@ func LoadModel(rep portio.IFileReader, path string) (*model.PmxModel, error) {
 }
 
 // LoadMotion はモーションを読み込み、型を検証して返す。
-func LoadMotion(rep portio.IFileReader, path string) (*motion.VmdMotion, error) {
+func LoadMotion(rep io.IFileReader, path string) (*motion.VmdMotion, error) {
 	if path == "" {
 		return nil, nil
 	}

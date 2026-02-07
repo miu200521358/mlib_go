@@ -12,7 +12,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/adapter/mpresenter/messages"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
-	baseerr "github.com/miu200521358/mlib_go/pkg/infra/base/err"
+	"github.com/miu200521358/mlib_go/pkg/infra/base/err"
 	"github.com/miu200521358/mlib_go/pkg/infra/file/mfile"
 	"github.com/miu200521358/mlib_go/pkg/shared/base"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
@@ -871,9 +871,9 @@ func (cw *ControlWindow) onChangeLanguage(lang i18n.LangCode) {
 	if cw.translator == nil {
 		return
 	}
-	if _, err := cw.translator.SetLang(lang); err != nil {
-		cw.loggerOrDefault().Error(cw.t(messages.ControlWindowKey048), err.Error())
-		walk.MsgBox(cw, cw.t(messages.ControlWindowKey049), baseerr.BuildErrorText(err), walk.MsgBoxIconError)
+	if _, setLangErr := cw.translator.SetLang(lang); setLangErr != nil {
+		cw.loggerOrDefault().Error(cw.t(messages.ControlWindowKey048), setLangErr.Error())
+		walk.MsgBox(cw, cw.t(messages.ControlWindowKey049), err.BuildErrorText(setLangErr), walk.MsgBoxIconError)
 		return
 	}
 	cw.shared.SetClosed(true)
@@ -1139,10 +1139,10 @@ func (cw *ControlWindow) triggerWindowLinkage() {
 // triggerSaveLog はログ保存を行う。
 func (cw *ControlWindow) triggerSaveLog() {
 	text := logging.ConsoleText()
-	path, err := mfile.SaveConsoleSnapshot(cw.userConfig, "console", text)
-	if err != nil {
-		cw.loggerOrDefault().Error(cw.t(messages.ControlWindowKey050), err.Error())
-		walk.MsgBox(cw, cw.t(messages.ControlWindowKey051), baseerr.BuildErrorText(err), walk.MsgBoxIconError)
+	path, saveErr := mfile.SaveConsoleSnapshot(cw.userConfig, "console", text)
+	if saveErr != nil {
+		cw.loggerOrDefault().Error(cw.t(messages.ControlWindowKey050), saveErr.Error())
+		walk.MsgBox(cw, cw.t(messages.ControlWindowKey051), err.BuildErrorText(saveErr), walk.MsgBoxIconError)
 		return
 	}
 	cw.loggerOrDefault().Info(cw.t(messages.ControlWindowKey052), path)

@@ -4,7 +4,7 @@ package usecase
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
-	portio "github.com/miu200521358/mlib_go/pkg/usecase/port/io"
+	"github.com/miu200521358/mlib_go/pkg/usecase/port/io"
 )
 
 // ModelLoadResult はモデル読み込み結果を表す。
@@ -21,7 +21,7 @@ type MotionLoadResult struct {
 }
 
 // LoadMotionWithMeta はモーションを読み込み、最大フレームを返す。
-func LoadMotionWithMeta(rep portio.IFileReader, path string) (*MotionLoadResult, error) {
+func LoadMotionWithMeta(rep io.IFileReader, path string) (*MotionLoadResult, error) {
 	motionData, err := LoadMotion(rep, path)
 	if err != nil {
 		return nil, err
@@ -35,7 +35,7 @@ func LoadMotionWithMeta(rep portio.IFileReader, path string) (*MotionLoadResult,
 }
 
 // LoadCameraMotionWithMeta はカメラフレームのみを採用してモーションを読み込み、最大フレームを返す。
-func LoadCameraMotionWithMeta(rep portio.IFileReader, path string) (*MotionLoadResult, error) {
+func LoadCameraMotionWithMeta(rep io.IFileReader, path string) (*MotionLoadResult, error) {
 	motionData, err := LoadMotion(rep, path)
 	if err != nil {
 		return nil, err
@@ -75,7 +75,7 @@ func extractCameraMotion(source *motion.VmdMotion) (*motion.VmdMotion, error) {
 }
 
 // CanLoadPath はリポジトリが指定パスを読み込み可能か判定する。
-func CanLoadPath(rep portio.IFileReader, path string) bool {
+func CanLoadPath(rep io.IFileReader, path string) bool {
 	if rep == nil || path == "" {
 		return false
 	}

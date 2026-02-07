@@ -13,7 +13,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
-	modelvrm "github.com/miu200521358/mlib_go/pkg/domain/model/vrm"
+	"github.com/miu200521358/mlib_go/pkg/domain/model/vrm"
 	"github.com/miu200521358/mlib_go/pkg/shared/hashable"
 	"gonum.org/v1/gonum/spatial/r3"
 )
@@ -420,13 +420,13 @@ func parseQuaternion(values []float64) (mmath.Quaternion, error) {
 }
 
 // buildVrmData はglTF文書からVrmDataとHumanoid採用名を構築する。
-func buildVrmData(doc *gltfDocument, parents []int) (*modelvrm.VrmData, map[int]string, error) {
+func buildVrmData(doc *gltfDocument, parents []int) (*vrm.VrmData, map[int]string, error) {
 	version := detectVrmVersion(doc)
 	if version == "" {
 		return nil, nil, io_common.NewIoFormatNotSupported("VRM拡張が見つかりません", nil)
 	}
 
-	vrmData := modelvrm.NewVrmData()
+	vrmData := vrm.NewVrmData()
 	vrmData.Version = version
 	vrmData.AssetGenerator = doc.Asset.Generator
 	if doc.Extensions != nil {
@@ -436,7 +436,7 @@ func buildVrmData(doc *gltfDocument, parents []int) (*modelvrm.VrmData, map[int]
 	}
 
 	for i, node := range doc.Nodes {
-		nodeData := modelvrm.NewNode(i)
+		nodeData := vrm.NewNode(i)
 		nodeData.Name = node.Name
 		nodeData.ParentIndex = parents[i]
 		nodeData.Children = append(nodeData.Children, node.Children...)
@@ -448,7 +448,7 @@ func buildVrmData(doc *gltfDocument, parents []int) (*modelvrm.VrmData, map[int]
 
 	exporterVersion := ""
 	humanoidMap := map[string]int{}
-	if version == modelvrm.VRM_VERSION_1 {
+	if version == vrm.VRM_VERSION_1 {
 		ext, err := parseVRM1Extension(doc.Extensions)
 		if err != nil {
 			return nil, nil, err
@@ -478,7 +478,7 @@ func buildVrmData(doc *gltfDocument, parents []int) (*modelvrm.VrmData, map[int]
 }
 
 // parseVRM0Extension はextensionsからVRM0情報を抽出する。
-func parseVRM0Extension(extensions map[string]json.RawMessage) (*modelvrm.Vrm0Data, error) {
+func parseVRM0Extension(extensions map[string]json.RawMessage) (*vrm.Vrm0Data, error) {
 	if extensions == nil {
 		return nil, nil
 	}
@@ -490,18 +490,18 @@ func parseVRM0Extension(extensions map[string]json.RawMessage) (*modelvrm.Vrm0Da
 	if err := json.Unmarshal(raw, &ext); err != nil {
 		return nil, io_common.NewIoParseFailed("VRM0拡張のJSON解析に失敗しました", err)
 	}
-	data := modelvrm.NewVrm0Data()
+	data := vrm.NewVrm0Data()
 	data.ExporterVersion = ext.ExporterVersion
-	data.Meta = &modelvrm.Vrm0Meta{
+	data.Meta = &vrm.Vrm0Meta{
 		Title:   ext.Meta.Title,
 		Version: ext.Meta.Version,
 		Author:  ext.Meta.Author,
 	}
-	data.Humanoid = &modelvrm.Vrm0Humanoid{
-		HumanBones: make([]modelvrm.Vrm0HumanBone, 0, len(ext.Humanoid.HumanBones)),
+	data.Humanoid = &vrm.Vrm0Humanoid{
+		HumanBones: make([]vrm.Vrm0HumanBone, 0, len(ext.Humanoid.HumanBones)),
 	}
 	for _, b := range ext.Humanoid.HumanBones {
-		data.Humanoid.HumanBones = append(data.Humanoid.HumanBones, modelvrm.Vrm0HumanBone{
+		data.Humanoid.HumanBones = append(data.Humanoid.HumanBones, vrm.Vrm0HumanBone{
 			Bone: b.Bone,
 			Node: b.Node,
 		})
@@ -510,7 +510,7 @@ func parseVRM0Extension(extensions map[string]json.RawMessage) (*modelvrm.Vrm0Da
 }
 
 // parseVRM1Extension はextensionsからVRM1情報を抽出する。
-func parseVRM1Extension(extensions map[string]json.RawMessage) (*modelvrm.Vrm1Data, error) {
+func parseVRM1Extension(extensions map[string]json.RawMessage) (*vrm.Vrm1Data, error) {
 	if extensions == nil {
 		return nil, io_common.NewIoFormatNotSupported("VRM1拡張が存在しません", nil)
 	}
@@ -522,27 +522,27 @@ func parseVRM1Extension(extensions map[string]json.RawMessage) (*modelvrm.Vrm1Da
 	if err := json.Unmarshal(raw, &ext); err != nil {
 		return nil, io_common.NewIoParseFailed("VRM1拡張のJSON解析に失敗しました", err)
 	}
-	data := modelvrm.NewVrm1Data()
+	data := vrm.NewVrm1Data()
 	data.SpecVersion = ext.SpecVersion
-	data.Meta = &modelvrm.Vrm1Meta{
+	data.Meta = &vrm.Vrm1Meta{
 		Name:    ext.Meta.Name,
 		Version: ext.Meta.Version,
 		Authors: append([]string{}, ext.Meta.Authors...),
 	}
-	data.Humanoid = &modelvrm.Vrm1Humanoid{
-		HumanBones: map[string]modelvrm.Vrm1HumanBone{},
+	data.Humanoid = &vrm.Vrm1Humanoid{
+		HumanBones: map[string]vrm.Vrm1HumanBone{},
 	}
 	for key, bone := range ext.Humanoid.HumanBones {
 		if bone.Node == nil {
 			continue
 		}
-		data.Humanoid.HumanBones[key] = modelvrm.Vrm1HumanBone{Node: *bone.Node}
+		data.Humanoid.HumanBones[key] = vrm.Vrm1HumanBone{Node: *bone.Node}
 	}
 	return data, nil
 }
 
 // detectVrmVersion は拡張宣言から優先バージョンを判定する。
-func detectVrmVersion(doc *gltfDocument) modelvrm.VrmVersion {
+func detectVrmVersion(doc *gltfDocument) vrm.VrmVersion {
 	hasVrm1 := containsIgnoreCase(doc.ExtensionsUsed, "VRMC_vrm")
 	hasVrm0 := containsIgnoreCase(doc.ExtensionsUsed, "VRM")
 	if doc.Extensions != nil {
@@ -556,10 +556,10 @@ func detectVrmVersion(doc *gltfDocument) modelvrm.VrmVersion {
 
 	// VRM0/1 同時宣言時は VRM1 を優先する。
 	if hasVrm1 {
-		return modelvrm.VRM_VERSION_1
+		return vrm.VRM_VERSION_1
 	}
 	if hasVrm0 {
-		return modelvrm.VRM_VERSION_0
+		return vrm.VRM_VERSION_0
 	}
 	return ""
 }
@@ -575,17 +575,17 @@ func containsIgnoreCase(values []string, target string) bool {
 }
 
 // detectProfile は作成元情報からVRMプロファイルを判定する。
-func detectProfile(assetGenerator string, exporterVersion string) modelvrm.VrmProfile {
+func detectProfile(assetGenerator string, exporterVersion string) vrm.VrmProfile {
 	generatorLower := strings.ToLower(assetGenerator)
 	exporterLower := strings.ToLower(exporterVersion)
 	if strings.Contains(generatorLower, "vroid") || strings.Contains(exporterLower, "vroid") {
-		return modelvrm.VRM_PROFILE_VROID
+		return vrm.VRM_PROFILE_VROID
 	}
-	return modelvrm.VRM_PROFILE_STANDARD
+	return vrm.VRM_PROFILE_STANDARD
 }
 
 // extractHumanoidMapFromVRM0 はVRM0 Humanoid情報をmapへ展開する。
-func extractHumanoidMapFromVRM0(data *modelvrm.Vrm0Data) map[string]int {
+func extractHumanoidMapFromVRM0(data *vrm.Vrm0Data) map[string]int {
 	out := map[string]int{}
 	if data == nil || data.Humanoid == nil {
 		return out
@@ -600,7 +600,7 @@ func extractHumanoidMapFromVRM0(data *modelvrm.Vrm0Data) map[string]int {
 }
 
 // extractHumanoidMapFromVRM1 はVRM1 Humanoid情報をmapへ展開する。
-func extractHumanoidMapFromVRM1(data *modelvrm.Vrm1Data) map[string]int {
+func extractHumanoidMapFromVRM1(data *vrm.Vrm1Data) map[string]int {
 	out := map[string]int{}
 	if data == nil || data.Humanoid == nil {
 		return out
@@ -727,7 +727,7 @@ func buildPmxModel(
 	worldPositions []mmath.Vec3,
 	parentIndexes []int,
 	humanBoneNames map[int]string,
-	vrmData *modelvrm.VrmData,
+	vrmData *vrm.VrmData,
 	inferredName string,
 ) (*model.PmxModel, error) {
 	conversion := buildVrmConversion(vrmData)

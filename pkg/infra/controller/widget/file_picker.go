@@ -19,10 +19,10 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_model"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_model/pmd"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_model/pmx"
-	io_model_vrm "github.com/miu200521358/mlib_go/pkg/adapter/io_model/vrm"
+	"github.com/miu200521358/mlib_go/pkg/adapter/io_model/vrm"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_motion"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_motion/vmd"
-	baseerr "github.com/miu200521358/mlib_go/pkg/infra/base/err"
+	"github.com/miu200521358/mlib_go/pkg/infra/base/err"
 	"github.com/miu200521358/mlib_go/pkg/infra/controller"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
@@ -143,7 +143,7 @@ func NewVrmLoadFilePicker(userConfig iCommonUserConfig, translator i18n.II18n, h
 			{extension: "*.vrm", description: "Vrm Files (*.vrm)"},
 			{extension: "*.*", description: "All Files (*.*)"},
 		},
-		io_model_vrm.NewVrmRepository(),
+		vrm.NewVrmRepository(),
 	)
 }
 
@@ -425,9 +425,9 @@ func (fp *FilePicker) showOpenDialog() {
 	fd.FilePath = fp.pathEdit.Text()
 	fd.Filter = fp.buildFilterString()
 	fd.InitialDirPath = fp.resolveInitialDir()
-	ok, err := fd.ShowOpen(fp.window)
-	if err != nil {
-		walk.MsgBox(fp.window, fp.t(messages.FilePickerKey004), baseerr.BuildErrorText(err), walk.MsgBoxIconError)
+	ok, dialogErr := fd.ShowOpen(fp.window)
+	if dialogErr != nil {
+		walk.MsgBox(fp.window, fp.t(messages.FilePickerKey004), err.BuildErrorText(dialogErr), walk.MsgBoxIconError)
 		return
 	}
 	if !ok {
@@ -443,9 +443,9 @@ func (fp *FilePicker) showSaveDialog() {
 	fd.FilePath = fp.pathEdit.Text()
 	fd.Filter = fp.buildFilterString()
 	fd.InitialDirPath = fp.resolveInitialDir()
-	ok, err := fd.ShowSave(fp.window)
-	if err != nil {
-		walk.MsgBox(fp.window, fp.t(messages.FilePickerKey005), baseerr.BuildErrorText(err), walk.MsgBoxIconError)
+	ok, dialogErr := fd.ShowSave(fp.window)
+	if dialogErr != nil {
+		walk.MsgBox(fp.window, fp.t(messages.FilePickerKey005), err.BuildErrorText(dialogErr), walk.MsgBoxIconError)
 		return
 	}
 	if !ok {

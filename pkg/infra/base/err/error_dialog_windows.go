@@ -8,7 +8,6 @@ import (
 	"embed"
 	"errors"
 	"fmt"
-	"github.com/miu200521358/mlib_go/pkg/adapter/mpresenter/messages"
 	"image/png"
 	"os"
 	"os/exec"
@@ -16,9 +15,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/miu200521358/mlib_go/pkg/adapter/mpresenter/messages"
 	"github.com/miu200521358/mlib_go/pkg/infra/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
-	sharedi18n "github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
@@ -167,6 +166,10 @@ func showErrorDialog(appConfig *config.AppConfig, err error, title string, heade
 }
 
 type (
+	iTranslator interface {
+		IsReady() bool
+		T(key string) string
+	}
 	iErrorKindProvider interface {
 		ErrorKind() merr.ErrorKind
 	}
@@ -177,7 +180,7 @@ type (
 )
 
 // buildErrorText はエラーダイアログ向けの本文を生成する。
-func buildErrorText(translator sharedi18n.II18n, err error) string {
+func buildErrorText(translator iTranslator, err error) string {
 	if err == nil {
 		return ""
 	}
@@ -198,7 +201,7 @@ func buildErrorText(translator sharedi18n.II18n, err error) string {
 }
 
 // formatErrorMessage はエラーのメッセージキーを翻訳して返す。
-func formatErrorMessage(translator sharedi18n.II18n, err error) string {
+func formatErrorMessage(translator iTranslator, err error) string {
 	summary := formatErrorSummary(translator, err)
 	detail := formatErrorDetail(translator, err)
 	if summary == "" {
@@ -211,7 +214,7 @@ func formatErrorMessage(translator sharedi18n.II18n, err error) string {
 }
 
 // formatErrorRemedy はエラー管理表から対処法メッセージを取得する。
-func formatErrorRemedy(translator sharedi18n.II18n, errID string) string {
+func formatErrorRemedy(translator iTranslator, errID string) string {
 	rec, err := merr.FindRecord(errID)
 	if err != nil || rec == nil || rec.Remedy == "" {
 		return ""
@@ -220,7 +223,7 @@ func formatErrorRemedy(translator sharedi18n.II18n, errID string) string {
 }
 
 // formatErrorSummary はエラー管理表のSummaryを翻訳して返す。
-func formatErrorSummary(translator sharedi18n.II18n, err error) string {
+func formatErrorSummary(translator iTranslator, err error) string {
 	rec, err := merr.FindRecord(merr.ExtractErrorID(err))
 	if err != nil || rec == nil || rec.Summary == "" {
 		return ""
@@ -229,7 +232,7 @@ func formatErrorSummary(translator sharedi18n.II18n, err error) string {
 }
 
 // formatErrorDetail はエラーのメッセージキーを翻訳して返す。
-func formatErrorDetail(translator sharedi18n.II18n, err error) string {
+func formatErrorDetail(translator iTranslator, err error) string {
 	key, params := extractMessageKey(err)
 	if key == "" {
 		return ""
@@ -242,7 +245,7 @@ func formatErrorDetail(translator sharedi18n.II18n, err error) string {
 }
 
 // translateKey は翻訳済みのキーを返し、欠落時はキー自身を返す。
-func translateKey(translator sharedi18n.II18n, key string) string {
+func translateKey(translator iTranslator, key string) string {
 	if key == "" {
 		return ""
 	}

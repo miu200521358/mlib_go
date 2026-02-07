@@ -7,7 +7,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
-	portio "github.com/miu200521358/mlib_go/pkg/usecase/port/io"
+	"github.com/miu200521358/mlib_go/pkg/usecase/port/io"
 )
 
 const (
@@ -21,9 +21,9 @@ const (
 type PmxSaveRequest struct {
 	ModelPath              string
 	ModelData              *model.PmxModel
-	Writer                 portio.IFileWriter
-	PathService            portio.IPathService
-	SaveOptions            portio.SaveOptions
+	Writer                 io.IFileWriter
+	PathService            io.IPathService
+	SaveOptions            io.SaveOptions
 	MissingModelMessage    string
 	InvalidSavePathMessage string
 }
@@ -70,7 +70,7 @@ func IsPmxConvertiblePath(path string) bool {
 	return strings.EqualFold(ext, ".x") || strings.EqualFold(ext, ".pmd")
 }
 
-func buildPmxOutputPath(service portio.IPathService, path string) string {
+func buildPmxOutputPath(service io.IPathService, path string) string {
 	if service == nil || path == "" {
 		return ""
 	}
