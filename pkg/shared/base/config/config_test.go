@@ -17,6 +17,9 @@ func TestConfigConstants(t *testing.T) {
 	if UserConfigLegacyFileName != "history.json" {
 		t.Errorf("UserConfigLegacyFileName: got=%v", UserConfigLegacyFileName)
 	}
+	if UserConfigKeyCameraVmdHistory != "camera_vmd" {
+		t.Errorf("UserConfigKeyCameraVmdHistory: got=%v", UserConfigKeyCameraVmdHistory)
+	}
 }
 
 // TestAppConfigUnmarshal は旧キーの変換を確認する。

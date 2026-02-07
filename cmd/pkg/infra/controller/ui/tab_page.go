@@ -104,7 +104,7 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 	cameraVmdLoad11Picker := widget.NewVmdLoadFilePicker(
 		userConfig,
 		translator,
-		config.UserConfigKeyVmdHistory,
+		config.UserConfigKeyCameraVmdHistory,
 		i18n.TranslateOrMark(translator, messages.LabelCameraMotionFile11),
 		i18n.TranslateOrMark(translator, messages.LabelCameraMotionFileTip),
 		func(cw *controller.ControlWindow, rep io_common.IFileReader, path string) {
@@ -137,7 +137,7 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 	cameraVmdLoad21Picker := widget.NewVmdLoadFilePicker(
 		userConfig,
 		translator,
-		config.UserConfigKeyVmdHistory,
+		config.UserConfigKeyCameraVmdHistory,
 		i18n.TranslateOrMark(translator, messages.LabelCameraMotionFile21),
 		i18n.TranslateOrMark(translator, messages.LabelCameraMotionFileTip),
 		func(cw *controller.ControlWindow, rep io_common.IFileReader, path string) {
