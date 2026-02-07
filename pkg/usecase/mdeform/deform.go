@@ -114,9 +114,19 @@ func BuildForPhysics(
 		if boneDelta == nil {
 			continue
 		}
-		if (enabled && rigidBody.PhysicsType != model.PHYSICS_TYPE_DYNAMIC) || resetType != state.PHYSICS_RESET_TYPE_NONE {
-			global := boneDelta.FilledGlobalMatrix()
+		global := boneDelta.FilledGlobalMatrix()
+		if resetType != state.PHYSICS_RESET_TYPE_NONE {
 			core.UpdateTransform(modelIndex, bone, &global, rigidBody)
+			continue
+		}
+		if !enabled {
+			continue
+		}
+		switch rigidBody.PhysicsType {
+		case model.PHYSICS_TYPE_STATIC:
+			core.UpdateTransform(modelIndex, bone, &global, rigidBody)
+		case model.PHYSICS_TYPE_DYNAMIC_BONE:
+			core.FollowDeltaTransform(modelIndex, bone, &global, rigidBody)
 		}
 	}
 	return deltas

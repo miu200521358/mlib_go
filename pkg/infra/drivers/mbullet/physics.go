@@ -38,6 +38,8 @@ type RigidBodyValue struct {
 	BtLocalTransform *bt.BtTransform
 	Mask             int
 	Group            int
+	PrevBoneMatrix   mmath.Mat4
+	HasPrevBone      bool
 }
 
 // PhysicsEngine は Bullet 物理エンジンの実装本体。
@@ -109,6 +111,7 @@ func (mp *PhysicsEngine) ResetWorld(gravity *mmath.Vec3) {
 	world := createWorld(gravityVec)
 	world.SetDebugDrawer(mp.drawer)
 	mp.world = world
+	mp.resetFollowBoneCache()
 }
 
 // StepSimulation は物理シミュレーションを1ステップ進める。
@@ -149,6 +152,28 @@ func (mp *PhysicsEngine) AddModelByDeltas(
 func (mp *PhysicsEngine) DeleteModel(modelIndex int) {
 	mp.deleteJoints(modelIndex)
 	mp.deleteRigidBodies(modelIndex)
+}
+
+// clearModelFollowBoneCache はモデル単位の追従行列キャッシュを破棄する。
+func (mp *PhysicsEngine) clearModelFollowBoneCache(modelIndex int) {
+	bodies, ok := mp.rigidBodies[modelIndex]
+	if !ok || bodies == nil {
+		return
+	}
+	for _, body := range bodies {
+		if body == nil {
+			continue
+		}
+		body.PrevBoneMatrix = mmath.Mat4{}
+		body.HasPrevBone = false
+	}
+}
+
+// resetFollowBoneCache は全モデルの追従行列キャッシュを破棄する。
+func (mp *PhysicsEngine) resetFollowBoneCache() {
+	for modelIndex := range mp.rigidBodies {
+		mp.clearModelFollowBoneCache(modelIndex)
+	}
 }
 
 // createWorld は Bullet ワールドを生成する。

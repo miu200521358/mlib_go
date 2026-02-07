@@ -29,6 +29,8 @@ type IPhysicsCore interface {
 	UpdateRigidBodyShapeMass(modelIndex int, rigidBody *model.RigidBody, rigidBodyDelta *delta.RigidBodyDelta)
 	// UpdateTransform は剛体の姿勢をボーン行列で更新する。
 	UpdateTransform(modelIndex int, rigidBodyBone *model.Bone, boneGlobalMatrix *mmath.Mat4, rigidBody *model.RigidBody)
+	// FollowDeltaTransform は前回ボーン姿勢との差分で剛体を追従更新する。
+	FollowDeltaTransform(modelIndex int, rigidBodyBone *model.Bone, boneGlobalMatrix *mmath.Mat4, rigidBody *model.RigidBody)
 	// GetRigidBodyBoneMatrix は剛体の姿勢からボーン行列を取得する。
 	GetRigidBodyBoneMatrix(modelIndex int, rigidBody *model.RigidBody) *mmath.Mat4
 
