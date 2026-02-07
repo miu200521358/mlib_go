@@ -14,8 +14,12 @@ const (
 	InitialCameraPositionY float64 = 11.0
 	// InitialCameraPositionZ は初期カメラ位置のZ成分。
 	InitialCameraPositionZ float64 = -40.0
+	// InitialLookAtCenterX は注視点の初期X成分。
+	InitialLookAtCenterX float64 = 0.0
 	// InitialLookAtCenterY は注視点の初期Y成分。
 	InitialLookAtCenterY float64 = 11.0
+	// InitialLookAtCenterZ は注視点の初期Z成分。
+	InitialLookAtCenterZ float64 = 0.0
 	// FieldOfViewAngle は視野角（度）。
 	FieldOfViewAngle float32 = 40.0
 )
@@ -36,7 +40,7 @@ type Camera struct {
 func NewDefaultCamera(width, height int) *Camera {
 	cam := &Camera{
 		Position:     &mmath.Vec3{},
-		LookAtCenter: &mmath.Vec3{Vec: r3.Vec{X: 0.0, Y: InitialLookAtCenterY, Z: 0.0}},
+		LookAtCenter: &mmath.Vec3{Vec: r3.Vec{X: InitialLookAtCenterX, Y: InitialLookAtCenterY, Z: InitialLookAtCenterZ}},
 		Up:           &mmath.Vec3{Vec: r3.Vec{X: 0.0, Y: 1.0, Z: 0.0}},
 		Orientation:  mmath.NewQuaternion(),
 		FieldOfView:  FieldOfViewAngle,
@@ -123,6 +127,24 @@ func (c *Camera) ResetPosition(yaw, pitch float64) {
 	}
 	c.ensureState()
 	radius := c.OrbitDistance()
+	yawRad := mmath.DegToRad(yaw)
+	pitchRad := mmath.DegToRad(pitch)
+	c.Orientation = mmath.NewQuaternionFromAxisAngles(mmath.UNIT_Y_VEC3, yawRad).
+		Muled(mmath.NewQuaternionFromAxisAngles(mmath.UNIT_X_VEC3, pitchRad)).
+		Normalized()
+	c.applyOrientation(radius)
+}
+
+// ResetPresetPosition はプリセット視点用に水平中心を初期値へ戻してからカメラ位置を更新する。
+func (c *Camera) ResetPresetPosition(yaw, pitch float64) {
+	if c == nil {
+		return
+	}
+	c.ensureState()
+	radius := c.OrbitDistance()
+	// プリセット視点では水平軸のズレを持ち越さず、真正面/真上/真下を原点基準で揃える。
+	c.LookAtCenter.X = InitialLookAtCenterX
+	c.LookAtCenter.Z = InitialLookAtCenterZ
 	yawRad := mmath.DegToRad(yaw)
 	pitchRad := mmath.DegToRad(pitch)
 	c.Orientation = mmath.NewQuaternionFromAxisAngles(mmath.UNIT_Y_VEC3, yawRad).
@@ -250,7 +272,7 @@ func (c *Camera) ensureState() {
 		c.Position = &mmath.Vec3{Vec: r3.Vec{X: 0.0, Y: InitialCameraPositionY, Z: InitialCameraPositionZ}}
 	}
 	if c.LookAtCenter == nil {
-		c.LookAtCenter = &mmath.Vec3{Vec: r3.Vec{X: 0.0, Y: InitialLookAtCenterY, Z: 0.0}}
+		c.LookAtCenter = &mmath.Vec3{Vec: r3.Vec{X: InitialLookAtCenterX, Y: InitialLookAtCenterY, Z: InitialLookAtCenterZ}}
 	}
 	if c.Up == nil {
 		c.Up = &mmath.Vec3{Vec: r3.Vec{X: 0.0, Y: 1.0, Z: 0.0}}
