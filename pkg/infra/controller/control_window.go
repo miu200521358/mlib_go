@@ -172,6 +172,9 @@ func NewControlWindow(shared *state.SharedState, baseServices base.IBaseServices
 		OnClosing: func(canceled *bool, reason walk.CloseReason) {
 			cw.onClosing(canceled)
 		},
+		OnActivate: func() {
+			cw.onActivate()
+		},
 		OnClickActivate: func() {
 			cw.onActivate()
 		},
