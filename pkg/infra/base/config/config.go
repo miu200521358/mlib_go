@@ -32,6 +32,15 @@ var (
 	}
 )
 
+// AppConfig は共通設定の型エイリアス。
+type AppConfig = config.AppConfig
+
+// IUserConfig は共通ユーザー設定の型エイリアス。
+type IUserConfig = config.IUserConfig
+
+// IConfigStore は共通設定ストアの型エイリアス。
+type IConfigStore = config.IConfigStore
+
 const (
 	appConfigLoadFailedErrorID         = "95201"
 	userConfigSaveFailedErrorID        = "95202"
