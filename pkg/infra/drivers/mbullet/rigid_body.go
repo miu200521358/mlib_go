@@ -16,6 +16,19 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 )
 
+const (
+	// boneLessRelativePositionScoreRatioThreshold は相対候補採用に必要な改善比率。
+	boneLessRelativePositionScoreRatioThreshold = 0.7
+	// boneLessRelativePositionScoreDeltaThreshold は相対候補採用に必要な最小改善量。
+	boneLessRelativePositionScoreDeltaThreshold = 0.3
+	// boneLessReferenceResolveScoreThreshold は参照補正を試行するジョイント整合スコア閾値。
+	boneLessReferenceResolveScoreThreshold = 5.0
+	// boneLessPoseMovedTranslationThreshold は姿勢移動検知に用いる平行移動閾値。
+	boneLessPoseMovedTranslationThreshold = 1e-3
+	// boneLessPoseMovedRotationEpsilon は姿勢移動検知に用いる回転比較許容値。
+	boneLessPoseMovedRotationEpsilon = 1e-3
+)
+
 // initRigidBodies はモデルの剛体を初期化します。
 func (mp *PhysicsEngine) initRigidBodies(modelIndex int, pmxModel *model.PmxModel) {
 	if pmxModel == nil || pmxModel.RigidBodies == nil {
@@ -45,6 +58,7 @@ func (mp *PhysicsEngine) initRigidBodiesByBoneDeltas(
 	}
 
 	rigidBodies := pmxModel.RigidBodies.Values()
+	boneLessPoseMoved := mp.isBoneLessPoseMoved(pmxModel, boneDeltas)
 	mp.rigidBodies[modelIndex] = make([]*RigidBodyValue, len(rigidBodies))
 	for _, rigidBody := range rigidBodies {
 		if rigidBody == nil {
@@ -57,13 +71,55 @@ func (mp *PhysicsEngine) initRigidBodiesByBoneDeltas(
 				if rigidBodyDeltas != nil {
 					rigidBodyDelta = rigidBodyDeltas.Get(rigidBody.Index())
 				}
-				btRigidBodyTransform, referenceRigidBody := mp.resolveBoneLessRigidBodyTransform(
-					modelIndex,
+				btRigidBodyTransform := bt.NewBtTransform(
+					newBulletFromRad(rigidBody.Rotation),
+					newBulletFromVec(rigidBody.Position),
+				)
+				var referenceRigidBody *model.RigidBody
+				rawScore, hasRawScore := mp.scoreBoneLessRigidBodyPositionByJoint(
 					pmxModel,
-					boneDeltas,
-					rigidBody,
+					rigidBody.Index(),
+					rigidBody.Position,
+				)
+				shouldResolve, resolveReason := shouldResolveBoneLessByScore(
+					boneLessPoseMoved,
+					hasRawScore,
+					rawScore,
+					boneLessReferenceResolveScoreThreshold,
 				)
 				logger := logging.DefaultLogger()
+				if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
+					logger.Verbose(
+						logging.VERBOSE_INDEX_PHYSICS,
+						"物理検証ボーン未紐付け判定: model=%d rigid=%d(%s) poseMoved=%t hasJointScore=%t rawScore=%.4f threshold=%.2f resolve=%t reason=%s",
+						modelIndex,
+						rigidBody.Index(),
+						rigidBody.Name(),
+						boneLessPoseMoved,
+						hasRawScore,
+						rawScore,
+						boneLessReferenceResolveScoreThreshold,
+						shouldResolve,
+						resolveReason,
+					)
+				}
+				if shouldResolve {
+					resolvedTransform, resolvedReferenceRigidBody := mp.resolveBoneLessRigidBodyTransform(
+						modelIndex,
+						pmxModel,
+						boneDeltas,
+						rigidBody,
+					)
+					if resolvedTransform != nil {
+						btRigidBodyTransform = resolvedTransform
+						referenceRigidBody = resolvedReferenceRigidBody
+					} else if boneLessPoseMoved {
+						centerTransform := mp.resolveBoneLessRigidBodyTransformByCenter(pmxModel, boneDeltas, rigidBody)
+						if centerTransform != nil {
+							btRigidBodyTransform = centerTransform
+						}
+					}
+				}
 				if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
 					if referenceRigidBody != nil {
 						logger.Verbose(
@@ -84,12 +140,6 @@ func (mp *PhysicsEngine) initRigidBodiesByBoneDeltas(
 							rigidBody.Name(),
 						)
 					}
-				}
-				if btRigidBodyTransform == nil {
-					btRigidBodyTransform = bt.NewBtTransform(
-						newBulletFromRad(rigidBody.Rotation),
-						newBulletFromVec(rigidBody.Position),
-					)
 				}
 				mp.initRigidBody(modelIndex, pmxModel.Bones, rigidBody, btRigidBodyTransform, rigidBodyDelta)
 				continue
@@ -169,9 +219,10 @@ func (mp *PhysicsEngine) resolveBoneLessRigidBodyTransform(
 	)
 	defer bt.DeleteBtTransform(refRestTransform)
 
+	targetRestPosition := mp.resolveBoneLessRigidBodyRestPosition(pmxModel, rigidBody, refBone)
 	targetRestTransform := bt.NewBtTransform(
 		newBulletFromRad(rigidBody.Rotation),
-		newBulletFromVec(rigidBody.Position),
+		newBulletFromVec(targetRestPosition),
 	)
 	defer bt.DeleteBtTransform(targetRestTransform)
 
@@ -187,7 +238,168 @@ func (mp *PhysicsEngine) resolveBoneLessRigidBodyTransform(
 	return targetCurrentTransform, refRigidBody
 }
 
-// findReferenceRigidBody はボーン未紐付け剛体の参照剛体をジョイントから探索する。
+// resolveBoneLessRigidBodyRestPosition はボーン未紐付け剛体のレスト位置候補を評価して返す。
+func (mp *PhysicsEngine) resolveBoneLessRigidBodyRestPosition(
+	pmxModel *model.PmxModel,
+	rigidBody *model.RigidBody,
+	refBone *model.Bone,
+) mmath.Vec3 {
+	if rigidBody == nil {
+		return mmath.ZERO_VEC3
+	}
+	if pmxModel == nil || pmxModel.Joints == nil || refBone == nil {
+		return rigidBody.Position
+	}
+	rawPosition := rigidBody.Position
+	relativeToRefBonePosition := rawPosition.Added(refBone.Position)
+
+	rawScore, hasRawScore := mp.scoreBoneLessRigidBodyPositionByJoint(
+		pmxModel,
+		rigidBody.Index(),
+		rawPosition,
+	)
+	relativeScore, hasRelativeScore := mp.scoreBoneLessRigidBodyPositionByJoint(
+		pmxModel,
+		rigidBody.Index(),
+		relativeToRefBonePosition,
+	)
+	if !hasRawScore && !hasRelativeScore {
+		return rawPosition
+	}
+	if !hasRawScore {
+		return relativeToRefBonePosition
+	}
+	if !hasRelativeScore {
+		return rawPosition
+	}
+	scoreDelta := rawScore - relativeScore
+	scoreRatio := 1.0
+	if rawScore > 1e-6 {
+		scoreRatio = relativeScore / rawScore
+	}
+	if scoreDelta > boneLessRelativePositionScoreDeltaThreshold &&
+		scoreRatio < boneLessRelativePositionScoreRatioThreshold {
+		return relativeToRefBonePosition
+	}
+	return rawPosition
+}
+
+// scoreBoneLessRigidBodyPositionByJoint は候補位置と接続ジョイント位置の一致度を評価する。
+func (mp *PhysicsEngine) scoreBoneLessRigidBodyPositionByJoint(
+	pmxModel *model.PmxModel,
+	rigidBodyIndex int,
+	candidatePosition mmath.Vec3,
+) (float64, bool) {
+	if pmxModel == nil || pmxModel.Joints == nil {
+		return 0, false
+	}
+	totalDistance := 0.0
+	count := 0
+	for _, joint := range pmxModel.Joints.Values() {
+		if joint == nil {
+			continue
+		}
+		if joint.RigidBodyIndexA != rigidBodyIndex && joint.RigidBodyIndexB != rigidBodyIndex {
+			continue
+		}
+		totalDistance += candidatePosition.Distance(joint.Param.Position)
+		count++
+	}
+	if count == 0 {
+		return 0, false
+	}
+	return totalDistance / float64(count), true
+}
+
+// resolveBoneLessRigidBodyTransformByCenter はセンターボーン姿勢を使って剛体初期変換を推定する。
+func (mp *PhysicsEngine) resolveBoneLessRigidBodyTransformByCenter(
+	pmxModel *model.PmxModel,
+	boneDeltas *delta.BoneDeltas,
+	rigidBody *model.RigidBody,
+) bt.BtTransform {
+	if pmxModel == nil || pmxModel.Bones == nil || boneDeltas == nil || rigidBody == nil {
+		return nil
+	}
+	centerBone, err := pmxModel.Bones.GetCenter()
+	if err != nil || centerBone == nil {
+		return nil
+	}
+	if !boneDeltas.Contains(centerBone.Index()) {
+		return nil
+	}
+	centerDelta := boneDeltas.Get(centerBone.Index())
+	if centerDelta == nil {
+		return nil
+	}
+
+	centerTransform := bt.NewBtTransform()
+	mat := newMglMat4FromMat4(centerDelta.FilledGlobalMatrix())
+	centerTransform.SetFromOpenGLMatrix(&mat[0])
+	defer bt.DeleteBtTransform(centerTransform)
+
+	localPos := rigidBody.Position.Subed(centerBone.Position)
+	localTransform := bt.NewBtTransform(
+		newBulletFromRad(rigidBody.Rotation),
+		newBulletFromVec(localPos),
+	)
+	defer bt.DeleteBtTransform(localTransform)
+
+	targetTransform := bt.NewBtTransform()
+	targetTransform.Mult(centerTransform, localTransform)
+	return targetTransform
+}
+
+// isBoneLessPoseMoved はボーン未紐付け剛体を姿勢追従させるべきか判定する。
+func (mp *PhysicsEngine) isBoneLessPoseMoved(
+	pmxModel *model.PmxModel,
+	boneDeltas *delta.BoneDeltas,
+) bool {
+	if pmxModel == nil || pmxModel.Bones == nil || boneDeltas == nil {
+		return false
+	}
+	centerBone, err := pmxModel.Bones.GetCenter()
+	if err != nil || centerBone == nil {
+		return false
+	}
+	if !boneDeltas.Contains(centerBone.Index()) {
+		return false
+	}
+	centerDelta := boneDeltas.Get(centerBone.Index())
+	if centerDelta == nil {
+		return false
+	}
+	currentPos := centerDelta.FilledGlobalPosition()
+	if currentPos.Distance(centerBone.Position) > boneLessPoseMovedTranslationThreshold {
+		return true
+	}
+	currentRot := centerDelta.FilledGlobalMatrix().Quaternion()
+	return !currentRot.NearEquals(mmath.NewQuaternion(), boneLessPoseMovedRotationEpsilon)
+}
+
+// shouldResolveBoneLessRigidBodyTransform は参照剛体による補正を適用すべきか判定する。
+func (mp *PhysicsEngine) shouldResolveBoneLessRigidBodyTransform(
+	pmxModel *model.PmxModel,
+	rigidBody *model.RigidBody,
+	poseMoved bool,
+) bool {
+	if rigidBody == nil {
+		return false
+	}
+	rawScore, hasRawScore := mp.scoreBoneLessRigidBodyPositionByJoint(
+		pmxModel,
+		rigidBody.Index(),
+		rigidBody.Position,
+	)
+	resolve, _ := shouldResolveBoneLessByScore(
+		poseMoved,
+		hasRawScore,
+		rawScore,
+		boneLessReferenceResolveScoreThreshold,
+	)
+	return resolve
+}
+
+// findReferenceRigidBody はボーン未紐付け剛体の参照剛体をジョイント連結から探索する。
 func (mp *PhysicsEngine) findReferenceRigidBody(
 	modelIndex int,
 	pmxModel *model.PmxModel,
@@ -197,23 +409,90 @@ func (mp *PhysicsEngine) findReferenceRigidBody(
 	if pmxModel == nil || pmxModel.Joints == nil || pmxModel.RigidBodies == nil || pmxModel.Bones == nil || boneDeltas == nil {
 		return nil
 	}
+	const boneLessReferenceSearchMaxDepth = 3
 
-	candidates := make([]referenceRigidBodyCandidate, 0)
-	candidateBodies := make(map[int]*model.RigidBody)
+	type rigidBodyJointConnection struct {
+		JointIndex     int
+		RigidBodyIndex int
+	}
+	type referenceSearchState struct {
+		Depth           int
+		FirstJointIndex int
+	}
+
+	adjacency := make(map[int][]rigidBodyJointConnection)
+	targetJointPositions := make([]mmath.Vec3, 0)
 	for _, joint := range pmxModel.Joints.Values() {
 		if joint == nil {
 			continue
 		}
-		otherIndex := -1
-		if joint.RigidBodyIndexA == rigidBodyIndex {
-			otherIndex = joint.RigidBodyIndexB
-		} else if joint.RigidBodyIndexB == rigidBodyIndex {
-			otherIndex = joint.RigidBodyIndexA
+		if joint.RigidBodyIndexA >= 0 && joint.RigidBodyIndexB >= 0 {
+			adjacency[joint.RigidBodyIndexA] = append(adjacency[joint.RigidBodyIndexA], rigidBodyJointConnection{
+				JointIndex:     joint.Index(),
+				RigidBodyIndex: joint.RigidBodyIndexB,
+			})
+			adjacency[joint.RigidBodyIndexB] = append(adjacency[joint.RigidBodyIndexB], rigidBodyJointConnection{
+				JointIndex:     joint.Index(),
+				RigidBodyIndex: joint.RigidBodyIndexA,
+			})
+			if joint.RigidBodyIndexA == rigidBodyIndex || joint.RigidBodyIndexB == rigidBodyIndex {
+				targetJointPositions = append(targetJointPositions, joint.Param.Position)
+			}
 		}
-		if otherIndex < 0 {
+	}
+	targetRigidBody, err := pmxModel.RigidBodies.Get(rigidBodyIndex)
+	if err != nil || targetRigidBody == nil {
+		return nil
+	}
+
+	searchStates := make(map[int]referenceSearchState)
+	searchStates[rigidBodyIndex] = referenceSearchState{
+		Depth:           0,
+		FirstJointIndex: -1,
+	}
+	queue := []int{rigidBodyIndex}
+	for len(queue) > 0 {
+		currentRigidBodyIndex := queue[0]
+		queue = queue[1:]
+		currentState := searchStates[currentRigidBodyIndex]
+		if currentState.Depth >= boneLessReferenceSearchMaxDepth {
 			continue
 		}
-		refRigidBody, err := pmxModel.RigidBodies.Get(otherIndex)
+
+		for _, connection := range adjacency[currentRigidBodyIndex] {
+			nextRigidBodyIndex := connection.RigidBodyIndex
+			if nextRigidBodyIndex < 0 {
+				continue
+			}
+			nextDepth := currentState.Depth + 1
+			nextFirstJointIndex := currentState.FirstJointIndex
+			if currentState.Depth == 0 {
+				nextFirstJointIndex = connection.JointIndex
+			}
+			existingState, exists := searchStates[nextRigidBodyIndex]
+			if exists {
+				if existingState.Depth < nextDepth {
+					continue
+				}
+				if existingState.Depth == nextDepth && existingState.FirstJointIndex <= nextFirstJointIndex {
+					continue
+				}
+			}
+			searchStates[nextRigidBodyIndex] = referenceSearchState{
+				Depth:           nextDepth,
+				FirstJointIndex: nextFirstJointIndex,
+			}
+			queue = append(queue, nextRigidBodyIndex)
+		}
+	}
+
+	candidates := make([]referenceRigidBodyCandidate, 0)
+	candidateBodies := make(map[int]*model.RigidBody)
+	for candidateRigidBodyIndex, searchState := range searchStates {
+		if candidateRigidBodyIndex == rigidBodyIndex || searchState.Depth <= 0 {
+			continue
+		}
+		refRigidBody, err := pmxModel.RigidBodies.Get(candidateRigidBodyIndex)
 		if err != nil || refRigidBody == nil {
 			continue
 		}
@@ -227,14 +506,20 @@ func (mp *PhysicsEngine) findReferenceRigidBody(
 		if !boneDeltas.Contains(refBone.Index()) {
 			continue
 		}
-
 		candidates = append(candidates, referenceRigidBodyCandidate{
-			JointIndex:     joint.Index(),
-			RigidBodyIndex: otherIndex,
+			Depth:          searchState.Depth,
+			JointIndex:     searchState.FirstJointIndex,
+			RigidBodyIndex: candidateRigidBodyIndex,
+			SidePenalty: calculateBoneLessReferenceSidePenalty(
+				targetRigidBody.Position.X,
+				refRigidBody.Position.X,
+			),
+			JointScore: scoreBoneLessReferenceByJointPositions(targetJointPositions, refRigidBody.Position),
+			Distance:   refRigidBody.Position.Distance(targetRigidBody.Position),
 		})
-		candidateBodies[otherIndex] = refRigidBody
+		candidateBodies[candidateRigidBodyIndex] = refRigidBody
 	}
-	// 優先順位は「ジョイントindex昇順」->「剛体index昇順」で固定し、候補が複数でも決定的に選ぶ。
+	// 優先順位は「左右整合」->「優先深さ」->「ジョイント整合度」->「距離」->「深さ」の順で固定する。
 	selected, sortedCandidates, ok := selectReferenceRigidBodyCandidate(candidates)
 	if !ok {
 		return nil

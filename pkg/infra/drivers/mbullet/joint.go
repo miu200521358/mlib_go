@@ -9,6 +9,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/model/collection"
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/mbullet/bt"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 )
 
 // jointValue はジョイントの物理エンジン内部表現を保持します。
@@ -89,12 +90,31 @@ func (mp *PhysicsEngine) initJointsByBoneDeltas(
 			continue
 		}
 
+		// 参照ボーンが取得できない（bone-less 同士など）場合でも、
+		// ジョイント自体はレスト座標で生成して連結を維持する。
+		// ここで continue すると拘束ネットワークが欠損し、剛体が落下しやすくなる。
+		var jointTransform bt.BtTransform
 		bone := mp.findReferenceBone(joint, pmxModel.Bones, pmxModel.RigidBodies)
-		if bone == nil || !boneDeltas.Contains(bone.Index()) {
-			continue
+		if bone != nil && boneDeltas.Contains(bone.Index()) {
+			jointTransform = mp.calculateJointTransform(joint, bone, boneDeltas)
+		} else {
+			jointTransform = bt.NewBtTransform(
+				newBulletFromRad(joint.Param.Rotation),
+				newBulletFromVec(joint.Param.Position),
+			)
+			logger := logging.DefaultLogger()
+			if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
+				logger.Verbose(
+					logging.VERBOSE_INDEX_PHYSICS,
+					"物理検証ジョイント初期化フォールバック: model=%d joint=%d(%s) reason=missing_reference_bone_or_delta rigidA=%d rigidB=%d",
+					modelIndex,
+					joint.Index(),
+					joint.Name(),
+					joint.RigidBodyIndexA,
+					joint.RigidBodyIndexB,
+				)
+			}
 		}
-
-		jointTransform := mp.calculateJointTransform(joint, bone, boneDeltas)
 
 		var jointDelta *delta.JointDelta
 		if jointDeltas != nil {

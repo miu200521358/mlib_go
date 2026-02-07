@@ -4,14 +4,28 @@ package mbullet
 import (
 	"math"
 	"sort"
+
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 )
 
 const defaultFollowDeltaVelocityRotationMaxRadians = math.Pi / 6.0
+const boneLessReferencePreferredDepth = 2
+const boneLessReferenceSideThreshold = 0.2
+const boneLessReferenceScoreEpsilon = 1e-6
+
+const boneLessResolveReasonPoseMoved = "pose_moved"
+const boneLessResolveReasonNoJointScore = "no_joint_score"
+const boneLessResolveReasonScoreThreshold = "score_over_threshold"
+const boneLessResolveReasonJointConnected = "joint_connected"
 
 // referenceRigidBodyCandidate はボーン未紐付け剛体の参照候補を表す。
 type referenceRigidBodyCandidate struct {
+	Depth          int
 	JointIndex     int
 	RigidBodyIndex int
+	SidePenalty    int
+	JointScore     float64
+	Distance       float64
 }
 
 // normalizeReferenceRigidBodyCandidates は候補を剛体ごとに正規化して優先順位順へ並べる。
@@ -26,7 +40,7 @@ func normalizeReferenceRigidBodyCandidates(candidates []referenceRigidBodyCandid
 			continue
 		}
 		current, exists := deduped[candidate.RigidBodyIndex]
-		if !exists || candidate.JointIndex < current.JointIndex {
+		if !exists || isHigherPriorityReferenceRigidBodyCandidate(candidate, current) {
 			deduped[candidate.RigidBodyIndex] = candidate
 		}
 	}
@@ -41,10 +55,7 @@ func normalizeReferenceRigidBodyCandidates(candidates []referenceRigidBodyCandid
 	sort.Slice(normalized, func(i, j int) bool {
 		left := normalized[i]
 		right := normalized[j]
-		if left.JointIndex != right.JointIndex {
-			return left.JointIndex < right.JointIndex
-		}
-		return left.RigidBodyIndex < right.RigidBodyIndex
+		return isHigherPriorityReferenceRigidBodyCandidate(left, right)
 	})
 	return normalized
 }
@@ -58,6 +69,76 @@ func selectReferenceRigidBodyCandidate(
 		return referenceRigidBodyCandidate{}, nil, false
 	}
 	return normalized[0], normalized, true
+}
+
+// isHigherPriorityReferenceRigidBodyCandidate は候補優先度比較を行う。
+func isHigherPriorityReferenceRigidBodyCandidate(
+	left referenceRigidBodyCandidate,
+	right referenceRigidBodyCandidate,
+) bool {
+	if left.SidePenalty != right.SidePenalty {
+		return left.SidePenalty < right.SidePenalty
+	}
+	leftDepthPreferred := left.Depth <= boneLessReferencePreferredDepth
+	rightDepthPreferred := right.Depth <= boneLessReferencePreferredDepth
+	if leftDepthPreferred != rightDepthPreferred {
+		return leftDepthPreferred
+	}
+	if left.JointScore < right.JointScore-boneLessReferenceScoreEpsilon {
+		return true
+	}
+	if right.JointScore < left.JointScore-boneLessReferenceScoreEpsilon {
+		return false
+	}
+	if left.Distance < right.Distance-boneLessReferenceScoreEpsilon {
+		return true
+	}
+	if right.Distance < left.Distance-boneLessReferenceScoreEpsilon {
+		return false
+	}
+	if left.Depth != right.Depth {
+		return left.Depth < right.Depth
+	}
+	if left.JointIndex != right.JointIndex {
+		return left.JointIndex < right.JointIndex
+	}
+	return left.RigidBodyIndex < right.RigidBodyIndex
+}
+
+// calculateBoneLessReferenceSidePenalty は左右反転参照を避けるためのペナルティを返す。
+func calculateBoneLessReferenceSidePenalty(targetPositionX, referencePositionX float64) int {
+	targetSide := rigidBodySideByPositionX(targetPositionX)
+	referenceSide := rigidBodySideByPositionX(referencePositionX)
+	if targetSide == 0 || referenceSide == 0 || targetSide == referenceSide {
+		return 0
+	}
+	return 1
+}
+
+// scoreBoneLessReferenceByJointPositions は対象ジョイント近傍との整合度を評価する。
+func scoreBoneLessReferenceByJointPositions(
+	targetJointPositions []mmath.Vec3,
+	candidatePosition mmath.Vec3,
+) float64 {
+	if len(targetJointPositions) == 0 {
+		return 0
+	}
+	totalDistance := 0.0
+	for _, jointPosition := range targetJointPositions {
+		totalDistance += candidatePosition.Distance(jointPosition)
+	}
+	return totalDistance / float64(len(targetJointPositions))
+}
+
+// rigidBodySideByPositionX はX座標から左右判定値（左:+1/中央:0/右:-1）を返す。
+func rigidBodySideByPositionX(positionX float64) int {
+	if positionX > boneLessReferenceSideThreshold {
+		return 1
+	}
+	if positionX < -boneLessReferenceSideThreshold {
+		return -1
+	}
+	return 0
 }
 
 // resolveQuaternionRotationAngleFromW はクォータニオンのW成分から回転角[rad]を求める。
@@ -80,4 +161,25 @@ func clampFollowDeltaVelocityRotationMaxRadians(maxAngleRad float64) float64 {
 		return math.Pi
 	}
 	return maxAngleRad
+}
+
+// shouldResolveBoneLessByScore はボーン未紐付け剛体の参照推定を試行すべきか判定する。
+func shouldResolveBoneLessByScore(
+	poseMoved bool,
+	hasRawScore bool,
+	rawScore float64,
+	scoreThreshold float64,
+) (bool, string) {
+	if poseMoved {
+		return true, boneLessResolveReasonPoseMoved
+	}
+	if !hasRawScore {
+		return false, boneLessResolveReasonNoJointScore
+	}
+	if rawScore >= scoreThreshold {
+		return true, boneLessResolveReasonScoreThreshold
+	}
+	// 閾値未満でもジョイント接続がある剛体は参照探索を試行する。
+	// 採用姿勢は resolveBoneLessRigidBodyRestPosition が raw/relative を比較して決める。
+	return true, boneLessResolveReasonJointConnected
 }
