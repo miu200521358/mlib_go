@@ -67,12 +67,13 @@ func (mp *PhysicsEngine) initRigidBodiesByBoneDeltas(
 				if rigidBodyDeltas != nil {
 					rigidBodyDelta = rigidBodyDeltas.Get(rigidBody.Index())
 				}
-				btRigidBodyTransform := newBulletTransform(rigidBody.Rotation, rigidBody.Position)
+				appliedPosition := mp.resolveAppliedPosition(rigidBody, rigidBodyDelta)
+				btRigidBodyTransform := newBulletTransform(rigidBody.Rotation, appliedPosition)
 				var referenceRigidBody *model.RigidBody
 				rawScore, hasRawScore := mp.scoreBoneLessRigidBodyPositionByJoint(
 					pmxModel,
 					rigidBody.Index(),
-					rigidBody.Position,
+					appliedPosition,
 				)
 				shouldResolve, resolveReason := shouldResolveBoneLessByScore(
 					boneLessPoseMoved,
@@ -148,6 +149,12 @@ func (mp *PhysicsEngine) initRigidBodiesByBoneDeltas(
 			continue
 		}
 
+		var rigidBodyDelta *delta.RigidBodyDelta
+		if rigidBodyDeltas != nil {
+			rigidBodyDelta = rigidBodyDeltas.Get(rigidBody.Index())
+		}
+		appliedPosition := mp.resolveAppliedPosition(rigidBody, rigidBodyDelta)
+
 		btRigidBodyTransform := bt.NewBtTransform()
 		boneTransform := bt.NewBtTransform()
 		defer bt.DeleteBtTransform(boneTransform)
@@ -155,16 +162,11 @@ func (mp *PhysicsEngine) initRigidBodiesByBoneDeltas(
 		mat := newMglMat4FromMat4(boneDeltas.Get(bone.Index()).FilledGlobalMatrix())
 		boneTransform.SetFromOpenGLMatrix(&mat[0])
 
-		rigidBodyLocalPos := rigidBody.Position.Subed(bone.Position)
+		rigidBodyLocalPos := appliedPosition.Subed(bone.Position)
 		btRigidBodyLocalTransform := newBulletTransform(rigidBody.Rotation, rigidBodyLocalPos)
 		defer bt.DeleteBtTransform(btRigidBodyLocalTransform)
 
 		btRigidBodyTransform.Mult(boneTransform, btRigidBodyLocalTransform)
-
-		var rigidBodyDelta *delta.RigidBodyDelta
-		if rigidBodyDeltas != nil {
-			rigidBodyDelta = rigidBodyDeltas.Get(rigidBody.Index())
-		}
 
 		mp.initRigidBody(modelIndex, pmxModel.Bones, rigidBody, btRigidBodyTransform, rigidBodyDelta)
 	}
@@ -595,6 +597,7 @@ func (mp *PhysicsEngine) initRigidBody(
 	if btRigidBodyTransform != nil {
 		defer bt.DeleteBtTransform(btRigidBodyTransform)
 	}
+	appliedPosition := mp.resolveAppliedPosition(rigidBody, rigidBodyDelta)
 	btCollisionShape := mp.createCollisionShape(rigidBody, rigidBodyDelta)
 	mass, localInertia := mp.calculateMassAndInertia(rigidBody, btCollisionShape, rigidBodyDelta)
 	defer bt.DeleteBtVector3(localInertia)
@@ -602,15 +605,15 @@ func (mp *PhysicsEngine) initRigidBody(
 	bonePos := mp.getBonePosition(bones, rigidBody)
 	btRigidBodyLocalTransform := newBulletTransform(
 		rigidBody.Rotation,
-		rigidBody.Position.Subed(bonePos),
+		appliedPosition.Subed(bonePos),
 	)
 
 	motionState := bt.NewBtDefaultMotionState(btRigidBodyTransform)
 	btRigidBody := bt.NewBtRigidBody(mass, motionState, btCollisionShape, localInertia)
 	mp.configureRigidBody(btRigidBody, modelIndex, rigidBody)
 
-	group := 1 << int(rigidBody.CollisionGroup.Group)
-	mask := int(rigidBody.CollisionGroup.Mask)
+	group := resolveBulletCollisionGroup(rigidBody.CollisionGroup.Group)
+	mask := resolveBulletCollisionMask(rigidBody.CollisionGroup.Mask)
 	appliedSize, appliedMass := mp.resolveAppliedShapeMass(rigidBody, rigidBodyDelta)
 	mp.world.AddRigidBody(btRigidBody, group, mask)
 	if rigidBody.Index() < 0 || rigidBody.Index() >= len(mp.rigidBodies[modelIndex]) {
@@ -626,6 +629,7 @@ func (mp *PhysicsEngine) initRigidBody(
 		BtLocalTransform: &btRigidBodyLocalTransform,
 		Mask:             mask,
 		Group:            group,
+		AppliedPosition:  appliedPosition,
 		AppliedSize:      appliedSize,
 		AppliedMass:      appliedMass,
 		HasAppliedParams: true,
@@ -639,11 +643,7 @@ func (mp *PhysicsEngine) createCollisionShape(
 	rigidBody *model.RigidBody,
 	rigidBodyDelta *delta.RigidBodyDelta,
 ) bt.BtCollisionShape {
-	size := rigidBody.Size
-	if rigidBodyDelta != nil {
-		size = rigidBodyDelta.Size
-	}
-	size.Clamp(mmath.ZERO_VEC3, mmath.VEC3_MAX_VAL)
+	size := mp.resolveAppliedSize(rigidBody, rigidBodyDelta)
 
 	switch rigidBody.Shape {
 	case model.SHAPE_SPHERE:
@@ -657,6 +657,35 @@ func (mp *PhysicsEngine) createCollisionShape(
 	default:
 		return bt.NewBtSphereShape(float32(size.X))
 	}
+}
+
+// resolveAppliedPosition は剛体に適用すべき位置を返します。
+func (mp *PhysicsEngine) resolveAppliedPosition(
+	rigidBody *model.RigidBody,
+	rigidBodyDelta *delta.RigidBodyDelta,
+) mmath.Vec3 {
+	if rigidBody == nil {
+		return mmath.ZERO_VEC3
+	}
+	if rigidBodyDelta != nil {
+		return rigidBodyDelta.Position
+	}
+	return rigidBody.Position
+}
+
+// resolveAppliedSize は剛体に適用すべきサイズを正規化して返します。
+func (mp *PhysicsEngine) resolveAppliedSize(
+	rigidBody *model.RigidBody,
+	rigidBodyDelta *delta.RigidBodyDelta,
+) mmath.Vec3 {
+	if rigidBody == nil {
+		return mmath.ZERO_VEC3
+	}
+	size := rigidBody.Size
+	if rigidBodyDelta != nil {
+		size = rigidBodyDelta.Size
+	}
+	return normalizeRigidBodySize(size)
 }
 
 // calculateMassAndInertia は剛体の質量と慣性を計算します。
@@ -688,10 +717,9 @@ func (mp *PhysicsEngine) resolveAppliedShapeMass(
 	rigidBody *model.RigidBody,
 	rigidBodyDelta *delta.RigidBodyDelta,
 ) (mmath.Vec3, float64) {
-	size := rigidBody.Size
+	size := mp.resolveAppliedSize(rigidBody, rigidBodyDelta)
 	mass := rigidBody.Param.Mass
 	if rigidBodyDelta != nil {
-		size = rigidBodyDelta.Size
 		mass = rigidBodyDelta.Mass
 	}
 	if rigidBody.PhysicsType == model.PHYSICS_TYPE_STATIC {
@@ -1004,7 +1032,32 @@ func (mp *PhysicsEngine) UpdateRigidBodiesSelectively(
 	})
 }
 
-// UpdateRigidBodyShapeMass はサイズ・質量変更時に剛体の形状を更新します。
+// offsetTransformByPositionDelta は MMD 座標差分ぶん Bullet 変換の平行移動を更新します。
+func (mp *PhysicsEngine) offsetTransformByPositionDelta(
+	transform bt.BtTransform,
+	positionDelta mmath.Vec3,
+) {
+	if transform == nil || positionDelta.IsZero() {
+		return
+	}
+
+	originAny := transform.GetOrigin()
+	origin, ok := originAny.(bt.BtVector3)
+	if !ok || origin == nil {
+		return
+	}
+
+	currentPosition := mmath.NewVec3()
+	currentPosition.X = -float64(origin.GetX())
+	currentPosition.Y = float64(origin.GetY())
+	currentPosition.Z = float64(origin.GetZ())
+	nextPosition := currentPosition.Added(positionDelta)
+	nextOrigin := newBulletFromVec(nextPosition)
+	defer bt.DeleteBtVector3(nextOrigin)
+	transform.SetOrigin(nextOrigin)
+}
+
+// UpdateRigidBodyShapeMass は位置・サイズ・質量変更時に剛体状態を更新します。
 func (mp *PhysicsEngine) UpdateRigidBodyShapeMass(
 	modelIndex int,
 	rigidBody *model.RigidBody,
@@ -1018,12 +1071,15 @@ func (mp *PhysicsEngine) UpdateRigidBodyShapeMass(
 	if r == nil || r.BtRigidBody == nil {
 		return
 	}
+	nextPosition := mp.resolveAppliedPosition(rigidBody, rigidBodyDelta)
 	nextSize, nextMass := mp.resolveAppliedShapeMass(rigidBody, rigidBodyDelta)
 	if r.HasAppliedParams &&
+		nextPosition.NearEquals(r.AppliedPosition, 1e-10) &&
 		nextSize.NearEquals(r.AppliedSize, 1e-10) &&
 		mmath.NearEquals(nextMass, r.AppliedMass, 1e-10) {
 		return
 	}
+	positionChanged := !r.HasAppliedParams || !nextPosition.NearEquals(r.AppliedPosition, 1e-10)
 	sizeChanged := !r.HasAppliedParams || !nextSize.NearEquals(r.AppliedSize, 1e-10)
 
 	btRigidBody := r.BtRigidBody
@@ -1031,6 +1087,13 @@ func (mp *PhysicsEngine) UpdateRigidBodyShapeMass(
 	currentTransform := bt.NewBtTransform()
 	defer bt.DeleteBtTransform(currentTransform)
 	motionState.GetWorldTransform(currentTransform)
+	if positionChanged {
+		positionDelta := nextPosition.Subed(r.AppliedPosition)
+		mp.offsetTransformByPositionDelta(currentTransform, positionDelta)
+		if r.BtLocalTransform != nil {
+			mp.offsetTransformByPositionDelta(*r.BtLocalTransform, positionDelta)
+		}
+	}
 
 	currentLinearVel := btRigidBody.GetLinearVelocity()
 	currentAngularVel := btRigidBody.GetAngularVelocity()
@@ -1075,6 +1138,7 @@ func (mp *PhysicsEngine) UpdateRigidBodyShapeMass(
 
 	mp.updateFlag(modelIndex, rigidBody)
 	btRigidBody.Activate(true)
+	r.AppliedPosition = nextPosition
 	r.AppliedSize = nextSize
 	r.AppliedMass = nextMass
 	r.HasAppliedParams = true

@@ -18,6 +18,21 @@ const boneLessResolveReasonNoJointScore = "no_joint_score"
 const boneLessResolveReasonScoreThreshold = "score_over_threshold"
 const boneLessResolveReasonJointConnected = "joint_connected"
 
+// resolveBulletCollisionGroup はドメインの衝突グループを Bullet のグループビットへ変換する。
+func resolveBulletCollisionGroup(collisionGroup byte) int {
+	return 1 << int(collisionGroup)
+}
+
+// resolveBulletCollisionMask は PMX 由来の衝突マスク値を Bullet へそのまま渡す。
+func resolveBulletCollisionMask(collisionMask uint16) int {
+	return int(collisionMask)
+}
+
+// normalizeRigidBodySize は剛体サイズを物理計算で扱える安全範囲へ正規化する。
+func normalizeRigidBodySize(size mmath.Vec3) mmath.Vec3 {
+	return size.Clamped(mmath.ZERO_VEC3, mmath.VEC3_MAX_VAL)
+}
+
 // referenceRigidBodyCandidate はボーン未紐付け剛体の参照候補を表す。
 type referenceRigidBodyCandidate struct {
 	Depth          int

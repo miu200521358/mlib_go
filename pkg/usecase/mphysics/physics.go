@@ -2,8 +2,6 @@
 package mphysics
 
 import (
-	"math"
-
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
@@ -17,26 +15,10 @@ func BuildPhysicsDeltas(modelData *model.PmxModel, motionData *motion.VmdMotion,
 		return nil
 	}
 	logger := logging.DefaultLogger()
-	logSummary := logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) && shouldEmitPhysicsDeltaSummary(frame)
-	var rigidDeltaCount int
-	var jointDeltaCount int
-	var rigidMassExplicitCount int
-	var rigidMassFallbackCount int
 
 	motionHash := motionHash(motionData)
 	deltas := delta.NewPhysicsDeltas(frame, modelData.RigidBodies, modelData.Joints, modelData.Hash(), motionHash)
 	if motionData == nil {
-		if logSummary {
-			logger.Verbose(
-				logging.VERBOSE_INDEX_PHYSICS,
-				"物理検証デルタ要約: frame=%v rigidDelta=%d jointDelta=%d mass(explicit=%d fallback=%d)",
-				frame,
-				rigidDeltaCount,
-				jointDeltaCount,
-				rigidMassExplicitCount,
-				rigidMassFallbackCount,
-			)
-		}
 		return deltas
 	}
 	if modelData.RigidBodies != nil && motionData.RigidBodyFrames != nil {
@@ -52,16 +34,35 @@ func BuildPhysicsDeltas(modelData *model.PmxModel, motionData *motion.VmdMotion,
 			if rf == nil {
 				continue
 			}
-			size := resolveVec3(rf.Size, rigidBody.Size)
+			position := resolveRigidBodyFrameVec3(
+				frames,
+				frame,
+				rigidBody.Position,
+				func(frameValue *motion.RigidBodyFrame) *mmath.Vec3 {
+					if frameValue == nil {
+						return nil
+					}
+					return frameValue.Position
+				},
+				nil,
+			)
+			size := resolveRigidBodyFrameVec3(
+				frames,
+				frame,
+				rigidBody.Size,
+				func(frameValue *motion.RigidBodyFrame) *mmath.Vec3 {
+					if frameValue == nil {
+						return nil
+					}
+					return frameValue.Size
+				},
+				nil,
+			)
 			mass := rigidBody.Param.Mass
 			if rf.Mass != nil {
 				mass = *rf.Mass
-				rigidMassExplicitCount++
-			} else {
-				rigidMassFallbackCount++
 			}
-			deltas.RigidBodies.Update(delta.NewRigidBodyDeltaByValue(rigidBody, frame, size, mass))
-			rigidDeltaCount++
+			deltas.RigidBodies.Update(delta.NewRigidBodyDeltaByValue(rigidBody, frame, position, size, mass))
 		}
 	}
 	if modelData.Joints != nil && motionData.JointFrames != nil {
@@ -77,29 +78,120 @@ func BuildPhysicsDeltas(modelData *model.PmxModel, motionData *motion.VmdMotion,
 			if jf == nil {
 				continue
 			}
+			translationLimitMin := resolveJointFrameVec3(
+				frames,
+				frame,
+				joint.Param.TranslationLimitMin,
+				func(frameValue *motion.JointFrame) *mmath.Vec3 {
+					if frameValue == nil {
+						return nil
+					}
+					return frameValue.TranslationLimitMin
+				},
+				nil,
+			)
+			translationLimitMax := resolveJointFrameVec3(
+				frames,
+				frame,
+				joint.Param.TranslationLimitMax,
+				func(frameValue *motion.JointFrame) *mmath.Vec3 {
+					if frameValue == nil {
+						return nil
+					}
+					return frameValue.TranslationLimitMax
+				},
+				nil,
+			)
+			rotationLimitMin := resolveJointFrameVec3(
+				frames,
+				frame,
+				joint.Param.RotationLimitMin,
+				func(frameValue *motion.JointFrame) *mmath.Vec3 {
+					if frameValue == nil {
+						return nil
+					}
+					return frameValue.RotationLimitMin
+				},
+				func(value mmath.Vec3) mmath.Vec3 {
+					return value.DegToRad()
+				},
+			)
+			rotationLimitMax := resolveJointFrameVec3(
+				frames,
+				frame,
+				joint.Param.RotationLimitMax,
+				func(frameValue *motion.JointFrame) *mmath.Vec3 {
+					if frameValue == nil {
+						return nil
+					}
+					return frameValue.RotationLimitMax
+				},
+				func(value mmath.Vec3) mmath.Vec3 {
+					return value.DegToRad()
+				},
+			)
+			springConstantTranslation := resolveJointFrameVec3(
+				frames,
+				frame,
+				joint.Param.SpringConstantTranslation,
+				func(frameValue *motion.JointFrame) *mmath.Vec3 {
+					if frameValue == nil {
+						return nil
+					}
+					return frameValue.SpringConstantTranslation
+				},
+				nil,
+			)
+			springConstantRotation := resolveJointFrameVec3(
+				frames,
+				frame,
+				joint.Param.SpringConstantRotation,
+				func(frameValue *motion.JointFrame) *mmath.Vec3 {
+					if frameValue == nil {
+						return nil
+					}
+					return frameValue.SpringConstantRotation
+				},
+				nil,
+			)
+			if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
+				logger.Verbose(
+					logging.VERBOSE_INDEX_PHYSICS,
+					"物理検証JointDelta: frame=%v joint=%d(%s) translationLimit=(min:%.6f,%.6f,%.6f max:%.6f,%.6f,%.6f) rotationLimitRad=(min:%.6f,%.6f,%.6f max:%.6f,%.6f,%.6f) spring=(translation:%.6f,%.6f,%.6f rotation:%.6f,%.6f,%.6f)",
+					frame,
+					joint.Index(),
+					joint.Name(),
+					translationLimitMin.X,
+					translationLimitMin.Y,
+					translationLimitMin.Z,
+					translationLimitMax.X,
+					translationLimitMax.Y,
+					translationLimitMax.Z,
+					rotationLimitMin.X,
+					rotationLimitMin.Y,
+					rotationLimitMin.Z,
+					rotationLimitMax.X,
+					rotationLimitMax.Y,
+					rotationLimitMax.Z,
+					springConstantTranslation.X,
+					springConstantTranslation.Y,
+					springConstantTranslation.Z,
+					springConstantRotation.X,
+					springConstantRotation.Y,
+					springConstantRotation.Z,
+				)
+			}
 			deltas.Joints.Update(delta.NewJointDeltaByValue(
 				joint,
 				frame,
-				resolveVec3(jf.TranslationLimitMin, joint.Param.TranslationLimitMin),
-				resolveVec3(jf.TranslationLimitMax, joint.Param.TranslationLimitMax),
-				resolveVec3(jf.RotationLimitMin, joint.Param.RotationLimitMin),
-				resolveVec3(jf.RotationLimitMax, joint.Param.RotationLimitMax),
-				resolveVec3(jf.SpringConstantTranslation, joint.Param.SpringConstantTranslation),
-				resolveVec3(jf.SpringConstantRotation, joint.Param.SpringConstantRotation),
+				translationLimitMin,
+				translationLimitMax,
+				rotationLimitMin,
+				rotationLimitMax,
+				springConstantTranslation,
+				springConstantRotation,
 			))
-			jointDeltaCount++
 		}
-	}
-	if logSummary {
-		logger.Verbose(
-			logging.VERBOSE_INDEX_PHYSICS,
-			"物理検証デルタ要約: frame=%v rigidDelta=%d jointDelta=%d mass(explicit=%d fallback=%d)",
-			frame,
-			rigidDeltaCount,
-			jointDeltaCount,
-			rigidMassExplicitCount,
-			rigidMassFallbackCount,
-		)
 	}
 	return deltas
 }
@@ -112,23 +204,138 @@ func motionHash(motionData *motion.VmdMotion) string {
 	return motionData.Hash()
 }
 
-// resolveVec3 はnilを既定値で補う。
-func resolveVec3(value *mmath.Vec3, fallback mmath.Vec3) mmath.Vec3 {
-	if value == nil {
+// resolveRigidBodyFrameVec3 は剛体フレームのVec3値を補間を考慮して解決する。
+func resolveRigidBodyFrameVec3(
+	frames *motion.RigidBodyNameFrames,
+	frame motion.Frame,
+	fallback mmath.Vec3,
+	extractor func(frameValue *motion.RigidBodyFrame) *mmath.Vec3,
+	transform func(value mmath.Vec3) mmath.Vec3,
+) mmath.Vec3 {
+	if frames == nil || extractor == nil {
 		return fallback
 	}
-	return *value
+	if frames.Has(frame) {
+		frameValue := frames.Get(frame)
+		value := extractor(frameValue)
+		if value == nil {
+			return fallback
+		}
+		return applyVec3Transform(*value, transform)
+	}
+	prevFrame, hasPrev := frames.PrevFrame(frame)
+	nextFrame, hasNext := frames.NextFrame(frame)
+	var prevValue *mmath.Vec3
+	if hasPrev {
+		prevValue = extractor(frames.Get(prevFrame))
+	}
+	var nextValue *mmath.Vec3
+	if hasNext {
+		nextValue = extractor(frames.Get(nextFrame))
+	}
+	return resolveFrameRangeVec3(
+		frame,
+		prevFrame,
+		nextFrame,
+		hasPrev,
+		hasNext,
+		prevValue,
+		nextValue,
+		fallback,
+		transform,
+	)
 }
 
-// shouldEmitPhysicsDeltaSummary は物理デルタ要約を出力すべきフレームか判定する。
-func shouldEmitPhysicsDeltaSummary(frame motion.Frame) bool {
-	rounded := motion.Frame(math.Round(float64(frame)))
-	if math.Abs(float64(frame-rounded)) > 1e-3 {
-		return false
+// resolveJointFrameVec3 はジョイントフレームのVec3値を補間を考慮して解決する。
+func resolveJointFrameVec3(
+	frames *motion.JointNameFrames,
+	frame motion.Frame,
+	fallback mmath.Vec3,
+	extractor func(frameValue *motion.JointFrame) *mmath.Vec3,
+	transform func(value mmath.Vec3) mmath.Vec3,
+) mmath.Vec3 {
+	if frames == nil || extractor == nil {
+		return fallback
 	}
-	frameNumber := int(rounded)
-	if frameNumber < 0 {
-		return false
+	if frames.Has(frame) {
+		frameValue := frames.Get(frame)
+		value := extractor(frameValue)
+		if value == nil {
+			return fallback
+		}
+		return applyVec3Transform(*value, transform)
 	}
-	return frameNumber == 0 || frameNumber%30 == 0
+	prevFrame, hasPrev := frames.PrevFrame(frame)
+	nextFrame, hasNext := frames.NextFrame(frame)
+	var prevValue *mmath.Vec3
+	if hasPrev {
+		prevValue = extractor(frames.Get(prevFrame))
+	}
+	var nextValue *mmath.Vec3
+	if hasNext {
+		nextValue = extractor(frames.Get(nextFrame))
+	}
+	return resolveFrameRangeVec3(
+		frame,
+		prevFrame,
+		nextFrame,
+		hasPrev,
+		hasNext,
+		prevValue,
+		nextValue,
+		fallback,
+		transform,
+	)
+}
+
+// resolveFrameRangeVec3 は前後フレーム値の有無に応じてVec3を補間または補完する。
+func resolveFrameRangeVec3(
+	frame motion.Frame,
+	prevFrame motion.Frame,
+	nextFrame motion.Frame,
+	hasPrev bool,
+	hasNext bool,
+	prevValue *mmath.Vec3,
+	nextValue *mmath.Vec3,
+	fallback mmath.Vec3,
+	transform func(value mmath.Vec3) mmath.Vec3,
+) mmath.Vec3 {
+	if !hasPrev {
+		return fallback
+	}
+	if !hasNext {
+		if prevValue == nil {
+			return fallback
+		}
+		return applyVec3Transform(*prevValue, transform)
+	}
+	if prevValue != nil && nextValue != nil {
+		if nextFrame == prevFrame {
+			return applyVec3Transform(*prevValue, transform)
+		}
+		t := resolveFrameLerpT(prevFrame, frame, nextFrame)
+		value := prevValue.Lerp(*nextValue, t)
+		return applyVec3Transform(value, transform)
+	}
+	if prevValue != nil {
+		return applyVec3Transform(*prevValue, transform)
+	}
+	return fallback
+}
+
+// resolveFrameLerpT はフレーム番号から線形補間係数を計算する。
+func resolveFrameLerpT(prevFrame motion.Frame, frame motion.Frame, nextFrame motion.Frame) float64 {
+	denom := float64(nextFrame - prevFrame)
+	if denom == 0 {
+		return 0
+	}
+	return float64(frame-prevFrame) / denom
+}
+
+// applyVec3Transform は必要時のみVec3変換を適用する。
+func applyVec3Transform(value mmath.Vec3, transform func(value mmath.Vec3) mmath.Vec3) mmath.Vec3 {
+	if transform == nil {
+		return value
+	}
+	return transform(value)
 }

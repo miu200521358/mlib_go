@@ -177,3 +177,32 @@ func TestShouldResolveBoneLessByScoreJointConnected(t *testing.T) {
 		t.Fatalf("理由が不正です: got=%s want=%s", reason, boneLessResolveReasonJointConnected)
 	}
 }
+
+func TestResolveBulletCollisionMask(t *testing.T) {
+	if got := resolveBulletCollisionMask(0x0000); got != 0x0000 {
+		t.Fatalf("マスク 0x0000 の変換結果が不正です: got=%#x want=%#x", got, 0x0000)
+	}
+	if got := resolveBulletCollisionMask(0xFFFF); got != int(math.MaxUint16) {
+		t.Fatalf("マスク 0xFFFF の変換結果が不正です: got=%#x want=%#x", got, math.MaxUint16)
+	}
+	if got := resolveBulletCollisionMask(0x0007); got != 0x0007 {
+		t.Fatalf("マスク 0x0007 の変換結果が不正です: got=%#x want=%#x", got, 0x0007)
+	}
+}
+
+func TestNormalizeRigidBodySize(t *testing.T) {
+	size := mmath.NewVec3()
+	size.X = -1
+	size.Y = 2
+	size.Z = math.Inf(1)
+	got := normalizeRigidBodySize(size)
+	if got.X != 0 {
+		t.Fatalf("Xの下限クランプが不正です: got=%v want=0", got.X)
+	}
+	if got.Y != 2 {
+		t.Fatalf("Yの中間値保持が不正です: got=%v want=2", got.Y)
+	}
+	if got.Z != mmath.VEC3_MAX_VAL.Z {
+		t.Fatalf("Zの上限クランプが不正です: got=%v want=%v", got.Z, mmath.VEC3_MAX_VAL.Z)
+	}
+}

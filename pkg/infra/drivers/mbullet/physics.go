@@ -49,6 +49,7 @@ type RigidBodyValue struct {
 	Group            int
 	PrevBoneMatrix   mmath.Mat4
 	HasPrevBone      bool
+	AppliedPosition  mmath.Vec3
 	AppliedSize      mmath.Vec3
 	AppliedMass      float64
 	HasAppliedParams bool

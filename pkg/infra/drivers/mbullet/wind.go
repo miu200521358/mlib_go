@@ -38,7 +38,7 @@ func (mp *PhysicsEngine) SetWindAdvanced(dragCoeff, liftCoeff, turbulenceFreqHz 
 	if liftCoeff >= 0 {
 		mp.windCfg.LiftCoeff = liftCoeff
 	}
-	if turbulenceFreqHz > 0 {
+	if turbulenceFreqHz >= 0 {
 		mp.windCfg.TurbulenceFreqHz = turbulenceFreqHz
 	}
 }

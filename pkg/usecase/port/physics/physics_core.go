@@ -25,7 +25,7 @@ type IPhysicsCore interface {
 	UpdatePhysicsSelectively(modelIndex int, model *model.PmxModel, physicsDeltas *delta.PhysicsDeltas)
 	// UpdateRigidBodiesSelectively は剛体のみを差分更新する。
 	UpdateRigidBodiesSelectively(modelIndex int, model *model.PmxModel, rigidBodyDeltas *delta.RigidBodyDeltas)
-	// UpdateRigidBodyShapeMass は剛体の形状・質量を更新する。
+	// UpdateRigidBodyShapeMass は剛体の位置・形状・質量を更新する。
 	UpdateRigidBodyShapeMass(modelIndex int, rigidBody *model.RigidBody, rigidBodyDelta *delta.RigidBodyDelta)
 	// UpdateTransform は剛体の姿勢をボーン行列で更新する。
 	UpdateTransform(modelIndex int, rigidBodyBone *model.Bone, boneGlobalMatrix *mmath.Mat4, rigidBody *model.RigidBody)
