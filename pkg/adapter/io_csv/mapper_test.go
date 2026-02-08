@@ -14,6 +14,12 @@ type sampleCsvRow struct {
 	Enabled bool   `csv:"有効"`
 }
 
+type duplicateHeaderCsvRow struct {
+	First  int `csv:"重複"`
+	Second int `csv:"重複"`
+	Third  int `csv:"末尾"`
+}
+
 func TestMarshal(t *testing.T) {
 	rows := []sampleCsvRow{
 		{Key: "A", Value: 10, Enabled: true},
@@ -93,6 +99,44 @@ func TestUnmarshalParseError(t *testing.T) {
 
 	var rows []sampleCsvRow
 	err := Unmarshal(model, &rows)
+	if err == nil {
+		t.Fatalf("expected error")
+	}
+	if merr.ExtractErrorID(err) != "14105" {
+		t.Fatalf("expected error id 14105, got %s", merr.ExtractErrorID(err))
+	}
+}
+
+func TestUnmarshalWithOptionsOrderMapping(t *testing.T) {
+	model := NewCsvModel([][]string{
+		{"重複", "重複", "末尾"},
+		{"1", "2", "3"},
+	})
+
+	var rows []duplicateHeaderCsvRow
+	if err := UnmarshalWithOptions(model, &rows, CsvUnmarshalOptions{
+		ColumnMapping: CsvColumnMappingOrder,
+	}); err != nil {
+		t.Fatalf("expected unmarshal with order mapping to succeed, got %v", err)
+	}
+	if len(rows) != 1 {
+		t.Fatalf("expected 1 row, got %d", len(rows))
+	}
+	if rows[0].First != 1 || rows[0].Second != 2 || rows[0].Third != 3 {
+		t.Fatalf("unexpected row values: %+v", rows[0])
+	}
+}
+
+func TestUnmarshalWithOptionsInvalidOption(t *testing.T) {
+	model := NewCsvModel([][]string{
+		{"キー", "値", "有効"},
+		{"A", "10", "true"},
+	})
+
+	var rows []sampleCsvRow
+	err := UnmarshalWithOptions(model, &rows, CsvUnmarshalOptions{
+		ColumnMapping: CsvColumnMapping(999),
+	})
 	if err == nil {
 		t.Fatalf("expected error")
 	}

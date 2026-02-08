@@ -17,6 +17,21 @@ type csvFieldMeta struct {
 	index int
 }
 
+// CsvColumnMapping はUnmarshal時の列マッピング方式を表す。
+type CsvColumnMapping int
+
+const (
+	// CsvColumnMappingHeader はヘッダ名で列をマッピングする。
+	CsvColumnMappingHeader CsvColumnMapping = iota
+	// CsvColumnMappingOrder は構造体のcsvタグ順で列をマッピングする。
+	CsvColumnMappingOrder
+)
+
+// CsvUnmarshalOptions はUnmarshal時のオプションを表す。
+type CsvUnmarshalOptions struct {
+	ColumnMapping CsvColumnMapping
+}
+
 // Marshal はCSVタグ付き構造体スライスをCsvModelへ変換する。
 func Marshal(data any) (*CsvModel, error) {
 	value := reflect.ValueOf(data)
@@ -71,8 +86,18 @@ func Marshal(data any) (*CsvModel, error) {
 
 // Unmarshal はCsvModelをCSVタグ付き構造体スライスへ変換する。
 func Unmarshal(model *CsvModel, out any) error {
+	return UnmarshalWithOptions(model, out, CsvUnmarshalOptions{})
+}
+
+// UnmarshalWithOptions はCsvModelをCSVタグ付き構造体スライスへ変換する。
+func UnmarshalWithOptions(model *CsvModel, out any, options CsvUnmarshalOptions) error {
 	if model == nil {
 		return io_common.NewIoParseFailed("CSVモデルがnilです", nil)
+	}
+
+	normalizedOptions, err := normalizeCsvUnmarshalOptions(options)
+	if err != nil {
+		return io_common.NewIoParseFailed("Unmarshalオプションが不正です", err)
 	}
 
 	outValue := reflect.ValueOf(out)
@@ -103,8 +128,10 @@ func Unmarshal(model *CsvModel, out any) error {
 		return nil
 	}
 
-	fieldIndexByName := csvFieldIndexMap(fields)
-	columnToField := mapCsvColumns(records[0], fieldIndexByName)
+	columnToField, err := resolveCsvColumnMapping(records[0], fields, normalizedOptions)
+	if err != nil {
+		return io_common.NewIoParseFailed("CSV列マッピングの解決に失敗しました", err)
+	}
 
 	result := reflect.MakeSlice(sliceValue.Type(), 0, max(0, len(records)-1))
 	for i := 1; i < len(records); i++ {
@@ -127,6 +154,16 @@ func Unmarshal(model *CsvModel, out any) error {
 
 	sliceValue.Set(result)
 	return nil
+}
+
+// normalizeCsvUnmarshalOptions はUnmarshalオプションを検証して返す。
+func normalizeCsvUnmarshalOptions(options CsvUnmarshalOptions) (CsvUnmarshalOptions, error) {
+	switch options.ColumnMapping {
+	case CsvColumnMappingHeader, CsvColumnMappingOrder:
+		return options, nil
+	default:
+		return options, fmt.Errorf("列マッピング方式が不正です: %d", options.ColumnMapping)
+	}
 }
 
 // resolveStructType は要素型から構造体型を解決し、ポインタ要素かを返す。
@@ -260,8 +297,21 @@ func csvFieldIndexMap(fields []csvFieldMeta) map[string]int {
 	return indexMap
 }
 
-// mapCsvColumns はヘッダ行から列番号とフィールド番号の対応表を作成する。
-func mapCsvColumns(header []string, fieldIndexByName map[string]int) map[int]int {
+// resolveCsvColumnMapping はオプションに応じて列対応表を作成する。
+func resolveCsvColumnMapping(header []string, fields []csvFieldMeta, options CsvUnmarshalOptions) (map[int]int, error) {
+	switch options.ColumnMapping {
+	case CsvColumnMappingHeader:
+		fieldIndexByName := csvFieldIndexMap(fields)
+		return mapCsvColumnsByHeader(header, fieldIndexByName), nil
+	case CsvColumnMappingOrder:
+		return mapCsvColumnsByOrder(header, fields), nil
+	default:
+		return nil, fmt.Errorf("列マッピング方式が不正です: %d", options.ColumnMapping)
+	}
+}
+
+// mapCsvColumnsByHeader はヘッダ行から列番号とフィールド番号の対応表を作成する。
+func mapCsvColumnsByHeader(header []string, fieldIndexByName map[string]int) map[int]int {
 	columnToField := make(map[int]int, len(header))
 	for columnIndex, name := range header {
 		fieldIndex, ok := fieldIndexByName[strings.TrimSpace(name)]
@@ -269,6 +319,16 @@ func mapCsvColumns(header []string, fieldIndexByName map[string]int) map[int]int
 			continue
 		}
 		columnToField[columnIndex] = fieldIndex
+	}
+	return columnToField
+}
+
+// mapCsvColumnsByOrder は列順とcsvタグ順で列番号とフィールド番号を対応付ける。
+func mapCsvColumnsByOrder(header []string, fields []csvFieldMeta) map[int]int {
+	maxColumns := min(len(header), len(fields))
+	columnToField := make(map[int]int, maxColumns)
+	for columnIndex := 0; columnIndex < maxColumns; columnIndex++ {
+		columnToField[columnIndex] = columnIndex
 	}
 	return columnToField
 }
@@ -358,6 +418,14 @@ func unmarshalCsvCell(targetField reflect.Value, cell string) error {
 // max は2値の大きい方を返す。
 func max(a int, b int) int {
 	if a >= b {
+		return a
+	}
+	return b
+}
+
+// min は2値の小さい方を返す。
+func min(a int, b int) int {
+	if a <= b {
 		return a
 	}
 	return b
