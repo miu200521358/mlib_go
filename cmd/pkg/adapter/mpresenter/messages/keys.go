@@ -37,7 +37,6 @@ const (
 	MessageMotionCsvSourcePathRequired    = "CSV変換対象のモーションファイルを選択してください"
 	MessageMotionCsvOutputPathRequired    = "CSV出力ファイルパスを入力もしくは選択してください"
 	MessageMotionCsvMotionNotFound        = "モーションデータが見つかりません"
-	MessageMotionCsvExportCompleted       = "モーションCSV出力完了"
 	MessageMotionCsvExportCompletedDetail = "モーションCSV出力が完了しました: %s"
 	LabelMaterialView                     = "材質ビュー"
 	HelpMaterialView                      = "材質ビュー説明"

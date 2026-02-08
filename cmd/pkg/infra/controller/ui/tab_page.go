@@ -184,7 +184,7 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 	csvSaveButton.SetLabel(i18n.TranslateOrMark(translator, messages.LabelCsvSave))
 	csvSaveButton.SetMinSize(declarative.Size{Width: 90})
 	csvSaveButton.SetOnClicked(func(cw *controller.ControlWindow) {
-		saveMotionCsv(logger, translator, csvMotionRepository, csvMotionPath, csvOutputPath, cw)
+		saveMotionCsv(logger, translator, csvMotionRepository, csvMotionPath, csvOutputPath)
 	})
 
 	mWidgets.Widgets = append(mWidgets.Widgets, player, pmxLoad11Picker, vmdLoad11Picker, cameraVmdLoad11Picker,
@@ -379,7 +379,7 @@ func loadMotion(logger logging.ILogger, translator i18n.II18n, cw *controller.Co
 }
 
 // saveMotionCsv は指定モーションをCSVへ保存する。
-func saveMotionCsv(logger logging.ILogger, translator i18n.II18n, rep io_common.IFileReader, sourcePath string, outputPath string, cw *controller.ControlWindow) {
+func saveMotionCsv(logger logging.ILogger, translator i18n.II18n, rep io_common.IFileReader, sourcePath string, outputPath string) {
 	if sourcePath == "" {
 		logErrorTitle(
 			logger,
@@ -418,7 +418,6 @@ func saveMotionCsv(logger logging.ILogger, translator i18n.II18n, rep io_common.
 		return
 	}
 
-	completedTitle := i18n.TranslateOrMark(translator, messages.MessageMotionCsvExportCompleted)
 	completedMessage := fmt.Sprintf(
 		i18n.TranslateOrMark(translator, messages.MessageMotionCsvExportCompletedDetail),
 		outputPath,
@@ -427,9 +426,6 @@ func saveMotionCsv(logger logging.ILogger, translator i18n.II18n, rep io_common.
 		logger.Info("%s", completedMessage)
 	}
 	controller.Beep()
-	if cw != nil {
-		walk.MsgBox(cw, completedTitle, completedMessage, walk.MsgBoxIconInformation)
-	}
 }
 
 // loadCameraMotion はカメラモーション読み込み結果をControlWindowへ反映する。

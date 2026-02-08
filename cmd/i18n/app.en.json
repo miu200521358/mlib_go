@@ -124,10 +124,6 @@
         "translation": "Motion data was not found"
     },
     {
-        "id": "モーションCSV出力完了",
-        "translation": "Motion CSV Export Completed"
-    },
-    {
         "id": "モーションCSV出力が完了しました: %s",
         "translation": "Motion CSV export has completed: %s"
     },
