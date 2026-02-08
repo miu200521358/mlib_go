@@ -20,7 +20,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_model"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_model/pmd"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_model/pmx"
-	"github.com/miu200521358/mlib_go/pkg/adapter/io_model/vrm"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_motion"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_motion/vmd"
 	"github.com/miu200521358/mlib_go/pkg/infra/base/err"
@@ -34,6 +33,12 @@ import (
 type filterExtension struct {
 	extension   string
 	description string
+}
+
+// FileFilterExtension はFilePickerに渡す拡張子フィルタを表す。
+type FileFilterExtension struct {
+	Extension   string
+	Description string
 }
 
 // FilePicker はファイル選択ウィジェットを表す。
@@ -64,6 +69,36 @@ type FilePicker struct {
 type iCommonUserConfig interface {
 	GetStringSlice(key string) ([]string, error)
 	SetStringSlice(key string, values []string, limit int) error
+}
+
+// NewLoadFilePicker は読み込み用のFilePickerを生成する。
+func NewLoadFilePicker(
+	userConfig iCommonUserConfig,
+	translator i18n.II18n,
+	historyKey string,
+	title string,
+	tooltip string,
+	onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string),
+	filterExtensions []FileFilterExtension,
+	repository io_common.IFileReader,
+) *FilePicker {
+	converted := make([]filterExtension, 0, len(filterExtensions))
+	for _, ext := range filterExtensions {
+		converted = append(converted, filterExtension{
+			extension:   ext.Extension,
+			description: ext.Description,
+		})
+	}
+	return newFilePicker(
+		userConfig,
+		translator,
+		historyKey,
+		title,
+		tooltip,
+		onPathChanged,
+		converted,
+		repository,
+	)
 }
 
 // NewPmxLoadFilePicker はPMX読み込み用のFilePickerを生成する。
@@ -131,23 +166,6 @@ func NewPmxPmdLoadFilePicker(userConfig iCommonUserConfig, translator i18n.II18n
 			{extension: "*.*", description: "All Files (*.*)"},
 		},
 		io_model.NewPmxPmdRepository(),
-	)
-}
-
-// NewVrmLoadFilePicker はVRM読み込み用のFilePickerを生成する。
-func NewVrmLoadFilePicker(userConfig iCommonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
-	return newFilePicker(
-		userConfig,
-		translator,
-		historyKey,
-		title,
-		tooltip,
-		onPathChanged,
-		[]filterExtension{
-			{extension: "*.vrm", description: "Vrm Files (*.vrm)"},
-			{extension: "*.*", description: "All Files (*.*)"},
-		},
-		vrm.NewVrmRepository(),
 	)
 }
 
