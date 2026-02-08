@@ -9,7 +9,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/model/collection"
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/mbullet/bt"
-	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 )
 
 // jointValue はジョイントの物理エンジン内部表現を保持します。
@@ -99,18 +98,6 @@ func (mp *PhysicsEngine) initJointsByBoneDeltas(
 			jointTransform = mp.calculateJointTransform(joint, bone, boneDeltas)
 		} else {
 			jointTransform = newBulletTransform(joint.Param.Rotation, joint.Param.Position)
-			logger := logging.DefaultLogger()
-			if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
-				logger.Verbose(
-					logging.VERBOSE_INDEX_PHYSICS,
-					"物理検証ジョイント初期化フォールバック: model=%d joint=%d(%s) reason=missing_reference_bone_or_delta rigidA=%d rigidB=%d",
-					modelIndex,
-					joint.Index(),
-					joint.Name(),
-					joint.RigidBodyIndexA,
-					joint.RigidBodyIndexB,
-				)
-			}
 		}
 
 		var jointDelta *delta.JointDelta

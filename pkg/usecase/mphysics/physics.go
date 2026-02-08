@@ -6,7 +6,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
-	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 )
 
 // BuildPhysicsDeltas は剛体/ジョイント差分を生成する。
@@ -14,7 +13,6 @@ func BuildPhysicsDeltas(modelData *model.PmxModel, motionData *motion.VmdMotion,
 	if modelData == nil {
 		return nil
 	}
-	logger := logging.DefaultLogger()
 
 	motionHash := motionHash(motionData)
 	deltas := delta.NewPhysicsDeltas(frame, modelData.RigidBodies, modelData.Joints, modelData.Hash(), motionHash)
@@ -154,33 +152,6 @@ func BuildPhysicsDeltas(modelData *model.PmxModel, motionData *motion.VmdMotion,
 				},
 				nil,
 			)
-			if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
-				logger.Verbose(
-					logging.VERBOSE_INDEX_PHYSICS,
-					"物理検証JointDelta: frame=%v joint=%d(%s) translationLimit=(min:%.6f,%.6f,%.6f max:%.6f,%.6f,%.6f) rotationLimitRad=(min:%.6f,%.6f,%.6f max:%.6f,%.6f,%.6f) spring=(translation:%.6f,%.6f,%.6f rotation:%.6f,%.6f,%.6f)",
-					frame,
-					joint.Index(),
-					joint.Name(),
-					translationLimitMin.X,
-					translationLimitMin.Y,
-					translationLimitMin.Z,
-					translationLimitMax.X,
-					translationLimitMax.Y,
-					translationLimitMax.Z,
-					rotationLimitMin.X,
-					rotationLimitMin.Y,
-					rotationLimitMin.Z,
-					rotationLimitMax.X,
-					rotationLimitMax.Y,
-					rotationLimitMax.Z,
-					springConstantTranslation.X,
-					springConstantTranslation.Y,
-					springConstantTranslation.Z,
-					springConstantRotation.X,
-					springConstantRotation.Y,
-					springConstantRotation.Z,
-				)
-			}
 			deltas.Joints.Update(delta.NewJointDeltaByValue(
 				joint,
 				frame,

@@ -13,7 +13,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/mbullet/bt"
-	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 )
 
 const (
@@ -69,36 +68,19 @@ func (mp *PhysicsEngine) initRigidBodiesByBoneDeltas(
 				}
 				appliedPosition := mp.resolveAppliedPosition(rigidBody, rigidBodyDelta)
 				btRigidBodyTransform := newBulletTransform(rigidBody.Rotation, appliedPosition)
-				var referenceRigidBody *model.RigidBody
 				rawScore, hasRawScore := mp.scoreBoneLessRigidBodyPositionByJoint(
 					pmxModel,
 					rigidBody.Index(),
 					appliedPosition,
 				)
-				shouldResolve, resolveReason := shouldResolveBoneLessByScore(
+				shouldResolve, _ := shouldResolveBoneLessByScore(
 					boneLessPoseMoved,
 					hasRawScore,
 					rawScore,
 					boneLessReferenceResolveScoreThreshold,
 				)
-				logger := logging.DefaultLogger()
-				if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
-					logger.Verbose(
-						logging.VERBOSE_INDEX_PHYSICS,
-						"物理検証ボーン未紐付け判定: model=%d rigid=%d(%s) poseMoved=%t hasJointScore=%t rawScore=%.4f threshold=%.2f resolve=%t reason=%s",
-						modelIndex,
-						rigidBody.Index(),
-						rigidBody.Name(),
-						boneLessPoseMoved,
-						hasRawScore,
-						rawScore,
-						boneLessReferenceResolveScoreThreshold,
-						shouldResolve,
-						resolveReason,
-					)
-				}
 				if shouldResolve {
-					resolvedTransform, resolvedReferenceRigidBody := mp.resolveBoneLessRigidBodyTransform(
+					resolvedTransform, _ := mp.resolveBoneLessRigidBodyTransform(
 						modelIndex,
 						pmxModel,
 						boneDeltas,
@@ -106,7 +88,6 @@ func (mp *PhysicsEngine) initRigidBodiesByBoneDeltas(
 					)
 					if resolvedTransform != nil {
 						btRigidBodyTransform = resolvedTransform
-						referenceRigidBody = resolvedReferenceRigidBody
 					} else if boneLessPoseMoved {
 						centerTransform := mp.resolveBoneLessRigidBodyTransformByCenter(pmxModel, boneDeltas, rigidBody)
 						if centerTransform != nil {
@@ -117,27 +98,6 @@ func (mp *PhysicsEngine) initRigidBodiesByBoneDeltas(
 								btRigidBodyTransform = bone0Transform
 							}
 						}
-					}
-				}
-				if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
-					if referenceRigidBody != nil {
-						logger.Verbose(
-							logging.VERBOSE_INDEX_PHYSICS,
-							"物理検証ボーン未紐付け剛体: model=%d rigid=%d(%s) reference=%d(%s)",
-							modelIndex,
-							rigidBody.Index(),
-							rigidBody.Name(),
-							referenceRigidBody.Index(),
-							referenceRigidBody.Name(),
-						)
-					} else {
-						logger.Verbose(
-							logging.VERBOSE_INDEX_PHYSICS,
-							"物理検証ボーン未紐付け剛体: model=%d rigid=%d(%s) reference=none(rest使用)",
-							modelIndex,
-							rigidBody.Index(),
-							rigidBody.Name(),
-						)
 					}
 				}
 				mp.initRigidBody(modelIndex, pmxModel.Bones, rigidBody, btRigidBodyTransform, rigidBodyDelta)
@@ -561,26 +521,9 @@ func (mp *PhysicsEngine) findReferenceRigidBody(
 		candidateBodies[candidateRigidBodyIndex] = refRigidBody
 	}
 	// 優先順位は「左右整合」->「優先深さ」->「ジョイント整合度」->「距離」->「深さ」の順で固定する。
-	selected, sortedCandidates, ok := selectReferenceRigidBodyCandidate(candidates)
+	selected, _, ok := selectReferenceRigidBodyCandidate(candidates)
 	if !ok {
 		return nil
-	}
-	if len(sortedCandidates) > 1 {
-		candidateIndexes := make([]int, 0, len(sortedCandidates))
-		for _, candidate := range sortedCandidates {
-			candidateIndexes = append(candidateIndexes, candidate.RigidBodyIndex)
-		}
-		logger := logging.DefaultLogger()
-		if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
-			logger.Verbose(
-				logging.VERBOSE_INDEX_PHYSICS,
-				"物理検証参照候補複数: model=%d target=%d selected=%d candidates=%v",
-				modelIndex,
-				rigidBodyIndex,
-				selected.RigidBodyIndex,
-				candidateIndexes,
-			)
-		}
 	}
 
 	return candidateBodies[selected.RigidBodyIndex]

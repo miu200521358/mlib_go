@@ -804,6 +804,7 @@ func (vl *ViewerManager) deformWindow(
 
 	ikDebugFactory := vl.ikDebugFactory()
 	physicsEnabled := vl.shared.HasFlag(state.STATE_FLAG_PHYSICS_ENABLED)
+	vl.logPhysicsPlaybackFrame(vw, frame, timeStep, maxSubSteps, fixedTimeStep, resetType, physicsEnabled)
 
 	for i, renderer := range vw.modelRenderers {
 		if renderer == nil || renderer.Model == nil {
@@ -869,6 +870,41 @@ func (vl *ViewerManager) deformWindow(
 		)
 		// モデル本体は不変とし、変形結果はGPUバッファへ出力するためCPU側スキニングは行わない。
 	}
+}
+
+// logPhysicsPlaybackFrame は再生中フレーム挙動の確認用に物理実行条件を出力する。
+func (vl *ViewerManager) logPhysicsPlaybackFrame(
+	vw *ViewerWindow,
+	frame motion.Frame,
+	timeStep float32,
+	maxSubSteps int,
+	fixedTimeStep float32,
+	resetType state.PhysicsResetType,
+	physicsEnabled bool,
+) {
+	logger := logging.DefaultLogger()
+	if vw == nil || logger == nil || !logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
+		return
+	}
+	playing := false
+	if vl != nil && vl.shared != nil {
+		playing = vl.shared.HasFlag(state.STATE_FLAG_PLAYING)
+	}
+	stepPlanned := vw.physics != nil && (physicsEnabled || resetType != state.PHYSICS_RESET_TYPE_NONE)
+	logger.Verbose(
+		logging.VERBOSE_INDEX_PHYSICS,
+		"物理追跡フレーム: window=%d frame=%v playing=%t physicsEnabled=%t resetType=%d timeStep=%.6f maxSubSteps=%d fixedTimeStep=%.6f stepPlanned=%t models=%d",
+		vw.windowIndex,
+		frame,
+		playing,
+		physicsEnabled,
+		resetType,
+		timeStep,
+		maxSubSteps,
+		fixedTimeStep,
+		stepPlanned,
+		len(vw.modelRenderers),
+	)
 }
 
 // ikDebugFactory はIKデバッグ用ファクトリを返す。
