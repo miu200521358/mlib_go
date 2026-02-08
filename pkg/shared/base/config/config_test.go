@@ -20,6 +20,9 @@ func TestConfigConstants(t *testing.T) {
 	if UserConfigKeyCameraVmdHistory != "camera_vmd" {
 		t.Errorf("UserConfigKeyCameraVmdHistory: got=%v", UserConfigKeyCameraVmdHistory)
 	}
+	if UserConfigKeyCsvHistory != "csv" {
+		t.Errorf("UserConfigKeyCsvHistory: got=%v", UserConfigKeyCsvHistory)
+	}
 }
 
 // TestAppConfigUnmarshal は旧キーの変換を確認する。

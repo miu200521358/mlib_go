@@ -180,6 +180,8 @@ const (
 	UserConfigKeyVmdHistory = "vmd"
 	// UserConfigKeyCameraVmdHistory はカメラモーションファイル履歴キー。
 	UserConfigKeyCameraVmdHistory = "camera_vmd"
+	// UserConfigKeyCsvHistory はCSVファイル履歴キー。
+	UserConfigKeyCsvHistory = "csv"
 	// UserConfigKeyVolume は音量キー。
 	UserConfigKeyVolume = "volume"
 )
