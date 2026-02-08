@@ -44,6 +44,10 @@
         "translation": "加载失败"
     },
     {
+        "id": "モーションCSV出力失敗",
+        "translation": "动作CSV导出失败"
+    },
+    {
         "id": "システム用ボーン追加失敗",
         "translation": "添加系统用骨骼失败"
     },
@@ -90,6 +94,42 @@
     {
         "id": "カメラモーションファイルを選択してください",
         "translation": "请选择相机动作文件"
+    },
+    {
+        "id": "CSV",
+        "translation": "CSV"
+    },
+    {
+        "id": "CSV変換モーションファイル",
+        "translation": "CSV转换动作文件"
+    },
+    {
+        "id": "CSV変換対象のモーションファイルを選択してください",
+        "translation": "请选择用于CSV转换的动作文件"
+    },
+    {
+        "id": "CSV出力ファイル",
+        "translation": "CSV输出文件"
+    },
+    {
+        "id": "CSV出力ファイルパスを入力もしくは選択してください",
+        "translation": "请输入或选择CSV输出文件路径"
+    },
+    {
+        "id": "CSV保存",
+        "translation": "保存CSV"
+    },
+    {
+        "id": "モーションデータが見つかりません",
+        "translation": "未找到动作数据"
+    },
+    {
+        "id": "モーションCSV出力完了",
+        "translation": "动作CSV导出完成"
+    },
+    {
+        "id": "モーションCSV出力が完了しました: %s",
+        "translation": "动作CSV导出已完成: %s"
     },
     {
         "id": "材質ビュー",
