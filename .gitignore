@@ -44,4 +44,4 @@ cmd/logs/
 .gopath/
 *.zip
 
-review.md
+review/
