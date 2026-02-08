@@ -660,13 +660,18 @@ func resolveFixedTimeStep(physicsWorldMotion *motion.VmdMotion, frame motion.Fra
 
 // resolvePhysicsTimeStep は再生状態に応じた物理ステップ秒を返す。
 func resolvePhysicsTimeStep(elapsed float64, frameElapsed float32, playing bool, frameDrop bool) float32 {
+	if !playing {
+		// 停止中に経過秒をそのまま流すと大きな時間ステップで暴れやすいため、上限を設ける。
+		defaultSpf := mtime.FpsToSpf(defaultFps)
+		return float32(mmath.Clamped(elapsed, 0, float64(defaultSpf)))
+	}
 	if playing && !frameDrop {
 		if frameElapsed > 0 {
 			return frameElapsed
 		}
 		return 0
 	}
-	return float32(elapsed)
+	return float32(mmath.Clamped(elapsed, 0, math.MaxFloat32))
 }
 
 // resolvePhysicsStepConfig は物理ステップとサブステップ上限を整える。
@@ -767,7 +772,8 @@ func (vl *ViewerManager) deformWindow(
 
 	ikDebugFactory := vl.ikDebugFactory()
 	physicsEnabled := vl.shared.HasFlag(state.STATE_FLAG_PHYSICS_ENABLED)
-	vl.logPhysicsPlaybackFrame(vw, frame, timeStep, maxSubSteps, fixedTimeStep, resetType, physicsEnabled)
+	playing := vl.shared.HasFlag(state.STATE_FLAG_PLAYING)
+	vl.logPhysicsPlaybackFrame(vw, frame, timeStep, maxSubSteps, fixedTimeStep, resetType, physicsEnabled, playing)
 
 	for i, renderer := range vw.modelRenderers {
 		if renderer == nil || renderer.Model == nil {
@@ -809,7 +815,7 @@ func (vl *ViewerManager) deformWindow(
 		)
 	}
 
-	if (physicsEnabled || resetType != state.PHYSICS_RESET_TYPE_NONE) && vw.physics != nil {
+	if shouldStepPhysics(vw.physics != nil, physicsEnabled, resetType) {
 		vl.updateWind(vw, frame)
 		vw.physics.StepSimulation(timeStep, maxSubSteps, fixedTimeStep)
 		vl.logPhysicsContactDiagnostics(vw, frame, timeStep, maxSubSteps, fixedTimeStep)
@@ -845,19 +851,16 @@ func (vl *ViewerManager) logPhysicsPlaybackFrame(
 	fixedTimeStep float32,
 	resetType state.PhysicsResetType,
 	physicsEnabled bool,
+	playing bool,
 ) {
 	logger := logging.DefaultLogger()
 	if vw == nil || vw.windowIndex != 0 || logger == nil || !logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
 		return
 	}
-	playing := false
-	if vl != nil && vl.shared != nil {
-		playing = vl.shared.HasFlag(state.STATE_FLAG_PLAYING)
-	}
 	deltaFrame := mtime.SecondsToFrames(mtime.Seconds(timeStep), defaultFps)
 	requiredSubSteps := resolveRequiredSubSteps(timeStep, fixedTimeStep)
 	subStepSaturated := maxSubSteps > 0 && requiredSubSteps > maxSubSteps
-	stepPlanned := vw.physics != nil && (physicsEnabled || resetType != state.PHYSICS_RESET_TYPE_NONE)
+	stepPlanned := shouldStepPhysics(vw.physics != nil, physicsEnabled, resetType)
 	logger.Verbose(
 		logging.VERBOSE_INDEX_PHYSICS,
 		"物理追跡フレーム: window=%d frame=%v playing=%t physicsEnabled=%t resetType=%d timeStep=%.6f deltaFrame=%.6f maxSubSteps=%d requiredSubSteps=%d subStepSaturated=%t fixedTimeStep=%.6f stepPlanned=%t models=%d",
@@ -877,6 +880,18 @@ func (vl *ViewerManager) logPhysicsPlaybackFrame(
 	)
 }
 
+// shouldStepPhysics は現在フレームで物理ステップを実行すべきかを返す。
+func shouldStepPhysics(
+	hasPhysicsWorld bool,
+	physicsEnabled bool,
+	resetType state.PhysicsResetType,
+) bool {
+	if !hasPhysicsWorld {
+		return false
+	}
+	return physicsEnabled || resetType != state.PHYSICS_RESET_TYPE_NONE
+}
+
 // logPhysicsContactDiagnostics は接触/侵入/速度の検証サマリを出力する。
 func (vl *ViewerManager) logPhysicsContactDiagnostics(
 	vw *ViewerWindow,
@@ -894,7 +909,7 @@ func (vl *ViewerManager) logPhysicsContactDiagnostics(
 	requiredSubSteps := resolveRequiredSubSteps(timeStep, fixedTimeStep)
 	logger.Verbose(
 		logging.VERBOSE_INDEX_PHYSICS,
-		"物理追跡接触: window=%d frame=%v timeStep=%.6f deltaFrame=%.6f maxSubSteps=%d requiredSubSteps=%d manifolds=%d activeManifolds=%d contacts=%d penetrations=%d maxPenetration=%.6f pairPenetration=%d:%d-%d:%d maxImpulse=%.6f pairImpulse=%d:%d-%d:%d dynamicBodies=%d maxLinear=%.6f bodyLinear=%d:%d maxAngular=%.6f bodyAngular=%d:%d",
+		"物理追跡接触: window=%d frame=%v timeStep=%.6f deltaFrame=%.6f maxSubSteps=%d requiredSubSteps=%d manifolds=%d activeManifolds=%d contacts=%d penetrations=%d maxPenetration=%.6f pairPenetration=%d:%d-%d:%d maxImpulse=%.6f pairImpulse=%d:%d-%d:%d dynamicBodies=%d maxLinear=%.6f bodyLinear=%d:%d maxAngular=%.6f bodyAngular=%d:%d solverIterations=%d solverSplitImpulse=%d solverSplitPen=%.6f solverErp2=%.6f solverGlobalCfm=%.6f solverMode=%d",
 		vw.windowIndex,
 		frame,
 		timeStep,
@@ -922,6 +937,12 @@ func (vl *ViewerManager) logPhysicsContactDiagnostics(
 		diagnostics.MaxAngularSpeed,
 		diagnostics.MaxAngularSpeedModelIndex,
 		diagnostics.MaxAngularSpeedRigidBodyIndex,
+		diagnostics.SolverNumIterations,
+		diagnostics.SolverSplitImpulse,
+		diagnostics.SolverSplitPenetration,
+		diagnostics.SolverErp2,
+		diagnostics.SolverGlobalCfm,
+		diagnostics.SolverMode,
 	)
 
 	trackedRigidBodyDiagnostics := vw.physics.CollectTrackedRigidBodyDiagnostics(diagnostics)

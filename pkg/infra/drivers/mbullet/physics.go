@@ -110,6 +110,12 @@ type PhysicsStepDiagnostics struct {
 	MaxAngularSpeed               float32
 	MaxAngularSpeedModelIndex     int
 	MaxAngularSpeedRigidBodyIndex int
+	SolverNumIterations           int
+	SolverSplitImpulse            int
+	SolverSplitPenetration        float32
+	SolverErp2                    float32
+	SolverGlobalCfm               float32
+	SolverMode                    int
 }
 
 // TrackedRigidBodyDiagnostics は追跡対象剛体の属性と状態を保持する。
@@ -145,6 +151,19 @@ type trackedRigidBodyTarget struct {
 	reason         string
 	modelIndex     int
 	rigidBodyIndex int
+}
+
+// worldSolverConfig はワールド共通ソルバ設定を保持する。
+type worldSolverConfig struct {
+	NumIterations                   int
+	SplitImpulse                    int
+	SplitImpulsePenetration         float32
+	Erp2                            float32
+	GlobalCfm                       float32
+	EnableWarmstarting              bool
+	EnableSimd                      bool
+	EnableCacheFriendly             bool
+	EnableInterleaveContactFriction bool
 }
 
 // NewPhysicsEngine は物理エンジンのインスタンスを生成する。
@@ -232,6 +251,7 @@ func (mp *PhysicsEngine) CollectStepDiagnostics() PhysicsStepDiagnostics {
 	if mp == nil {
 		return diagnostics
 	}
+	mp.collectSolverDiagnostics(&diagnostics)
 	mp.collectContactDiagnostics(&diagnostics)
 	mp.collectRigidBodyDiagnostics(&diagnostics)
 	return diagnostics
@@ -264,7 +284,78 @@ func newPhysicsStepDiagnostics() PhysicsStepDiagnostics {
 		MaxLinearSpeedRigidBodyIndex:  -1,
 		MaxAngularSpeedModelIndex:     -1,
 		MaxAngularSpeedRigidBodyIndex: -1,
+		SolverNumIterations:           -1,
+		SolverSplitImpulse:            -1,
+		SolverSplitPenetration:        float32(-1),
+		SolverErp2:                    float32(-1),
+		SolverGlobalCfm:               float32(-1),
+		SolverMode:                    -1,
 	}
+}
+
+// newWorldSolverConfig は剛性優先のソルバ既定値を返す。
+func newWorldSolverConfig() worldSolverConfig {
+	return worldSolverConfig{
+		NumIterations:                   16,
+		SplitImpulse:                    1,
+		SplitImpulsePenetration:         float32(-0.02),
+		Erp2:                            float32(0.2),
+		GlobalCfm:                       float32(0.0005),
+		EnableWarmstarting:              true,
+		EnableSimd:                      true,
+		EnableCacheFriendly:             true,
+		EnableInterleaveContactFriction: true,
+	}
+}
+
+// applyWorldSolverConfig はワールドへソルバ設定を適用する。
+func applyWorldSolverConfig(world bt.BtDiscreteDynamicsWorld, config worldSolverConfig) {
+	if world == nil {
+		return
+	}
+	solverInfoAny := world.GetSolverInfo()
+	solverInfo, ok := solverInfoAny.(bt.BtContactSolverInfo)
+	if !ok || solverInfo == nil {
+		return
+	}
+	solverInfo.SetM_numIterations(max(config.NumIterations, 1))
+	solverInfo.SetM_splitImpulse(config.SplitImpulse)
+	solverInfo.SetM_splitImpulsePenetrationThreshold(config.SplitImpulsePenetration)
+	solverInfo.SetM_erp2(config.Erp2)
+	solverInfo.SetM_globalCfm(config.GlobalCfm)
+
+	solverMode := solverInfo.GetM_solverMode()
+	if config.EnableWarmstarting {
+		solverMode |= int(bt.SOLVER_USE_WARMSTARTING)
+	}
+	if config.EnableSimd {
+		solverMode |= int(bt.SOLVER_SIMD)
+	}
+	if config.EnableCacheFriendly {
+		solverMode |= int(bt.SOLVER_CACHE_FRIENDLY)
+	}
+	if config.EnableInterleaveContactFriction {
+		solverMode |= int(bt.SOLVER_INTERLEAVE_CONTACT_AND_FRICTION_CONSTRAINTS)
+	}
+	solverInfo.SetM_solverMode(solverMode)
+}
+
+// collectSolverDiagnostics は現在のソルバ設定を診断へ反映する。
+func (mp *PhysicsEngine) collectSolverDiagnostics(diagnostics *PhysicsStepDiagnostics) {
+	if mp == nil || diagnostics == nil || mp.world == nil {
+		return
+	}
+	solverInfoAny := mp.world.GetSolverInfo()
+	solverInfo, ok := solverInfoAny.(bt.BtContactSolverInfo)
+	if !ok || solverInfo == nil {
+		return
+	}
+	diagnostics.SolverNumIterations = solverInfo.GetM_numIterations()
+	diagnostics.SolverSplitImpulse = solverInfo.GetM_splitImpulse()
+	diagnostics.SolverSplitPenetration = solverInfo.GetM_splitImpulsePenetrationThreshold()
+	diagnostics.SolverErp2 = solverInfo.GetM_erp2()
+	diagnostics.SolverGlobalCfm = solverInfo.GetM_globalCfm()
+	diagnostics.SolverMode = solverInfo.GetM_solverMode()
 }
 
 // newTrackedRigidBodyDiagnostics は追跡剛体の初期値を生成する。
@@ -565,6 +656,7 @@ func createWorld(gravity mmath.Vec3) *worldResources {
 	dispatcher := bt.NewBtCollisionDispatcher(collisionConfiguration)
 	solver := bt.NewBtSequentialImpulseConstraintSolver()
 	world := bt.NewBtDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration)
+	applyWorldSolverConfig(world, newWorldSolverConfig())
 	// MMD互換の重力スケールに合わせるため、Y成分は10倍でBulletへ渡す。
 	gravityVector := bt.NewBtVector3(float32(gravity.X), float32(gravity.Y*10), float32(gravity.Z))
 	world.SetGravity(gravityVector)
