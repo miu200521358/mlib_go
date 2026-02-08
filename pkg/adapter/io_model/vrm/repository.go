@@ -154,9 +154,6 @@ func logVrmStep(format string, params ...any) {
 		return
 	}
 	logger.Info(format, params...)
-	if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
-		logger.Verbose(logging.VERBOSE_INDEX_VIEWER, format, params...)
-	}
 }
 
 // logVrmDebug はVRM変換のデバッグログを出力する。
@@ -166,9 +163,6 @@ func logVrmDebug(format string, params ...any) {
 		return
 	}
 	logger.Debug(format, params...)
-	if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
-		logger.Verbose(logging.VERBOSE_INDEX_VIEWER, format, params...)
-	}
 }
 
 // logVrmWarn はVRM変換の警告ログを出力する。
@@ -178,9 +172,6 @@ func logVrmWarn(format string, params ...any) {
 		return
 	}
 	logger.Warn(format, params...)
-	if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
-		logger.Verbose(logging.VERBOSE_INDEX_VIEWER, "WARN: "+format, params...)
-	}
 }
 
 // gltfDocument はVRM読込時に必要なglTFトップレベル要素を表す。

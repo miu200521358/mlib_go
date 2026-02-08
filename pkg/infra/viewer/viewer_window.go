@@ -336,26 +336,6 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 			boxSelectionRemove = remove
 			boxSelectionMin = minPos
 			boxSelectionMax = maxPos
-			logger := logging.DefaultLogger()
-			if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
-				logger.Verbose(
-					logging.VERBOSE_INDEX_VIEWER,
-					"ボックス選択: win=(%d,%d) fb=(%d,%d) start=(%.2f,%.2f) end=(%.2f,%.2f) rect=(%.2f,%.2f)-(%.2f,%.2f) remove=%t",
-					winW,
-					winH,
-					fbW,
-					fbH,
-					vw.boxSelectionStart.X,
-					vw.boxSelectionStart.Y,
-					vw.boxSelectionEnd.X,
-					vw.boxSelectionEnd.Y,
-					boxSelectionMin.X,
-					boxSelectionMin.Y,
-					boxSelectionMax.X,
-					boxSelectionMax.Y,
-					boxSelectionRemove,
-				)
-			}
 		}
 	}
 
@@ -1055,29 +1035,6 @@ func (vw *ViewerWindow) closeCallback(_ *glfw.Window) {
 
 // keyCallback はキー入力を処理する。
 func (vw *ViewerWindow) keyCallback(_ *glfw.Window, key glfw.Key, _ int, action glfw.Action, _ glfw.ModifierKey) {
-	logger := logging.DefaultLogger()
-	verbose := logger != nil && logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER)
-	if verbose && action != glfw.Release {
-		if (key >= glfw.KeyKP0 && key <= glfw.KeyKP9) || key == glfw.KeyKPDecimal {
-			actionLabel := "不明"
-			switch action {
-			case glfw.Press:
-				actionLabel = "押下"
-			case glfw.Release:
-				actionLabel = "離し"
-			case glfw.Repeat:
-				actionLabel = "リピート"
-			}
-			logger.Verbose(
-				logging.VERBOSE_INDEX_VIEWER,
-				"操作: テンキー key=%d action=%s shift=%t ctrl=%t",
-				key,
-				actionLabel,
-				vw.isShiftPressed(),
-				vw.isCtrlPressed(),
-			)
-		}
-	}
 	switch action {
 	case glfw.Press:
 		switch key {
@@ -1107,21 +1064,6 @@ func (vw *ViewerWindow) keyCallback(_ *glfw.Window, key glfw.Key, _ int, action 
 			return
 		}
 		vw.resetCameraPositionForPreset(preset.Yaw, preset.Pitch)
-		if verbose {
-			cam := vw.shader.Camera()
-			fov := float32(0)
-			if cam != nil {
-				fov = cam.FieldOfView
-			}
-			logger.Verbose(logging.VERBOSE_INDEX_VIEWER,
-				"操作: カメラプリセット name=%s key=%d yaw=%.3f pitch=%.3f fov=%.3f",
-				preset.Name,
-				key,
-				preset.Yaw,
-				preset.Pitch,
-				fov,
-			)
-		}
 	}
 }
 

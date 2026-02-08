@@ -50,9 +50,6 @@ type ViewerManager struct {
 	fixedTimeStepsScratch  []float32
 	maxSubStepsScratch     []int
 	iconImage              image.Image
-	viewerProfileActive    bool
-	viewerProfilePath      string
-	viewerProfileFile      *os.File
 	modelLoadProfileActive bool
 	modelLoadProfilePath   string
 	modelLoadProfileFile   *os.File
@@ -127,7 +124,6 @@ func (vl *ViewerManager) Run() {
 		vl.handleWindowFocus()
 		vl.handleVSync()
 		glfw.PollEvents()
-		vl.updateViewerProfile(logging.DefaultLogger())
 
 		frameTime := glfw.GetTime()
 		elapsed := frameTime - prevTime
@@ -160,69 +156,7 @@ func (vl *ViewerManager) Run() {
 		vw.Destroy()
 	}
 	vl.stopModelLoadProfile(logging.DefaultLogger())
-	vl.stopViewerProfile(logging.DefaultLogger())
 	glfw.Terminate()
-}
-
-// updateViewerProfile はビューワー冗長ログの状態に応じてpprofを開始/終了する。
-func (vl *ViewerManager) updateViewerProfile(logger logging.ILogger) {
-	if logger == nil {
-		return
-	}
-	enabled := logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER)
-	if enabled && !vl.viewerProfileActive {
-		vl.startViewerProfile(logger)
-		return
-	}
-	if !enabled && vl.viewerProfileActive {
-		vl.stopViewerProfile(logger)
-	}
-}
-
-// startViewerProfile はCPUプロファイルの計測を開始する。
-func (vl *ViewerManager) startViewerProfile(logger logging.ILogger) {
-	if vl.viewerProfileActive {
-		return
-	}
-	file, displayPath, fullPath, err := vl.createViewerProfileFile()
-	if err != nil {
-		if logger != nil {
-			logger.Error("ビューワープロファイル開始に失敗しました: %s", sanitizeProfileError(err, fullPath, displayPath))
-		}
-		return
-	}
-	if err := pprof.StartCPUProfile(file); err != nil {
-		_ = file.Close()
-		if logger != nil {
-			logger.Error("ビューワープロファイル開始に失敗しました: %s", sanitizeProfileError(err, fullPath, displayPath))
-		}
-		return
-	}
-	vl.viewerProfileFile = file
-	vl.viewerProfilePath = displayPath
-	vl.viewerProfileActive = true
-	if logger != nil {
-		logger.Info("ビューワープロファイル開始: %s", displayPath)
-	}
-}
-
-// stopViewerProfile はCPUプロファイルの計測を終了する。
-func (vl *ViewerManager) stopViewerProfile(logger logging.ILogger) {
-	if !vl.viewerProfileActive {
-		return
-	}
-	pprof.StopCPUProfile()
-	if vl.viewerProfileFile != nil {
-		if err := vl.viewerProfileFile.Close(); err != nil && logger != nil {
-			logger.Error("ビューワープロファイル保存に失敗しました: %s", sanitizeProfileError(err, "", vl.viewerProfilePath))
-		}
-		vl.viewerProfileFile = nil
-	}
-	if logger != nil && vl.viewerProfilePath != "" {
-		logger.Info("ビューワープロファイル出力: %s", vl.viewerProfilePath)
-	}
-	vl.viewerProfileActive = false
-	vl.viewerProfilePath = ""
 }
 
 // startModelLoadProfile はモデル読み込み用のCPUプロファイル計測を開始する。
@@ -237,12 +171,6 @@ func (vl *ViewerManager) startModelLoadProfile(logger logging.ILogger) bool {
 			vl.modelLoadProfileCount++
 		}
 		return true
-	}
-	if vl.viewerProfileActive {
-		if logger != nil {
-			logger.Warn("モデル読み込みプロファイル開始に失敗しました: ビューワープロファイルが有効です (%s)", vl.viewerProfilePath)
-		}
-		return false
 	}
 	file, displayPath, fullPath, err := vl.createModelLoadProfileFile()
 	if err != nil {
@@ -302,25 +230,6 @@ func (vl *ViewerManager) stopModelLoadProfile(logger logging.ILogger) {
 	vl.modelLoadProfileCount = 0
 }
 
-// createViewerProfileFile はpprof出力用ファイルを生成する。
-func (vl *ViewerManager) createViewerProfileFile() (*os.File, string, string, error) {
-	dir, displayDir, err := vl.resolveViewerProfileDir()
-	if err != nil {
-		return nil, "", "", err
-	}
-	if err := os.MkdirAll(dir, 0o755); err != nil {
-		return nil, "", "", err
-	}
-	fileName := viewerProfileFileName()
-	fullPath := filepath.Join(dir, fileName)
-	file, err := os.Create(fullPath)
-	if err != nil {
-		return nil, "", fullPath, err
-	}
-	displayPath := filepath.Join(displayDir, fileName)
-	return file, displayPath, fullPath, nil
-}
-
 // createModelLoadProfileFile はモデル読み込み用のpprof出力ファイルを生成する。
 func (vl *ViewerManager) createModelLoadProfileFile() (*os.File, string, string, error) {
 	dir, displayDir, err := vl.resolveViewerProfileDir()
@@ -349,12 +258,6 @@ func (vl *ViewerManager) resolveViewerProfileDir() (string, string, error) {
 		}
 	}
 	return "logs", "logs", nil
-}
-
-// viewerProfileFileName はpprof出力ファイル名を生成する。
-func viewerProfileFileName() string {
-	stamp := time.Now().Format("20060102_150405")
-	return fmt.Sprintf("pprof_viewer_%s.pprof", stamp)
 }
 
 // modelLoadProfileFileName はモデル読み込み用のpprofファイル名を生成する。
@@ -909,6 +812,7 @@ func (vl *ViewerManager) deformWindow(
 	if (physicsEnabled || resetType != state.PHYSICS_RESET_TYPE_NONE) && vw.physics != nil {
 		vl.updateWind(vw, frame)
 		vw.physics.StepSimulation(timeStep, maxSubSteps, fixedTimeStep)
+		vl.logPhysicsContactDiagnostics(vw, frame, timeStep, maxSubSteps, fixedTimeStep)
 	}
 
 	for i, renderer := range vw.modelRenderers {
@@ -943,7 +847,7 @@ func (vl *ViewerManager) logPhysicsPlaybackFrame(
 	physicsEnabled bool,
 ) {
 	logger := logging.DefaultLogger()
-	if vw == nil || logger == nil || !logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
+	if vw == nil || vw.windowIndex != 0 || logger == nil || !logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
 		return
 	}
 	playing := false
@@ -971,6 +875,92 @@ func (vl *ViewerManager) logPhysicsPlaybackFrame(
 		stepPlanned,
 		len(vw.modelRenderers),
 	)
+}
+
+// logPhysicsContactDiagnostics は接触/侵入/速度の検証サマリを出力する。
+func (vl *ViewerManager) logPhysicsContactDiagnostics(
+	vw *ViewerWindow,
+	frame motion.Frame,
+	timeStep float32,
+	maxSubSteps int,
+	fixedTimeStep float32,
+) {
+	logger := logging.DefaultLogger()
+	if vw == nil || vw.windowIndex != 0 || vw.physics == nil || logger == nil || !logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
+		return
+	}
+	diagnostics := vw.physics.CollectStepDiagnostics()
+	deltaFrame := mtime.SecondsToFrames(mtime.Seconds(timeStep), defaultFps)
+	requiredSubSteps := resolveRequiredSubSteps(timeStep, fixedTimeStep)
+	logger.Verbose(
+		logging.VERBOSE_INDEX_PHYSICS,
+		"物理追跡接触: window=%d frame=%v timeStep=%.6f deltaFrame=%.6f maxSubSteps=%d requiredSubSteps=%d manifolds=%d activeManifolds=%d contacts=%d penetrations=%d maxPenetration=%.6f pairPenetration=%d:%d-%d:%d maxImpulse=%.6f pairImpulse=%d:%d-%d:%d dynamicBodies=%d maxLinear=%.6f bodyLinear=%d:%d maxAngular=%.6f bodyAngular=%d:%d",
+		vw.windowIndex,
+		frame,
+		timeStep,
+		deltaFrame,
+		maxSubSteps,
+		requiredSubSteps,
+		diagnostics.ManifoldCount,
+		diagnostics.ActiveManifoldCount,
+		diagnostics.ContactPointCount,
+		diagnostics.PenetrationPointCount,
+		diagnostics.MaxPenetrationDepth,
+		diagnostics.MaxPenetrationModelIndexA,
+		diagnostics.MaxPenetrationRigidBodyIndexA,
+		diagnostics.MaxPenetrationModelIndexB,
+		diagnostics.MaxPenetrationRigidBodyIndexB,
+		diagnostics.MaxAppliedImpulse,
+		diagnostics.MaxImpulseModelIndexA,
+		diagnostics.MaxImpulseRigidBodyIndexA,
+		diagnostics.MaxImpulseModelIndexB,
+		diagnostics.MaxImpulseRigidBodyIndexB,
+		diagnostics.DynamicBodyCount,
+		diagnostics.MaxLinearSpeed,
+		diagnostics.MaxLinearSpeedModelIndex,
+		diagnostics.MaxLinearSpeedRigidBodyIndex,
+		diagnostics.MaxAngularSpeed,
+		diagnostics.MaxAngularSpeedModelIndex,
+		diagnostics.MaxAngularSpeedRigidBodyIndex,
+	)
+
+	trackedRigidBodyDiagnostics := vw.physics.CollectTrackedRigidBodyDiagnostics(diagnostics)
+	for _, trackedRigidBodyDiagnostic := range trackedRigidBodyDiagnostics {
+		logger.Verbose(
+			logging.VERBOSE_INDEX_PHYSICS,
+			"物理追跡剛体: window=%d frame=%v reason=%s model=%d rigidBody=%d resolved=%t hasApplied=%t physicsType=%d shape=%d group=%d mask=%d baseMass=%.6f appliedMass=%.6f appliedSize=%.6f,%.6f,%.6f appliedPos=%.6f,%.6f,%.6f linearDamping=%.6f angularDamping=%.6f restitution=%.6f friction=%.6f collisionFlags=%d activationState=%d ccdMotionThreshold=%.6f ccdRadius=%.6f contactThreshold=%.6f linearSpeed=%.6f angularSpeed=%.6f",
+			vw.windowIndex,
+			frame,
+			trackedRigidBodyDiagnostic.Reason,
+			trackedRigidBodyDiagnostic.ModelIndex,
+			trackedRigidBodyDiagnostic.RigidBodyIndex,
+			trackedRigidBodyDiagnostic.Resolved,
+			trackedRigidBodyDiagnostic.HasAppliedParams,
+			trackedRigidBodyDiagnostic.PhysicsType,
+			trackedRigidBodyDiagnostic.Shape,
+			trackedRigidBodyDiagnostic.Group,
+			trackedRigidBodyDiagnostic.Mask,
+			trackedRigidBodyDiagnostic.BaseMass,
+			trackedRigidBodyDiagnostic.AppliedMass,
+			trackedRigidBodyDiagnostic.AppliedSize.X,
+			trackedRigidBodyDiagnostic.AppliedSize.Y,
+			trackedRigidBodyDiagnostic.AppliedSize.Z,
+			trackedRigidBodyDiagnostic.AppliedPosition.X,
+			trackedRigidBodyDiagnostic.AppliedPosition.Y,
+			trackedRigidBodyDiagnostic.AppliedPosition.Z,
+			trackedRigidBodyDiagnostic.LinearDamping,
+			trackedRigidBodyDiagnostic.AngularDamping,
+			trackedRigidBodyDiagnostic.Restitution,
+			trackedRigidBodyDiagnostic.Friction,
+			trackedRigidBodyDiagnostic.CollisionFlags,
+			trackedRigidBodyDiagnostic.ActivationState,
+			trackedRigidBodyDiagnostic.CcdMotionThreshold,
+			trackedRigidBodyDiagnostic.CcdSweptSphereRadius,
+			trackedRigidBodyDiagnostic.ContactProcessingThreshold,
+			trackedRigidBodyDiagnostic.LinearSpeed,
+			trackedRigidBodyDiagnostic.AngularSpeed,
+		)
+	}
 }
 
 // ikDebugFactory はIKデバッグ用ファクトリを返す。
