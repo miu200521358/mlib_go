@@ -34,8 +34,9 @@ import (
 )
 
 const (
-	defaultFps                      = mtime.DefaultFps
-	physicsInitialFrame mtime.Frame = 60
+	defaultFps                             = mtime.DefaultFps
+	physicsInitialFrame        mtime.Frame = 60
+	maxAdaptivePhysicsSubSteps             = 30
 )
 
 // ViewerManager はビューワー全体を管理する。
@@ -46,6 +47,8 @@ type ViewerManager struct {
 	windowList             []*ViewerWindow
 	physicsMotionsScratch  []*motion.VmdMotion
 	timeStepsScratch       []float32
+	fixedTimeStepsScratch  []float32
+	maxSubStepsScratch     []int
 	iconImage              image.Image
 	viewerProfileActive    bool
 	viewerProfilePath      string
@@ -506,22 +509,44 @@ func (vl *ViewerManager) processFrame(elapsed float64) (bool, float32) {
 	}
 	vl.timeStepsScratch = timeSteps
 
+	fixedTimeSteps := vl.fixedTimeStepsScratch
+	if cap(fixedTimeSteps) < len(vl.windowList) {
+		fixedTimeSteps = make([]float32, len(vl.windowList))
+	} else {
+		fixedTimeSteps = fixedTimeSteps[:len(vl.windowList)]
+		clear(fixedTimeSteps)
+	}
+	vl.fixedTimeStepsScratch = fixedTimeSteps
+
+	maxSubStepsByWindow := vl.maxSubStepsScratch
+	if cap(maxSubStepsByWindow) < len(vl.windowList) {
+		maxSubStepsByWindow = make([]int, len(vl.windowList))
+	} else {
+		maxSubStepsByWindow = maxSubStepsByWindow[:len(vl.windowList)]
+		clear(maxSubStepsByWindow)
+	}
+	vl.maxSubStepsScratch = maxSubStepsByWindow
+
 	// 再生中はフレーム落ちを抑えるため、経過時間を制限する。
 	frameElapsed := float32(elapsed)
 	if !frameDrop {
 		frameElapsed = float32(mmath.Clamped(elapsed, 0, float64(defaultSpf)))
 	}
+	physicsTimeStep := resolvePhysicsTimeStep(elapsed, frameElapsed, playing, frameDrop)
+	playbackDeltaFrame := mtime.SecondsToFrames(mtime.Seconds(frameElapsed), defaultFps)
 
 	// 物理刻みと描画タイミングを決定する。
 	needRender := false
 	frameInterval := vl.shared.FrameInterval()
 	for i := range vl.windowList {
 		physicsWorldMotions[i] = resolvePhysicsWorldMotion(vl.shared, i)
-		if frameDrop {
-			timeSteps[i] = float32(elapsed)
-		} else {
-			timeSteps[i] = resolveFixedTimeStep(physicsWorldMotions[i], motion.Frame(frame))
-		}
+		fixedTimeSteps[i] = resolveFixedTimeStep(physicsWorldMotions[i], motion.Frame(frame))
+		configuredMaxSubSteps := resolveMaxSubSteps(physicsWorldMotions[i], motion.Frame(frame))
+		timeSteps[i], maxSubStepsByWindow[i] = resolvePhysicsStepConfig(
+			physicsTimeStep,
+			fixedTimeSteps[i],
+			configuredMaxSubSteps,
+		)
 		if frameInterval <= 0 || mtime.Seconds(frameElapsed) >= frameInterval {
 			needRender = true
 		}
@@ -554,15 +579,13 @@ func (vl *ViewerManager) processFrame(elapsed float64) (bool, float32) {
 	physicsDeltasByWindow := make([][]*delta.PhysicsDeltas, len(vl.windowList))
 	for i, vw := range vl.windowList {
 		physicsDeltasByWindow[i] = vl.buildPhysicsDeltas(vw, motion.Frame(frame))
-		maxSubSteps := resolveMaxSubSteps(physicsWorldMotions[i], motion.Frame(frame))
-		fixedTimeStep := resolveFixedTimeStep(physicsWorldMotions[i], motion.Frame(frame))
 		vl.deformWindow(
 			vw,
 			vw.motions,
 			motion.Frame(frame),
 			timeSteps[i],
-			maxSubSteps,
-			fixedTimeStep,
+			maxSubStepsByWindow[i],
+			fixedTimeSteps[i],
 			physicsResetType,
 			physicsDeltasByWindow[i],
 		)
@@ -576,14 +599,12 @@ func (vl *ViewerManager) processFrame(elapsed float64) (bool, float32) {
 		// リセット種別がある場合は物理ワールドを再構築する。
 		for i, vw := range vl.windowList {
 			gravity := resolveGravity(physicsWorldMotions[i], motion.Frame(frame))
-			maxSubSteps := resolveMaxSubSteps(physicsWorldMotions[i], motion.Frame(frame))
-			fixedTimeStep := resolveFixedTimeStep(physicsWorldMotions[i], motion.Frame(frame))
 			vl.resetPhysics(
 				vw,
 				motion.Frame(frame),
 				timeSteps[i],
-				maxSubSteps,
-				fixedTimeStep,
+				maxSubStepsByWindow[i],
+				fixedTimeSteps[i],
 				gravity,
 				physicsResetType,
 				physicsDeltasByWindow[i],
@@ -594,7 +615,7 @@ func (vl *ViewerManager) processFrame(elapsed float64) (bool, float32) {
 
 	if playing && !vl.shared.IsClosed() {
 		// 再生中はフレームを進め、ループ時にリセット種別を追加する。
-		deltaFrame := mtime.SecondsToFrames(mtime.Seconds(frameElapsed), defaultFps)
+		deltaFrame := playbackDeltaFrame
 		if deltaFrame > 0 {
 			frame += deltaFrame
 			if maxFrame > 0 && frame > maxFrame {
@@ -732,6 +753,45 @@ func resolveFixedTimeStep(physicsWorldMotion *motion.VmdMotion, frame motion.Fra
 		return float32(1.0 / 60.0)
 	}
 	return float32(fixedFrame.FixedTimeStep())
+}
+
+// resolvePhysicsTimeStep は再生状態に応じた物理ステップ秒を返す。
+func resolvePhysicsTimeStep(elapsed float64, frameElapsed float32, playing bool, frameDrop bool) float32 {
+	if playing && !frameDrop {
+		if frameElapsed > 0 {
+			return frameElapsed
+		}
+		return 0
+	}
+	return float32(elapsed)
+}
+
+// resolvePhysicsStepConfig は物理ステップとサブステップ上限を整える。
+func resolvePhysicsStepConfig(timeStep, fixedTimeStep float32, configuredMaxSubSteps int) (float32, int) {
+	maxSubSteps := configuredMaxSubSteps
+	if maxSubSteps <= 0 {
+		maxSubSteps = performance.DefaultMaxSubSteps
+	}
+	if timeStep <= 0 || fixedTimeStep <= 0 {
+		return max(timeStep, 0), maxSubSteps
+	}
+	requiredSubSteps := resolveRequiredSubSteps(timeStep, fixedTimeStep)
+	if requiredSubSteps > maxSubSteps {
+		maxSubSteps = min(requiredSubSteps, maxAdaptivePhysicsSubSteps)
+		maxSimulatedTime := fixedTimeStep * float32(maxSubSteps)
+		if timeStep > maxSimulatedTime {
+			timeStep = maxSimulatedTime
+		}
+	}
+	return timeStep, maxSubSteps
+}
+
+// resolveRequiredSubSteps はtimeStep消化に必要なサブステップ数を返す。
+func resolveRequiredSubSteps(timeStep, fixedTimeStep float32) int {
+	if timeStep <= 0 || fixedTimeStep <= 0 {
+		return 0
+	}
+	return int(math.Ceil(float64(timeStep / fixedTimeStep)))
 }
 
 // resolveGravity は重力ベクトルを取得する。
@@ -890,17 +950,23 @@ func (vl *ViewerManager) logPhysicsPlaybackFrame(
 	if vl != nil && vl.shared != nil {
 		playing = vl.shared.HasFlag(state.STATE_FLAG_PLAYING)
 	}
+	deltaFrame := mtime.SecondsToFrames(mtime.Seconds(timeStep), defaultFps)
+	requiredSubSteps := resolveRequiredSubSteps(timeStep, fixedTimeStep)
+	subStepSaturated := maxSubSteps > 0 && requiredSubSteps > maxSubSteps
 	stepPlanned := vw.physics != nil && (physicsEnabled || resetType != state.PHYSICS_RESET_TYPE_NONE)
 	logger.Verbose(
 		logging.VERBOSE_INDEX_PHYSICS,
-		"物理追跡フレーム: window=%d frame=%v playing=%t physicsEnabled=%t resetType=%d timeStep=%.6f maxSubSteps=%d fixedTimeStep=%.6f stepPlanned=%t models=%d",
+		"物理追跡フレーム: window=%d frame=%v playing=%t physicsEnabled=%t resetType=%d timeStep=%.6f deltaFrame=%.6f maxSubSteps=%d requiredSubSteps=%d subStepSaturated=%t fixedTimeStep=%.6f stepPlanned=%t models=%d",
 		vw.windowIndex,
 		frame,
 		playing,
 		physicsEnabled,
 		resetType,
 		timeStep,
+		deltaFrame,
 		maxSubSteps,
+		requiredSubSteps,
+		subStepSaturated,
 		fixedTimeStep,
 		stepPlanned,
 		len(vw.modelRenderers),
