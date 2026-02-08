@@ -16,6 +16,7 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_audio"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
+	"github.com/miu200521358/mlib_go/pkg/adapter/io_csv"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_model"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_model/pmd"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_model/pmx"
@@ -52,8 +53,11 @@ type FilePicker struct {
 	historyPushButton *walk.PushButton
 	historyDialog     *walk.Dialog
 	historyListBox    *walk.ListBox
+	historyValues     []string
 	prevPath          string
 	prevPathHash      string
+	requestedEnabled  bool
+	loading           bool
 	onPathChanged     func(*controller.ControlWindow, io_common.IFileReader, string)
 }
 
@@ -198,6 +202,23 @@ func NewAudioLoadFilePicker(userConfig iCommonUserConfig, translator i18n.II18n,
 	)
 }
 
+// NewCsvLoadFilePicker はCSV読み込み用のFilePickerを生成する。
+func NewCsvLoadFilePicker(userConfig iCommonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
+	return newFilePicker(
+		userConfig,
+		translator,
+		historyKey,
+		title,
+		tooltip,
+		onPathChanged,
+		[]filterExtension{
+			{extension: "*.csv", description: "Csv Files (*.csv)"},
+			{extension: "*.*", description: "All Files (*.*)"},
+		},
+		io_csv.NewCsvRepository(),
+	)
+}
+
 // NewPmxSaveFilePicker はPMX保存用のFilePickerを生成する。
 func NewPmxSaveFilePicker(userConfig iCommonUserConfig, translator i18n.II18n, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
 	return newFilePicker(
@@ -249,6 +270,23 @@ func NewVmdSaveFilePicker(userConfig iCommonUserConfig, translator i18n.II18n, t
 	)
 }
 
+// NewCsvSaveFilePicker はCSV保存用のFilePickerを生成する。
+func NewCsvSaveFilePicker(userConfig iCommonUserConfig, translator i18n.II18n, title string, tooltip string, onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string)) *FilePicker {
+	return newFilePicker(
+		userConfig,
+		translator,
+		"",
+		title,
+		tooltip,
+		onPathChanged,
+		[]filterExtension{
+			{extension: "*.csv", description: "Csv Files (*.csv)"},
+			{extension: "*.*", description: "All Files (*.*)"},
+		},
+		io_csv.NewCsvRepository(),
+	)
+}
+
 // newFilePicker はFilePickerを生成する。
 func newFilePicker(userConfig iCommonUserConfig, translator i18n.II18n, historyKey string, title string, tooltip string,
 	onPathChanged func(*controller.ControlWindow, io_common.IFileReader, string), filterExtensions []filterExtension, repository io_common.IFileReader) *FilePicker {
@@ -261,6 +299,7 @@ func newFilePicker(userConfig iCommonUserConfig, translator i18n.II18n, historyK
 		onPathChanged:    onPathChanged,
 		userConfig:       userConfig,
 		translator:       translator,
+		requestedEnabled: true,
 	}
 	return picker
 }
@@ -285,6 +324,27 @@ func (fp *FilePicker) SetEnabledInPlaying(playing bool) {
 
 // SetEnabled はウィジェットの有効状態を設定する。
 func (fp *FilePicker) SetEnabled(enabled bool) {
+	if fp == nil {
+		return
+	}
+	fp.requestedEnabled = enabled
+	fp.applyEnabledState()
+}
+
+// SetPath は外部からパスを設定し、読み込み処理を実行する。
+func (fp *FilePicker) SetPath(path string) {
+	if fp == nil || fp.loading {
+		return
+	}
+	fp.handlePathChanged(path)
+}
+
+// applyEnabledState は要求状態と読み込み状態からUIの有効状態を反映する。
+func (fp *FilePicker) applyEnabledState() {
+	if fp == nil {
+		return
+	}
+	enabled := fp.requestedEnabled && !fp.loading
 	if fp.pathEdit != nil {
 		fp.pathEdit.SetEnabled(enabled)
 	}
@@ -297,15 +357,43 @@ func (fp *FilePicker) SetEnabled(enabled bool) {
 	if fp.historyPushButton != nil {
 		fp.historyPushButton.SetEnabled(enabled)
 	}
+	fp.setHistoryDialogEnabled(enabled)
 	fp.applyNameEditBackground()
 }
 
-// SetPath は外部からパスを設定し、読み込み処理を実行する。
-func (fp *FilePicker) SetPath(path string) {
-	if fp == nil {
+// setHistoryDialogEnabled は履歴ダイアログの有効状態を更新する。
+func (fp *FilePicker) setHistoryDialogEnabled(enabled bool) {
+	if fp == nil || fp.historyDialog == nil {
 		return
 	}
-	fp.handlePathChanged(path)
+	if fp.historyDialog.IsDisposed() {
+		fp.historyDialog = nil
+		fp.historyListBox = nil
+		return
+	}
+	fp.historyDialog.SetEnabled(enabled)
+	if fp.historyListBox != nil {
+		fp.historyListBox.SetEnabled(enabled)
+	}
+}
+
+// beginLoading は読み込み中状態へ遷移する。
+func (fp *FilePicker) beginLoading() bool {
+	if fp == nil || fp.loading {
+		return false
+	}
+	fp.loading = true
+	fp.applyEnabledState()
+	return true
+}
+
+// endLoading は読み込み中状態を解除する。
+func (fp *FilePicker) endLoading() {
+	if fp == nil || !fp.loading {
+		return
+	}
+	fp.loading = false
+	fp.applyEnabledState()
 }
 
 // applyNameEditBackground は表示名欄の背景色を再設定する。
@@ -411,6 +499,9 @@ func (fp *FilePicker) Widgets() declarative.Composite {
 
 // onOpenClicked は開くボタンの処理を行う。
 func (fp *FilePicker) onOpenClicked() {
+	if fp == nil || fp.loading {
+		return
+	}
 	if fp.historyKey == "" {
 		fp.showSaveDialog()
 		return
@@ -487,6 +578,9 @@ func (fp *FilePicker) handleDropFiles(files []string) {
 
 // applyPath はパス更新処理を共通化する。
 func (fp *FilePicker) applyPath(path string, allowSame bool) {
+	if fp == nil || fp.loading {
+		return
+	}
 	cleaned := fp.cleanPath(path)
 	if cleaned == "" {
 		return
@@ -499,6 +593,10 @@ func (fp *FilePicker) applyPath(path string, allowSame bool) {
 	if fp.historyKey != "" && fp.repository != nil && !fp.repository.CanLoad(cleaned) {
 		return
 	}
+	if !fp.beginLoading() {
+		return
+	}
+	defer fp.endLoading()
 
 	fp.prevPath = cleaned
 	fp.prevPathHash = currentHash
@@ -566,7 +664,7 @@ func (fp *FilePicker) resolveInitialDir() string {
 
 // openHistoryDialog は履歴ダイアログを表示する。
 func (fp *FilePicker) openHistoryDialog() {
-	if fp.historyKey == "" {
+	if fp.historyKey == "" || fp.loading || !fp.requestedEnabled {
 		return
 	}
 	values := []string{}
@@ -579,13 +677,15 @@ func (fp *FilePicker) openHistoryDialog() {
 			values = []string{}
 		}
 	}
+	fp.historyValues = append([]string{}, values...)
 
 	if fp.historyDialog != nil {
 		if fp.historyDialog.IsDisposed() {
 			fp.historyDialog = nil
 			fp.historyListBox = nil
 		} else {
-			fp.historyListBox.SetModel(values)
+			fp.historyListBox.SetModel(fp.historyValues)
+			fp.setHistoryDialogEnabled(fp.requestedEnabled && !fp.loading)
 			fp.historyDialog.Show()
 			return
 		}
@@ -611,16 +711,17 @@ func (fp *FilePicker) openHistoryDialog() {
 		Children: []declarative.Widget{
 			declarative.ListBox{
 				AssignTo: &lb,
-				Model:    values,
+				Model:    fp.historyValues,
 				MinSize:  declarative.Size{Width: 800, Height: 400},
 				OnItemActivated: func() {
 					idx := lb.CurrentIndex()
-					if idx < 0 || idx >= len(values) {
+					selectedPath, ok := fp.historyPathByIndex(idx)
+					if !ok {
 						return
 					}
 					push.SetEnabled(true)
-					fp.handlePathConfirmed(values[idx])
 					dlg.Accept()
+					fp.handlePathConfirmed(selectedPath)
 				},
 			}, declarative.Composite{
 				Layout: declarative.HBox{},
@@ -651,9 +752,23 @@ func (fp *FilePicker) openHistoryDialog() {
 	fp.historyDialog.Disposing().Attach(func() {
 		fp.historyDialog = nil
 		fp.historyListBox = nil
+		fp.historyValues = nil
 	})
 	push.SetEnabled(true)
+	fp.setHistoryDialogEnabled(fp.requestedEnabled && !fp.loading)
 	fp.historyDialog.Show()
+}
+
+// historyPathByIndex は履歴インデックスに対応するパスを返す。
+func (fp *FilePicker) historyPathByIndex(index int) (string, bool) {
+	if fp == nil || index < 0 || index >= len(fp.historyValues) {
+		return "", false
+	}
+	path := fp.cleanPath(fp.historyValues[index])
+	if path == "" {
+		return "", false
+	}
+	return path, true
 }
 
 // cleanPath は入力パスを正規化する。
