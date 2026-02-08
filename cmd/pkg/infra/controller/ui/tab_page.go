@@ -28,7 +28,8 @@ import (
 // NewTabPages はサンプル用のタブページ群を生成する。
 func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices, audioPlayer audio_api.IAudioPlayer) []declarative.TabPage {
 	var fileTab *walk.TabPage
-	var csvTab *walk.TabPage
+	var csvOutputTab *walk.TabPage
+	var csvInputTab *walk.TabPage
 	var materialTab *walk.TabPage
 	var vertexTab *walk.TabPage
 
@@ -150,27 +151,27 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 		},
 	)
 
-	csvMotionPath := ""
+	csvOutputMotionPath := ""
 	csvOutputPath := ""
-	csvMotionRepository := io_common.IFileReader(nil)
-	var csvSavePicker *widget.FilePicker
+	csvOutputMotionRepository := io_common.IFileReader(nil)
+	var csvOutputSavePicker *widget.FilePicker
 
-	csvMotionPicker := widget.NewVmdVpdLoadFilePicker(
+	csvOutputMotionPicker := widget.NewVmdVpdLoadFilePicker(
 		userConfig,
 		translator,
 		config.UserConfigKeyVmdHistory,
 		i18n.TranslateOrMark(translator, messages.LabelCsvMotionFile),
 		i18n.TranslateOrMark(translator, messages.LabelCsvMotionFileTip),
 		func(cw *controller.ControlWindow, rep io_common.IFileReader, path string) {
-			csvMotionRepository = rep
-			csvMotionPath = path
-			if csvSavePicker != nil && path != "" {
-				csvSavePicker.SetPath(buildMotionCsvDefaultOutputPath(path))
+			csvOutputMotionRepository = rep
+			csvOutputMotionPath = path
+			if csvOutputSavePicker != nil && path != "" {
+				csvOutputSavePicker.SetPath(buildMotionCsvDefaultOutputPath(path))
 			}
 		},
 	)
 
-	csvSavePicker = widget.NewCsvSaveFilePicker(
+	csvOutputSavePicker = widget.NewCsvSaveFilePicker(
 		userConfig,
 		translator,
 		i18n.TranslateOrMark(translator, messages.LabelCsvOutputFile),
@@ -180,16 +181,56 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 		},
 	)
 
-	csvSaveButton := widget.NewMPushButton()
-	csvSaveButton.SetLabel(i18n.TranslateOrMark(translator, messages.LabelCsvSave))
-	csvSaveButton.SetMinSize(declarative.Size{Width: 90})
-	csvSaveButton.SetOnClicked(func(cw *controller.ControlWindow) {
-		saveMotionCsv(logger, translator, csvMotionRepository, csvMotionPath, csvOutputPath)
+	csvOutputSaveButton := widget.NewMPushButton()
+	csvOutputSaveButton.SetLabel(i18n.TranslateOrMark(translator, messages.LabelCsvSave))
+	csvOutputSaveButton.SetMinSize(declarative.Size{Width: 90})
+	csvOutputSaveButton.SetOnClicked(func(cw *controller.ControlWindow) {
+		saveMotionCsv(logger, translator, csvOutputMotionRepository, csvOutputMotionPath, csvOutputPath)
 	})
 
-	mWidgets.Widgets = append(mWidgets.Widgets, player, pmxLoad11Picker, vmdLoad11Picker, cameraVmdLoad11Picker,
-		pmxLoad21Picker, vmdLoad21Picker, cameraVmdLoad21Picker, csvMotionPicker, csvSavePicker, csvSaveButton,
-		materialView, allMaterialButton, invertMaterialButton, vertexView)
+	csvInputPath := ""
+	csvInputOutputPath := ""
+	var csvInputMotionSavePicker *widget.FilePicker
+
+	csvInputPicker := widget.NewCsvLoadFilePicker(
+		userConfig,
+		translator,
+		config.UserConfigKeyCsvHistory,
+		i18n.TranslateOrMark(translator, messages.LabelCsvInputFile),
+		i18n.TranslateOrMark(translator, messages.LabelCsvInputFileTip),
+		func(cw *controller.ControlWindow, rep io_common.IFileReader, path string) {
+			csvInputPath = path
+			if csvInputMotionSavePicker != nil && path != "" {
+				csvInputMotionSavePicker.SetPath(buildMotionVmdDefaultOutputPath(path))
+			}
+		},
+	)
+
+	csvInputMotionSavePicker = widget.NewVmdSaveFilePicker(
+		userConfig,
+		translator,
+		i18n.TranslateOrMark(translator, messages.LabelCsvInputMotionOutputFile),
+		i18n.TranslateOrMark(translator, messages.LabelCsvInputMotionOutputFileTip),
+		func(cw *controller.ControlWindow, rep io_common.IFileReader, path string) {
+			csvInputOutputPath = path
+		},
+	)
+
+	csvInputSaveButton := widget.NewMPushButton()
+	csvInputSaveButton.SetLabel(i18n.TranslateOrMark(translator, messages.LabelCsvInputSave))
+	csvInputSaveButton.SetMinSize(declarative.Size{Width: 90})
+	csvInputSaveButton.SetOnClicked(func(cw *controller.ControlWindow) {
+		saveMotionByCsv(logger, translator, csvInputPath, csvInputOutputPath)
+	})
+
+	mWidgets.Widgets = append(
+		mWidgets.Widgets,
+		player, pmxLoad11Picker, vmdLoad11Picker, cameraVmdLoad11Picker,
+		pmxLoad21Picker, vmdLoad21Picker, cameraVmdLoad21Picker,
+		csvOutputMotionPicker, csvOutputSavePicker, csvOutputSaveButton,
+		csvInputPicker, csvInputMotionSavePicker, csvInputSaveButton,
+		materialView, allMaterialButton, invertMaterialButton, vertexView,
+	)
 
 	mWidgets.SetOnLoaded(func() {
 		if mWidgets == nil || mWidgets.Window() == nil {
@@ -232,9 +273,9 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 		},
 	}
 
-	csvTabPage := declarative.TabPage{
+	csvOutputTabPage := declarative.TabPage{
 		Title:    i18n.TranslateOrMark(translator, messages.LabelCsv),
-		AssignTo: &csvTab,
+		AssignTo: &csvOutputTab,
 		Layout:   declarative.VBox{},
 		Background: declarative.SolidColorBrush{
 			Color: controller.ColorTabBackground,
@@ -243,10 +284,31 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 			declarative.Composite{
 				Layout: declarative.VBox{},
 				Children: []declarative.Widget{
-					csvMotionPicker.Widgets(),
-					csvSavePicker.Widgets(),
+					csvOutputMotionPicker.Widgets(),
+					csvOutputSavePicker.Widgets(),
 					declarative.VSeparator{},
-					csvSaveButton.Widgets(),
+					csvOutputSaveButton.Widgets(),
+					declarative.VSpacer{},
+				},
+			},
+		},
+	}
+
+	csvInputTabPage := declarative.TabPage{
+		Title:    i18n.TranslateOrMark(translator, messages.LabelCsvInput),
+		AssignTo: &csvInputTab,
+		Layout:   declarative.VBox{},
+		Background: declarative.SolidColorBrush{
+			Color: controller.ColorTabBackground,
+		},
+		Children: []declarative.Widget{
+			declarative.Composite{
+				Layout: declarative.VBox{},
+				Children: []declarative.Widget{
+					csvInputPicker.Widgets(),
+					csvInputMotionSavePicker.Widgets(),
+					declarative.VSeparator{},
+					csvInputSaveButton.Widgets(),
 					declarative.VSpacer{},
 				},
 			},
@@ -293,7 +355,7 @@ func NewTabPages(mWidgets *controller.MWidgets, baseServices base.IBaseServices,
 		},
 	}
 
-	return []declarative.TabPage{fileTabPage, csvTabPage, materialTabPage, vertexTabPage}
+	return []declarative.TabPage{fileTabPage, csvOutputTabPage, csvInputTabPage, materialTabPage, vertexTabPage}
 }
 
 // NewTabPage はサンプル用のタブページを生成する。
@@ -420,6 +482,47 @@ func saveMotionCsv(logger logging.ILogger, translator i18n.II18n, rep io_common.
 
 	completedMessage := fmt.Sprintf(
 		i18n.TranslateOrMark(translator, messages.MessageMotionCsvExportCompletedDetail),
+		outputPath,
+	)
+	if logger != nil {
+		logger.Info("%s", completedMessage)
+	}
+	controller.Beep()
+}
+
+// saveMotionByCsv は指定CSVをVMDへ保存する。
+func saveMotionByCsv(logger logging.ILogger, translator i18n.II18n, sourcePath string, outputPath string) {
+	if sourcePath == "" {
+		logErrorTitle(
+			logger,
+			i18n.TranslateOrMark(translator, messages.MessageMotionCsvImportFailed),
+			errors.New(i18n.TranslateOrMark(translator, messages.MessageMotionCsvImportSourceRequired)),
+		)
+		return
+	}
+	if outputPath == "" {
+		logErrorTitle(
+			logger,
+			i18n.TranslateOrMark(translator, messages.MessageMotionCsvImportFailed),
+			errors.New(i18n.TranslateOrMark(translator, messages.MessageMotionCsvImportOutputRequired)),
+		)
+		return
+	}
+	if err := importMotionCsvByInputPath(sourcePath, outputPath); err != nil {
+		if errors.Is(err, errMotionCsvNoData) {
+			logErrorTitle(
+				logger,
+				i18n.TranslateOrMark(translator, messages.MessageMotionCsvImportFailed),
+				errors.New(i18n.TranslateOrMark(translator, messages.MessageMotionCsvImportNoData)),
+			)
+			return
+		}
+		logErrorTitle(logger, i18n.TranslateOrMark(translator, messages.MessageMotionCsvImportFailed), err)
+		return
+	}
+
+	completedMessage := fmt.Sprintf(
+		i18n.TranslateOrMark(translator, messages.MessageMotionCsvImportCompletedDetail),
 		outputPath,
 	)
 	if logger != nil {

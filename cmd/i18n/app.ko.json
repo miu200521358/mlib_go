@@ -96,8 +96,8 @@
         "translation": "카메라 모션 파일을 선택하세요"
     },
     {
-        "id": "CSV",
-        "translation": "CSV"
+        "id": "CSV出力",
+        "translation": "CSV 출력"
     },
     {
         "id": "CSV変換モーションファイル",
@@ -120,12 +120,48 @@
         "translation": "CSV 저장"
     },
     {
+        "id": "CSV入力",
+        "translation": "CSV 입력"
+    },
+    {
+        "id": "CSV入力ファイル",
+        "translation": "CSV 입력 파일"
+    },
+    {
+        "id": "CSV入力対象ファイルを選択してください",
+        "translation": "CSV 입력 대상 파일을 선택하세요"
+    },
+    {
+        "id": "モーション出力ファイル",
+        "translation": "모션 출력 파일"
+    },
+    {
+        "id": "モーション出力ファイルパスを入力もしくは選択してください",
+        "translation": "모션 출력 파일 경로를 입력하거나 선택하세요"
+    },
+    {
+        "id": "VMD保存",
+        "translation": "VMD 저장"
+    },
+    {
         "id": "モーションデータが見つかりません",
         "translation": "모션 데이터를 찾을 수 없습니다"
     },
     {
         "id": "モーションCSV出力が完了しました: %s",
         "translation": "모션 CSV 내보내기가 완료되었습니다: %s"
+    },
+    {
+        "id": "モーションCSV入力失敗",
+        "translation": "모션 CSV 가져오기 실패"
+    },
+    {
+        "id": "入力CSVに有効なモーションデータが見つかりません",
+        "translation": "입력 CSV에서 유효한 모션 데이터를 찾을 수 없습니다"
+    },
+    {
+        "id": "モーションCSV入力が完了しました: %s",
+        "translation": "모션 CSV 가져오기가 완료되었습니다: %s"
     },
     {
         "id": "材質ビュー",

@@ -96,8 +96,8 @@
         "translation": "Please select a camera motion file"
     },
     {
-        "id": "CSV",
-        "translation": "CSV"
+        "id": "CSV出力",
+        "translation": "CSV Output"
     },
     {
         "id": "CSV変換モーションファイル",
@@ -120,12 +120,48 @@
         "translation": "Save CSV"
     },
     {
+        "id": "CSV入力",
+        "translation": "CSV Input"
+    },
+    {
+        "id": "CSV入力ファイル",
+        "translation": "CSV Input File"
+    },
+    {
+        "id": "CSV入力対象ファイルを選択してください",
+        "translation": "Please select the CSV input file"
+    },
+    {
+        "id": "モーション出力ファイル",
+        "translation": "Motion Output File"
+    },
+    {
+        "id": "モーション出力ファイルパスを入力もしくは選択してください",
+        "translation": "Please enter or select the motion output file path"
+    },
+    {
+        "id": "VMD保存",
+        "translation": "Save VMD"
+    },
+    {
         "id": "モーションデータが見つかりません",
         "translation": "Motion data was not found"
     },
     {
         "id": "モーションCSV出力が完了しました: %s",
         "translation": "Motion CSV export has completed: %s"
+    },
+    {
+        "id": "モーションCSV入力失敗",
+        "translation": "Motion CSV import failed"
+    },
+    {
+        "id": "入力CSVに有効なモーションデータが見つかりません",
+        "translation": "No valid motion data was found in the input CSV"
+    },
+    {
+        "id": "モーションCSV入力が完了しました: %s",
+        "translation": "Motion CSV import has completed: %s"
     },
     {
         "id": "材質ビュー",
