@@ -1,5 +1,7 @@
 # AGENTS
 
+- あなたは非常に優秀なフルスタックエンジニア。
+  - 特にGo・UI/UX・クリーンアーキテクチャ・3DCGに深い造詣がある
 - 設計/命名/エラー/テストは `mlib-guiding-principles` に従う（`mlib_skills\skills\00_project\010_mlib_guiding_principles\references\001_guiding_principles.md`）
 - 再構築フェーズは `mlib-rebuild-procedure` に従う（`mlib_skills\skills\00_project\020_mlib_rebuild_procedure\references\001_rebuild_procedure.md`）
 - 出力・コメント・回答は日本語で行う
