@@ -746,14 +746,15 @@ func (fp *FilePicker) openHistoryDialog() {
 						Text:     fp.t(messages.FilePickerKey006),
 						Enabled:  true,
 						OnClicked: func() {
+							if !fp.applyHistoryDialogSelection(historyDialogActionConfirm, lb.CurrentIndex()) {
+								return
+							}
 							dlg.Accept()
-							fp.applyHistoryDialogSelection(historyDialogActionConfirm, lb.CurrentIndex())
 						},
 					},
 					declarative.PushButton{
 						Text: fp.t(messages.FilePickerKey007),
 						OnClicked: func() {
-							fp.applyHistoryDialogSelection(historyDialogActionCancel, lb.CurrentIndex())
 							dlg.Cancel()
 						},
 					},
