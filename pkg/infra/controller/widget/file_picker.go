@@ -732,14 +732,11 @@ func (fp *FilePicker) openHistoryDialog() {
 				Model:    fp.historyValues,
 				MinSize:  declarative.Size{Width: 800, Height: 400},
 				OnItemActivated: func() {
-					idx := lb.CurrentIndex()
-					selectedPath, ok := fp.historyPathByIndex(idx)
-					if !ok {
+					if !fp.applyHistoryDialogSelection(historyDialogActionConfirm, lb.CurrentIndex()) {
 						return
 					}
 					push.SetEnabled(true)
 					dlg.Accept()
-					fp.handlePathConfirmed(selectedPath)
 				},
 			}, declarative.Composite{
 				Layout: declarative.HBox{},
@@ -750,11 +747,13 @@ func (fp *FilePicker) openHistoryDialog() {
 						Enabled:  true,
 						OnClicked: func() {
 							dlg.Accept()
+							fp.applyHistoryDialogSelection(historyDialogActionConfirm, lb.CurrentIndex())
 						},
 					},
 					declarative.PushButton{
 						Text: fp.t(messages.FilePickerKey007),
 						OnClicked: func() {
+							fp.applyHistoryDialogSelection(historyDialogActionCancel, lb.CurrentIndex())
 							dlg.Cancel()
 						},
 					},
@@ -775,6 +774,16 @@ func (fp *FilePicker) openHistoryDialog() {
 	push.SetEnabled(true)
 	fp.setHistoryDialogEnabled(fp.requestedEnabled && !fp.loading)
 	fp.historyDialog.Show()
+}
+
+// applyHistoryDialogSelection は履歴ダイアログの操作に応じて選択中パスを反映する。
+func (fp *FilePicker) applyHistoryDialogSelection(action historyDialogAction, index int) bool {
+	selectedPath, ok := resolveHistoryDialogSelection(action, index, fp.historyPathByIndex)
+	if !ok {
+		return false
+	}
+	fp.handlePathConfirmed(selectedPath)
+	return true
 }
 
 // historyPathByIndex は履歴インデックスに対応するパスを返す。
