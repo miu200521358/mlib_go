@@ -41,19 +41,24 @@ const (
 
 // ViewerManager はビューワー全体を管理する。
 type ViewerManager struct {
-	shared                 *state.SharedState
-	appConfig              *config.AppConfig
-	userConfig             config.IUserConfig
-	windowList             []*ViewerWindow
-	physicsMotionsScratch  []*motion.VmdMotion
-	timeStepsScratch       []float32
-	fixedTimeStepsScratch  []float32
-	maxSubStepsScratch     []int
-	iconImage              image.Image
-	modelLoadProfileActive bool
-	modelLoadProfilePath   string
-	modelLoadProfileFile   *os.File
-	modelLoadProfileCount  int
+	shared                  *state.SharedState
+	appConfig               *config.AppConfig
+	userConfig              config.IUserConfig
+	windowList              []*ViewerWindow
+	physicsMotionsScratch   []*motion.VmdMotion
+	timeStepsScratch        []float32
+	fixedTimeStepsScratch   []float32
+	maxSubStepsScratch      []int
+	iconImage               image.Image
+	modelLoadProfileActive  bool
+	modelLoadProfilePath    string
+	modelLoadProfileFile    *os.File
+	modelLoadProfileCount   int
+	physicsTraceInitialized bool
+	physicsTracePrevFrame   motion.Frame
+	physicsTracePrevReset   state.PhysicsResetType
+	physicsTracePrevPlaying bool
+	physicsTracePrevEnabled bool
 }
 
 // NewViewerManager はViewerManagerを生成する。
@@ -773,7 +778,16 @@ func (vl *ViewerManager) deformWindow(
 	ikDebugFactory := vl.ikDebugFactory()
 	physicsEnabled := vl.shared.HasFlag(state.STATE_FLAG_PHYSICS_ENABLED)
 	playing := vl.shared.HasFlag(state.STATE_FLAG_PLAYING)
-	vl.logPhysicsPlaybackFrame(vw, frame, timeStep, maxSubSteps, fixedTimeStep, resetType, physicsEnabled, playing)
+	frameStateLogged := vl.logPhysicsHypothesisFrameState(
+		vw,
+		frame,
+		timeStep,
+		maxSubSteps,
+		fixedTimeStep,
+		resetType,
+		physicsEnabled,
+		playing,
+	)
 
 	for i, renderer := range vw.modelRenderers {
 		if renderer == nil || renderer.Model == nil {
@@ -804,6 +818,16 @@ func (vl *ViewerManager) deformWindow(
 		if vw.physics != nil && resetType == state.PHYSICS_RESET_TYPE_CONTINUE_FRAME && physicsDelta != nil {
 			vw.physics.UpdatePhysicsSelectively(i, renderer.Model, physicsDelta)
 		}
+		vl.logPhysicsHypothesisBuildPlan(
+			vw,
+			i,
+			frame,
+			renderer.Model,
+			vw.vmdDeltas[i],
+			resetType,
+			physicsEnabled,
+			frameStateLogged,
+		)
 		vw.vmdDeltas[i] = mdeform.BuildForPhysics(
 			vw.physics,
 			i,
@@ -818,7 +842,6 @@ func (vl *ViewerManager) deformWindow(
 	if shouldStepPhysics(vw.physics != nil, physicsEnabled, resetType) {
 		vl.updateWind(vw, frame)
 		vw.physics.StepSimulation(timeStep, maxSubSteps, fixedTimeStep)
-		vl.logPhysicsContactDiagnostics(vw, frame, timeStep, maxSubSteps, fixedTimeStep)
 	}
 
 	for i, renderer := range vw.modelRenderers {
@@ -842,8 +865,8 @@ func (vl *ViewerManager) deformWindow(
 	}
 }
 
-// logPhysicsPlaybackFrame は再生中フレーム挙動の確認用に物理実行条件を出力する。
-func (vl *ViewerManager) logPhysicsPlaybackFrame(
+// logPhysicsHypothesisFrameState は仮説検証向けにフレーム単位の物理入力状態を出力する。
+func (vl *ViewerManager) logPhysicsHypothesisFrameState(
 	vw *ViewerWindow,
 	frame motion.Frame,
 	timeStep float32,
@@ -852,32 +875,66 @@ func (vl *ViewerManager) logPhysicsPlaybackFrame(
 	resetType state.PhysicsResetType,
 	physicsEnabled bool,
 	playing bool,
-) {
+) bool {
 	logger := logging.DefaultLogger()
 	if vw == nil || vw.windowIndex != 0 || logger == nil || !logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
-		return
+		return false
 	}
+
+	prevFrame := frame
+	prevReset := resetType
+	prevPlaying := playing
+	prevEnabled := physicsEnabled
+	if vl.physicsTraceInitialized {
+		prevFrame = vl.physicsTracePrevFrame
+		prevReset = vl.physicsTracePrevReset
+		prevPlaying = vl.physicsTracePrevPlaying
+		prevEnabled = vl.physicsTracePrevEnabled
+	}
+
+	shouldLog := !vl.physicsTraceInitialized ||
+		frame != prevFrame ||
+		resetType != prevReset ||
+		playing != prevPlaying ||
+		physicsEnabled != prevEnabled
+	if !shouldLog {
+		return false
+	}
+
+	vl.physicsTraceInitialized = true
+	vl.physicsTracePrevFrame = frame
+	vl.physicsTracePrevReset = resetType
+	vl.physicsTracePrevPlaying = playing
+	vl.physicsTracePrevEnabled = physicsEnabled
+
+	directSeek := !playing && frame != prevFrame
+	frameDelta := frame - prevFrame
 	deltaFrame := mtime.SecondsToFrames(mtime.Seconds(timeStep), defaultFps)
 	requiredSubSteps := resolveRequiredSubSteps(timeStep, fixedTimeStep)
-	subStepSaturated := maxSubSteps > 0 && requiredSubSteps > maxSubSteps
 	stepPlanned := shouldStepPhysics(vw.physics != nil, physicsEnabled, resetType)
 	logger.Verbose(
 		logging.VERBOSE_INDEX_PHYSICS,
-		"物理追跡フレーム: window=%d frame=%v playing=%t physicsEnabled=%t resetType=%d timeStep=%.6f deltaFrame=%.6f maxSubSteps=%d requiredSubSteps=%d subStepSaturated=%t fixedTimeStep=%.6f stepPlanned=%t models=%d",
+		"物理検証フレーム: window=%d frame=%v prevFrame=%v frameDelta=%v directSeek=%t playing=%t prevPlaying=%t physicsEnabled=%t prevPhysicsEnabled=%t resetType=%d prevResetType=%d timeStep=%.6f deltaFrame=%.6f maxSubSteps=%d requiredSubSteps=%d fixedTimeStep=%.6f stepPlanned=%t models=%d",
 		vw.windowIndex,
 		frame,
+		prevFrame,
+		frameDelta,
+		directSeek,
 		playing,
+		prevPlaying,
 		physicsEnabled,
+		prevEnabled,
 		resetType,
+		prevReset,
 		timeStep,
 		deltaFrame,
 		maxSubSteps,
 		requiredSubSteps,
-		subStepSaturated,
 		fixedTimeStep,
 		stepPlanned,
 		len(vw.modelRenderers),
 	)
+	return true
 }
 
 // shouldStepPhysics は現在フレームで物理ステップを実行すべきかを返す。
@@ -892,96 +949,129 @@ func shouldStepPhysics(
 	return physicsEnabled || resetType != state.PHYSICS_RESET_TYPE_NONE
 }
 
-// logPhysicsContactDiagnostics は接触/侵入/速度の検証サマリを出力する。
-func (vl *ViewerManager) logPhysicsContactDiagnostics(
+// physicsBuildPlanSummary は BuildForPhysics 前に算出する同期計画サマリを保持する。
+type physicsBuildPlanSummary struct {
+	TotalRigidBodies            int
+	StaticRigidBodies           int
+	DynamicRigidBodies          int
+	DynamicBoneRigidBodies      int
+	ResolvableRigidBodies       int
+	ResolvableWithBoneDelta     int
+	SkippedByMissingBone        int
+	SkippedByMissingBoneDelta   int
+	SyncByResetCount            int
+	SyncByStaticCount           int
+	DynamicBoneSyncCandidateCnt int
+}
+
+// collectPhysicsBuildPlanSummary は BuildForPhysics の前提となる同期計画サマリを算出する。
+func collectPhysicsBuildPlanSummary(
+	modelData *model.PmxModel,
+	vmdDeltas *delta.VmdDeltas,
+	resetType state.PhysicsResetType,
+	physicsEnabled bool,
+) physicsBuildPlanSummary {
+	summary := physicsBuildPlanSummary{}
+	if modelData == nil || modelData.RigidBodies == nil {
+		return summary
+	}
+
+	var boneDeltas *delta.BoneDeltas
+	if vmdDeltas != nil {
+		boneDeltas = vmdDeltas.Bones
+	}
+
+	for _, rigidBody := range modelData.RigidBodies.Values() {
+		if rigidBody == nil {
+			continue
+		}
+		summary.TotalRigidBodies++
+		switch rigidBody.PhysicsType {
+		case model.PHYSICS_TYPE_STATIC:
+			summary.StaticRigidBodies++
+		case model.PHYSICS_TYPE_DYNAMIC_BONE:
+			summary.DynamicBoneRigidBodies++
+		case model.PHYSICS_TYPE_DYNAMIC:
+			summary.DynamicRigidBodies++
+		}
+
+		bone := resolveRigidBodyBoneForViewer(modelData, rigidBody)
+		if bone == nil {
+			summary.SkippedByMissingBone++
+			continue
+		}
+		summary.ResolvableRigidBodies++
+
+		if boneDeltas == nil || !boneDeltas.Contains(bone.Index()) || boneDeltas.Get(bone.Index()) == nil {
+			summary.SkippedByMissingBoneDelta++
+			continue
+		}
+		summary.ResolvableWithBoneDelta++
+
+		if resetType != state.PHYSICS_RESET_TYPE_NONE {
+			summary.SyncByResetCount++
+			continue
+		}
+		if !physicsEnabled {
+			continue
+		}
+		switch rigidBody.PhysicsType {
+		case model.PHYSICS_TYPE_STATIC:
+			summary.SyncByStaticCount++
+		case model.PHYSICS_TYPE_DYNAMIC_BONE:
+			summary.DynamicBoneSyncCandidateCnt++
+		}
+	}
+
+	return summary
+}
+
+// resolveRigidBodyBoneForViewer は剛体に紐づくボーンを返す。
+func resolveRigidBodyBoneForViewer(modelData *model.PmxModel, rigidBody *model.RigidBody) *model.Bone {
+	if modelData == nil || modelData.Bones == nil || rigidBody == nil || rigidBody.BoneIndex < 0 {
+		return nil
+	}
+	bone, err := modelData.Bones.Get(rigidBody.BoneIndex)
+	if err != nil {
+		return nil
+	}
+	return bone
+}
+
+// logPhysicsHypothesisBuildPlan は BuildForPhysics 前の同期計画サマリを出力する。
+func (vl *ViewerManager) logPhysicsHypothesisBuildPlan(
 	vw *ViewerWindow,
+	modelIndex int,
 	frame motion.Frame,
-	timeStep float32,
-	maxSubSteps int,
-	fixedTimeStep float32,
+	modelData *model.PmxModel,
+	vmdDeltas *delta.VmdDeltas,
+	resetType state.PhysicsResetType,
+	physicsEnabled bool,
+	frameStateLogged bool,
 ) {
 	logger := logging.DefaultLogger()
-	if vw == nil || vw.windowIndex != 0 || vw.physics == nil || logger == nil || !logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
+	if !frameStateLogged || vw == nil || vw.windowIndex != 0 || logger == nil || !logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
 		return
 	}
-	diagnostics := vw.physics.CollectStepDiagnostics()
-	deltaFrame := mtime.SecondsToFrames(mtime.Seconds(timeStep), defaultFps)
-	requiredSubSteps := resolveRequiredSubSteps(timeStep, fixedTimeStep)
+	summary := collectPhysicsBuildPlanSummary(modelData, vmdDeltas, resetType, physicsEnabled)
 	logger.Verbose(
 		logging.VERBOSE_INDEX_PHYSICS,
-		"物理追跡接触: window=%d frame=%v timeStep=%.6f deltaFrame=%.6f maxSubSteps=%d requiredSubSteps=%d manifolds=%d activeManifolds=%d contacts=%d penetrations=%d maxPenetration=%.6f pairPenetration=%d:%d-%d:%d maxImpulse=%.6f pairImpulse=%d:%d-%d:%d dynamicBodies=%d maxLinear=%.6f bodyLinear=%d:%d maxAngular=%.6f bodyAngular=%d:%d solverIterations=%d solverSplitImpulse=%d solverSplitPen=%.6f solverErp2=%.6f solverGlobalCfm=%.6f solverMode=%d",
+		"物理検証同期計画: window=%d frame=%v model=%d total=%d static=%d dynamic=%d dynamicBone=%d resolvable=%d withBoneDelta=%d skipNoBone=%d skipNoBoneDelta=%d syncByReset=%d syncByStatic=%d dynamicBoneSyncCandidate=%d",
 		vw.windowIndex,
 		frame,
-		timeStep,
-		deltaFrame,
-		maxSubSteps,
-		requiredSubSteps,
-		diagnostics.ManifoldCount,
-		diagnostics.ActiveManifoldCount,
-		diagnostics.ContactPointCount,
-		diagnostics.PenetrationPointCount,
-		diagnostics.MaxPenetrationDepth,
-		diagnostics.MaxPenetrationModelIndexA,
-		diagnostics.MaxPenetrationRigidBodyIndexA,
-		diagnostics.MaxPenetrationModelIndexB,
-		diagnostics.MaxPenetrationRigidBodyIndexB,
-		diagnostics.MaxAppliedImpulse,
-		diagnostics.MaxImpulseModelIndexA,
-		diagnostics.MaxImpulseRigidBodyIndexA,
-		diagnostics.MaxImpulseModelIndexB,
-		diagnostics.MaxImpulseRigidBodyIndexB,
-		diagnostics.DynamicBodyCount,
-		diagnostics.MaxLinearSpeed,
-		diagnostics.MaxLinearSpeedModelIndex,
-		diagnostics.MaxLinearSpeedRigidBodyIndex,
-		diagnostics.MaxAngularSpeed,
-		diagnostics.MaxAngularSpeedModelIndex,
-		diagnostics.MaxAngularSpeedRigidBodyIndex,
-		diagnostics.SolverNumIterations,
-		diagnostics.SolverSplitImpulse,
-		diagnostics.SolverSplitPenetration,
-		diagnostics.SolverErp2,
-		diagnostics.SolverGlobalCfm,
-		diagnostics.SolverMode,
+		modelIndex,
+		summary.TotalRigidBodies,
+		summary.StaticRigidBodies,
+		summary.DynamicRigidBodies,
+		summary.DynamicBoneRigidBodies,
+		summary.ResolvableRigidBodies,
+		summary.ResolvableWithBoneDelta,
+		summary.SkippedByMissingBone,
+		summary.SkippedByMissingBoneDelta,
+		summary.SyncByResetCount,
+		summary.SyncByStaticCount,
+		summary.DynamicBoneSyncCandidateCnt,
 	)
-
-	trackedRigidBodyDiagnostics := vw.physics.CollectTrackedRigidBodyDiagnostics(diagnostics)
-	for _, trackedRigidBodyDiagnostic := range trackedRigidBodyDiagnostics {
-		logger.Verbose(
-			logging.VERBOSE_INDEX_PHYSICS,
-			"物理追跡剛体: window=%d frame=%v reason=%s model=%d rigidBody=%d resolved=%t hasApplied=%t physicsType=%d shape=%d group=%d mask=%d baseMass=%.6f appliedMass=%.6f appliedSize=%.6f,%.6f,%.6f appliedPos=%.6f,%.6f,%.6f linearDamping=%.6f angularDamping=%.6f restitution=%.6f friction=%.6f collisionFlags=%d activationState=%d ccdMotionThreshold=%.6f ccdRadius=%.6f contactThreshold=%.6f linearSpeed=%.6f angularSpeed=%.6f",
-			vw.windowIndex,
-			frame,
-			trackedRigidBodyDiagnostic.Reason,
-			trackedRigidBodyDiagnostic.ModelIndex,
-			trackedRigidBodyDiagnostic.RigidBodyIndex,
-			trackedRigidBodyDiagnostic.Resolved,
-			trackedRigidBodyDiagnostic.HasAppliedParams,
-			trackedRigidBodyDiagnostic.PhysicsType,
-			trackedRigidBodyDiagnostic.Shape,
-			trackedRigidBodyDiagnostic.Group,
-			trackedRigidBodyDiagnostic.Mask,
-			trackedRigidBodyDiagnostic.BaseMass,
-			trackedRigidBodyDiagnostic.AppliedMass,
-			trackedRigidBodyDiagnostic.AppliedSize.X,
-			trackedRigidBodyDiagnostic.AppliedSize.Y,
-			trackedRigidBodyDiagnostic.AppliedSize.Z,
-			trackedRigidBodyDiagnostic.AppliedPosition.X,
-			trackedRigidBodyDiagnostic.AppliedPosition.Y,
-			trackedRigidBodyDiagnostic.AppliedPosition.Z,
-			trackedRigidBodyDiagnostic.LinearDamping,
-			trackedRigidBodyDiagnostic.AngularDamping,
-			trackedRigidBodyDiagnostic.Restitution,
-			trackedRigidBodyDiagnostic.Friction,
-			trackedRigidBodyDiagnostic.CollisionFlags,
-			trackedRigidBodyDiagnostic.ActivationState,
-			trackedRigidBodyDiagnostic.CcdMotionThreshold,
-			trackedRigidBodyDiagnostic.CcdSweptSphereRadius,
-			trackedRigidBodyDiagnostic.ContactProcessingThreshold,
-			trackedRigidBodyDiagnostic.LinearSpeed,
-			trackedRigidBodyDiagnostic.AngularSpeed,
-		)
-	}
 }
 
 // ikDebugFactory はIKデバッグ用ファクトリを返す。

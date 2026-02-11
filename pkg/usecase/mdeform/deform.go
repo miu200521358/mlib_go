@@ -2,11 +2,14 @@
 package mdeform
 
 import (
+	"sort"
+
 	"github.com/miu200521358/mlib_go/pkg/domain/deform"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"github.com/miu200521358/mlib_go/pkg/shared/state"
 	"github.com/miu200521358/mlib_go/pkg/usecase/port/physics"
 )
@@ -42,6 +45,13 @@ type DeformOptions struct {
 	EnableIK        bool
 	EnablePhysics   bool
 	IkDebugFactory  deform.IIkDebugFactory
+}
+
+// rigidBodyBoneMatrixResult は剛体結果から得たボーン行列反映情報を保持する。
+type rigidBodyBoneMatrixResult struct {
+	rigidBody    *model.RigidBody
+	bone         *model.Bone
+	globalMatrix mmath.Mat4
 }
 
 // BuildBeforePhysics は物理前の変形差分を構築する。
@@ -184,27 +194,12 @@ func BuildAfterPhysics(
 		return deltas
 	}
 	deltas.SetFrame(frame)
+	reflectedCount := 0
 	if core != nil && physicsEnabled {
 		// 動的剛体の結果をボーンへ反映する。
-		if modelData.RigidBodies != nil {
-			rigidBodies := modelData.RigidBodies.Values()
-			for _, rigidBody := range rigidBodies {
-				if rigidBody == nil || rigidBody.PhysicsType == model.PHYSICS_TYPE_STATIC {
-					continue
-				}
-				bone := boneByRigidBody(modelData, rigidBody)
-				if bone == nil {
-					continue
-				}
-				mat := core.GetRigidBodyBoneMatrix(modelIndex, rigidBody)
-				if mat == nil {
-					continue
-				}
-				parent := deltas.Bones.Get(bone.ParentIndex)
-				bd := delta.NewBoneDeltaByGlobalMatrix(bone, frame, *mat, parent)
-				deltas.Bones.Update(bd)
-			}
-		}
+		results := collectRigidBodyBoneMatrices(core, modelIndex, modelData)
+		order := resolveRigidBodyBoneUpdateOrder(results)
+		reflectedCount = applyRigidBodyBoneMatrices(deltas, frame, results, order)
 	}
 
 	// 物理後変形対象ボーンを再計算して反映する。
@@ -218,7 +213,142 @@ func BuildAfterPhysics(
 	if len(afterIndexes) > 0 {
 		deform.ApplyGlobalMatricesWithIndexes(modelData, deltas.Bones, afterIndexes)
 	}
+	logAfterPhysicsBoneSummary(modelIndex, frame, reflectedCount, len(afterIndexes))
 	return deltas
+}
+
+// collectRigidBodyBoneMatrices は剛体シミュレーション結果のボーン行列を収集する。
+func collectRigidBodyBoneMatrices(
+	core physics.IPhysicsCore,
+	modelIndex int,
+	modelData *model.PmxModel,
+) map[int]rigidBodyBoneMatrixResult {
+	results := map[int]rigidBodyBoneMatrixResult{}
+	if core == nil || modelData == nil || modelData.RigidBodies == nil {
+		return results
+	}
+	for _, rigidBody := range modelData.RigidBodies.Values() {
+		if rigidBody == nil || rigidBody.PhysicsType == model.PHYSICS_TYPE_STATIC {
+			continue
+		}
+		bone := boneByRigidBody(modelData, rigidBody)
+		if bone == nil {
+			continue
+		}
+		mat := core.GetRigidBodyBoneMatrix(modelIndex, rigidBody)
+		if mat == nil {
+			continue
+		}
+		// 同一ボーンへ複数剛体が紐づく場合は従来互換で後勝ちにする。
+		results[bone.Index()] = rigidBodyBoneMatrixResult{
+			rigidBody:    rigidBody,
+			bone:         bone,
+			globalMatrix: *mat,
+		}
+	}
+	return results
+}
+
+// resolveRigidBodyBoneUpdateOrder は親剛体ボーンを先行させる反映順を返す。
+func resolveRigidBodyBoneUpdateOrder(results map[int]rigidBodyBoneMatrixResult) []int {
+	if len(results) == 0 {
+		return nil
+	}
+	keys := make([]int, 0, len(results))
+	for index := range results {
+		keys = append(keys, index)
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		left := results[keys[i]].bone
+		right := results[keys[j]].bone
+		leftLayer := 0
+		rightLayer := 0
+		if left != nil {
+			leftLayer = left.Layer
+		}
+		if right != nil {
+			rightLayer = right.Layer
+		}
+		if leftLayer == rightLayer {
+			return keys[i] < keys[j]
+		}
+		return leftLayer < rightLayer
+	})
+
+	order := make([]int, 0, len(keys))
+	visited := map[int]bool{}
+	visiting := map[int]bool{}
+	var visit func(index int)
+	visit = func(index int) {
+		if visited[index] {
+			return
+		}
+		if visiting[index] {
+			return
+		}
+		visiting[index] = true
+		result, ok := results[index]
+		if ok && result.bone != nil {
+			if _, exists := results[result.bone.ParentIndex]; exists {
+				visit(result.bone.ParentIndex)
+			}
+		}
+		visiting[index] = false
+		visited[index] = true
+		order = append(order, index)
+	}
+	for _, index := range keys {
+		visit(index)
+	}
+	return order
+}
+
+// applyRigidBodyBoneMatrices は反映順に従って剛体行列をボーン差分へ適用する。
+func applyRigidBodyBoneMatrices(
+	deltas *delta.VmdDeltas,
+	frame motion.Frame,
+	results map[int]rigidBodyBoneMatrixResult,
+	order []int,
+) int {
+	if deltas == nil || deltas.Bones == nil || len(results) == 0 || len(order) == 0 {
+		return 0
+	}
+	reflectedCount := 0
+	for _, boneIndex := range order {
+		result, ok := results[boneIndex]
+		if !ok || result.bone == nil {
+			continue
+		}
+		parent := deltas.Bones.Get(result.bone.ParentIndex)
+		bd := delta.NewBoneDeltaByGlobalMatrix(result.bone, frame, result.globalMatrix, parent)
+		if bd == nil {
+			continue
+		}
+		deltas.Bones.Update(bd)
+		reflectedCount++
+	}
+	return reflectedCount
+}
+
+// logAfterPhysicsBoneSummary は物理後ボーン計算の集計をVerbose出力する。
+func logAfterPhysicsBoneSummary(
+	modelIndex int,
+	frame motion.Frame,
+	reflectedCount int,
+	afterBoneCount int,
+) {
+	logger := logging.DefaultLogger()
+	if logger == nil || !logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
+		return
+	}
+	logger.Verbose(
+		logging.VERBOSE_INDEX_PHYSICS,
+		"物理後ボーン集計: model=%d frame=%v reflectedRigidBones=%d afterPhysicsBones=%d",
+		modelIndex,
+		frame,
+		reflectedCount,
+		afterBoneCount,
+	)
 }
 
 // ApplySkinning はスキニングを適用して頂点/法線を更新する。

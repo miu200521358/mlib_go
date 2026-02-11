@@ -125,7 +125,7 @@ func (mp *MotionPlayer) Widgets() declarative.Composite {
 						return
 					}
 					frame := mtime.Frame(mp.frameEdit.Value())
-					mp.window.SetFrame(frame)
+					mp.applyFrameSeek(frame, "number")
 					mp.frameSlider.ChangeValue(int(mp.frameEdit.Value()))
 					mp.seekAudioByFrame(frame)
 				},
@@ -143,7 +143,7 @@ func (mp *MotionPlayer) Widgets() declarative.Composite {
 						return
 					}
 					frame := mtime.Frame(mp.frameSlider.Value())
-					mp.window.SetFrame(frame)
+					mp.applyFrameSeek(frame, "slider")
 					mp.frameEdit.ChangeValue(float64(mp.frameSlider.Value()))
 					mp.seekAudioByFrame(frame)
 				},
@@ -372,6 +372,46 @@ func (mp *MotionPlayer) syncWhilePlaying() {
 			break
 		}
 	}
+}
+
+// applyFrameSeek は停止中のフレーム直接移動を適用して物理検証ログを出力する。
+func (mp *MotionPlayer) applyFrameSeek(frame mtime.Frame, source string) {
+	if mp == nil || mp.window == nil {
+		return
+	}
+	prevFrame := mp.window.Frame()
+	prevResetType := mp.window.PhysicsResetType()
+	physicsEnabled := mp.window.PhysicsEnabled()
+	mp.window.SetFrame(frame)
+	nextResetType := mp.window.PhysicsResetType()
+	mp.logPhysicsSeekVerbose(source, prevFrame, frame, prevResetType, nextResetType, physicsEnabled)
+}
+
+// logPhysicsSeekVerbose は停止中のフレーム直接移動に関する物理検証ログを出力する。
+func (mp *MotionPlayer) logPhysicsSeekVerbose(
+	source string,
+	prevFrame mtime.Frame,
+	nextFrame mtime.Frame,
+	prevResetType state.PhysicsResetType,
+	nextResetType state.PhysicsResetType,
+	physicsEnabled bool,
+) {
+	logger := logging.DefaultLogger()
+	if logger == nil || !logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
+		return
+	}
+	frameDelta := nextFrame - prevFrame
+	logger.Verbose(
+		logging.VERBOSE_INDEX_PHYSICS,
+		"物理検証シーク: source=%s prevFrame=%v nextFrame=%v frameDelta=%v physicsEnabled=%t resetBefore=%d resetAfter=%d",
+		source,
+		prevFrame,
+		nextFrame,
+		frameDelta,
+		physicsEnabled,
+		prevResetType,
+		nextResetType,
+	)
 }
 
 // currentFrame は現在フレームを取得する。
