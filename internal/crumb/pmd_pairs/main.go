@@ -35,8 +35,7 @@ func main() {
 
 // parseArgs はCLI引数を解析して保存先パスを返す。
 func parseArgs() string {
-	defaultOut := filepath.Join("internal", "crumb", "pmd_pairs", "pmd_pairs_materials.pmx")
-	outPath := flag.String("output", defaultOut, "保存先PMXパス")
+	outPath := flag.String("output", "pmd_pairs_materials.pmx", "保存先PMXパス")
 	flag.Parse()
 	return *outPath
 }
