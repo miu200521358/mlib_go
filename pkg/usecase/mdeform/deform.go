@@ -2,10 +2,12 @@
 package mdeform
 
 import (
+	"math"
 	"sort"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/deform"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"

@@ -8,6 +8,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 )
 
 // BuildPhysicsDeltas は剛体/ジョイント差分を生成する。
