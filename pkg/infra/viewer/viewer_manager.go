@@ -41,22 +41,24 @@ const (
 
 // ViewerManager はビューワー全体を管理する。
 type ViewerManager struct {
-	shared                 *state.SharedState
-	appConfig              *config.AppConfig
-	userConfig             config.IUserConfig
-	windowList             []*ViewerWindow
-	physicsMotionsScratch  []*motion.VmdMotion
-	timeStepsScratch       []float32
-	fixedTimeStepsScratch  []float32
-	maxSubStepsScratch     []int
-	iconImage              image.Image
-	viewerProfileActive    bool
-	viewerProfilePath      string
-	viewerProfileFile      *os.File
-	modelLoadProfileActive bool
-	modelLoadProfilePath   string
-	modelLoadProfileFile   *os.File
-	modelLoadProfileCount  int
+	shared                  *state.SharedState
+	appConfig               *config.AppConfig
+	userConfig              config.IUserConfig
+	windowList              []*ViewerWindow
+	physicsMotionsScratch   []*motion.VmdMotion
+	timeStepsScratch        []float32
+	fixedTimeStepsScratch   []float32
+	maxSubStepsScratch      []int
+	iconImage               image.Image
+	modelLoadProfileActive  bool
+	modelLoadProfilePath    string
+	modelLoadProfileFile    *os.File
+	modelLoadProfileCount   int
+	physicsTraceInitialized bool
+	physicsTracePrevFrame   motion.Frame
+	physicsTracePrevReset   state.PhysicsResetType
+	physicsTracePrevPlaying bool
+	physicsTracePrevEnabled bool
 }
 
 // NewViewerManager はViewerManagerを生成する。
@@ -127,7 +129,6 @@ func (vl *ViewerManager) Run() {
 		vl.handleWindowFocus()
 		vl.handleVSync()
 		glfw.PollEvents()
-		vl.updateViewerProfile(logging.DefaultLogger())
 
 		frameTime := glfw.GetTime()
 		elapsed := frameTime - prevTime
@@ -160,69 +161,7 @@ func (vl *ViewerManager) Run() {
 		vw.Destroy()
 	}
 	vl.stopModelLoadProfile(logging.DefaultLogger())
-	vl.stopViewerProfile(logging.DefaultLogger())
 	glfw.Terminate()
-}
-
-// updateViewerProfile はビューワー冗長ログの状態に応じてpprofを開始/終了する。
-func (vl *ViewerManager) updateViewerProfile(logger logging.ILogger) {
-	if logger == nil {
-		return
-	}
-	enabled := logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER)
-	if enabled && !vl.viewerProfileActive {
-		vl.startViewerProfile(logger)
-		return
-	}
-	if !enabled && vl.viewerProfileActive {
-		vl.stopViewerProfile(logger)
-	}
-}
-
-// startViewerProfile はCPUプロファイルの計測を開始する。
-func (vl *ViewerManager) startViewerProfile(logger logging.ILogger) {
-	if vl.viewerProfileActive {
-		return
-	}
-	file, displayPath, fullPath, err := vl.createViewerProfileFile()
-	if err != nil {
-		if logger != nil {
-			logger.Error("ビューワープロファイル開始に失敗しました: %s", sanitizeProfileError(err, fullPath, displayPath))
-		}
-		return
-	}
-	if err := pprof.StartCPUProfile(file); err != nil {
-		_ = file.Close()
-		if logger != nil {
-			logger.Error("ビューワープロファイル開始に失敗しました: %s", sanitizeProfileError(err, fullPath, displayPath))
-		}
-		return
-	}
-	vl.viewerProfileFile = file
-	vl.viewerProfilePath = displayPath
-	vl.viewerProfileActive = true
-	if logger != nil {
-		logger.Info("ビューワープロファイル開始: %s", displayPath)
-	}
-}
-
-// stopViewerProfile はCPUプロファイルの計測を終了する。
-func (vl *ViewerManager) stopViewerProfile(logger logging.ILogger) {
-	if !vl.viewerProfileActive {
-		return
-	}
-	pprof.StopCPUProfile()
-	if vl.viewerProfileFile != nil {
-		if err := vl.viewerProfileFile.Close(); err != nil && logger != nil {
-			logger.Error("ビューワープロファイル保存に失敗しました: %s", sanitizeProfileError(err, "", vl.viewerProfilePath))
-		}
-		vl.viewerProfileFile = nil
-	}
-	if logger != nil && vl.viewerProfilePath != "" {
-		logger.Info("ビューワープロファイル出力: %s", vl.viewerProfilePath)
-	}
-	vl.viewerProfileActive = false
-	vl.viewerProfilePath = ""
 }
 
 // startModelLoadProfile はモデル読み込み用のCPUプロファイル計測を開始する。
@@ -237,12 +176,6 @@ func (vl *ViewerManager) startModelLoadProfile(logger logging.ILogger) bool {
 			vl.modelLoadProfileCount++
 		}
 		return true
-	}
-	if vl.viewerProfileActive {
-		if logger != nil {
-			logger.Warn("モデル読み込みプロファイル開始に失敗しました: ビューワープロファイルが有効です (%s)", vl.viewerProfilePath)
-		}
-		return false
 	}
 	file, displayPath, fullPath, err := vl.createModelLoadProfileFile()
 	if err != nil {
@@ -302,25 +235,6 @@ func (vl *ViewerManager) stopModelLoadProfile(logger logging.ILogger) {
 	vl.modelLoadProfileCount = 0
 }
 
-// createViewerProfileFile はpprof出力用ファイルを生成する。
-func (vl *ViewerManager) createViewerProfileFile() (*os.File, string, string, error) {
-	dir, displayDir, err := vl.resolveViewerProfileDir()
-	if err != nil {
-		return nil, "", "", err
-	}
-	if err := os.MkdirAll(dir, 0o755); err != nil {
-		return nil, "", "", err
-	}
-	fileName := viewerProfileFileName()
-	fullPath := filepath.Join(dir, fileName)
-	file, err := os.Create(fullPath)
-	if err != nil {
-		return nil, "", fullPath, err
-	}
-	displayPath := filepath.Join(displayDir, fileName)
-	return file, displayPath, fullPath, nil
-}
-
 // createModelLoadProfileFile はモデル読み込み用のpprof出力ファイルを生成する。
 func (vl *ViewerManager) createModelLoadProfileFile() (*os.File, string, string, error) {
 	dir, displayDir, err := vl.resolveViewerProfileDir()
@@ -349,12 +263,6 @@ func (vl *ViewerManager) resolveViewerProfileDir() (string, string, error) {
 		}
 	}
 	return "logs", "logs", nil
-}
-
-// viewerProfileFileName はpprof出力ファイル名を生成する。
-func viewerProfileFileName() string {
-	stamp := time.Now().Format("20060102_150405")
-	return fmt.Sprintf("pprof_viewer_%s.pprof", stamp)
 }
 
 // modelLoadProfileFileName はモデル読み込み用のpprofファイル名を生成する。
@@ -969,8 +877,8 @@ func (vl *ViewerManager) logPhysicsHypothesisFrameState(
 	playing bool,
 ) bool {
 	logger := logging.DefaultLogger()
-	if vw == nil || logger == nil || !logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
-		return
+	if vw == nil || vw.windowIndex != 0 || logger == nil || !logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
+		return false
 	}
 
 	prevFrame := frame
@@ -1027,6 +935,143 @@ func (vl *ViewerManager) logPhysicsHypothesisFrameState(
 		len(vw.modelRenderers),
 	)
 	return true
+}
+
+// shouldStepPhysics は現在フレームで物理ステップを実行すべきかを返す。
+func shouldStepPhysics(
+	hasPhysicsWorld bool,
+	physicsEnabled bool,
+	resetType state.PhysicsResetType,
+) bool {
+	if !hasPhysicsWorld {
+		return false
+	}
+	return physicsEnabled || resetType != state.PHYSICS_RESET_TYPE_NONE
+}
+
+// physicsBuildPlanSummary は BuildForPhysics 前に算出する同期計画サマリを保持する。
+type physicsBuildPlanSummary struct {
+	TotalRigidBodies            int
+	StaticRigidBodies           int
+	DynamicRigidBodies          int
+	DynamicBoneRigidBodies      int
+	ResolvableRigidBodies       int
+	ResolvableWithBoneDelta     int
+	SkippedByMissingBone        int
+	SkippedByMissingBoneDelta   int
+	SyncByResetCount            int
+	SyncByStaticCount           int
+	DynamicBoneSyncCandidateCnt int
+}
+
+// collectPhysicsBuildPlanSummary は BuildForPhysics の前提となる同期計画サマリを算出する。
+func collectPhysicsBuildPlanSummary(
+	modelData *model.PmxModel,
+	vmdDeltas *delta.VmdDeltas,
+	resetType state.PhysicsResetType,
+	physicsEnabled bool,
+) physicsBuildPlanSummary {
+	summary := physicsBuildPlanSummary{}
+	if modelData == nil || modelData.RigidBodies == nil {
+		return summary
+	}
+
+	var boneDeltas *delta.BoneDeltas
+	if vmdDeltas != nil {
+		boneDeltas = vmdDeltas.Bones
+	}
+
+	for _, rigidBody := range modelData.RigidBodies.Values() {
+		if rigidBody == nil {
+			continue
+		}
+		summary.TotalRigidBodies++
+		switch rigidBody.PhysicsType {
+		case model.PHYSICS_TYPE_STATIC:
+			summary.StaticRigidBodies++
+		case model.PHYSICS_TYPE_DYNAMIC_BONE:
+			summary.DynamicBoneRigidBodies++
+		case model.PHYSICS_TYPE_DYNAMIC:
+			summary.DynamicRigidBodies++
+		}
+
+		bone := resolveRigidBodyBoneForViewer(modelData, rigidBody)
+		if bone == nil {
+			summary.SkippedByMissingBone++
+			continue
+		}
+		summary.ResolvableRigidBodies++
+
+		if boneDeltas == nil || !boneDeltas.Contains(bone.Index()) || boneDeltas.Get(bone.Index()) == nil {
+			summary.SkippedByMissingBoneDelta++
+			continue
+		}
+		summary.ResolvableWithBoneDelta++
+
+		if resetType != state.PHYSICS_RESET_TYPE_NONE {
+			summary.SyncByResetCount++
+			continue
+		}
+		if !physicsEnabled {
+			continue
+		}
+		switch rigidBody.PhysicsType {
+		case model.PHYSICS_TYPE_STATIC:
+			summary.SyncByStaticCount++
+		case model.PHYSICS_TYPE_DYNAMIC_BONE:
+			summary.DynamicBoneSyncCandidateCnt++
+		}
+	}
+
+	return summary
+}
+
+// resolveRigidBodyBoneForViewer は剛体に紐づくボーンを返す。
+func resolveRigidBodyBoneForViewer(modelData *model.PmxModel, rigidBody *model.RigidBody) *model.Bone {
+	if modelData == nil || modelData.Bones == nil || rigidBody == nil || rigidBody.BoneIndex < 0 {
+		return nil
+	}
+	bone, err := modelData.Bones.Get(rigidBody.BoneIndex)
+	if err != nil {
+		return nil
+	}
+	return bone
+}
+
+// logPhysicsHypothesisBuildPlan は BuildForPhysics 前の同期計画サマリを出力する。
+func (vl *ViewerManager) logPhysicsHypothesisBuildPlan(
+	vw *ViewerWindow,
+	modelIndex int,
+	frame motion.Frame,
+	modelData *model.PmxModel,
+	vmdDeltas *delta.VmdDeltas,
+	resetType state.PhysicsResetType,
+	physicsEnabled bool,
+	frameStateLogged bool,
+) {
+	logger := logging.DefaultLogger()
+	if !frameStateLogged || vw == nil || vw.windowIndex != 0 || logger == nil || !logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
+		return
+	}
+	summary := collectPhysicsBuildPlanSummary(modelData, vmdDeltas, resetType, physicsEnabled)
+	logger.Verbose(
+		logging.VERBOSE_INDEX_PHYSICS,
+		"物理検証同期計画: window=%d frame=%v model=%d total=%d static=%d dynamic=%d dynamicBone=%d resolvable=%d withBoneDelta=%d skipNoBone=%d skipNoBoneDelta=%d syncByReset=%d syncByStatic=%d dynamicBoneSyncCandidate=%d",
+		vw.windowIndex,
+		frame,
+		modelIndex,
+		summary.TotalRigidBodies,
+		summary.StaticRigidBodies,
+		summary.DynamicRigidBodies,
+		summary.DynamicBoneRigidBodies,
+		summary.ResolvableRigidBodies,
+		summary.ResolvableWithBoneDelta,
+		summary.SkippedByMissingBone,
+		summary.SkippedByMissingBoneDelta,
+		summary.SyncByResetCount,
+		summary.SyncByStaticCount,
+		summary.DynamicBoneSyncCandidateCnt,
+	)
 }
 
 // ikDebugFactory はIKデバッグ用ファクトリを返す。

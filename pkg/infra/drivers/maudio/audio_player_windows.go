@@ -12,14 +12,13 @@ import (
 	"sync/atomic"
 	"unsafe"
 
-	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 	"golang.org/x/sys/windows"
 )
 
 const (
-	mciVolumeMin = 0
-	mciVolumeMax = 1000
+	mciVolumeMin                 = 0
+	mciVolumeMax                 = 1000
 	audioFileNotSpecifiedErrorID = "15401"
 )
 
@@ -281,10 +280,9 @@ func (p *AudioPlayer) applyVolumeLocked() error {
 
 // logVerbose は冗長ログを出力する。
 func (p *AudioPlayer) logVerbose(format string, args ...any) {
-	logger := logging.DefaultLogger()
-	if logger != nil && logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
-		logger.Verbose(logging.VERBOSE_INDEX_VIEWER, format, args...)
-	}
+	_ = p
+	_ = format
+	_ = args
 }
 
 // nextAlias はMCIの別名を生成する。
