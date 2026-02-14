@@ -2,12 +2,9 @@
 package state
 
 import (
-	"runtime"
-	"strings"
 	"sync"
 	"sync/atomic"
 
-	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"github.com/miu200521358/mlib_go/pkg/shared/contracts/mtime"
 	"github.com/miu200521358/mlib_go/pkg/shared/contracts/performance"
 	"github.com/miu200521358/mlib_go/pkg/shared/hashable"
@@ -119,15 +116,6 @@ const (
 	SELECTED_VERTEX_DEPTH_MODE_ALL SelectedVertexDepthMode = iota
 	// SELECTED_VERTEX_DEPTH_MODE_FRONT は最前面のみ選択。
 	SELECTED_VERTEX_DEPTH_MODE_FRONT
-)
-
-const (
-	// physicsVerboseFrameSetTarget は SetFrame 呼び出し元追跡の中心フレーム。
-	physicsVerboseFrameSetTarget mtime.Frame = 680
-	// physicsVerboseFrameSetRadius は SetFrame 呼び出し元追跡の対象幅(前後)。
-	physicsVerboseFrameSetRadius mtime.Frame = 1
-	// physicsVerboseFrameSetCallerDepth は呼び出し元スタックの出力段数。
-	physicsVerboseFrameSetCallerDepth = 4
 )
 
 // IStateModel は共有状態で扱うモデルI/F。
@@ -282,7 +270,6 @@ type SharedState struct {
 	physicsModelMotions     [][]atomic.Value
 	windMotions             []atomic.Value
 	physicsResetType        atomic.Int32
-	frameSetSerial          atomic.Uint64
 	screenshotMu            sync.Mutex
 	screenshotSeq           uint64
 	screenshotQueues        [][]ScreenshotRequest
@@ -425,82 +412,7 @@ func (ss *SharedState) Frame() mtime.Frame {
 
 // SetFrame は現在フレームを設定する。
 func (ss *SharedState) SetFrame(frame mtime.Frame) {
-	prev := ss.Frame()
 	ss.frameValue.Store(frame)
-	serial := ss.frameSetSerial.Add(1)
-	ss.logFrameSetVerbose(serial, prev, frame)
-}
-
-// FrameSetSerial は SetFrame 呼び出しの連番を返す。
-func (ss *SharedState) FrameSetSerial() uint64 {
-	return ss.frameSetSerial.Load()
-}
-
-// logFrameSetVerbose はフレーム設定の呼び出し元情報を冗長出力する。
-func (ss *SharedState) logFrameSetVerbose(serial uint64, prev, next mtime.Frame) {
-	logger := logging.DefaultLogger()
-	if logger == nil || !logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
-		return
-	}
-	if !isPhysicsVerboseFrameSetTargetFrame(prev) && !isPhysicsVerboseFrameSetTargetFrame(next) {
-		return
-	}
-	playing := ss.HasFlag(STATE_FLAG_PLAYING)
-	frameDrop := ss.HasFlag(STATE_FLAG_FRAME_DROP) || !playing
-	logger.Verbose(
-		logging.VERBOSE_INDEX_PHYSICS,
-		"フレーム設定: serial=%d prev=%v next=%v delta=%v playing=%t frameDrop=%t caller=%s",
-		serial,
-		prev,
-		next,
-		next-prev,
-		playing,
-		frameDrop,
-		frameSetCallerSummary(physicsVerboseFrameSetCallerDepth),
-	)
-}
-
-// frameSetCallerSummary は SetFrame 呼び出し元の要約を返す。
-func frameSetCallerSummary(maxDepth int) string {
-	if maxDepth <= 0 {
-		maxDepth = 1
-	}
-	pcs := make([]uintptr, 8)
-	n := runtime.Callers(4, pcs)
-	if n <= 0 {
-		return "-"
-	}
-	frames := runtime.CallersFrames(pcs[:n])
-	names := make([]string, 0, maxDepth)
-	for len(names) < maxDepth {
-		frame, more := frames.Next()
-		if frame.Function != "" {
-			names = append(names, shortCallerName(frame.Function))
-		}
-		if !more {
-			break
-		}
-	}
-	if len(names) == 0 {
-		return "-"
-	}
-	return strings.Join(names, " <- ")
-}
-
-// isPhysicsVerboseFrameSetTargetFrame は SetFrame 追跡対象フレームか判定する。
-func isPhysicsVerboseFrameSetTargetFrame(frame mtime.Frame) bool {
-	minFrame := physicsVerboseFrameSetTarget - physicsVerboseFrameSetRadius
-	maxFrame := physicsVerboseFrameSetTarget + physicsVerboseFrameSetRadius
-	return frame >= minFrame && frame <= maxFrame
-}
-
-// shortCallerName は関数名を末尾要素へ短縮して返す。
-func shortCallerName(funcName string) string {
-	lastSlash := strings.LastIndex(funcName, "/")
-	if lastSlash >= 0 && lastSlash+1 < len(funcName) {
-		return funcName[lastSlash+1:]
-	}
-	return funcName
 }
 
 // MaxFrame は最大フレームを返す。

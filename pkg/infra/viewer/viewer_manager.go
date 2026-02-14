@@ -34,30 +34,31 @@ import (
 )
 
 const (
-	defaultFps                              = mtime.DefaultFps
-	physicsInitialFrame        mtime.Frame  = 60
-	maxAdaptivePhysicsSubSteps              = 30
-	physicsVerboseTargetFrame  motion.Frame = 680
-	// pauseFixedTimeStepEnabled は停止中に timeStep を fixedTimeStep へ固定する実験フラグ。
-	pauseFixedTimeStepEnabled = true
+	defaultFps                             = mtime.DefaultFps
+	physicsInitialFrame        mtime.Frame = 60
+	maxAdaptivePhysicsSubSteps             = 30
 )
 
 // ViewerManager はビューワー全体を管理する。
 type ViewerManager struct {
-	shared                   *state.SharedState
-	appConfig                *config.AppConfig
-	userConfig               config.IUserConfig
-	windowList               []*ViewerWindow
-	physicsMotionsScratch    []*motion.VmdMotion
-	timeStepsScratch         []float32
-	fixedTimeStepsScratch    []float32
-	maxSubStepsScratch       []int
-	iconImage                image.Image
-	modelLoadProfileActive   bool
-	modelLoadProfilePath     string
-	modelLoadProfileFile     *os.File
-	modelLoadProfileCount    int
-	physicsVerboseCallSerial uint64
+	shared                  *state.SharedState
+	appConfig               *config.AppConfig
+	userConfig              config.IUserConfig
+	windowList              []*ViewerWindow
+	physicsMotionsScratch   []*motion.VmdMotion
+	timeStepsScratch        []float32
+	fixedTimeStepsScratch   []float32
+	maxSubStepsScratch      []int
+	iconImage               image.Image
+	modelLoadProfileActive  bool
+	modelLoadProfilePath    string
+	modelLoadProfileFile    *os.File
+	modelLoadProfileCount   int
+	physicsTraceInitialized bool
+	physicsTracePrevFrame   motion.Frame
+	physicsTracePrevReset   state.PhysicsResetType
+	physicsTracePrevPlaying bool
+	physicsTracePrevEnabled bool
 }
 
 // NewViewerManager はViewerManagerを生成する。
@@ -439,7 +440,7 @@ func (vl *ViewerManager) processFrame(elapsed float64) (bool, float32) {
 	if !frameDrop {
 		frameElapsed = float32(mmath.Clamped(elapsed, 0, float64(defaultSpf)))
 	}
-	basePhysicsTimeStep := resolvePhysicsTimeStep(elapsed, frameElapsed, playing, frameDrop)
+	physicsTimeStep := resolvePhysicsTimeStep(elapsed, frameElapsed, playing, frameDrop)
 	playbackDeltaFrame := mtime.SecondsToFrames(mtime.Seconds(frameElapsed), defaultFps)
 
 	// 物理刻みと描画タイミングを決定する。
@@ -449,9 +450,8 @@ func (vl *ViewerManager) processFrame(elapsed float64) (bool, float32) {
 		physicsWorldMotions[i] = resolvePhysicsWorldMotion(vl.shared, i)
 		fixedTimeSteps[i] = resolveFixedTimeStep(physicsWorldMotions[i], motion.Frame(frame))
 		configuredMaxSubSteps := resolveMaxSubSteps(physicsWorldMotions[i], motion.Frame(frame))
-		windowTimeStep := resolveWindowPhysicsTimeStep(basePhysicsTimeStep, fixedTimeSteps[i], playing)
 		timeSteps[i], maxSubStepsByWindow[i] = resolvePhysicsStepConfig(
-			windowTimeStep,
+			physicsTimeStep,
 			fixedTimeSteps[i],
 			configuredMaxSubSteps,
 		)
@@ -679,14 +679,6 @@ func resolvePhysicsTimeStep(elapsed float64, frameElapsed float32, playing bool,
 	return float32(mmath.Clamped(elapsed, 0, math.MaxFloat32))
 }
 
-// resolveWindowPhysicsTimeStep はウィンドウごとの物理ステップ秒を返す。
-func resolveWindowPhysicsTimeStep(baseTimeStep, fixedTimeStep float32, playing bool) float32 {
-	if !playing && pauseFixedTimeStepEnabled && fixedTimeStep > 0 {
-		return fixedTimeStep
-	}
-	return baseTimeStep
-}
-
 // resolvePhysicsStepConfig は物理ステップとサブステップ上限を整える。
 func resolvePhysicsStepConfig(timeStep, fixedTimeStep float32, configuredMaxSubSteps int) (float32, int) {
 	maxSubSteps := configuredMaxSubSteps
@@ -782,13 +774,20 @@ func (vl *ViewerManager) deformWindow(
 	if len(motions) == 0 {
 		motions = nil
 	}
-	vl.physicsVerboseCallSerial++
-	callSerial := vl.physicsVerboseCallSerial
 
 	ikDebugFactory := vl.ikDebugFactory()
 	physicsEnabled := vl.shared.HasFlag(state.STATE_FLAG_PHYSICS_ENABLED)
 	playing := vl.shared.HasFlag(state.STATE_FLAG_PLAYING)
-	frameDrop := vl.shared.HasFlag(state.STATE_FLAG_FRAME_DROP) || !playing
+	frameStateLogged := vl.logPhysicsHypothesisFrameState(
+		vw,
+		frame,
+		timeStep,
+		maxSubSteps,
+		fixedTimeStep,
+		resetType,
+		physicsEnabled,
+		playing,
+	)
 
 	for i, renderer := range vw.modelRenderers {
 		if renderer == nil || renderer.Model == nil {
@@ -819,6 +818,16 @@ func (vl *ViewerManager) deformWindow(
 		if vw.physics != nil && resetType == state.PHYSICS_RESET_TYPE_CONTINUE_FRAME && physicsDelta != nil {
 			vw.physics.UpdatePhysicsSelectively(i, renderer.Model, physicsDelta)
 		}
+		vl.logPhysicsHypothesisBuildPlan(
+			vw,
+			i,
+			frame,
+			renderer.Model,
+			vw.vmdDeltas[i],
+			resetType,
+			physicsEnabled,
+			frameStateLogged,
+		)
 		vw.vmdDeltas[i] = mdeform.BuildForPhysics(
 			vw.physics,
 			i,
@@ -826,13 +835,11 @@ func (vl *ViewerManager) deformWindow(
 			vw.vmdDeltas[i],
 			physicsDelta,
 			physicsEnabled,
-			playing,
 			resetType,
 		)
 	}
 
-	stepPhysics := shouldStepPhysics(vw.physics != nil, physicsEnabled, resetType)
-	if stepPhysics {
+	if shouldStepPhysics(vw.physics != nil, physicsEnabled, resetType) {
 		vl.updateWind(vw, frame)
 		vw.physics.StepSimulation(timeStep, maxSubSteps, fixedTimeStep)
 	}
@@ -845,26 +852,6 @@ func (vl *ViewerManager) deformWindow(
 			continue
 		}
 		motionData := motionFromIndex(motions, i)
-		physicsDelta := physicsDeltaFromIndex(physicsDeltas, i)
-		selectiveUpdateApplied := vw.physics != nil && resetType == state.PHYSICS_RESET_TYPE_CONTINUE_FRAME && physicsDelta != nil
-		vl.logAfterPhysicsVerboseContext(
-			frame,
-			callSerial,
-			vw,
-			i,
-			renderer.Model,
-			playing,
-			frameDrop,
-			physicsEnabled,
-			stepPhysics,
-			resetType,
-			selectiveUpdateApplied,
-			motionData != nil,
-			physicsDelta != nil,
-			timeStep,
-			fixedTimeStep,
-			maxSubSteps,
-		)
 		vw.vmdDeltas[i] = mdeform.BuildAfterPhysics(
 			vw.physics,
 			physicsEnabled,
@@ -878,79 +865,76 @@ func (vl *ViewerManager) deformWindow(
 	}
 }
 
-// logAfterPhysicsVerboseContext は物理後変形呼び出しの文脈情報を冗長出力する。
-func (vl *ViewerManager) logAfterPhysicsVerboseContext(
-	frame motion.Frame,
-	callSerial uint64,
+// logPhysicsHypothesisFrameState は仮説検証向けにフレーム単位の物理入力状態を出力する。
+func (vl *ViewerManager) logPhysicsHypothesisFrameState(
 	vw *ViewerWindow,
-	modelIndex int,
-	modelData *model.PmxModel,
-	playing bool,
-	frameDrop bool,
-	physicsEnabled bool,
-	stepPhysics bool,
-	resetType state.PhysicsResetType,
-	selectiveUpdateApplied bool,
-	hasMotion bool,
-	hasPhysicsDelta bool,
+	frame motion.Frame,
 	timeStep float32,
-	fixedTimeStep float32,
 	maxSubSteps int,
-) {
+	fixedTimeStep float32,
+	resetType state.PhysicsResetType,
+	physicsEnabled bool,
+	playing bool,
+) bool {
 	logger := logging.DefaultLogger()
-	if logger == nil || !logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
-		return
-	}
-	if frame != physicsVerboseTargetFrame {
-		return
-	}
-	if !hasPhysicsVerboseTargetBone(modelData) {
-		return
-	}
-	windowIndex := -1
-	if vw != nil {
-		windowIndex = vw.windowIndex
-	}
-	frameSetSerial := uint64(0)
-	if vl != nil && vl.shared != nil {
-		frameSetSerial = vl.shared.FrameSetSerial()
-	}
-	logger.Verbose(
-		logging.VERBOSE_INDEX_PHYSICS,
-		"物理呼出文脈: serial=%d frameSetSerial=%d window=%d model=%d frame=%v playing=%t frameDrop=%t resetType=%d physicsEnabled=%t stepPhysics=%t selectiveUpdate=%t motion=%t physicsDelta=%t timeStep=%.7f fixedTimeStep=%.7f maxSubSteps=%d",
-		callSerial,
-		frameSetSerial,
-		windowIndex,
-		modelIndex,
-		frame,
-		playing,
-		frameDrop,
-		int(resetType),
-		physicsEnabled,
-		stepPhysics,
-		selectiveUpdateApplied,
-		hasMotion,
-		hasPhysicsDelta,
-		timeStep,
-		fixedTimeStep,
-		maxSubSteps,
-	)
-}
-
-// hasPhysicsVerboseTargetBone は物理冗長ログ対象ボーンをモデルが含むか判定する。
-func hasPhysicsVerboseTargetBone(modelData *model.PmxModel) bool {
-	if modelData == nil || modelData.Bones == nil {
+	if vw == nil || vw.windowIndex != 0 || logger == nil || !logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
 		return false
 	}
-	for _, bone := range modelData.Bones.Values() {
-		if bone == nil {
-			continue
-		}
-		if strings.Contains(bone.Name(), "右袖") {
-			return true
-		}
+
+	prevFrame := frame
+	prevReset := resetType
+	prevPlaying := playing
+	prevEnabled := physicsEnabled
+	if vl.physicsTraceInitialized {
+		prevFrame = vl.physicsTracePrevFrame
+		prevReset = vl.physicsTracePrevReset
+		prevPlaying = vl.physicsTracePrevPlaying
+		prevEnabled = vl.physicsTracePrevEnabled
 	}
-	return false
+
+	shouldLog := !vl.physicsTraceInitialized ||
+		frame != prevFrame ||
+		resetType != prevReset ||
+		playing != prevPlaying ||
+		physicsEnabled != prevEnabled
+	if !shouldLog {
+		return false
+	}
+
+	vl.physicsTraceInitialized = true
+	vl.physicsTracePrevFrame = frame
+	vl.physicsTracePrevReset = resetType
+	vl.physicsTracePrevPlaying = playing
+	vl.physicsTracePrevEnabled = physicsEnabled
+
+	directSeek := !playing && frame != prevFrame
+	frameDelta := frame - prevFrame
+	deltaFrame := mtime.SecondsToFrames(mtime.Seconds(timeStep), defaultFps)
+	requiredSubSteps := resolveRequiredSubSteps(timeStep, fixedTimeStep)
+	stepPlanned := shouldStepPhysics(vw.physics != nil, physicsEnabled, resetType)
+	logger.Verbose(
+		logging.VERBOSE_INDEX_PHYSICS,
+		"物理検証フレーム: window=%d frame=%v prevFrame=%v frameDelta=%v directSeek=%t playing=%t prevPlaying=%t physicsEnabled=%t prevPhysicsEnabled=%t resetType=%d prevResetType=%d timeStep=%.6f deltaFrame=%.6f maxSubSteps=%d requiredSubSteps=%d fixedTimeStep=%.6f stepPlanned=%t models=%d",
+		vw.windowIndex,
+		frame,
+		prevFrame,
+		frameDelta,
+		directSeek,
+		playing,
+		prevPlaying,
+		physicsEnabled,
+		prevEnabled,
+		resetType,
+		prevReset,
+		timeStep,
+		deltaFrame,
+		maxSubSteps,
+		requiredSubSteps,
+		fixedTimeStep,
+		stepPlanned,
+		len(vw.modelRenderers),
+	)
+	return true
 }
 
 // shouldStepPhysics は現在フレームで物理ステップを実行すべきかを返す。
@@ -963,6 +947,131 @@ func shouldStepPhysics(
 		return false
 	}
 	return physicsEnabled || resetType != state.PHYSICS_RESET_TYPE_NONE
+}
+
+// physicsBuildPlanSummary は BuildForPhysics 前に算出する同期計画サマリを保持する。
+type physicsBuildPlanSummary struct {
+	TotalRigidBodies            int
+	StaticRigidBodies           int
+	DynamicRigidBodies          int
+	DynamicBoneRigidBodies      int
+	ResolvableRigidBodies       int
+	ResolvableWithBoneDelta     int
+	SkippedByMissingBone        int
+	SkippedByMissingBoneDelta   int
+	SyncByResetCount            int
+	SyncByStaticCount           int
+	DynamicBoneSyncCandidateCnt int
+}
+
+// collectPhysicsBuildPlanSummary は BuildForPhysics の前提となる同期計画サマリを算出する。
+func collectPhysicsBuildPlanSummary(
+	modelData *model.PmxModel,
+	vmdDeltas *delta.VmdDeltas,
+	resetType state.PhysicsResetType,
+	physicsEnabled bool,
+) physicsBuildPlanSummary {
+	summary := physicsBuildPlanSummary{}
+	if modelData == nil || modelData.RigidBodies == nil {
+		return summary
+	}
+
+	var boneDeltas *delta.BoneDeltas
+	if vmdDeltas != nil {
+		boneDeltas = vmdDeltas.Bones
+	}
+
+	for _, rigidBody := range modelData.RigidBodies.Values() {
+		if rigidBody == nil {
+			continue
+		}
+		summary.TotalRigidBodies++
+		switch rigidBody.PhysicsType {
+		case model.PHYSICS_TYPE_STATIC:
+			summary.StaticRigidBodies++
+		case model.PHYSICS_TYPE_DYNAMIC_BONE:
+			summary.DynamicBoneRigidBodies++
+		case model.PHYSICS_TYPE_DYNAMIC:
+			summary.DynamicRigidBodies++
+		}
+
+		bone := resolveRigidBodyBoneForViewer(modelData, rigidBody)
+		if bone == nil {
+			summary.SkippedByMissingBone++
+			continue
+		}
+		summary.ResolvableRigidBodies++
+
+		if boneDeltas == nil || !boneDeltas.Contains(bone.Index()) || boneDeltas.Get(bone.Index()) == nil {
+			summary.SkippedByMissingBoneDelta++
+			continue
+		}
+		summary.ResolvableWithBoneDelta++
+
+		if resetType != state.PHYSICS_RESET_TYPE_NONE {
+			summary.SyncByResetCount++
+			continue
+		}
+		if !physicsEnabled {
+			continue
+		}
+		switch rigidBody.PhysicsType {
+		case model.PHYSICS_TYPE_STATIC:
+			summary.SyncByStaticCount++
+		case model.PHYSICS_TYPE_DYNAMIC_BONE:
+			summary.DynamicBoneSyncCandidateCnt++
+		}
+	}
+
+	return summary
+}
+
+// resolveRigidBodyBoneForViewer は剛体に紐づくボーンを返す。
+func resolveRigidBodyBoneForViewer(modelData *model.PmxModel, rigidBody *model.RigidBody) *model.Bone {
+	if modelData == nil || modelData.Bones == nil || rigidBody == nil || rigidBody.BoneIndex < 0 {
+		return nil
+	}
+	bone, err := modelData.Bones.Get(rigidBody.BoneIndex)
+	if err != nil {
+		return nil
+	}
+	return bone
+}
+
+// logPhysicsHypothesisBuildPlan は BuildForPhysics 前の同期計画サマリを出力する。
+func (vl *ViewerManager) logPhysicsHypothesisBuildPlan(
+	vw *ViewerWindow,
+	modelIndex int,
+	frame motion.Frame,
+	modelData *model.PmxModel,
+	vmdDeltas *delta.VmdDeltas,
+	resetType state.PhysicsResetType,
+	physicsEnabled bool,
+	frameStateLogged bool,
+) {
+	logger := logging.DefaultLogger()
+	if !frameStateLogged || vw == nil || vw.windowIndex != 0 || logger == nil || !logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
+		return
+	}
+	summary := collectPhysicsBuildPlanSummary(modelData, vmdDeltas, resetType, physicsEnabled)
+	logger.Verbose(
+		logging.VERBOSE_INDEX_PHYSICS,
+		"物理検証同期計画: window=%d frame=%v model=%d total=%d static=%d dynamic=%d dynamicBone=%d resolvable=%d withBoneDelta=%d skipNoBone=%d skipNoBoneDelta=%d syncByReset=%d syncByStatic=%d dynamicBoneSyncCandidate=%d",
+		vw.windowIndex,
+		frame,
+		modelIndex,
+		summary.TotalRigidBodies,
+		summary.StaticRigidBodies,
+		summary.DynamicRigidBodies,
+		summary.DynamicBoneRigidBodies,
+		summary.ResolvableRigidBodies,
+		summary.ResolvableWithBoneDelta,
+		summary.SkippedByMissingBone,
+		summary.SkippedByMissingBoneDelta,
+		summary.SyncByResetCount,
+		summary.SyncByStaticCount,
+		summary.DynamicBoneSyncCandidateCnt,
+	)
 }
 
 // ikDebugFactory はIKデバッグ用ファクトリを返す。
@@ -1047,7 +1156,6 @@ func (vl *ViewerManager) updatePhysicsSelectively(
 		return
 	}
 	physicsEnabled := vl.shared.HasFlag(state.STATE_FLAG_PHYSICS_ENABLED)
-	playing := vl.shared.HasFlag(state.STATE_FLAG_PLAYING)
 	ikDebugFactory := vl.ikDebugFactory()
 
 	for i, renderer := range vw.modelRenderers {
@@ -1082,7 +1190,6 @@ func (vl *ViewerManager) updatePhysicsSelectively(
 			vw.vmdDeltas[i],
 			physicsDelta,
 			physicsEnabled,
-			playing,
 			state.PHYSICS_RESET_TYPE_CONTINUE_FRAME,
 		)
 	}
@@ -1134,7 +1241,6 @@ func (vl *ViewerManager) resetPhysics(
 			vw.vmdDeltas[i],
 			physicsDelta,
 			vl.shared.HasFlag(state.STATE_FLAG_PHYSICS_ENABLED),
-			vl.shared.HasFlag(state.STATE_FLAG_PLAYING),
 			resetType,
 		)
 	}

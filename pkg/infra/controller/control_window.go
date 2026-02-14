@@ -503,6 +503,25 @@ func (cw *ControlWindow) SetDisplayFlag(flag state.StateFlag, enabled bool) {
 
 // RequestPhysicsReset は物理リセット種別を設定する。
 func (cw *ControlWindow) RequestPhysicsReset(resetType state.PhysicsResetType) {
+	logger := cw.loggerOrDefault()
+	prevResetType := state.PHYSICS_RESET_TYPE_NONE
+	frame := mtime.Frame(0)
+	playing := false
+	if cw != nil && cw.shared != nil {
+		prevResetType = cw.shared.PhysicsResetType()
+		frame = cw.shared.Frame()
+		playing = cw.shared.HasFlag(state.STATE_FLAG_PLAYING)
+	}
+	if logger != nil && logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
+		logger.Verbose(
+			logging.VERBOSE_INDEX_PHYSICS,
+			"物理検証Reset要求: prevResetType=%d nextResetType=%d frame=%v playing=%t",
+			prevResetType,
+			resetType,
+			frame,
+			playing,
+		)
+	}
 	cw.shared.SetPhysicsResetType(resetType)
 }
 
