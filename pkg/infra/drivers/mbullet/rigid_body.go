@@ -464,11 +464,11 @@ func (mp *PhysicsEngine) initRigidBody(
 
 	motionState := bt.NewBtDefaultMotionState(btRigidBodyTransform)
 	btRigidBody := bt.NewBtRigidBody(mass, motionState, btCollisionShape, localInertia)
-	appliedSize, appliedMass := mp.resolveAppliedShapeMass(rigidBody, rigidBodyDelta)
-	mp.configureRigidBody(btRigidBody, modelIndex, rigidBody, appliedSize, appliedMass)
+	mp.configureRigidBody(btRigidBody, modelIndex, rigidBody)
 
-	group := 1 << int(rigidBody.CollisionGroup.Group)
-	mask := int(rigidBody.CollisionGroup.Mask)
+	group := resolveBulletCollisionGroup(rigidBody.CollisionGroup.Group)
+	mask := resolveBulletCollisionMask(rigidBody.CollisionGroup.Mask)
+	appliedSize, appliedMass := mp.resolveAppliedShapeMass(rigidBody, rigidBodyDelta)
 	mp.world.AddRigidBody(btRigidBody, group, mask)
 	mp.rigidBodies[modelIndex][rigidBody.Index()] = &RigidBodyValue{
 		RigidBody:        rigidBody,
@@ -550,25 +550,10 @@ func (mp *PhysicsEngine) getBonePosition(bones *model.BoneCollection, rigidBody 
 }
 
 // configureRigidBody は剛体の物理パラメータを設定します。
-func (mp *PhysicsEngine) configureRigidBody(
-	btRigidBody bt.BtRigidBody,
-	modelIndex int,
-	rigidBody *model.RigidBody,
-	appliedSize mmath.Vec3,
-	appliedMass float64,
-) {
+func (mp *PhysicsEngine) configureRigidBody(btRigidBody bt.BtRigidBody, modelIndex int, rigidBody *model.RigidBody) {
 	btRigidBody.SetDamping(float32(rigidBody.Param.LinearDamping), float32(rigidBody.Param.AngularDamping))
 	btRigidBody.SetRestitution(float32(rigidBody.Param.Restitution))
 	btRigidBody.SetFriction(float32(rigidBody.Param.Friction))
-	ccdMotionThreshold, ccdSweptSphereRadius, ccdEnabled := resolveCcdParameters(
-		rigidBody.Shape,
-		appliedSize,
-		appliedMass,
-	)
-	if ccdEnabled {
-		btRigidBody.SetCcdMotionThreshold(ccdMotionThreshold)
-		btRigidBody.SetCcdSweptSphereRadius(ccdSweptSphereRadius)
-	}
 	btRigidBody.SetUserIndex(modelIndex)
 	btRigidBody.SetUserIndex2(rigidBody.Index())
 }

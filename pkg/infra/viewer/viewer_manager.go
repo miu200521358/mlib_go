@@ -756,18 +756,13 @@ func resolveFixedTimeStep(physicsWorldMotion *motion.VmdMotion, frame motion.Fra
 
 // resolvePhysicsTimeStep は再生状態に応じた物理ステップ秒を返す。
 func resolvePhysicsTimeStep(elapsed float64, frameElapsed float32, playing bool, frameDrop bool) float32 {
-	if !playing {
-		// 停止中に経過秒をそのまま流すと大きな時間ステップで暴れやすいため、上限を設ける。
-		defaultSpf := mtime.FpsToSpf(defaultFps)
-		return float32(mmath.Clamped(elapsed, 0, float64(defaultSpf)))
-	}
 	if playing && !frameDrop {
 		if frameElapsed > 0 {
 			return frameElapsed
 		}
 		return 0
 	}
-	return float32(mmath.Clamped(elapsed, 0, math.MaxFloat32))
+	return float32(elapsed)
 }
 
 // resolvePhysicsStepConfig は物理ステップとサブステップ上限を整える。
@@ -868,17 +863,7 @@ func (vl *ViewerManager) deformWindow(
 
 	ikDebugFactory := vl.ikDebugFactory()
 	physicsEnabled := vl.shared.HasFlag(state.STATE_FLAG_PHYSICS_ENABLED)
-	playing := vl.shared.HasFlag(state.STATE_FLAG_PLAYING)
-	frameStateLogged := vl.logPhysicsHypothesisFrameState(
-		vw,
-		frame,
-		timeStep,
-		maxSubSteps,
-		fixedTimeStep,
-		resetType,
-		physicsEnabled,
-		playing,
-	)
+	vl.logPhysicsPlaybackFrame(vw, frame, timeStep, maxSubSteps, fixedTimeStep, resetType, physicsEnabled)
 
 	for i, renderer := range vw.modelRenderers {
 		if renderer == nil || renderer.Model == nil {
@@ -930,7 +915,7 @@ func (vl *ViewerManager) deformWindow(
 		)
 	}
 
-	if shouldStepPhysics(vw.physics != nil, physicsEnabled, resetType) {
+	if (physicsEnabled || resetType != state.PHYSICS_RESET_TYPE_NONE) && vw.physics != nil {
 		vl.updateWind(vw, frame)
 		vw.physics.StepSimulation(timeStep, maxSubSteps, fixedTimeStep)
 	}
@@ -965,44 +950,19 @@ func (vl *ViewerManager) logPhysicsHypothesisFrameState(
 	fixedTimeStep float32,
 	resetType state.PhysicsResetType,
 	physicsEnabled bool,
-	playing bool,
-) bool {
+) {
 	logger := logging.DefaultLogger()
 	if vw == nil || logger == nil || !logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
 		return
 	}
-
-	prevFrame := frame
-	prevReset := resetType
-	prevPlaying := playing
-	prevEnabled := physicsEnabled
-	if vl.physicsTraceInitialized {
-		prevFrame = vl.physicsTracePrevFrame
-		prevReset = vl.physicsTracePrevReset
-		prevPlaying = vl.physicsTracePrevPlaying
-		prevEnabled = vl.physicsTracePrevEnabled
+	playing := false
+	if vl != nil && vl.shared != nil {
+		playing = vl.shared.HasFlag(state.STATE_FLAG_PLAYING)
 	}
-
-	shouldLog := !vl.physicsTraceInitialized ||
-		frame != prevFrame ||
-		resetType != prevReset ||
-		playing != prevPlaying ||
-		physicsEnabled != prevEnabled
-	if !shouldLog {
-		return false
-	}
-
-	vl.physicsTraceInitialized = true
-	vl.physicsTracePrevFrame = frame
-	vl.physicsTracePrevReset = resetType
-	vl.physicsTracePrevPlaying = playing
-	vl.physicsTracePrevEnabled = physicsEnabled
-
-	directSeek := !playing && frame != prevFrame
-	frameDelta := frame - prevFrame
 	deltaFrame := mtime.SecondsToFrames(mtime.Seconds(timeStep), defaultFps)
 	requiredSubSteps := resolveRequiredSubSteps(timeStep, fixedTimeStep)
-	stepPlanned := shouldStepPhysics(vw.physics != nil, physicsEnabled, resetType)
+	subStepSaturated := maxSubSteps > 0 && requiredSubSteps > maxSubSteps
+	stepPlanned := vw.physics != nil && (physicsEnabled || resetType != state.PHYSICS_RESET_TYPE_NONE)
 	logger.Verbose(
 		logging.VERBOSE_INDEX_PHYSICS,
 		"物理検証フレーム: window=%d frame=%v prevFrame=%v frameDelta=%v directSeek=%t playing=%t prevPlaying=%t physicsEnabled=%t prevPhysicsEnabled=%t resetType=%d prevResetType=%d timeStep=%.6f deltaFrame=%.6f maxSubSteps=%d requiredSubSteps=%d fixedTimeStep=%.6f stepPlanned=%t models=%d",
@@ -1025,7 +985,92 @@ func (vl *ViewerManager) logPhysicsHypothesisFrameState(
 		stepPlanned,
 		len(vw.modelRenderers),
 	)
-	return true
+}
+
+// logPhysicsContactDiagnostics は接触/侵入/速度の検証サマリを出力する。
+func (vl *ViewerManager) logPhysicsContactDiagnostics(
+	vw *ViewerWindow,
+	frame motion.Frame,
+	timeStep float32,
+	maxSubSteps int,
+	fixedTimeStep float32,
+) {
+	logger := logging.DefaultLogger()
+	if vw == nil || vw.windowIndex != 0 || vw.physics == nil || logger == nil || !logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
+		return
+	}
+	diagnostics := vw.physics.CollectStepDiagnostics()
+	deltaFrame := mtime.SecondsToFrames(mtime.Seconds(timeStep), defaultFps)
+	requiredSubSteps := resolveRequiredSubSteps(timeStep, fixedTimeStep)
+	logger.Verbose(
+		logging.VERBOSE_INDEX_PHYSICS,
+		"物理追跡接触: window=%d frame=%v timeStep=%.6f deltaFrame=%.6f maxSubSteps=%d requiredSubSteps=%d manifolds=%d activeManifolds=%d contacts=%d penetrations=%d maxPenetration=%.6f pairPenetration=%d:%d-%d:%d maxImpulse=%.6f pairImpulse=%d:%d-%d:%d dynamicBodies=%d maxLinear=%.6f bodyLinear=%d:%d maxAngular=%.6f bodyAngular=%d:%d",
+		vw.windowIndex,
+		frame,
+		timeStep,
+		deltaFrame,
+		maxSubSteps,
+		requiredSubSteps,
+		diagnostics.ManifoldCount,
+		diagnostics.ActiveManifoldCount,
+		diagnostics.ContactPointCount,
+		diagnostics.PenetrationPointCount,
+		diagnostics.MaxPenetrationDepth,
+		diagnostics.MaxPenetrationModelIndexA,
+		diagnostics.MaxPenetrationRigidBodyIndexA,
+		diagnostics.MaxPenetrationModelIndexB,
+		diagnostics.MaxPenetrationRigidBodyIndexB,
+		diagnostics.MaxAppliedImpulse,
+		diagnostics.MaxImpulseModelIndexA,
+		diagnostics.MaxImpulseRigidBodyIndexA,
+		diagnostics.MaxImpulseModelIndexB,
+		diagnostics.MaxImpulseRigidBodyIndexB,
+		diagnostics.DynamicBodyCount,
+		diagnostics.MaxLinearSpeed,
+		diagnostics.MaxLinearSpeedModelIndex,
+		diagnostics.MaxLinearSpeedRigidBodyIndex,
+		diagnostics.MaxAngularSpeed,
+		diagnostics.MaxAngularSpeedModelIndex,
+		diagnostics.MaxAngularSpeedRigidBodyIndex,
+	)
+
+	trackedRigidBodyDiagnostics := vw.physics.CollectTrackedRigidBodyDiagnostics(diagnostics)
+	for _, trackedRigidBodyDiagnostic := range trackedRigidBodyDiagnostics {
+		logger.Verbose(
+			logging.VERBOSE_INDEX_PHYSICS,
+			"物理追跡剛体: window=%d frame=%v reason=%s model=%d rigidBody=%d resolved=%t hasApplied=%t physicsType=%d shape=%d group=%d mask=%d baseMass=%.6f appliedMass=%.6f appliedSize=%.6f,%.6f,%.6f appliedPos=%.6f,%.6f,%.6f linearDamping=%.6f angularDamping=%.6f restitution=%.6f friction=%.6f collisionFlags=%d activationState=%d ccdMotionThreshold=%.6f ccdRadius=%.6f contactThreshold=%.6f linearSpeed=%.6f angularSpeed=%.6f",
+			vw.windowIndex,
+			frame,
+			trackedRigidBodyDiagnostic.Reason,
+			trackedRigidBodyDiagnostic.ModelIndex,
+			trackedRigidBodyDiagnostic.RigidBodyIndex,
+			trackedRigidBodyDiagnostic.Resolved,
+			trackedRigidBodyDiagnostic.HasAppliedParams,
+			trackedRigidBodyDiagnostic.PhysicsType,
+			trackedRigidBodyDiagnostic.Shape,
+			trackedRigidBodyDiagnostic.Group,
+			trackedRigidBodyDiagnostic.Mask,
+			trackedRigidBodyDiagnostic.BaseMass,
+			trackedRigidBodyDiagnostic.AppliedMass,
+			trackedRigidBodyDiagnostic.AppliedSize.X,
+			trackedRigidBodyDiagnostic.AppliedSize.Y,
+			trackedRigidBodyDiagnostic.AppliedSize.Z,
+			trackedRigidBodyDiagnostic.AppliedPosition.X,
+			trackedRigidBodyDiagnostic.AppliedPosition.Y,
+			trackedRigidBodyDiagnostic.AppliedPosition.Z,
+			trackedRigidBodyDiagnostic.LinearDamping,
+			trackedRigidBodyDiagnostic.AngularDamping,
+			trackedRigidBodyDiagnostic.Restitution,
+			trackedRigidBodyDiagnostic.Friction,
+			trackedRigidBodyDiagnostic.CollisionFlags,
+			trackedRigidBodyDiagnostic.ActivationState,
+			trackedRigidBodyDiagnostic.CcdMotionThreshold,
+			trackedRigidBodyDiagnostic.CcdSweptSphereRadius,
+			trackedRigidBodyDiagnostic.ContactProcessingThreshold,
+			trackedRigidBodyDiagnostic.LinearSpeed,
+			trackedRigidBodyDiagnostic.AngularSpeed,
+		)
+	}
 }
 
 // ikDebugFactory はIKデバッグ用ファクトリを返す。
