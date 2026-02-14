@@ -9,6 +9,8 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
+	"strings"
+	"unicode"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.3-core/gl"
@@ -171,13 +173,20 @@ func (r *TooltipRenderer) uploadTextTexture(text string) {
 	if face == nil {
 		face = r.fallbackFace
 	}
+	renderText := sanitizeTooltipText(text, face)
+	if renderText == "" {
+		r.width = 0
+		r.height = 0
+		r.lastText = text
+		return
+	}
 
 	metrics := face.Metrics()
 	ascent := metrics.Ascent.Round()
 	lineHeight := (metrics.Ascent + metrics.Descent).Round()
 
 	drawer := font.Drawer{Face: face, Src: image.Black}
-	textWidth := drawer.MeasureString(text).Round()
+	textWidth := drawer.MeasureString(renderText).Round()
 	width := textWidth + padding*2
 	height := lineHeight + padding*2
 
@@ -195,7 +204,7 @@ func (r *TooltipRenderer) uploadTextTexture(text string) {
 	drawer.Dot = fixed.Point26_6{X: fixed.I(padding), Y: fixed.I(padding + ascent)}
 
 	// 文字描画
-	drawer.DrawString(text)
+	drawer.DrawString(renderText)
 
 	if r.texture == 0 {
 		gl.GenTextures(1, &r.texture)
@@ -218,6 +227,48 @@ func (r *TooltipRenderer) uploadTextTexture(text string) {
 	r.width = width
 	r.height = height
 	r.lastText = text
+}
+
+// sanitizeTooltipText は表示不能文字を置換してツールチップ描画用文字列を返す。
+func sanitizeTooltipText(text string, face font.Face) string {
+	if text == "" {
+		return ""
+	}
+	replaceRune := '?'
+	if !hasGlyph(face, replaceRune) {
+		replaceRune = ' '
+	}
+	var builder strings.Builder
+	builder.Grow(len(text))
+	for _, r := range text {
+		switch r {
+		case '\r', '\n', '\t':
+			builder.WriteRune(' ')
+			continue
+		}
+		if unicode.IsControl(r) {
+			continue
+		}
+		if hasGlyph(face, r) {
+			builder.WriteRune(r)
+			continue
+		}
+		builder.WriteRune(replaceRune)
+	}
+	result := builder.String()
+	if result == "" && strings.TrimSpace(text) != "" {
+		return string(replaceRune)
+	}
+	return result
+}
+
+// hasGlyph は指定フォントで rune を描画できるか判定する。
+func hasGlyph(face font.Face, r rune) bool {
+	if face == nil {
+		return false
+	}
+	_, _, ok := face.GlyphBounds(r)
+	return ok
 }
 
 // buildQuad はツールチップ用の四角形頂点を生成する。

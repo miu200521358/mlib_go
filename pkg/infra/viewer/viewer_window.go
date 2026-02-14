@@ -262,9 +262,14 @@ func (vw *ViewerWindow) ensureContextCurrent() {
 	vw.MakeContextCurrent()
 }
 
-// isSelectionEnabledInWindow はこのウィンドウで選択/ホバーを有効にするか返す。
+// isSelectionEnabledInWindow はこのウィンドウでクリック選択/頂点選択を有効にするか返す。
 func (vw *ViewerWindow) isSelectionEnabledInWindow() bool {
 	return vw != nil && vw.windowIndex == 0
+}
+
+// isNonVertexHoverEnabledInWindow はこのウィンドウでボーン/剛体/ジョイントのホバーを有効にするか返す。
+func (vw *ViewerWindow) isNonVertexHoverEnabledInWindow() bool {
+	return vw != nil
 }
 
 // Title はタイトルを返す。
@@ -321,6 +326,7 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 
 	showSelectedVertex := vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX)
 	selectionEnabled := vw.isSelectionEnabledInWindow()
+	nonVertexHoverEnabled := vw.isNonVertexHoverEnabledInWindow()
 	selectionMode := vw.selectedVertexMode()
 	selectionDepthMode := state.SELECTED_VERTEX_DEPTH_MODE_ALL
 	if vw.list != nil && vw.list.shared != nil {
@@ -368,6 +374,10 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 	var debugBoneHover []*graphics_api.DebugBoneHover
 	if selectionEnabled {
 		vw.updateSelectedVertexHoverExpire()
+	} else {
+		vw.clearSelectedVertexHover()
+	}
+	if nonVertexHoverEnabled {
 		vw.updateBoneHoverExpire()
 		vw.updateRigidBodyHoverExpire()
 		vw.updateJointHoverExpire()
@@ -375,8 +385,7 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 			debugBoneHover = vw.boneHighlighter.DebugBoneHoverInfo()
 		}
 	} else {
-		// サブウィンドウでは選択/ホバーを行わないため、状態をクリアする。
-		vw.clearAllHovers()
+		vw.clearNonVertexHovers()
 	}
 
 	baseResults := make([]*render.ModelRenderBaseResult, len(vw.modelRenderers))
@@ -1132,6 +1141,7 @@ func (vw *ViewerWindow) cursorPosCallback(_ *glfw.Window, xpos, ypos float64) {
 	vw.cursorX = xpos
 	vw.cursorY = ypos
 	selectionEnabled := vw.isSelectionEnabledInWindow()
+	nonVertexHoverEnabled := vw.isNonVertexHoverEnabledInWindow()
 
 	if !vw.updatedPrevCursor {
 		vw.prevCursorPos.X = xpos
@@ -1169,7 +1179,7 @@ func (vw *ViewerWindow) cursorPosCallback(_ *glfw.Window, xpos, ypos float64) {
 		}
 	}
 	if !vw.rightButtonPressed && !vw.middleButtonPressed {
-		if !selectionEnabled {
+		if !selectionEnabled && !nonVertexHoverEnabled {
 			vw.prevCursorPos.X = xpos
 			vw.prevCursorPos.Y = ypos
 			return
@@ -1180,27 +1190,31 @@ func (vw *ViewerWindow) cursorPosCallback(_ *glfw.Window, xpos, ypos float64) {
 			vw.prevCursorPos.Y = ypos
 			return
 		}
-		drawRigidBody := vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_RIGID_BODY_FRONT) ||
-			vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_RIGID_BODY_BACK)
-		drawJoint := vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_JOINT)
-		switch {
-		case drawRigidBody:
-			vw.selectRigidBodyByCursor(xpos, ypos)
-			if drawJoint {
-				if vw.rigidBodyHoverActive {
-					vw.clearJointHover()
+		if nonVertexHoverEnabled {
+			drawRigidBody := vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_RIGID_BODY_FRONT) ||
+				vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_RIGID_BODY_BACK)
+			drawJoint := vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_JOINT)
+			switch {
+			case drawRigidBody:
+				vw.selectRigidBodyByCursor(xpos, ypos)
+				if drawJoint {
+					if vw.rigidBodyHoverActive {
+						vw.clearJointHover()
+					} else {
+						vw.selectJointByCursor(xpos, ypos)
+					}
 				} else {
-					vw.selectJointByCursor(xpos, ypos)
+					vw.clearJointHover()
 				}
-			} else {
-				vw.clearJointHover()
+			case drawJoint:
+				vw.selectJointByCursor(xpos, ypos)
+			case vw.list.shared.IsAnyBoneVisible():
+				vw.selectBoneByCursor(xpos, ypos)
+			default:
+				vw.clearAllHovers()
 			}
-		case drawJoint:
-			vw.selectJointByCursor(xpos, ypos)
-		case vw.list.shared.IsAnyBoneVisible():
-			vw.selectBoneByCursor(xpos, ypos)
-		default:
-			vw.clearAllHovers()
+		} else {
+			vw.clearNonVertexHovers()
 		}
 	}
 	vw.prevCursorPos.X = xpos

@@ -3,6 +3,9 @@ package io_common
 
 import (
 	"bytes"
+	"fmt"
+	"strings"
+	"unicode/utf8"
 
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/japanese"
@@ -27,6 +30,10 @@ func DecodePmxText(primary encoding.Encoding, raw []byte) (string, error) {
 		}
 		decoded, err := decodeText(enc, raw)
 		if err == nil {
+			if containsRuneError(decoded) {
+				lastErr = fmt.Errorf("デコード結果に置換文字が含まれています")
+				continue
+			}
 			return decoded, nil
 		}
 		lastErr = err
@@ -80,4 +87,9 @@ func decodeText(enc encoding.Encoding, raw []byte) (string, error) {
 		return "", err
 	}
 	return string(decoded), nil
+}
+
+// containsRuneError は置換文字(U+FFFD)を含むか判定する。
+func containsRuneError(text string) bool {
+	return strings.ContainsRune(text, utf8.RuneError)
 }
