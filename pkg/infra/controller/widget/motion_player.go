@@ -22,6 +22,10 @@ import (
 
 const (
 	audioVolumeDefault = 100
+	// physicsVerboseSeekTargetFrame は停止時シーク冗長ログの中心フレーム。
+	physicsVerboseSeekTargetFrame mtime.Frame = 680
+	// physicsVerboseSeekTargetRadius は停止時シーク冗長ログの対象幅(前後)。
+	physicsVerboseSeekTargetRadius mtime.Frame = 1
 )
 
 // MotionPlayer は再生操作ウィジェットを表す。
@@ -374,44 +378,53 @@ func (mp *MotionPlayer) syncWhilePlaying() {
 	}
 }
 
-// applyFrameSeek は停止中のフレーム直接移動を適用して物理検証ログを出力する。
+// applyFrameSeek は停止中のフレーム直接移動を適用する。
 func (mp *MotionPlayer) applyFrameSeek(frame mtime.Frame, source string) {
 	if mp == nil || mp.window == nil {
 		return
 	}
 	prevFrame := mp.window.Frame()
-	prevResetType := mp.window.PhysicsResetType()
-	physicsEnabled := mp.window.PhysicsEnabled()
+	mp.logPhysicsSeekVerbose(source, prevFrame, frame)
 	mp.window.SetFrame(frame)
-	nextResetType := mp.window.PhysicsResetType()
-	mp.logPhysicsSeekVerbose(source, prevFrame, frame, prevResetType, nextResetType, physicsEnabled)
 }
 
-// logPhysicsSeekVerbose は停止中のフレーム直接移動に関する物理検証ログを出力する。
-func (mp *MotionPlayer) logPhysicsSeekVerbose(
-	source string,
-	prevFrame mtime.Frame,
-	nextFrame mtime.Frame,
-	prevResetType state.PhysicsResetType,
-	nextResetType state.PhysicsResetType,
-	physicsEnabled bool,
-) {
+// logPhysicsSeekVerbose は停止中のシーク要求を冗長出力する。
+func (mp *MotionPlayer) logPhysicsSeekVerbose(source string, prevFrame, nextFrame mtime.Frame) {
 	logger := logging.DefaultLogger()
 	if logger == nil || !logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
 		return
 	}
-	frameDelta := nextFrame - prevFrame
+	if !isPhysicsSeekVerboseTargetFrame(prevFrame) && !isPhysicsSeekVerboseTargetFrame(nextFrame) {
+		return
+	}
+	editFrame := mtime.Frame(-1)
+	if mp.frameEdit != nil {
+		editFrame = mtime.Frame(mp.frameEdit.Value())
+	}
+	sliderFrame := mtime.Frame(-1)
+	if mp.frameSlider != nil {
+		sliderFrame = mtime.Frame(mp.frameSlider.Value())
+	}
 	logger.Verbose(
 		logging.VERBOSE_INDEX_PHYSICS,
-		"物理検証シーク: source=%s prevFrame=%v nextFrame=%v frameDelta=%v physicsEnabled=%t resetBefore=%d resetAfter=%d",
+		"フレームシーク要求: source=%s prev=%v next=%v delta=%v playing=%t physicsEnabled=%t resetType=%d edit=%v slider=%v",
 		source,
 		prevFrame,
 		nextFrame,
-		frameDelta,
-		physicsEnabled,
-		prevResetType,
-		nextResetType,
+		nextFrame-prevFrame,
+		mp.window.Playing(),
+		mp.window.PhysicsEnabled(),
+		int(mp.window.PhysicsResetType()),
+		editFrame,
+		sliderFrame,
 	)
+}
+
+// isPhysicsSeekVerboseTargetFrame は停止時シーク冗長ログ対象フレームか判定する。
+func isPhysicsSeekVerboseTargetFrame(frame mtime.Frame) bool {
+	minFrame := physicsVerboseSeekTargetFrame - physicsVerboseSeekTargetRadius
+	maxFrame := physicsVerboseSeekTargetFrame + physicsVerboseSeekTargetRadius
+	return frame >= minFrame && frame <= maxFrame
 }
 
 // currentFrame は現在フレームを取得する。
