@@ -17,6 +17,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/mgl"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"github.com/miu200521358/mlib_go/pkg/shared/state"
 )
 
@@ -452,6 +453,7 @@ func (mr *ModelRenderer) drawSelectedVertex(
 						}
 					}
 					depthTolerance := depthToleranceFromBuffer()
+					logger := logging.DefaultLogger()
 					for i := 0; i+3 < len(positions); i += 4 {
 						if positions[i+3] < 0 {
 							continue
@@ -492,6 +494,13 @@ func (mr *ModelRenderer) drawSelectedVertex(
 							if depth > depthAt+depthTolerance {
 								continue
 							}
+						}
+						if logger.IsVerboseEnabled(logging.VERBOSE_INDEX_VIEWER) {
+							logger.Verbose(
+								logging.VERBOSE_INDEX_VIEWER,
+								"ボックス選択:頂点 index=%d pos=[x=%.4f, y=%.4f, z=%.4f] screen=(%.2f, %.2f) depth=%.6f depthAt=%.6f remove=%t",
+								idx, pos.X, pos.Y, pos.Z, screenX, screenY, depth, depthAt, removeSelection,
+							)
 						}
 						if removeSelection {
 							delete(selectedSet, idx)
