@@ -38,11 +38,6 @@ type RigidBodyValue struct {
 	BtLocalTransform *bt.BtTransform
 	Mask             int
 	Group            int
-	PrevBoneMatrix   mmath.Mat4
-	HasPrevBone      bool
-	AppliedSize      mmath.Vec3
-	AppliedMass      float64
-	HasAppliedParams bool
 }
 
 // PhysicsEngine は Bullet 物理エンジンの実装本体。
@@ -114,7 +109,6 @@ func (mp *PhysicsEngine) ResetWorld(gravity *mmath.Vec3) {
 	world := createWorld(gravityVec)
 	world.SetDebugDrawer(mp.drawer)
 	mp.world = world
-	mp.resetFollowBoneCache()
 }
 
 // StepSimulation は物理シミュレーションを1ステップ進める。
@@ -143,42 +137,18 @@ func (mp *PhysicsEngine) AddModelByDeltas(
 		return
 	}
 	var rigidBodyDeltas *delta.RigidBodyDeltas
-	var jointDeltas *delta.JointDeltas
 	if physicsDeltas != nil {
 		rigidBodyDeltas = physicsDeltas.RigidBodies
-		jointDeltas = physicsDeltas.Joints
 	}
 
 	mp.initRigidBodiesByBoneDeltas(modelIndex, model, boneDeltas, rigidBodyDeltas)
-	mp.initJointsByBoneDeltas(modelIndex, model, boneDeltas, jointDeltas)
+	mp.initJointsByBoneDeltas(modelIndex, model, boneDeltas, nil)
 }
 
 // DeleteModel はモデルを物理エンジンから削除する。
 func (mp *PhysicsEngine) DeleteModel(modelIndex int) {
 	mp.deleteJoints(modelIndex)
 	mp.deleteRigidBodies(modelIndex)
-}
-
-// clearModelFollowBoneCache はモデル単位の追従行列キャッシュを破棄する。
-func (mp *PhysicsEngine) clearModelFollowBoneCache(modelIndex int) {
-	bodies, ok := mp.rigidBodies[modelIndex]
-	if !ok || bodies == nil {
-		return
-	}
-	for _, body := range bodies {
-		if body == nil {
-			continue
-		}
-		body.PrevBoneMatrix = mmath.Mat4{}
-		body.HasPrevBone = false
-	}
-}
-
-// resetFollowBoneCache は全モデルの追従行列キャッシュを破棄する。
-func (mp *PhysicsEngine) resetFollowBoneCache() {
-	for modelIndex := range mp.rigidBodies {
-		mp.clearModelFollowBoneCache(modelIndex)
-	}
 }
 
 // createWorld は Bullet ワールドを生成する。
@@ -188,8 +158,6 @@ func createWorld(gravity mmath.Vec3) bt.BtDiscreteDynamicsWorld {
 	dispatcher := bt.NewBtCollisionDispatcher(collisionConfiguration)
 	solver := bt.NewBtSequentialImpulseConstraintSolver()
 	world := bt.NewBtDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration)
-	applyWorldSolverConfig(world, newWorldSolverConfig())
-	// MMD互換の重力スケールに合わせるため、Y成分は10倍でBulletへ渡す。
 	world.SetGravity(bt.NewBtVector3(float32(gravity.X), float32(gravity.Y*10), float32(gravity.Z)))
 
 	groundShape := bt.NewBtStaticPlaneShape(bt.NewBtVector3(float32(0), float32(1), float32(0)), float32(0))

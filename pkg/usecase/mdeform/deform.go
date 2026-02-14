@@ -125,23 +125,9 @@ func BuildForPhysics(
 		if boneDelta == nil {
 			continue
 		}
-		global := boneDelta.FilledGlobalMatrix()
-		if resetType != state.PHYSICS_RESET_TYPE_NONE {
-			counters.HardSyncByReset++
+		if (enabled && rigidBody.PhysicsType != model.PHYSICS_TYPE_DYNAMIC) || resetType != state.PHYSICS_RESET_TYPE_NONE {
+			global := boneDelta.FilledGlobalMatrix()
 			core.UpdateTransform(modelIndex, bone, &global, rigidBody)
-			continue
-		}
-		if !enabled {
-			continue
-		}
-		switch rigidBody.PhysicsType {
-		case model.PHYSICS_TYPE_STATIC:
-			core.UpdateTransform(modelIndex, bone, &global, rigidBody)
-		case model.PHYSICS_TYPE_DYNAMIC_BONE:
-			// 旧 mlib と同等に、動的ボーン追従剛体も毎フレームの姿勢同期はハード更新で扱う。
-			counters.HardSyncDynamicBone++
-			core.UpdateTransform(modelIndex, bone, &global, rigidBody)
-		case model.PHYSICS_TYPE_DYNAMIC:
 		}
 	}
 	if logSummary && logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
@@ -410,7 +396,9 @@ func updateRigidBodyShapeMass(core physics.IPhysicsCore, modelIndex int, modelDa
 		if rigidDelta == nil {
 			continue
 		}
-		core.UpdateRigidBodyShapeMass(modelIndex, rigidBody, rigidDelta)
+		if !rigidDelta.Size.IsZero() || rigidDelta.Mass != 0.0 {
+			core.UpdateRigidBodyShapeMass(modelIndex, rigidBody, rigidDelta)
+		}
 	}
 }
 
