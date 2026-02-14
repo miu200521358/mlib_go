@@ -3,7 +3,6 @@ package mdeform
 
 import (
 	"sort"
-	"strings"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/deform"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
@@ -38,14 +37,7 @@ const (
 )
 
 // defaultDynamicBoneSyncMode は通常時の DYNAMIC_BONE 同期方式。
-// 見た目の基準復帰のため、既定は Bullet 結果優先（物理前同期なし）を使う。
 const defaultDynamicBoneSyncMode = DYNAMIC_BONE_SYNC_MODE_BULLET
-
-// playingDynamicBoneSyncMode は再生中の DYNAMIC_BONE 同期方式。
-const playingDynamicBoneSyncMode = DYNAMIC_BONE_SYNC_MODE_FOLLOW_DELTA
-
-// afterPhysicsVerboseTargetFrame は物理冗長ログの対象フレーム。
-const afterPhysicsVerboseTargetFrame motion.Frame = 680
 
 // DeformOptions は変形オプションを表す。
 type DeformOptions struct {
@@ -120,13 +112,12 @@ func BuildForPhysics(
 	deltas *delta.VmdDeltas,
 	physicsDeltas *delta.PhysicsDeltas,
 	enabled bool,
-	playing bool,
 	resetType state.PhysicsResetType,
 ) *delta.VmdDeltas {
 	if core == nil || modelData == nil || deltas == nil || deltas.Bones == nil {
 		return deltas
 	}
-	dynamicBoneMode := resolveDynamicBoneSyncMode(playing)
+	dynamicBoneMode := resolveDynamicBoneSyncMode()
 	if physicsDeltas != nil && physicsDeltas.RigidBodies != nil {
 		updateRigidBodyShapeMass(core, modelIndex, modelData, physicsDeltas)
 	}
@@ -164,11 +155,8 @@ func BuildForPhysics(
 	return deltas
 }
 
-// resolveDynamicBoneSyncMode は再生状態に応じた DYNAMIC_BONE 同期方式を返す。
-func resolveDynamicBoneSyncMode(playing bool) dynamicBoneSyncMode {
-	if playing {
-		return playingDynamicBoneSyncMode
-	}
+// resolveDynamicBoneSyncMode は通常時の DYNAMIC_BONE 同期方式を返す。
+func resolveDynamicBoneSyncMode() dynamicBoneSyncMode {
 	return defaultDynamicBoneSyncMode
 }
 
@@ -206,16 +194,13 @@ func BuildAfterPhysics(
 		return deltas
 	}
 	deltas.SetFrame(frame)
-	logger := afterPhysicsVerboseLogger()
-	results := map[int]rigidBodyBoneMatrixResult{}
-	order := make([]int, 0)
+	reflectedCount := 0
 	if core != nil && physicsEnabled {
 		// 動的剛体の結果をボーンへ反映する。
-		results = collectRigidBodyBoneMatrices(core, modelIndex, modelData)
-		order = resolveRigidBodyBoneUpdateOrder(results)
-		applyRigidBodyBoneMatrices(deltas, frame, results, order)
+		results := collectRigidBodyBoneMatrices(core, modelIndex, modelData)
+		order := resolveRigidBodyBoneUpdateOrder(results)
+		reflectedCount = applyRigidBodyBoneMatrices(deltas, frame, results, order)
 	}
-	logAfterPhysicsStage(logger, "物理直後", modelIndex, frame, modelData, deltas.Bones, order)
 
 	// 物理後変形対象ボーンを再計算して反映する。
 	afterNames := afterPhysicsBoneNames(modelData)
@@ -223,16 +208,12 @@ func BuildAfterPhysics(
 	if len(afterNames) > 0 {
 		afterIndexes = deform.UpdateAfterPhysicsBoneDeltas(modelData, motionData, deltas.Bones, frame, afterNames)
 	}
-	rotationGrantIndexes := collectExternalRotationBoneIndexes(modelData, afterIndexes)
-	logAfterPhysicsStage(logger, "回転付与", modelIndex, frame, modelData, deltas.Bones, rotationGrantIndexes)
 
 	// 既存のユニット行列を使い物理後変形対象のグローバル行列のみ更新する。
 	if len(afterIndexes) > 0 {
 		deform.ApplyGlobalMatricesWithIndexes(modelData, deltas.Bones, afterIndexes)
 	}
-	logAfterPhysicsStage(logger, "物理後変形", modelIndex, frame, modelData, deltas.Bones, afterIndexes)
-	finalIndexes := mergeUniqueBoneIndexes(afterIndexes, order)
-	logAfterPhysicsStage(logger, "最終結果", modelIndex, frame, modelData, deltas.Bones, finalIndexes)
+	logAfterPhysicsBoneSummary(modelIndex, frame, reflectedCount, len(afterIndexes))
 	return deltas
 }
 
@@ -349,179 +330,25 @@ func applyRigidBodyBoneMatrices(
 	return reflectedCount
 }
 
-// afterPhysicsVerboseLogger は物理冗長ログ出力用の logger を返す。
-func afterPhysicsVerboseLogger() logging.ILogger {
-	logger := logging.DefaultLogger()
-	if logger == nil || !logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
-		return nil
-	}
-	return logger
-}
-
-// logAfterPhysicsStage は物理後変形の段階別ボーン情報を冗長出力する。
-func logAfterPhysicsStage(
-	logger logging.ILogger,
-	stage string,
+// logAfterPhysicsBoneSummary は物理後ボーン計算の集計をVerbose出力する。
+func logAfterPhysicsBoneSummary(
 	modelIndex int,
 	frame motion.Frame,
-	modelData *model.PmxModel,
-	boneDeltas *delta.BoneDeltas,
-	indexes []int,
+	reflectedCount int,
+	afterBoneCount int,
 ) {
-	if logger == nil || modelData == nil || boneDeltas == nil || !isAfterPhysicsVerboseTargetFrame(frame) {
-		return
-	}
-	targetIndexes := filterAfterPhysicsVerboseIndexes(boneDeltas, indexes)
-	if len(targetIndexes) == 0 {
+	logger := logging.DefaultLogger()
+	if logger == nil || !logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
 		return
 	}
 	logger.Verbose(
 		logging.VERBOSE_INDEX_PHYSICS,
-		"物理段階: stage=%s model=%d frame=%v bones=%d",
-		stage,
+		"物理後ボーン集計: model=%d frame=%v reflectedRigidBones=%d afterPhysicsBones=%d",
 		modelIndex,
 		frame,
-		len(targetIndexes),
+		reflectedCount,
+		afterBoneCount,
 	)
-	for _, boneIndex := range targetIndexes {
-		boneDelta := boneDeltas.Get(boneIndex)
-		if boneDelta == nil || boneDelta.Bone == nil {
-			continue
-		}
-		bone := boneDelta.Bone
-		parentName := boneNameByIndex(modelData, bone.ParentIndex)
-		effectName := boneNameByIndex(modelData, bone.EffectIndex)
-		isAfterPhysics := bone.BoneFlag&model.BONE_FLAG_IS_AFTER_PHYSICS_DEFORM != 0
-		isExternalRotation := bone.BoneFlag&model.BONE_FLAG_IS_EXTERNAL_ROTATION != 0 && bone.EffectIndex >= 0
-		globalPos := boneDelta.FilledGlobalPosition().String()
-		globalRot := boneDelta.FilledGlobalMatrix().Quaternion().ToMMDDegrees().String()
-		totalRot := boneDelta.FilledTotalRotation().ToMMDDegrees().String()
-		framePos := boneDelta.FilledFramePosition().String()
-		frameRot := boneDelta.FilledFrameRotation().ToMMDDegrees().String()
-		effectGlobalRot, effectTotalRot := afterPhysicsEffectRotationInfo(boneDeltas, bone.EffectIndex)
-		logger.Verbose(
-			logging.VERBOSE_INDEX_PHYSICS,
-			"物理段階詳細: stage=%s model=%d frame=%v bone=%s(%d) parent=%s(%d) effect=%s(%d,%.3f) flags=0x%04x afterPhysics=%t extRot=%t framePos=%s frameRotDeg=%s globalPos=%s globalRotDeg=%s totalRotDeg=%s effectGlobalRotDeg=%s effectTotalRotDeg=%s",
-			stage,
-			modelIndex,
-			frame,
-			bone.Name(),
-			bone.Index(),
-			parentName,
-			bone.ParentIndex,
-			effectName,
-			bone.EffectIndex,
-			bone.EffectFactor,
-			int(bone.BoneFlag),
-			isAfterPhysics,
-			isExternalRotation,
-			framePos,
-			frameRot,
-			globalPos,
-			globalRot,
-			totalRot,
-			effectGlobalRot,
-			effectTotalRot,
-		)
-	}
-}
-
-// isAfterPhysicsVerboseTargetFrame は物理冗長ログの対象フレームか判定する。
-func isAfterPhysicsVerboseTargetFrame(frame motion.Frame) bool {
-	return frame == afterPhysicsVerboseTargetFrame
-}
-
-// afterPhysicsEffectRotationInfo は付与元ボーンの回転情報を返す。
-func afterPhysicsEffectRotationInfo(boneDeltas *delta.BoneDeltas, effectIndex int) (string, string) {
-	if boneDeltas == nil || effectIndex < 0 {
-		return "-", "-"
-	}
-	effectDelta := boneDeltas.Get(effectIndex)
-	if effectDelta == nil {
-		return "-", "-"
-	}
-	globalRot := effectDelta.FilledGlobalMatrix().Quaternion().ToMMDDegrees().String()
-	totalRot := effectDelta.FilledTotalRotation().ToMMDDegrees().String()
-	return globalRot, totalRot
-}
-
-// filterAfterPhysicsVerboseIndexes は物理冗長ログ対象のボーンindexへ絞り込む。
-func filterAfterPhysicsVerboseIndexes(boneDeltas *delta.BoneDeltas, indexes []int) []int {
-	if boneDeltas == nil || len(indexes) == 0 {
-		return nil
-	}
-	out := make([]int, 0, len(indexes))
-	for _, boneIndex := range indexes {
-		boneDelta := boneDeltas.Get(boneIndex)
-		if boneDelta == nil || boneDelta.Bone == nil {
-			continue
-		}
-		if !isAfterPhysicsVerboseTargetBone(boneDelta.Bone) {
-			continue
-		}
-		out = append(out, boneIndex)
-	}
-	return out
-}
-
-// isAfterPhysicsVerboseTargetBone は物理冗長ログに出力する対象ボーンか判定する。
-func isAfterPhysicsVerboseTargetBone(bone *model.Bone) bool {
-	if bone == nil {
-		return false
-	}
-	return strings.Contains(bone.Name(), "右袖")
-}
-
-// collectExternalRotationBoneIndexes は回転付与ボーンの index を返す。
-func collectExternalRotationBoneIndexes(modelData *model.PmxModel, indexes []int) []int {
-	if modelData == nil || len(indexes) == 0 {
-		return nil
-	}
-	out := make([]int, 0, len(indexes))
-	for _, boneIndex := range indexes {
-		bone, err := modelData.Bones.Get(boneIndex)
-		if err != nil || bone == nil {
-			continue
-		}
-		if bone.BoneFlag&model.BONE_FLAG_IS_EXTERNAL_ROTATION == 0 || bone.EffectIndex < 0 {
-			continue
-		}
-		out = append(out, boneIndex)
-	}
-	return out
-}
-
-// mergeUniqueBoneIndexes は index 群を重複排除しつつ連結する。
-func mergeUniqueBoneIndexes(primary []int, secondary []int) []int {
-	out := make([]int, 0, len(primary)+len(secondary))
-	used := map[int]struct{}{}
-	for _, index := range primary {
-		if _, exists := used[index]; exists {
-			continue
-		}
-		used[index] = struct{}{}
-		out = append(out, index)
-	}
-	for _, index := range secondary {
-		if _, exists := used[index]; exists {
-			continue
-		}
-		used[index] = struct{}{}
-		out = append(out, index)
-	}
-	return out
-}
-
-// boneNameByIndex は index に対応するボーン名を返す。
-func boneNameByIndex(modelData *model.PmxModel, index int) string {
-	if modelData == nil || modelData.Bones == nil || index < 0 {
-		return "-"
-	}
-	bone, err := modelData.Bones.Get(index)
-	if err != nil || bone == nil {
-		return "-"
-	}
-	return bone.Name()
 }
 
 // ApplySkinning はスキニングを適用して頂点/法線を更新する。

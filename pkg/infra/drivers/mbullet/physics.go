@@ -184,12 +184,10 @@ func NewPhysicsEngine(gravity *mmath.Vec3) *PhysicsEngine {
 		joints:      make(map[int][]*jointValue),
 		// 既定では拘束を硬めにし、必要時のみモデル単位で上書きする。
 		jointConfig: JointConstraintConfig{
-			// 段階検証(ソルバ/拘束値): 停止中 fixed timeStep 化の次段として、
-			// 全体の拘束をやや柔らかくして袖布の硬さ差を比較する。
-			ERP:                                float32(0.6),
-			StopERP:                            float32(0.6),
-			CFM:                                float32(0.02),
-			StopCFM:                            float32(0.02),
+			ERP:                                float32(0.8),
+			StopERP:                            float32(0.8),
+			CFM:                                float32(0.01),
+			StopCFM:                            float32(0.01),
 			DisableCollisionsBetweenLinkedBody: false,
 		},
 		modelJoints:                       make(map[int]JointConstraintConfig),
@@ -298,11 +296,11 @@ func newPhysicsStepDiagnostics() PhysicsStepDiagnostics {
 // newWorldSolverConfig は剛性優先のソルバ既定値を返す。
 func newWorldSolverConfig() worldSolverConfig {
 	return worldSolverConfig{
-		NumIterations:                   12,
+		NumIterations:                   16,
 		SplitImpulse:                    1,
 		SplitImpulsePenetration:         float32(-0.02),
-		Erp2:                            float32(0.15),
-		GlobalCfm:                       float32(0.001),
+		Erp2:                            float32(0.2),
+		GlobalCfm:                       float32(0.0005),
 		EnableWarmstarting:              true,
 		EnableSimd:                      true,
 		EnableCacheFriendly:             true,
