@@ -305,7 +305,7 @@ func (vw *ViewerWindow) resetCameraPositionForPreset(yaw, pitch float64) {
 		return
 	}
 	vw.markCameraManualOverride()
-	cam.ResetPresetPosition(yaw, pitch)
+	cam.ResetPosition(yaw, pitch)
 	cam.FieldOfView = graphics_api.FieldOfViewAngle
 	vw.shader.SetCamera(cam)
 	vw.syncCameraToOthers()

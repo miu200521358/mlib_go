@@ -1058,47 +1058,20 @@ func (vl *ViewerManager) updateWind(vw *ViewerWindow, frame motion.Frame) {
 	if enabledFrame != nil {
 		vw.physics.EnableWind(enabledFrame.Enabled)
 	}
-	if direction, speed, randomness, ok := resolveWindBasicParams(directionFrame, speedFrame, randomnessFrame); ok {
+	if directionFrame != nil && speedFrame != nil && randomnessFrame != nil {
 		vw.physics.SetWind(
-			direction,
-			speed,
-			randomness,
+			directionFrame.Direction,
+			float32(speedFrame.Speed),
+			float32(randomnessFrame.Randomness),
 		)
 	}
-	if dragCoeff, liftCoeff, turbulenceFreqHz, ok := resolveWindAdvancedParams(dragCoeffFrame, liftCoeffFrame, turbulenceFrame); ok {
+	if liftCoeffFrame != nil && dragCoeffFrame != nil && turbulenceFrame != nil {
 		vw.physics.SetWindAdvanced(
-			dragCoeff,
-			liftCoeff,
-			turbulenceFreqHz,
+			float32(dragCoeffFrame.DragCoeff),
+			float32(liftCoeffFrame.LiftCoeff),
+			float32(turbulenceFrame.TurbulenceFreqHz),
 		)
 	}
-}
-
-// resolveWindBasicParams は風の基本パラメータを物理反映値に変換して返す。
-func resolveWindBasicParams(
-	directionFrame *motion.WindDirectionFrame,
-	speedFrame *motion.WindSpeedFrame,
-	randomnessFrame *motion.WindRandomnessFrame,
-) (*mmath.Vec3, float32, float32, bool) {
-	if directionFrame == nil || speedFrame == nil || randomnessFrame == nil {
-		return nil, 0, 0, false
-	}
-	return directionFrame.Direction, float32(speedFrame.WindSpeed()), float32(randomnessFrame.WindRandomness()), true
-}
-
-// resolveWindAdvancedParams は風の詳細パラメータを物理反映値に変換して返す。
-func resolveWindAdvancedParams(
-	dragCoeffFrame *motion.WindDragCoeffFrame,
-	liftCoeffFrame *motion.WindLiftCoeffFrame,
-	turbulenceFrame *motion.WindTurbulenceFreqHzFrame,
-) (float32, float32, float32, bool) {
-	if dragCoeffFrame == nil || liftCoeffFrame == nil || turbulenceFrame == nil {
-		return 0, 0, 0, false
-	}
-	return float32(dragCoeffFrame.WindDragCoeff()),
-		float32(liftCoeffFrame.WindLiftCoeff()),
-		float32(turbulenceFrame.WindTurbulenceFreqHz()),
-		true
 }
 
 // updatePhysicsSelectively は継続フレーム用の選択的更新を行う。

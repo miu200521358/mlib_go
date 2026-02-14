@@ -6,7 +6,6 @@ import (
 
 	"github.com/miu200521358/mlib_go/pkg/domain/deform"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
-	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
@@ -25,19 +24,6 @@ const (
 	// DEFORM_STAGE_AFTER_PHYSICS は物理後変形。
 	DEFORM_STAGE_AFTER_PHYSICS
 )
-
-// dynamicBoneSyncMode は DYNAMIC_BONE 剛体の同期方式を表す。
-type dynamicBoneSyncMode int
-
-const (
-	// DYNAMIC_BONE_SYNC_MODE_BULLET は Bullet 結果を優先し、物理前同期を行わない。
-	DYNAMIC_BONE_SYNC_MODE_BULLET dynamicBoneSyncMode = iota
-	// DYNAMIC_BONE_SYNC_MODE_FOLLOW_DELTA はボーン差分で剛体姿勢を追従更新する。
-	DYNAMIC_BONE_SYNC_MODE_FOLLOW_DELTA
-)
-
-// defaultDynamicBoneSyncMode は通常時の DYNAMIC_BONE 同期方式。
-const defaultDynamicBoneSyncMode = DYNAMIC_BONE_SYNC_MODE_BULLET
 
 // DeformOptions は変形オプションを表す。
 type DeformOptions struct {
@@ -117,7 +103,10 @@ func BuildForPhysics(
 	if core == nil || modelData == nil || deltas == nil || deltas.Bones == nil {
 		return deltas
 	}
-	dynamicBoneMode := resolveDynamicBoneSyncMode()
+	frame := deltas.Frame()
+	logSummary := shouldEmitPhysicsVerificationSummary(frame)
+	logger := logging.DefaultLogger()
+	counters := physicsSyncCounters{}
 	if physicsDeltas != nil && physicsDeltas.RigidBodies != nil {
 		updateRigidBodyShapeMass(core, modelIndex, modelData, physicsDeltas)
 	}
@@ -138,6 +127,7 @@ func BuildForPhysics(
 		}
 		global := boneDelta.FilledGlobalMatrix()
 		if resetType != state.PHYSICS_RESET_TYPE_NONE {
+			counters.HardSyncByReset++
 			core.UpdateTransform(modelIndex, bone, &global, rigidBody)
 			continue
 		}
@@ -148,36 +138,34 @@ func BuildForPhysics(
 		case model.PHYSICS_TYPE_STATIC:
 			core.UpdateTransform(modelIndex, bone, &global, rigidBody)
 		case model.PHYSICS_TYPE_DYNAMIC_BONE:
-			syncDynamicBoneForPhysics(core, dynamicBoneMode, modelIndex, bone, &global, rigidBody)
+			// 旧 mlib と同等に、動的ボーン追従剛体も毎フレームの姿勢同期はハード更新で扱う。
+			counters.HardSyncDynamicBone++
+			core.UpdateTransform(modelIndex, bone, &global, rigidBody)
 		case model.PHYSICS_TYPE_DYNAMIC:
 		}
 	}
+	if logSummary && logger.IsVerboseEnabled(logging.VERBOSE_INDEX_PHYSICS) {
+		logger.Verbose(
+			logging.VERBOSE_INDEX_PHYSICS,
+			"物理検証同期要約: model=%d frame=%v enabled=%t resetType=%d total=%d static=%d dynamic=%d dynamicBone=%d hardStatic=%d hardDynamicBone=%d hardReset=%d skipDynamic=%d skipDisabled=%d missingBone=%d missingBoneDelta=%d",
+			modelIndex,
+			frame,
+			enabled,
+			resetType,
+			counters.Total,
+			counters.Static,
+			counters.Dynamic,
+			counters.DynamicBone,
+			counters.HardSyncStatic,
+			counters.HardSyncDynamicBone,
+			counters.HardSyncByReset,
+			counters.SkippedDynamic,
+			counters.SkippedByPhysicsDisabled,
+			counters.MissingBone,
+			counters.MissingBoneDelta,
+		)
+	}
 	return deltas
-}
-
-// resolveDynamicBoneSyncMode は通常時の DYNAMIC_BONE 同期方式を返す。
-func resolveDynamicBoneSyncMode() dynamicBoneSyncMode {
-	return defaultDynamicBoneSyncMode
-}
-
-// syncDynamicBoneForPhysics は DYNAMIC_BONE の通常時同期を方式ごとに実行する。
-func syncDynamicBoneForPhysics(
-	core physics.IPhysicsCore,
-	mode dynamicBoneSyncMode,
-	modelIndex int,
-	bone *model.Bone,
-	global *mmath.Mat4,
-	rigidBody *model.RigidBody,
-) {
-	if core == nil || bone == nil || global == nil || rigidBody == nil {
-		return
-	}
-	switch mode {
-	case DYNAMIC_BONE_SYNC_MODE_FOLLOW_DELTA:
-		core.FollowDeltaTransform(modelIndex, bone, global, rigidBody)
-	default:
-		// 現状の既定は Bullet 結果優先。同期は行わず、物理後反映のみで追従させる。
-	}
 }
 
 // BuildAfterPhysics は物理結果を反映し、物理後変形を行う。
@@ -476,4 +464,32 @@ func mergeBoneDeltas(dst *delta.BoneDeltas, src *delta.BoneDeltas, skip map[int]
 		dst.Update(bd)
 		return true
 	})
+}
+
+// physicsSyncCounters は物理同期経路の集計値を保持する。
+type physicsSyncCounters struct {
+	Total                    int
+	Static                   int
+	Dynamic                  int
+	DynamicBone              int
+	HardSyncStatic           int
+	HardSyncDynamicBone      int
+	HardSyncByReset          int
+	SkippedDynamic           int
+	SkippedByPhysicsDisabled int
+	MissingBone              int
+	MissingBoneDelta         int
+}
+
+// shouldEmitPhysicsVerificationSummary は物理検証要約ログを出力すべきフレームか判定する。
+func shouldEmitPhysicsVerificationSummary(frame motion.Frame) bool {
+	rounded := motion.Frame(math.Round(float64(frame)))
+	if math.Abs(float64(frame-rounded)) > 1e-3 {
+		return false
+	}
+	frameNumber := int(rounded)
+	if frameNumber < 0 {
+		return false
+	}
+	return frameNumber == 0 || frameNumber%30 == 0
 }
