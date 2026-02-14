@@ -469,6 +469,7 @@ func (mp *PhysicsEngine) initRigidBody(
 
 	group := 1 << int(rigidBody.CollisionGroup.Group)
 	mask := int(rigidBody.CollisionGroup.Mask)
+	appliedSize, appliedMass := mp.resolveAppliedShapeMass(rigidBody, rigidBodyDelta)
 	mp.world.AddRigidBody(btRigidBody, group, mask)
 	mp.rigidBodies[modelIndex][rigidBody.Index()] = &RigidBodyValue{
 		RigidBody:        rigidBody,
@@ -476,6 +477,9 @@ func (mp *PhysicsEngine) initRigidBody(
 		BtLocalTransform: &btRigidBodyLocalTransform,
 		Mask:             mask,
 		Group:            group,
+		AppliedSize:      appliedSize,
+		AppliedMass:      appliedMass,
+		HasAppliedParams: true,
 	}
 
 	mp.updateFlag(modelIndex, rigidBody)
@@ -526,6 +530,23 @@ func (mp *PhysicsEngine) calculateMassAndInertia(
 	}
 
 	return mass, localInertia
+}
+
+// resolveAppliedShapeMass は剛体に適用すべきサイズと質量を返します。
+func (mp *PhysicsEngine) resolveAppliedShapeMass(
+	rigidBody *model.RigidBody,
+	rigidBodyDelta *delta.RigidBodyDelta,
+) (mmath.Vec3, float64) {
+	size := rigidBody.Size
+	mass := rigidBody.Param.Mass
+	if rigidBodyDelta != nil {
+		size = rigidBodyDelta.Size
+		mass = rigidBodyDelta.Mass
+	}
+	if rigidBody.PhysicsType == model.PHYSICS_TYPE_STATIC {
+		mass = 0
+	}
+	return size, mass
 }
 
 // getRigidBodyBone は剛体に紐づくボーンを取得します。
@@ -605,47 +626,11 @@ func (mp *PhysicsEngine) updateFlag(modelIndex int, rigidBody *model.RigidBody) 
 	btRigidBody.SetActivationState(bt.DISABLE_DEACTIVATION)
 }
 
-// UpdateTransform はボーン行列に基づいて剛体の位置を更新します。
-func (mp *PhysicsEngine) UpdateTransform(
-	modelIndex int,
-	rigidBodyBone *model.Bone,
-	boneGlobalMatrix *mmath.Mat4,
-	rigidBody *model.RigidBody,
-) {
-	if rigidBodyBone == nil || boneGlobalMatrix == nil || rigidBody == nil {
-		return
-	}
-
-	boneTransform := bt.NewBtTransform()
-	defer bt.DeleteBtTransform(boneTransform)
-
-	mat := newMglMat4FromMat4(*boneGlobalMatrix)
-	boneTransform.SetFromOpenGLMatrix(&mat[0])
-
-	btRigidBody := mp.rigidBodies[modelIndex][rigidBody.Index()].BtRigidBody
-	btRigidBodyLocalTransform := *mp.rigidBodies[modelIndex][rigidBody.Index()].BtLocalTransform
-
-	motionState := btRigidBody.GetMotionState().(bt.BtMotionState)
-	currentTransform := bt.NewBtTransform()
-	defer bt.DeleteBtTransform(currentTransform)
-
-	currentTransform.Mult(boneTransform, btRigidBodyLocalTransform)
-	// 物理シミュレーションに反映させるため、剛体とモーションステートの両方を更新する。
-	btRigidBody.SetWorldTransform(currentTransform)
-	btRigidBody.SetInterpolationWorldTransform(currentTransform)
-	motionState.SetWorldTransform(currentTransform)
-	btRigidBody.Activate(true)
-}
-
-// GetRigidBodyBoneMatrix は剛体に基づいてボーン行列を取得します。
-func (mp *PhysicsEngine) GetRigidBodyBoneMatrix(
-	modelIndex int,
-	rigidBody *model.RigidBody,
-) *mmath.Mat4 {
+// getRigidBodyValue は物理エンジン内の剛体情報を取得する。
+func (mp *PhysicsEngine) getRigidBodyValue(modelIndex int, rigidBody *model.RigidBody) *RigidBodyValue {
 	if rigidBody == nil {
 		return nil
 	}
-
 	bodies, ok := mp.rigidBodies[modelIndex]
 	if !ok || bodies == nil {
 		return nil
@@ -658,6 +643,168 @@ func (mp *PhysicsEngine) GetRigidBodyBoneMatrix(
 	if body == nil || body.BtRigidBody == nil || body.BtLocalTransform == nil {
 		return nil
 	}
+	return body
+}
+
+// UpdateTransform はボーン行列に基づいて剛体の位置を更新します。
+func (mp *PhysicsEngine) UpdateTransform(
+	modelIndex int,
+	rigidBodyBone *model.Bone,
+	boneGlobalMatrix *mmath.Mat4,
+	rigidBody *model.RigidBody,
+) {
+	if rigidBodyBone == nil || boneGlobalMatrix == nil || rigidBody == nil {
+		return
+	}
+	body := mp.getRigidBodyValue(modelIndex, rigidBody)
+	if body == nil {
+		return
+	}
+
+	boneTransform := bt.NewBtTransform()
+	defer bt.DeleteBtTransform(boneTransform)
+
+	mat := newMglMat4FromMat4(*boneGlobalMatrix)
+	boneTransform.SetFromOpenGLMatrix(&mat[0])
+
+	btRigidBody := body.BtRigidBody
+	btRigidBodyLocalTransform := *body.BtLocalTransform
+
+	motionState := btRigidBody.GetMotionState().(bt.BtMotionState)
+	worldTransform := bt.NewBtTransform()
+	defer bt.DeleteBtTransform(worldTransform)
+
+	worldTransform.Mult(boneTransform, btRigidBodyLocalTransform)
+	// 旧 mlib と同等に、剛体追従は MotionState 更新を基準とする。
+	// 動的剛体へ直接 SetWorldTransform を繰り返すとソルバの warm start を崩して不安定化しやすいため、
+	// ここでは MotionState の更新に限定する。
+	motionState.SetWorldTransform(worldTransform)
+	if rigidBody.PhysicsType == model.PHYSICS_TYPE_STATIC {
+		// ボーン未紐付け剛体が静的剛体を参照するケースでは、静的剛体のワールド姿勢が
+		// Bullet 本体側にも反映されていないと拘束が崩れやすい。静的剛体のみ明示更新する。
+		btRigidBody.SetWorldTransform(worldTransform)
+		btRigidBody.SetInterpolationWorldTransform(worldTransform)
+	}
+	body.PrevBoneMatrix = *boneGlobalMatrix
+	body.HasPrevBone = true
+}
+
+// FollowDeltaTransform は前回ボーン姿勢との差分で剛体姿勢を追従更新する。
+func (mp *PhysicsEngine) FollowDeltaTransform(
+	modelIndex int,
+	rigidBodyBone *model.Bone,
+	boneGlobalMatrix *mmath.Mat4,
+	rigidBody *model.RigidBody,
+) {
+	if rigidBodyBone == nil || boneGlobalMatrix == nil || rigidBody == nil {
+		return
+	}
+	body := mp.getRigidBodyValue(modelIndex, rigidBody)
+	if body == nil {
+		return
+	}
+	if !body.HasPrevBone {
+		// 初回は差分を計算できないため、ハード同期を行って基準姿勢を確定する。
+		mp.UpdateTransform(modelIndex, rigidBodyBone, boneGlobalMatrix, rigidBody)
+		return
+	}
+	// 同一フレーム停止中の微小誤差を追従すると速度にノイズが蓄積するため、差分が極小なら更新しない。
+	if boneGlobalMatrix.NearEquals(body.PrevBoneMatrix, 1e-7) {
+		body.PrevBoneMatrix = *boneGlobalMatrix
+		return
+	}
+	btRigidBody := body.BtRigidBody
+	btRigidBodyLocalTransform := *body.BtLocalTransform
+	motionState := btRigidBody.GetMotionState().(bt.BtMotionState)
+
+	currentTransform := bt.NewBtTransform()
+	defer bt.DeleteBtTransform(currentTransform)
+	motionState.GetWorldTransform(currentTransform)
+
+	// 物理後反映済みの同一姿勢を再追従すると、停止中に差分が二重適用されて発散する。
+	// 入力ボーン姿勢が現在剛体姿勢由来と一致する場合は追従処理を行わない。
+	currentRigidBodyBoneMatrix := mp.getBoneMatrixByTransforms(currentTransform, btRigidBodyLocalTransform)
+	if boneGlobalMatrix.NearEquals(currentRigidBodyBoneMatrix, 1e-6) {
+		body.PrevBoneMatrix = *boneGlobalMatrix
+		body.HasPrevBone = true
+		return
+	}
+
+	prevBoneTransform := bt.NewBtTransform()
+	defer bt.DeleteBtTransform(prevBoneTransform)
+	prevMat := newMglMat4FromMat4(body.PrevBoneMatrix)
+	prevBoneTransform.SetFromOpenGLMatrix(&prevMat[0])
+
+	currBoneTransform := bt.NewBtTransform()
+	defer bt.DeleteBtTransform(currBoneTransform)
+	currMat := newMglMat4FromMat4(*boneGlobalMatrix)
+	currBoneTransform.SetFromOpenGLMatrix(&currMat[0])
+
+	invPrevBoneTransform := prevBoneTransform.Inverse()
+	defer bt.DeleteBtTransform(invPrevBoneTransform)
+
+	deltaBoneTransform := bt.NewBtTransform()
+	defer bt.DeleteBtTransform(deltaBoneTransform)
+	deltaBoneTransform.Mult(currBoneTransform, invPrevBoneTransform)
+
+	targetTransform := bt.NewBtTransform()
+	defer bt.DeleteBtTransform(targetTransform)
+	targetTransform.Mult(deltaBoneTransform, currentTransform)
+
+	// 剛体姿勢とモーションステートを同時更新して、ボーン差分に追従させる。
+	btRigidBody.SetWorldTransform(targetTransform)
+	btRigidBody.SetInterpolationWorldTransform(targetTransform)
+	motionState.SetWorldTransform(targetTransform)
+
+	// 速度ベクトルも差分回転に追従させ、見た目の連続性を維持する。
+	deltaRotation := deltaBoneTransform.GetRotation()
+	defer bt.DeleteBtQuaternion(deltaRotation)
+	normalizedDeltaRotation := deltaRotation.Normalized()
+	defer bt.DeleteBtQuaternion(normalizedDeltaRotation)
+
+	linearVelocity := btRigidBody.GetLinearVelocity()
+	angularVelocity := btRigidBody.GetAngularVelocity()
+	rotatedLinearVelocity := bt.QuatRotate(normalizedDeltaRotation, linearVelocity)
+	rotatedAngularVelocity := bt.QuatRotate(normalizedDeltaRotation, angularVelocity)
+	defer bt.DeleteBtVector3(rotatedLinearVelocity)
+	defer bt.DeleteBtVector3(rotatedAngularVelocity)
+
+	btRigidBody.SetLinearVelocity(rotatedLinearVelocity)
+	btRigidBody.SetAngularVelocity(rotatedAngularVelocity)
+	btRigidBody.Activate(true)
+
+	body.PrevBoneMatrix = *boneGlobalMatrix
+	body.HasPrevBone = true
+}
+
+// getBoneMatrixByTransforms は剛体ワールド変換とローカル変換からボーングローバル行列を生成する。
+func (mp *PhysicsEngine) getBoneMatrixByTransforms(
+	rigidBodyGlobalTransform bt.BtTransform,
+	rigidBodyLocalTransform bt.BtTransform,
+) mmath.Mat4 {
+	boneGlobalTransform := bt.NewBtTransform()
+	defer bt.DeleteBtTransform(boneGlobalTransform)
+
+	invRigidBodyLocalTransform := rigidBodyLocalTransform.Inverse()
+	defer bt.DeleteBtTransform(invRigidBodyLocalTransform)
+
+	boneGlobalTransform.Mult(rigidBodyGlobalTransform, invRigidBodyLocalTransform)
+
+	boneGlobalMatrixGL := mgl32.Mat4{}
+	boneGlobalTransform.GetOpenGLMatrix(&boneGlobalMatrixGL[0])
+
+	return newMat4FromMgl(&boneGlobalMatrixGL)
+}
+
+// GetRigidBodyBoneMatrix は剛体に基づいてボーン行列を取得します。
+func (mp *PhysicsEngine) GetRigidBodyBoneMatrix(
+	modelIndex int,
+	rigidBody *model.RigidBody,
+) *mmath.Mat4 {
+	body := mp.getRigidBodyValue(modelIndex, rigidBody)
+	if body == nil {
+		return nil
+	}
 	btRigidBody := body.BtRigidBody
 	btRigidBodyLocalTransform := *body.BtLocalTransform
 
@@ -668,18 +815,7 @@ func (mp *PhysicsEngine) GetRigidBodyBoneMatrix(
 
 	motionState.GetWorldTransform(rigidBodyGlobalTransform)
 
-	boneGlobalTransform := bt.NewBtTransform()
-	defer bt.DeleteBtTransform(boneGlobalTransform)
-
-	invRigidBodyLocalTransform := btRigidBodyLocalTransform.Inverse()
-	defer bt.DeleteBtTransform(invRigidBodyLocalTransform)
-
-	boneGlobalTransform.Mult(rigidBodyGlobalTransform, invRigidBodyLocalTransform)
-
-	boneGlobalMatrixGL := mgl32.Mat4{}
-	boneGlobalTransform.GetOpenGLMatrix(&boneGlobalMatrixGL[0])
-
-	boneGlobalMatrix := newMat4FromMgl(&boneGlobalMatrixGL)
+	boneGlobalMatrix := mp.getBoneMatrixByTransforms(rigidBodyGlobalTransform, btRigidBodyLocalTransform)
 	return &boneGlobalMatrix
 }
 
@@ -714,16 +850,17 @@ func (mp *PhysicsEngine) UpdateRigidBodyShapeMass(
 		return
 	}
 
-	massChanged := !mmath.NearEquals(rigidBodyDelta.Mass, rigidBody.Param.Mass, 1e-10)
-	sizeChanged := !rigidBodyDelta.Size.NearEquals(rigidBody.Size, 1e-10)
-	if !massChanged && !sizeChanged {
-		return
-	}
-
 	r := mp.rigidBodies[modelIndex][rigidBody.Index()]
 	if r == nil || r.BtRigidBody == nil {
 		return
 	}
+	nextSize, nextMass := mp.resolveAppliedShapeMass(rigidBody, rigidBodyDelta)
+	if r.HasAppliedParams &&
+		nextSize.NearEquals(r.AppliedSize, 1e-10) &&
+		mmath.NearEquals(nextMass, r.AppliedMass, 1e-10) {
+		return
+	}
+	sizeChanged := !r.HasAppliedParams || !nextSize.NearEquals(r.AppliedSize, 1e-10)
 
 	btRigidBody := r.BtRigidBody
 	motionState := btRigidBody.GetMotionState().(bt.BtMotionState)
@@ -733,15 +870,7 @@ func (mp *PhysicsEngine) UpdateRigidBodyShapeMass(
 
 	currentLinearVel := btRigidBody.GetLinearVelocity()
 	currentAngularVel := btRigidBody.GetAngularVelocity()
-	currentMass := float32(0.0)
-	if btRigidBody.GetInvMass() != 0 {
-		currentMass = 1.0 / btRigidBody.GetInvMass()
-	}
-
-	newMass := currentMass
-	if rigidBody.PhysicsType != model.PHYSICS_TYPE_STATIC {
-		newMass = float32(mmath.Clamped(rigidBodyDelta.Mass, 0, math.MaxFloat64))
-	}
+	newMass := float32(mmath.Clamped(nextMass, 0, math.MaxFloat64))
 
 	needShapeUpdate := sizeChanged
 	if needShapeUpdate {
@@ -781,6 +910,9 @@ func (mp *PhysicsEngine) UpdateRigidBodyShapeMass(
 
 	mp.updateFlag(modelIndex, rigidBody)
 	btRigidBody.Activate(true)
+	r.AppliedSize = nextSize
+	r.AppliedMass = nextMass
+	r.HasAppliedParams = true
 }
 
 // findRigidBodyByCollisionObject は衝突オブジェクトから剛体参照を取得します。

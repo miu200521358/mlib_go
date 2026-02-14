@@ -27,6 +27,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
 	"github.com/miu200521358/mlib_go/pkg/shared/contracts/mtime"
+	"github.com/miu200521358/mlib_go/pkg/shared/contracts/performance"
 	"github.com/miu200521358/mlib_go/pkg/shared/state"
 	"github.com/miu200521358/mlib_go/pkg/usecase/mdeform"
 	"github.com/miu200521358/mlib_go/pkg/usecase/mphysics"
@@ -733,11 +734,11 @@ func resolveWindMotion(shared state.ISharedState, viewerIndex int) *motion.VmdMo
 // resolveMaxSubSteps は最大演算回数を取得する。
 func resolveMaxSubSteps(physicsWorldMotion *motion.VmdMotion, frame motion.Frame) int {
 	if physicsWorldMotion == nil || physicsWorldMotion.MaxSubStepsFrames == nil {
-		return 2
+		return performance.DefaultMaxSubSteps
 	}
 	maxFrame := physicsWorldMotion.MaxSubStepsFrames.Get(frame)
 	if maxFrame == nil || maxFrame.MaxSubSteps <= 0 {
-		return 2
+		return performance.DefaultMaxSubSteps
 	}
 	return maxFrame.MaxSubSteps
 }

@@ -52,7 +52,13 @@ func BuildPhysicsDeltas(modelData *model.PmxModel, motionData *motion.VmdMotion,
 				continue
 			}
 			size := resolveVec3(rf.Size, rigidBody.Size)
-			mass := rf.Mass
+			mass := rigidBody.Param.Mass
+			if rf.Mass != nil {
+				mass = *rf.Mass
+				rigidMassExplicitCount++
+			} else {
+				rigidMassFallbackCount++
+			}
 			deltas.RigidBodies.Update(delta.NewRigidBodyDeltaByValue(rigidBody, frame, size, mass))
 			rigidDeltaCount++
 		}
