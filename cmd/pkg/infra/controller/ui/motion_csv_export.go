@@ -8,9 +8,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/miu200521358/mlib_go/cmd/pkg/adapter/mpresenter/messages"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_csv"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 )
 
 const (
@@ -19,6 +21,11 @@ const (
 	motionCsvTimeLayout  = "20060102_150405"
 	motionCsvExt         = ".csv"
 	motionVmdExt         = ".vmd"
+)
+
+const (
+	motionCsvCsvSaveFailedErrorID = "15607"
+	motionCsvMarshalFailedErrorID = "95602"
 )
 
 var motionCsvNowFunc = time.Now
@@ -104,10 +111,21 @@ func buildMotionCsvOutputPath(basePath, kind, timestamp string) string {
 func saveMotionBoneCsv(outputPath string, rows []motionBoneCsvRow) error {
 	model, err := io_csv.Marshal(rows)
 	if err != nil {
-		return fmt.Errorf("ボーンCSVモデル生成に失敗しました: %w", err)
+		return merr.NewCommonError(
+			motionCsvMarshalFailedErrorID,
+			merr.ErrorKindInternal,
+			messages.MessageMotionCsvBoneMarshalFailed,
+			err,
+		)
 	}
 	if err := io_csv.NewCsvRepository().Save(outputPath, model, io_common.SaveOptions{}); err != nil {
-		return fmt.Errorf("ボーンCSV保存に失敗しました: %w", err)
+		return merr.NewCommonError(
+			motionCsvCsvSaveFailedErrorID,
+			merr.ErrorKindValidate,
+			messages.MessageMotionCsvBoneSaveFailed,
+			err,
+			filepath.Base(outputPath),
+		)
 	}
 	return nil
 }
@@ -116,10 +134,21 @@ func saveMotionBoneCsv(outputPath string, rows []motionBoneCsvRow) error {
 func saveMotionMorphCsv(outputPath string, rows []motionMorphCsvRow) error {
 	model, err := io_csv.Marshal(rows)
 	if err != nil {
-		return fmt.Errorf("モーフCSVモデル生成に失敗しました: %w", err)
+		return merr.NewCommonError(
+			motionCsvMarshalFailedErrorID,
+			merr.ErrorKindInternal,
+			messages.MessageMotionCsvMorphMarshalFailed,
+			err,
+		)
 	}
 	if err := io_csv.NewCsvRepository().Save(outputPath, model, io_common.SaveOptions{}); err != nil {
-		return fmt.Errorf("モーフCSV保存に失敗しました: %w", err)
+		return merr.NewCommonError(
+			motionCsvCsvSaveFailedErrorID,
+			merr.ErrorKindValidate,
+			messages.MessageMotionCsvMorphSaveFailed,
+			err,
+			filepath.Base(outputPath),
+		)
 	}
 	return nil
 }

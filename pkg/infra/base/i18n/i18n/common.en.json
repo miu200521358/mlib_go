@@ -1678,5 +1678,33 @@
     {
         "id": "テクスチャの読込に失敗しました: %s",
         "translation": "Failed to load texture: %s"
+    },
+    {
+        "id": "スクリーンショット要求に失敗しました",
+        "translation": "Failed to request screenshot"
+    },
+    {
+        "id": "スクリーンショット保存先が未指定です",
+        "translation": "Screenshot save destination is not specified"
+    },
+    {
+        "id": "スクリーンショット保存に失敗しました: %s",
+        "translation": "Failed to save screenshot: %s"
+    },
+    {
+        "id": "スクリーンショットサイズが不正です: %dx%d",
+        "translation": "Invalid screenshot size: %dx%d"
+    },
+    {
+        "id": "スクリーンショットの保存先ディレクトリ作成に失敗しました: %s",
+        "translation": "Failed to create screenshot output directory: %s"
+    },
+    {
+        "id": "スクリーンショットファイルの作成に失敗しました: %s",
+        "translation": "Failed to create screenshot file: %s"
+    },
+    {
+        "id": "スクリーンショットのエンコードに失敗しました: %s",
+        "translation": "Failed to encode screenshot: %s"
     }
 ]

@@ -2,18 +2,19 @@
 package ui
 
 import (
-	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 
+	"github.com/miu200521358/mlib_go/cmd/pkg/adapter/mpresenter/messages"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_csv"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_motion"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 )
 
 const (
@@ -21,10 +22,25 @@ const (
 	motionCsvMorphColumnsMin = 3
 )
 
+const (
+	motionCsvNoDataErrorID              = "15601"
+	motionCsvHeaderNotFoundErrorID      = "15602"
+	motionCsvFormatUnknownErrorID       = "15603"
+	motionCsvColumnsInsufficientErrorID = "15604"
+	motionCsvParseFailedErrorID         = "15605"
+	motionCsvVmdSaveFailedErrorID       = "15606"
+	motionCsvModelInvalidErrorID        = "95601"
+)
+
 var (
 	motionCsvBoneFilePattern  = regexp.MustCompile(`(?i)_bone(_\d{8}_\d{6})?\.csv$`)
 	motionCsvMorphFilePattern = regexp.MustCompile(`(?i)_morph(_\d{8}_\d{6})?\.csv$`)
-	errMotionCsvNoData        = errors.New("入力CSVに有効なモーションデータが見つかりません")
+	errMotionCsvNoData        = merr.NewCommonError(
+		motionCsvNoDataErrorID,
+		merr.ErrorKindValidate,
+		messages.MessageMotionCsvImportNoData,
+		nil,
+	)
 )
 
 type motionCsvKind int
@@ -72,7 +88,13 @@ func importMotionCsvByInputPath(inputPath string, outputPath string) error {
 
 	motionData.UpdateHash()
 	if err := io_motion.NewVmdVpdRepository().Save(outputPath, motionData, io_common.SaveOptions{}); err != nil {
-		return fmt.Errorf("VMD保存に失敗しました: %w", err)
+		return merr.NewCommonError(
+			motionCsvVmdSaveFailedErrorID,
+			merr.ErrorKindValidate,
+			messages.MessageMotionCsvVmdSaveFailed,
+			err,
+			filepath.Base(outputPath),
+		)
 	}
 	return nil
 }
@@ -80,7 +102,12 @@ func importMotionCsvByInputPath(inputPath string, outputPath string) error {
 // appendMotionCsvByPath はCSV1ファイルを読み込み、モーションへ追記する。
 func appendMotionCsvByPath(motionData *motion.VmdMotion, path string) (motionCsvKind, int, error) {
 	if motionData == nil {
-		return motionCsvKindUnknown, 0, errors.New("モーションデータがnilです")
+		return motionCsvKindUnknown, 0, merr.NewCommonError(
+			motionCsvModelInvalidErrorID,
+			merr.ErrorKindInternal,
+			messages.MessageMotionCsvMotionDataNil,
+			nil,
+		)
 	}
 
 	data, err := io_csv.NewCsvRepository().Load(path)
@@ -89,12 +116,24 @@ func appendMotionCsvByPath(motionData *motion.VmdMotion, path string) (motionCsv
 	}
 	model, ok := data.(*io_csv.CsvModel)
 	if !ok || model == nil {
-		return motionCsvKindUnknown, 0, fmt.Errorf("CSVモデル変換に失敗しました: %s", filepath.Base(path))
+		return motionCsvKindUnknown, 0, merr.NewCommonError(
+			motionCsvModelInvalidErrorID,
+			merr.ErrorKindInternal,
+			messages.MessageMotionCsvModelConvertFailed,
+			nil,
+			filepath.Base(path),
+		)
 	}
 
 	records := model.Records()
 	if len(records) == 0 || len(records[0]) == 0 {
-		return motionCsvKindUnknown, 0, fmt.Errorf("CSVヘッダが見つかりません: %s", filepath.Base(path))
+		return motionCsvKindUnknown, 0, merr.NewCommonError(
+			motionCsvHeaderNotFoundErrorID,
+			merr.ErrorKindValidate,
+			messages.MessageMotionCsvHeaderNotFound,
+			nil,
+			filepath.Base(path),
+		)
 	}
 
 	kind := detectMotionCsvKind(records[0])
@@ -112,7 +151,13 @@ func appendMotionCsvByPath(motionData *motion.VmdMotion, path string) (motionCsv
 		count, err := appendMotionMorphCsvRecords(motionData, model, path)
 		return kind, count, err
 	default:
-		return motionCsvKindUnknown, 0, fmt.Errorf("CSV形式を判別できません: %s", filepath.Base(path))
+		return motionCsvKindUnknown, 0, merr.NewCommonError(
+			motionCsvFormatUnknownErrorID,
+			merr.ErrorKindValidate,
+			messages.MessageMotionCsvFormatUnknown,
+			nil,
+			filepath.Base(path),
+		)
 	}
 }
 
@@ -138,7 +183,14 @@ func validateMotionCsvColumns(records [][]string, minColumns int, label string, 
 		return nil
 	}
 	if len(records[0]) < minColumns {
-		return fmt.Errorf("%sの列数が不足しています: %s", label, filepath.Base(path))
+		return merr.NewCommonError(
+			motionCsvColumnsInsufficientErrorID,
+			merr.ErrorKindValidate,
+			messages.MessageMotionCsvColumnsInsufficient,
+			nil,
+			label,
+			filepath.Base(path),
+		)
 	}
 
 	for rowIndex := 1; rowIndex < len(records); rowIndex++ {
@@ -147,8 +199,11 @@ func validateMotionCsvColumns(records [][]string, minColumns int, label string, 
 			continue
 		}
 		if len(row) < minColumns {
-			return fmt.Errorf(
-				"%sの列数が不足しています(行:%d): %s",
+			return merr.NewCommonError(
+				motionCsvColumnsInsufficientErrorID,
+				merr.ErrorKindValidate,
+				messages.MessageMotionCsvColumnsInsufficientWithRow,
+				nil,
 				label,
 				rowIndex+1,
 				filepath.Base(path),
@@ -161,14 +216,25 @@ func validateMotionCsvColumns(records [][]string, minColumns int, label string, 
 // appendMotionBoneCsvRecords はボーンCSVレコードをモーションへ追記する。
 func appendMotionBoneCsvRecords(motionData *motion.VmdMotion, model *io_csv.CsvModel, path string) (int, error) {
 	if model == nil {
-		return 0, errors.New("CSVモデルがnilです")
+		return 0, merr.NewCommonError(
+			motionCsvModelInvalidErrorID,
+			merr.ErrorKindInternal,
+			messages.MessageMotionCsvModelNil,
+			nil,
+		)
 	}
 
 	rows := make([]motionBoneCsvRow, 0)
 	if err := io_csv.UnmarshalWithOptions(model, &rows, io_csv.CsvUnmarshalOptions{
 		ColumnMapping: io_csv.CsvColumnMappingOrder,
 	}); err != nil {
-		return 0, fmt.Errorf("ボーンCSVの解析に失敗しました: %s: %w", filepath.Base(path), err)
+		return 0, merr.NewCommonError(
+			motionCsvParseFailedErrorID,
+			merr.ErrorKindValidate,
+			messages.MessageMotionCsvBoneParseFailed,
+			err,
+			filepath.Base(path),
+		)
 	}
 
 	count := 0
@@ -202,14 +268,25 @@ func appendMotionBoneCsvRecords(motionData *motion.VmdMotion, model *io_csv.CsvM
 // appendMotionMorphCsvRecords はモーフCSVレコードをモーションへ追記する。
 func appendMotionMorphCsvRecords(motionData *motion.VmdMotion, model *io_csv.CsvModel, path string) (int, error) {
 	if model == nil {
-		return 0, errors.New("CSVモデルがnilです")
+		return 0, merr.NewCommonError(
+			motionCsvModelInvalidErrorID,
+			merr.ErrorKindInternal,
+			messages.MessageMotionCsvModelNil,
+			nil,
+		)
 	}
 
 	rows := make([]motionMorphCsvRow, 0)
 	if err := io_csv.UnmarshalWithOptions(model, &rows, io_csv.CsvUnmarshalOptions{
 		ColumnMapping: io_csv.CsvColumnMappingHeader,
 	}); err != nil {
-		return 0, fmt.Errorf("モーフCSVの解析に失敗しました: %s: %w", filepath.Base(path), err)
+		return 0, merr.NewCommonError(
+			motionCsvParseFailedErrorID,
+			merr.ErrorKindValidate,
+			messages.MessageMotionCsvMorphParseFailed,
+			err,
+			filepath.Base(path),
+		)
 	}
 
 	count := 0
@@ -305,5 +382,15 @@ func existsFile(path string) bool {
 
 // sameFilePath は同一パスか判定する。
 func sameFilePath(left string, right string) bool {
-	return strings.EqualFold(filepath.Clean(left), filepath.Clean(right))
+	return sameFilePathByOS(runtime.GOOS, left, right)
+}
+
+// sameFilePathByOS はOSごとの比較方式で同一パスか判定する。
+func sameFilePathByOS(osName string, left string, right string) bool {
+	leftPath := filepath.Clean(left)
+	rightPath := filepath.Clean(right)
+	if osName == "windows" {
+		return strings.EqualFold(leftPath, rightPath)
+	}
+	return leftPath == rightPath
 }

@@ -5,7 +5,6 @@
 package ui
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/miu200521358/mlib_go/cmd/pkg/adapter/mpresenter/messages"
@@ -23,6 +22,11 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/usecase"
 	"github.com/miu200521358/walk/pkg/declarative"
 	"github.com/miu200521358/walk/pkg/walk"
+)
+
+const (
+	motionCsvRequiredPathErrorID   = "15608"
+	motionCsvMotionNotFoundErrorID = "15609"
 )
 
 // NewTabPages はサンプル用のタブページ群を生成する。
@@ -446,16 +450,28 @@ func saveMotionCsv(logger logging.ILogger, translator i18n.II18n, rep io_common.
 	if sourcePath == "" {
 		logErrorTitle(
 			logger,
+			translator,
 			i18n.TranslateOrMark(translator, messages.MessageMotionCsvExportFailed),
-			errors.New(i18n.TranslateOrMark(translator, messages.MessageMotionCsvSourcePathRequired)),
+			merr.NewCommonError(
+				motionCsvRequiredPathErrorID,
+				merr.ErrorKindValidate,
+				messages.MessageMotionCsvSourcePathRequired,
+				nil,
+			),
 		)
 		return
 	}
 	if outputPath == "" {
 		logErrorTitle(
 			logger,
+			translator,
 			i18n.TranslateOrMark(translator, messages.MessageMotionCsvExportFailed),
-			errors.New(i18n.TranslateOrMark(translator, messages.MessageMotionCsvOutputPathRequired)),
+			merr.NewCommonError(
+				motionCsvRequiredPathErrorID,
+				merr.ErrorKindValidate,
+				messages.MessageMotionCsvOutputPathRequired,
+				nil,
+			),
 		)
 		return
 	}
@@ -472,12 +488,17 @@ func saveMotionCsv(logger logging.ILogger, translator i18n.II18n, rep io_common.
 		logLoadFailed(
 			logger,
 			translator,
-			errors.New(i18n.TranslateOrMark(translator, messages.MessageMotionCsvMotionNotFound)),
+			merr.NewCommonError(
+				motionCsvMotionNotFoundErrorID,
+				merr.ErrorKindNotFound,
+				messages.MessageMotionCsvMotionNotFound,
+				nil,
+			),
 		)
 		return
 	}
 	if err := exportMotionCsvByOutputPath(outputPath, motionResult.Motion); err != nil {
-		logErrorTitle(logger, i18n.TranslateOrMark(translator, messages.MessageMotionCsvExportFailed), err)
+		logErrorTitle(logger, translator, i18n.TranslateOrMark(translator, messages.MessageMotionCsvExportFailed), err)
 		return
 	}
 
@@ -496,29 +517,33 @@ func saveMotionByCsv(logger logging.ILogger, translator i18n.II18n, sourcePath s
 	if sourcePath == "" {
 		logErrorTitle(
 			logger,
+			translator,
 			i18n.TranslateOrMark(translator, messages.MessageMotionCsvImportFailed),
-			errors.New(i18n.TranslateOrMark(translator, messages.MessageMotionCsvImportSourceRequired)),
+			merr.NewCommonError(
+				motionCsvRequiredPathErrorID,
+				merr.ErrorKindValidate,
+				messages.MessageMotionCsvImportSourceRequired,
+				nil,
+			),
 		)
 		return
 	}
 	if outputPath == "" {
 		logErrorTitle(
 			logger,
+			translator,
 			i18n.TranslateOrMark(translator, messages.MessageMotionCsvImportFailed),
-			errors.New(i18n.TranslateOrMark(translator, messages.MessageMotionCsvImportOutputRequired)),
+			merr.NewCommonError(
+				motionCsvRequiredPathErrorID,
+				merr.ErrorKindValidate,
+				messages.MessageMotionCsvImportOutputRequired,
+				nil,
+			),
 		)
 		return
 	}
 	if err := importMotionCsvByInputPath(sourcePath, outputPath); err != nil {
-		if errors.Is(err, errMotionCsvNoData) {
-			logErrorTitle(
-				logger,
-				i18n.TranslateOrMark(translator, messages.MessageMotionCsvImportFailed),
-				errors.New(i18n.TranslateOrMark(translator, messages.MessageMotionCsvImportNoData)),
-			)
-			return
-		}
-		logErrorTitle(logger, i18n.TranslateOrMark(translator, messages.MessageMotionCsvImportFailed), err)
+		logErrorTitle(logger, translator, i18n.TranslateOrMark(translator, messages.MessageMotionCsvImportFailed), err)
 		return
 	}
 
@@ -568,7 +593,7 @@ func logLoadFailed(logger logging.ILogger, translator i18n.II18n, err error) {
 	if logger == nil {
 		logger = logging.DefaultLogger()
 	}
-	logErrorTitle(logger, i18n.TranslateOrMark(translator, messages.MessageLoadFailed), err)
+	logErrorTitle(logger, translator, i18n.TranslateOrMark(translator, messages.MessageLoadFailed), err)
 }
 
 // logModelLoadWarnings はモデル読み込み時の継続警告をログ出力する。
@@ -589,7 +614,7 @@ func logModelLoadWarnings(logger logging.ILogger, translator i18n.II18n, result 
 }
 
 // logErrorTitle はタイトル付きエラーを出力する。
-func logErrorTitle(logger logging.ILogger, title string, err error) {
+func logErrorTitle(logger logging.ILogger, translator i18n.II18n, title string, err error) {
 	if logger == nil {
 		return
 	}
@@ -603,7 +628,8 @@ func logErrorTitle(logger logging.ILogger, title string, err error) {
 	if err != nil {
 		errText = err.Error()
 		if errID := merr.ExtractErrorID(err); errID != "" {
-			errText = "エラーID: " + errID + "\n" + errText
+			errLabel := i18n.TranslateOrMark(translator, messages.ErrorCommonKey001)
+			errText = fmt.Sprintf("%s: %s\n%s", errLabel, errID, errText)
 		}
 	}
 	logger.Error("%s: %s", title, errText)

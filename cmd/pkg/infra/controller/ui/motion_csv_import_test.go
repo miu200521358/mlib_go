@@ -11,6 +11,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_motion"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 )
 
 func TestBuildMotionVmdDefaultOutputPath(t *testing.T) {
@@ -105,6 +106,52 @@ func TestImportMotionCsvByInputPath_InvalidFormat(t *testing.T) {
 	err := importMotionCsvByInputPath(inputPath, outputPath)
 	if err == nil {
 		t.Fatalf("expected import to fail for invalid format")
+	}
+	if errID := merr.ExtractErrorID(err); errID == "" {
+		t.Fatalf("expected ErrorID to be set")
+	} else if errID != motionCsvFormatUnknownErrorID {
+		t.Fatalf("unexpected ErrorID: got=%s want=%s", errID, motionCsvFormatUnknownErrorID)
+	}
+}
+
+func TestSameFilePathByOS(t *testing.T) {
+	tests := []struct {
+		name   string
+		osName string
+		left   string
+		right  string
+		want   bool
+	}{
+		{
+			name:   "windows は大文字小文字を区別しない",
+			osName: "windows",
+			left:   "C:/work/A.csv",
+			right:  "c:/work/a.csv",
+			want:   true,
+		},
+		{
+			name:   "linux は大文字小文字を区別する",
+			osName: "linux",
+			left:   "/tmp/A.csv",
+			right:  "/tmp/a.csv",
+			want:   false,
+		},
+		{
+			name:   "linux は正規化後に一致判定する",
+			osName: "linux",
+			left:   "/tmp/work/../a.csv",
+			right:  "/tmp/a.csv",
+			want:   true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got := sameFilePathByOS(tc.osName, tc.left, tc.right)
+			if got != tc.want {
+				t.Fatalf("sameFilePathByOS(%s, %s, %s) = %v, want %v", tc.osName, tc.left, tc.right, got, tc.want)
+			}
+		})
 	}
 }
 

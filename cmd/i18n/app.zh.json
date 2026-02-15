@@ -164,6 +164,66 @@
         "translation": "动作CSV导入已完成: %s"
     },
     {
+        "id": "VMD保存に失敗しました: %s",
+        "translation": "VMD保存失败: %s"
+    },
+    {
+        "id": "モーションデータが不正です",
+        "translation": "动作数据无效"
+    },
+    {
+        "id": "CSVモデル変換に失敗しました: %s",
+        "translation": "CSV模型转换失败: %s"
+    },
+    {
+        "id": "CSVヘッダが見つかりません: %s",
+        "translation": "未找到CSV表头: %s"
+    },
+    {
+        "id": "CSV形式を判別できません: %s",
+        "translation": "无法判断CSV格式: %s"
+    },
+    {
+        "id": "%sの列数が不足しています: %s",
+        "translation": "%s的列数不足: %s"
+    },
+    {
+        "id": "%sの列数が不足しています(行:%d): %s",
+        "translation": "%s的列数不足(行:%d): %s"
+    },
+    {
+        "id": "CSVモデルが不正です",
+        "translation": "CSV模型无效"
+    },
+    {
+        "id": "ボーンCSVの解析に失敗しました: %s",
+        "translation": "骨骼CSV解析失败: %s"
+    },
+    {
+        "id": "モーフCSVの解析に失敗しました: %s",
+        "translation": "变形CSV解析失败: %s"
+    },
+    {
+        "id": "ボーンCSVモデル生成に失敗しました",
+        "translation": "骨骼CSV模型生成失败"
+    },
+    {
+        "id": "ボーンCSV保存に失敗しました: %s",
+        "translation": "骨骼CSV保存失败: %s"
+    },
+    {
+        "id": "モーフCSVモデル生成に失敗しました",
+        "translation": "变形CSV模型生成失败"
+    },
+    {
+        "id": "モーフCSV保存に失敗しました: %s",
+        "translation": "变形CSV保存失败: %s"
+    },
+    {
+        "id": "エラーID",
+        "translation": "错误ID"
+    },
+    {
         "id": "材質ビュー",
         "translation": "材质视图"
     },

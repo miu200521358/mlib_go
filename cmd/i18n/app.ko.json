@@ -164,6 +164,66 @@
         "translation": "모션 CSV 가져오기가 완료되었습니다: %s"
     },
     {
+        "id": "VMD保存に失敗しました: %s",
+        "translation": "VMD 저장에 실패했습니다: %s"
+    },
+    {
+        "id": "モーションデータが不正です",
+        "translation": "모션 데이터가 올바르지 않습니다"
+    },
+    {
+        "id": "CSVモデル変換に失敗しました: %s",
+        "translation": "CSV 모델 변환에 실패했습니다: %s"
+    },
+    {
+        "id": "CSVヘッダが見つかりません: %s",
+        "translation": "CSV 헤더를 찾을 수 없습니다: %s"
+    },
+    {
+        "id": "CSV形式を判別できません: %s",
+        "translation": "CSV 형식을 판별할 수 없습니다: %s"
+    },
+    {
+        "id": "%sの列数が不足しています: %s",
+        "translation": "%s의 열 수가 부족합니다: %s"
+    },
+    {
+        "id": "%sの列数が不足しています(行:%d): %s",
+        "translation": "%s의 열 수가 부족합니다(행:%d): %s"
+    },
+    {
+        "id": "CSVモデルが不正です",
+        "translation": "CSV 모델이 올바르지 않습니다"
+    },
+    {
+        "id": "ボーンCSVの解析に失敗しました: %s",
+        "translation": "본 CSV 해석에 실패했습니다: %s"
+    },
+    {
+        "id": "モーフCSVの解析に失敗しました: %s",
+        "translation": "모프 CSV 해석에 실패했습니다: %s"
+    },
+    {
+        "id": "ボーンCSVモデル生成に失敗しました",
+        "translation": "본 CSV 모델 생성에 실패했습니다"
+    },
+    {
+        "id": "ボーンCSV保存に失敗しました: %s",
+        "translation": "본 CSV 저장에 실패했습니다: %s"
+    },
+    {
+        "id": "モーフCSVモデル生成に失敗しました",
+        "translation": "모프 CSV 모델 생성에 실패했습니다"
+    },
+    {
+        "id": "モーフCSV保存に失敗しました: %s",
+        "translation": "모프 CSV 저장에 실패했습니다: %s"
+    },
+    {
+        "id": "エラーID",
+        "translation": "오류 ID"
+    },
+    {
         "id": "材質ビュー",
         "translation": "재질 뷰"
     },

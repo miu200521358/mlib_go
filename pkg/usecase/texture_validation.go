@@ -10,6 +10,11 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/usecase/port/io"
 )
 
+const (
+	textureExistsValidationFailedErrorID = "13503"
+	textureImageValidationFailedErrorID  = "13504"
+)
+
 // TextureValidationIssue はテクスチャ検証で無効だった要素を表す。
 type TextureValidationIssue struct {
 	Name string
@@ -48,7 +53,13 @@ func ValidateModelTextures(modelData *model.PmxModel, validator io.ITextureValid
 		if err != nil {
 			result.Errors = append(
 				result.Errors,
-				merr.NewCommonError("", merr.ErrorKindValidate, messages.TextureExistsValidationFailed, err, texturePath),
+				merr.NewCommonError(
+					textureExistsValidationFailedErrorID,
+					merr.ErrorKindValidate,
+					messages.TextureExistsValidationFailed,
+					err,
+					texturePath,
+				),
 			)
 			texture.SetValid(false)
 			result.Issues = append(result.Issues, TextureValidationIssue{Name: name, Path: texturePath})
@@ -62,7 +73,13 @@ func ValidateModelTextures(modelData *model.PmxModel, validator io.ITextureValid
 		if err := validator.ValidateImage(texturePath); err != nil {
 			result.Errors = append(
 				result.Errors,
-				merr.NewCommonError("", merr.ErrorKindValidate, messages.TextureImageValidationFailed, err, texturePath),
+				merr.NewCommonError(
+					textureImageValidationFailedErrorID,
+					merr.ErrorKindValidate,
+					messages.TextureImageValidationFailed,
+					err,
+					texturePath,
+				),
 			)
 			texture.SetValid(false)
 			result.Issues = append(result.Issues, TextureValidationIssue{Name: name, Path: texturePath})

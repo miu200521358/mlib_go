@@ -164,6 +164,66 @@
         "translation": "モーションCSV入力が完了しました: %s"
     },
     {
+        "id": "VMD保存に失敗しました: %s",
+        "translation": "VMD保存に失敗しました: %s"
+    },
+    {
+        "id": "モーションデータが不正です",
+        "translation": "モーションデータが不正です"
+    },
+    {
+        "id": "CSVモデル変換に失敗しました: %s",
+        "translation": "CSVモデル変換に失敗しました: %s"
+    },
+    {
+        "id": "CSVヘッダが見つかりません: %s",
+        "translation": "CSVヘッダが見つかりません: %s"
+    },
+    {
+        "id": "CSV形式を判別できません: %s",
+        "translation": "CSV形式を判別できません: %s"
+    },
+    {
+        "id": "%sの列数が不足しています: %s",
+        "translation": "%sの列数が不足しています: %s"
+    },
+    {
+        "id": "%sの列数が不足しています(行:%d): %s",
+        "translation": "%sの列数が不足しています(行:%d): %s"
+    },
+    {
+        "id": "CSVモデルが不正です",
+        "translation": "CSVモデルが不正です"
+    },
+    {
+        "id": "ボーンCSVの解析に失敗しました: %s",
+        "translation": "ボーンCSVの解析に失敗しました: %s"
+    },
+    {
+        "id": "モーフCSVの解析に失敗しました: %s",
+        "translation": "モーフCSVの解析に失敗しました: %s"
+    },
+    {
+        "id": "ボーンCSVモデル生成に失敗しました",
+        "translation": "ボーンCSVモデル生成に失敗しました"
+    },
+    {
+        "id": "ボーンCSV保存に失敗しました: %s",
+        "translation": "ボーンCSV保存に失敗しました: %s"
+    },
+    {
+        "id": "モーフCSVモデル生成に失敗しました",
+        "translation": "モーフCSVモデル生成に失敗しました"
+    },
+    {
+        "id": "モーフCSV保存に失敗しました: %s",
+        "translation": "モーフCSV保存に失敗しました: %s"
+    },
+    {
+        "id": "エラーID",
+        "translation": "エラーID"
+    },
+    {
         "id": "材質ビュー",
         "translation": "材質ビュー"
     },

@@ -66,6 +66,7 @@ func TestValidateModelTextures(t *testing.T) {
 		wantIssueLen     int
 		wantErrorLen     int
 		wantErrorKind    merr.ErrorKind
+		wantErrorID      string
 		wantErrorKey     string
 		wantIssuePath    bool
 		wantTextureValid bool
@@ -92,6 +93,7 @@ func TestValidateModelTextures(t *testing.T) {
 			wantIssueLen:     1,
 			wantErrorLen:     1,
 			wantErrorKind:    merr.ErrorKindValidate,
+			wantErrorID:      textureExistsValidationFailedErrorID,
 			wantErrorKey:     messages.TextureExistsValidationFailed,
 			wantIssuePath:    true,
 			wantTextureValid: false,
@@ -121,6 +123,7 @@ func TestValidateModelTextures(t *testing.T) {
 			wantIssueLen:     1,
 			wantErrorLen:     1,
 			wantErrorKind:    merr.ErrorKindValidate,
+			wantErrorID:      textureImageValidationFailedErrorID,
 			wantErrorKey:     messages.TextureImageValidationFailed,
 			wantIssuePath:    true,
 			wantTextureValid: false,
@@ -170,8 +173,11 @@ func TestValidateModelTextures(t *testing.T) {
 				if ce.MessageKey() != tc.wantErrorKey {
 					t.Fatalf("MessageKey が不正です: got=%s want=%s", ce.MessageKey(), tc.wantErrorKey)
 				}
-				if ce.ErrorID() != "" {
-					t.Fatalf("ErrorID は空想定です: got=%s", ce.ErrorID())
+				if ce.ErrorID() == "" {
+					t.Fatalf("ErrorID が空です")
+				}
+				if ce.ErrorID() != tc.wantErrorID {
+					t.Fatalf("ErrorID が不正です: got=%s want=%s", ce.ErrorID(), tc.wantErrorID)
 				}
 			}
 			if tc.wantIssueLen > 0 && tc.wantIssuePath {

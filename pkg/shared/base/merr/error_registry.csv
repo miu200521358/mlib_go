@@ -14,6 +14,8 @@ ID,Kind,Layer,Module,ErrorName,Summary,Remedy,SourcePaths
 13001,Validate,usecase,39,PrerequisiteMissingError,前提不足で処理開始できない,前提を満たしてから再実行してください,-
 13501,Validate,usecase,39,ModelNotLoadedError,モデルが読み込まれていない,モデルを読み込んでから保存してください,mlib_go_t4/pkg/usecase/model_save.go
 13502,Validate,usecase,39,SavePathInvalidError,保存先パスが不正,保存先/権限/ファイル名を確認してください。絵文字/特殊記号が含まれる場合は英数字のみのパスに変更してください。,mlib_go_t4/pkg/usecase/model_save.go
+13503,Validate,usecase,39,TextureExistsValidationFailedError,,,mlib_go_t4/pkg/usecase/texture_validation.go
+13504,Validate,usecase,39,TextureImageValidationFailedError,,,mlib_go_t4/pkg/usecase/texture_validation.go
 14101,Validate,adapter,41,IoFileNotFound,入力ファイルが存在しない,パスを確認して再指定してください。絵文字/特殊記号が含まれる場合は英数字のみのパスへ移動してください。,-
 14102,Validate,adapter,41,IoExtInvalid,拡張子が不正,拡張子を対応形式に修正してください。パスに絵文字/特殊記号がある場合は英数字のみのパスへ移動してください。,-
 14103,Validate,adapter,41,IoFormatNotSupported,形式/バージョンが非対応,対応形式/バージョンに変換してください,-
@@ -52,6 +54,18 @@ ID,Kind,Layer,Module,ErrorName,Summary,Remedy,SourcePaths
 15306,Validate,infra,53,ConsoleSnapshotSaveFailed,ログスナップショット保存に失敗,出力先/権限/ディスク容量を確認してください。パスに絵文字/特殊記号がある場合は英数字のみのパスへ保存してください。,-
 15307,Validate,infra,53,ImageFormatNotSupported,画像形式が未対応,画像形式/拡張子を確認してください。パスに絵文字/特殊記号がある場合は英数字のみのパスへ移動してください。,mlib_go_t4/pkg/infra/file/mfile/image.go; mlib_go_t4/pkg/infra/drivers/render/texture_manager.go
 15401,Validate,infra,54,AudioFileNotSpecified,音楽ファイルが指定されていない,音楽ファイルを選択してください,mlib_go_t4/pkg/infra/drivers/maudio/audio_player_windows.go
+15501,Validate,infra,55,ScreenshotPathRequiredError,,,mlib_go_t4/pkg/infra/controller/control_window.go; mlib_go_t4/pkg/infra/viewer/viewer_window.go
+15502,Validate,infra,55,ScreenshotSizeInvalidError,,,mlib_go_t4/pkg/infra/viewer/viewer_window.go
+15503,Validate,infra,55,ScreenshotSaveFailedError,,,mlib_go_t4/pkg/infra/viewer/viewer_window.go
+15601,Validate,infra,56,MotionCsvNoDataError,,,mlib_go_t4/cmd/pkg/infra/controller/ui/motion_csv_import.go
+15602,Validate,infra,56,MotionCsvHeaderNotFoundError,,,mlib_go_t4/cmd/pkg/infra/controller/ui/motion_csv_import.go
+15603,Validate,infra,56,MotionCsvFormatUnknownError,,,mlib_go_t4/cmd/pkg/infra/controller/ui/motion_csv_import.go
+15604,Validate,infra,56,MotionCsvColumnsInsufficientError,,,mlib_go_t4/cmd/pkg/infra/controller/ui/motion_csv_import.go
+15605,Validate,infra,56,MotionCsvParseFailedError,,,mlib_go_t4/cmd/pkg/infra/controller/ui/motion_csv_import.go
+15606,Validate,infra,56,MotionCsvVmdSaveFailedError,,,mlib_go_t4/cmd/pkg/infra/controller/ui/motion_csv_import.go
+15607,Validate,infra,56,MotionCsvSaveFailedError,,,mlib_go_t4/cmd/pkg/infra/controller/ui/motion_csv_export.go
+15608,Validate,infra,56,MotionCsvRequiredPathError,,,mlib_go_t4/cmd/pkg/infra/controller/ui/tab_page.go
+15609,NotFound,infra,56,MotionCsvMotionNotFoundError,,,mlib_go_t4/cmd/pkg/infra/controller/ui/tab_page.go
 95301,Internal,infra,53,IterProcessFailed,並列処理中のエラー,,-
 95401,Internal,infra,54,GlfwInitFailed,GLFWの初期化に失敗,,mlib_go_t4/pkg/infra/app/errors.go
 95402,Internal,infra,54,PanicDetected,panicを検知,,mlib_go_t4/pkg/infra/app/errors.go
@@ -59,6 +73,9 @@ ID,Kind,Layer,Module,ErrorName,Summary,Remedy,SourcePaths
 95501,Internal,infra,55,ControllerWindowInitFailed,Controllerウィンドウ初期化に失敗,,-
 95502,Internal,infra,55,ConsoleViewInitFailed,ConsoleView初期化に失敗,,-
 95503,Internal,infra,55,ProgressBarInitFailed,ProgressBar初期化に失敗,,-
+95504,Internal,infra,55,ScreenshotRequestFailedError,,,mlib_go_t4/pkg/infra/controller/control_window.go
+95601,Internal,infra,56,MotionCsvModelInvalidError,,,mlib_go_t4/cmd/pkg/infra/controller/ui/motion_csv_import.go
+95602,Internal,infra,56,MotionCsvMarshalFailedError,,,mlib_go_t4/cmd/pkg/infra/controller/ui/motion_csv_export.go
 93501,Internal,usecase,39,RepositoryNotConfiguredError,読み込みリポジトリが未設定,usecase 実行前に読み込みリポジトリを注入してください,mlib_go_t4/pkg/usecase/load.go
 93502,Internal,usecase,39,SaveRepositoryNotConfiguredError,保存リポジトリが未設定,usecase 実行前に保存リポジトリを注入してください,mlib_go_t4/pkg/usecase/model_save.go
 93503,Internal,usecase,39,SavePathServiceNotConfiguredError,保存先判定サービスが未設定,usecase 実行前に保存先判定サービスを注入してください,mlib_go_t4/pkg/usecase/model_save.go

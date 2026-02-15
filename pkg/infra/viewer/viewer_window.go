@@ -34,6 +34,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/render"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 	"github.com/miu200521358/mlib_go/pkg/shared/state"
 )
 
@@ -49,6 +50,12 @@ const (
 	collisionAllFilterMask = int(^uint32(0))
 	// cameraOperationBlockedWarnCooldown はカメラ操作ブロック警告の最小通知間隔。
 	cameraOperationBlockedWarnCooldown = time.Second
+	// screenshotPathRequiredErrorID はスクリーンショット保存先未指定エラーID。
+	screenshotPathRequiredErrorID = "15501"
+	// screenshotSizeInvalidErrorID はスクリーンショットサイズ不正エラーID。
+	screenshotSizeInvalidErrorID = "15502"
+	// screenshotSaveFailedErrorID はスクリーンショット保存失敗エラーID。
+	screenshotSaveFailedErrorID = "15503"
 )
 
 // modelRendererLoadState はモデル描画の非同期読み込み状態を保持する。
@@ -611,7 +618,7 @@ func (vw *ViewerWindow) captureScreenshotIfRequested(width, height int) {
 	errMessage := ""
 	if err != nil {
 		errMessage = err.Error()
-		logging.DefaultLogger().Warn("スクリーンショット保存に失敗しました: %s", errMessage)
+		logging.DefaultLogger().Warn(messages.ViewerWindowKey006, errMessage)
 	}
 	vw.list.shared.CompleteScreenshot(state.ScreenshotResult{
 		ID:         request.ID,
@@ -623,10 +630,22 @@ func (vw *ViewerWindow) captureScreenshotIfRequested(width, height int) {
 // saveScreenshot は現在のフレームバッファを画像として保存する。
 func (vw *ViewerWindow) saveScreenshot(path string, width, height int) error {
 	if path == "" {
-		return fmt.Errorf("保存先パスが空です")
+		return merr.NewCommonError(
+			screenshotPathRequiredErrorID,
+			merr.ErrorKindValidate,
+			messages.ViewerWindowKey007,
+			nil,
+		)
 	}
 	if width <= 0 || height <= 0 {
-		return fmt.Errorf("スクリーンショットサイズが不正です: %dx%d", width, height)
+		return merr.NewCommonError(
+			screenshotSizeInvalidErrorID,
+			merr.ErrorKindValidate,
+			messages.ViewerWindowKey008,
+			nil,
+			width,
+			height,
+		)
 	}
 
 	pixels := make([]uint8, width*height*4)
@@ -654,17 +673,35 @@ func (vw *ViewerWindow) saveScreenshot(path string, width, height int) error {
 	dir := filepath.Dir(path)
 	if dir != "." && dir != "" {
 		if err := os.MkdirAll(dir, 0o755); err != nil {
-			return err
+			return merr.NewCommonError(
+				screenshotSaveFailedErrorID,
+				merr.ErrorKindValidate,
+				messages.ViewerWindowKey009,
+				err,
+				dir,
+			)
 		}
 	}
 	file, err := os.Create(path)
 	if err != nil {
-		return err
+		return merr.NewCommonError(
+			screenshotSaveFailedErrorID,
+			merr.ErrorKindValidate,
+			messages.ViewerWindowKey010,
+			err,
+			path,
+		)
 	}
 	defer file.Close()
 
 	if err := png.Encode(file, img); err != nil {
-		return err
+		return merr.NewCommonError(
+			screenshotSaveFailedErrorID,
+			merr.ErrorKindValidate,
+			messages.ViewerWindowKey011,
+			err,
+			path,
+		)
 	}
 	return nil
 }

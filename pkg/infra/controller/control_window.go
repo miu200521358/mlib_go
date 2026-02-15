@@ -18,6 +18,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/shared/base/config"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/i18n"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
 	"github.com/miu200521358/mlib_go/pkg/shared/contracts/mtime"
 	"github.com/miu200521358/mlib_go/pkg/shared/state"
 	"github.com/miu200521358/walk/pkg/declarative"
@@ -45,6 +46,13 @@ const (
 	langZh i18n.LangCode = "zh"
 	// langKo は韓国語の言語コード。
 	langKo i18n.LangCode = "ko"
+)
+
+const (
+	// screenshotPathRequiredErrorID はスクリーンショット保存先未指定エラーID。
+	screenshotPathRequiredErrorID = "15501"
+	// screenshotRequestFailedErrorID はスクリーンショット要求失敗エラーID。
+	screenshotRequestFailedErrorID = "95504"
 )
 
 // ControlWindow はコントローラーウィンドウを表す。
@@ -426,15 +434,30 @@ func (cw *ControlWindow) SetSaveDeltaIndex(windowIndex int, index int) {
 // RequestScreenshot はスクリーンショットの保存要求を送信する。
 func (cw *ControlWindow) RequestScreenshot(windowIndex int, path string) (uint64, error) {
 	if cw == nil || cw.shared == nil {
-		return 0, fmt.Errorf("スクリーンショット要求に失敗しました")
+		return 0, merr.NewCommonError(
+			screenshotRequestFailedErrorID,
+			merr.ErrorKindInternal,
+			messages.ControlWindowKey106,
+			nil,
+		)
 	}
 	if path == "" {
-		return 0, fmt.Errorf("スクリーンショット保存先が未指定です")
+		return 0, merr.NewCommonError(
+			screenshotPathRequiredErrorID,
+			merr.ErrorKindValidate,
+			messages.ControlWindowKey107,
+			nil,
+		)
 	}
 	if id, ok := cw.shared.EnqueueScreenshot(windowIndex, path); ok {
 		return id, nil
 	}
-	return 0, fmt.Errorf("スクリーンショット要求に失敗しました")
+	return 0, merr.NewCommonError(
+		screenshotRequestFailedErrorID,
+		merr.ErrorKindInternal,
+		messages.ControlWindowKey106,
+		nil,
+	)
 }
 
 // FetchScreenshotResult はスクリーンショット結果を取得して破棄する。

@@ -164,6 +164,66 @@
         "translation": "Motion CSV import has completed: %s"
     },
     {
+        "id": "VMD保存に失敗しました: %s",
+        "translation": "Failed to save VMD: %s"
+    },
+    {
+        "id": "モーションデータが不正です",
+        "translation": "Motion data is invalid"
+    },
+    {
+        "id": "CSVモデル変換に失敗しました: %s",
+        "translation": "Failed to convert CSV model: %s"
+    },
+    {
+        "id": "CSVヘッダが見つかりません: %s",
+        "translation": "CSV header not found: %s"
+    },
+    {
+        "id": "CSV形式を判別できません: %s",
+        "translation": "Unable to determine CSV format: %s"
+    },
+    {
+        "id": "%sの列数が不足しています: %s",
+        "translation": "Insufficient columns in %s: %s"
+    },
+    {
+        "id": "%sの列数が不足しています(行:%d): %s",
+        "translation": "Insufficient columns in %s (row:%d): %s"
+    },
+    {
+        "id": "CSVモデルが不正です",
+        "translation": "CSV model is invalid"
+    },
+    {
+        "id": "ボーンCSVの解析に失敗しました: %s",
+        "translation": "Failed to parse bone CSV: %s"
+    },
+    {
+        "id": "モーフCSVの解析に失敗しました: %s",
+        "translation": "Failed to parse morph CSV: %s"
+    },
+    {
+        "id": "ボーンCSVモデル生成に失敗しました",
+        "translation": "Failed to build bone CSV model"
+    },
+    {
+        "id": "ボーンCSV保存に失敗しました: %s",
+        "translation": "Failed to save bone CSV: %s"
+    },
+    {
+        "id": "モーフCSVモデル生成に失敗しました",
+        "translation": "Failed to build morph CSV model"
+    },
+    {
+        "id": "モーフCSV保存に失敗しました: %s",
+        "translation": "Failed to save morph CSV: %s"
+    },
+    {
+        "id": "エラーID",
+        "translation": "Error ID"
+    },
+    {
         "id": "材質ビュー",
         "translation": "Material View"
     },
