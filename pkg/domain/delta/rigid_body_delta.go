@@ -11,7 +11,6 @@ import (
 type RigidBodyDelta struct {
 	RigidBody *model.RigidBody
 	Frame     mtime.Frame
-	Position  mmath.Vec3
 	Size      mmath.Vec3
 	Mass      float64
 }
@@ -24,7 +23,6 @@ func NewRigidBodyDelta(rigidBody *model.RigidBody, frame mtime.Frame) *RigidBody
 	return &RigidBodyDelta{
 		RigidBody: rigidBody,
 		Frame:     frame,
-		Position:  rigidBody.Position,
 		Size:      rigidBody.Size,
 		Mass:      rigidBody.Param.Mass,
 	}
@@ -34,7 +32,6 @@ func NewRigidBodyDelta(rigidBody *model.RigidBody, frame mtime.Frame) *RigidBody
 func NewRigidBodyDeltaByValue(
 	rigidBody *model.RigidBody,
 	frame mtime.Frame,
-	position mmath.Vec3,
 	size mmath.Vec3,
 	mass float64,
 ) *RigidBodyDelta {
@@ -44,7 +41,6 @@ func NewRigidBodyDeltaByValue(
 	return &RigidBodyDelta{
 		RigidBody: rigidBody,
 		Frame:     frame,
-		Position:  position,
 		Size:      size,
 		Mass:      mass,
 	}

@@ -12,7 +12,7 @@ type RigidBodyFrame struct {
 	*BaseFrame
 	Position *mmath.Vec3
 	Size     *mmath.Vec3
-	Mass     *float64
+	Mass     float64
 }
 
 // NewRigidBodyFrame はRigidBodyFrameを生成する。
@@ -29,10 +29,7 @@ func (f *RigidBodyFrame) Copy() (RigidBodyFrame, error) {
 		BaseFrame: &BaseFrame{index: f.Index(), Read: f.Read},
 		Position:  copyVec3(f.Position),
 		Size:      copyVec3(f.Size),
-	}
-	if f.Mass != nil {
-		mass := *f.Mass
-		copied.Mass = &mass
+		Mass:      f.Mass,
 	}
 	return copied, nil
 }
@@ -58,16 +55,7 @@ func (next *RigidBodyFrame) lerpFrame(prev *RigidBodyFrame, index Frame) *RigidB
 	size := prevSize.Lerp(nextSize, t)
 	out.Position = &pos
 	out.Size = &size
-	if prev.Mass != nil && next.Mass != nil {
-		mass := mmath.Lerp(*prev.Mass, *next.Mass, t)
-		out.Mass = &mass
-	} else if prev.Mass != nil {
-		mass := *prev.Mass
-		out.Mass = &mass
-	} else if next.Mass != nil {
-		mass := *next.Mass
-		out.Mass = &mass
-	}
+	out.Mass = mmath.Lerp(prev.Mass, next.Mass, t)
 	return out
 }
 
@@ -76,16 +64,12 @@ func (f *RigidBodyFrame) copyWithIndex(index Frame) *RigidBodyFrame {
 	if f == nil {
 		return nil
 	}
-	copied := &RigidBodyFrame{
+	return &RigidBodyFrame{
 		BaseFrame: &BaseFrame{index: index, Read: f.Read},
 		Position:  copyVec3(f.Position),
 		Size:      copyVec3(f.Size),
+		Mass:      f.Mass,
 	}
-	if f.Mass != nil {
-		mass := *f.Mass
-		copied.Mass = &mass
-	}
-	return copied
 }
 
 // splitCurve は何もしない。

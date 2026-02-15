@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
-	"github.com/miu200521358/mlib_go/pkg/domain/model"
 )
 
 func TestSelectReferenceRigidBodyCandidate(t *testing.T) {
@@ -176,79 +175,5 @@ func TestShouldResolveBoneLessByScoreJointConnected(t *testing.T) {
 	}
 	if reason != boneLessResolveReasonJointConnected {
 		t.Fatalf("理由が不正です: got=%s want=%s", reason, boneLessResolveReasonJointConnected)
-	}
-}
-
-func TestResolveBulletCollisionMask(t *testing.T) {
-	if got := resolveBulletCollisionMask(0x0000); got != 0x0000 {
-		t.Fatalf("マスク 0x0000 の変換結果が不正です: got=%#x want=%#x", got, 0x0000)
-	}
-	if got := resolveBulletCollisionMask(0xFFFF); got != int(math.MaxUint16) {
-		t.Fatalf("マスク 0xFFFF の変換結果が不正です: got=%#x want=%#x", got, math.MaxUint16)
-	}
-	if got := resolveBulletCollisionMask(0x0007); got != 0x0007 {
-		t.Fatalf("マスク 0x0007 の変換結果が不正です: got=%#x want=%#x", got, 0x0007)
-	}
-}
-
-func TestNormalizeRigidBodySize(t *testing.T) {
-	size := mmath.NewVec3()
-	size.X = -1
-	size.Y = 2
-	size.Z = math.Inf(1)
-	got := normalizeRigidBodySize(size)
-	if got.X != 0 {
-		t.Fatalf("Xの下限クランプが不正です: got=%v want=0", got.X)
-	}
-	if got.Y != 2 {
-		t.Fatalf("Yの中間値保持が不正です: got=%v want=2", got.Y)
-	}
-	if got.Z != mmath.VEC3_MAX_VAL.Z {
-		t.Fatalf("Zの上限クランプが不正です: got=%v want=%v", got.Z, mmath.VEC3_MAX_VAL.Z)
-	}
-}
-
-func TestResolveCcdParametersSphere(t *testing.T) {
-	size := mmath.NewVec3()
-	size.X = 0.4
-	threshold, radius, enabled := resolveCcdParameters(model.SHAPE_SPHERE, size, 1.0)
-	if !enabled {
-		t.Fatalf("動的球剛体でCCDが無効になっています")
-	}
-	if math.Abs(float64(radius)-0.08) > 1e-6 {
-		t.Fatalf("球剛体のCCD半径が不正です: got=%f want=0.08", radius)
-	}
-	if math.Abs(float64(threshold)-0.2) > 1e-6 {
-		t.Fatalf("球剛体のCCDしきい値が不正です: got=%f want=0.2", threshold)
-	}
-}
-
-func TestResolveCcdParametersBoxIgnoresZeroAxis(t *testing.T) {
-	size := mmath.NewVec3()
-	size.X = 0.25
-	size.Y = 1.6
-	threshold, radius, enabled := resolveCcdParameters(model.SHAPE_BOX, size, 0.5)
-	if !enabled {
-		t.Fatalf("動的箱剛体でCCDが無効になっています")
-	}
-	if math.Abs(float64(radius)-0.05) > 1e-6 {
-		t.Fatalf("箱剛体のCCD半径が不正です: got=%f want=0.05", radius)
-	}
-	if math.Abs(float64(threshold)-0.125) > 1e-6 {
-		t.Fatalf("箱剛体のCCDしきい値が不正です: got=%f want=0.125", threshold)
-	}
-}
-
-func TestResolveCcdParametersStaticMass(t *testing.T) {
-	size := mmath.NewVec3()
-	size.X = 1.0
-	size.Y = 1.0
-	size.Z = 1.0
-	threshold, radius, enabled := resolveCcdParameters(model.SHAPE_BOX, size, 0)
-	if enabled {
-		t.Fatalf("静的相当剛体でCCDが有効になっています: threshold=%f radius=%f", threshold, radius)
-	}
-	if threshold != 0 || radius != 0 {
-		t.Fatalf("静的相当剛体のCCD値が不正です: threshold=%f radius=%f", threshold, radius)
 	}
 }

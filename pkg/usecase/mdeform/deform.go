@@ -26,19 +26,6 @@ const (
 	DEFORM_STAGE_AFTER_PHYSICS
 )
 
-// dynamicBoneSyncMode は DYNAMIC_BONE 剛体の同期方式を表す。
-type dynamicBoneSyncMode int
-
-const (
-	// DYNAMIC_BONE_SYNC_MODE_BULLET は Bullet 結果を優先し、物理前同期を行わない。
-	DYNAMIC_BONE_SYNC_MODE_BULLET dynamicBoneSyncMode = iota
-	// DYNAMIC_BONE_SYNC_MODE_FOLLOW_DELTA はボーン差分で剛体姿勢を追従更新する。
-	DYNAMIC_BONE_SYNC_MODE_FOLLOW_DELTA
-)
-
-// defaultDynamicBoneSyncMode は通常時の DYNAMIC_BONE 同期方式。
-const defaultDynamicBoneSyncMode = DYNAMIC_BONE_SYNC_MODE_BULLET
-
 // DeformOptions は変形オプションを表す。
 type DeformOptions struct {
 	TargetBoneNames []string
@@ -117,7 +104,6 @@ func BuildForPhysics(
 	if core == nil || modelData == nil || deltas == nil || deltas.Bones == nil {
 		return deltas
 	}
-	dynamicBoneMode := resolveDynamicBoneSyncMode()
 	if physicsDeltas != nil && physicsDeltas.RigidBodies != nil {
 		updateRigidBodyShapeMass(core, modelIndex, modelData, physicsDeltas)
 	}
@@ -136,48 +122,12 @@ func BuildForPhysics(
 		if boneDelta == nil {
 			continue
 		}
-		global := boneDelta.FilledGlobalMatrix()
-		if resetType != state.PHYSICS_RESET_TYPE_NONE {
+		if (enabled && rigidBody.PhysicsType != model.PHYSICS_TYPE_DYNAMIC) || resetType != state.PHYSICS_RESET_TYPE_NONE {
+			global := boneDelta.FilledGlobalMatrix()
 			core.UpdateTransform(modelIndex, bone, &global, rigidBody)
-			continue
-		}
-		if !enabled {
-			continue
-		}
-		switch rigidBody.PhysicsType {
-		case model.PHYSICS_TYPE_STATIC:
-			core.UpdateTransform(modelIndex, bone, &global, rigidBody)
-		case model.PHYSICS_TYPE_DYNAMIC_BONE:
-			syncDynamicBoneForPhysics(core, dynamicBoneMode, modelIndex, bone, &global, rigidBody)
-		case model.PHYSICS_TYPE_DYNAMIC:
 		}
 	}
 	return deltas
-}
-
-// resolveDynamicBoneSyncMode は通常時の DYNAMIC_BONE 同期方式を返す。
-func resolveDynamicBoneSyncMode() dynamicBoneSyncMode {
-	return defaultDynamicBoneSyncMode
-}
-
-// syncDynamicBoneForPhysics は DYNAMIC_BONE の通常時同期を方式ごとに実行する。
-func syncDynamicBoneForPhysics(
-	core physics.IPhysicsCore,
-	mode dynamicBoneSyncMode,
-	modelIndex int,
-	bone *model.Bone,
-	global *mmath.Mat4,
-	rigidBody *model.RigidBody,
-) {
-	if core == nil || bone == nil || global == nil || rigidBody == nil {
-		return
-	}
-	switch mode {
-	case DYNAMIC_BONE_SYNC_MODE_FOLLOW_DELTA:
-		core.FollowDeltaTransform(modelIndex, bone, global, rigidBody)
-	default:
-		// 現状の既定は Bullet 結果優先。同期は行わず、物理後反映のみで追従させる。
-	}
 }
 
 // BuildAfterPhysics は物理結果を反映し、物理後変形を行う。
@@ -422,7 +372,9 @@ func updateRigidBodyShapeMass(core physics.IPhysicsCore, modelIndex int, modelDa
 		if rigidDelta == nil {
 			continue
 		}
-		core.UpdateRigidBodyShapeMass(modelIndex, rigidBody, rigidDelta)
+		if !rigidDelta.Size.IsZero() || rigidDelta.Mass != 0.0 {
+			core.UpdateRigidBodyShapeMass(modelIndex, rigidBody, rigidDelta)
+		}
 	}
 }
 

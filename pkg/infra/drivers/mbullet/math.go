@@ -21,15 +21,6 @@ func newBulletFromRad(rad mmath.Vec3) bt.BtQuaternion {
 	return bt.NewBtQuaternion(float32(-rad.Y), float32(rad.X), float32(-rad.Z))
 }
 
-// newBulletTransform は位置・回転から Bullet 変換行列を生成する。
-func newBulletTransform(rotation mmath.Vec3, position mmath.Vec3) bt.BtTransform {
-	btRot := newBulletFromRad(rotation)
-	defer bt.DeleteBtQuaternion(btRot)
-	btPos := newBulletFromVec(position)
-	defer bt.DeleteBtVector3(btPos)
-	return bt.NewBtTransform(btRot, btPos)
-}
-
 // newMglMat4FromMat4 は MMD 座標系の行列を OpenGL 座標の行列へ変換する。
 func newMglMat4FromMat4(mat mmath.Mat4) mgl32.Mat4 {
 	return mgl32.Mat4{
