@@ -13,6 +13,7 @@ const defaultFollowDeltaVelocityRotationMaxRadians = math.Pi / 6.0
 const boneLessReferencePreferredDepth = 2
 const boneLessReferenceSideThreshold = 0.2
 const boneLessReferenceScoreEpsilon = 1e-6
+const enableStaticRigidBodyWorldTransformSync = false
 const minCcdSweptSphereRadius = 0.005
 const minCcdMotionThreshold = 0.02
 const ccdSweptSphereRadiusScale = 0.2

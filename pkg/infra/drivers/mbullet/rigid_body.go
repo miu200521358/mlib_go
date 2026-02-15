@@ -826,7 +826,7 @@ func (mp *PhysicsEngine) UpdateTransform(
 	// 動的剛体へ直接 SetWorldTransform を繰り返すとソルバの warm start を崩して不安定化しやすいため、
 	// ここでは MotionState の更新に限定する。
 	motionState.SetWorldTransform(worldTransform)
-	if rigidBody.PhysicsType == model.PHYSICS_TYPE_STATIC {
+	if enableStaticRigidBodyWorldTransformSync && rigidBody.PhysicsType == model.PHYSICS_TYPE_STATIC {
 		// ボーン未紐付け剛体が静的剛体を参照するケースでは、静的剛体のワールド姿勢が
 		// Bullet 本体側にも反映されていないと拘束が崩れやすい。静的剛体のみ明示更新する。
 		btRigidBody.SetWorldTransform(worldTransform)
