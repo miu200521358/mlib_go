@@ -2327,14 +2327,9 @@ func (vw *ViewerWindow) isShiftPressed() bool {
 	if vw == nil {
 		return false
 	}
-	if vw.shiftPressed {
-		return true
-	}
-	if vw.Window == nil {
-		return false
-	}
-	return vw.Window.GetKey(glfw.KeyLeftShift) == glfw.Press ||
-		vw.Window.GetKey(glfw.KeyRightShift) == glfw.Press
+	// StickyKeys 有効時は GetKey が解除直後の押下を一度だけ返すため、
+	// コールバックで同期した状態を正として扱う。
+	return vw.shiftPressed
 }
 
 // isCtrlPressed はCtrlキーが押されているか判定する。
@@ -2342,14 +2337,9 @@ func (vw *ViewerWindow) isCtrlPressed() bool {
 	if vw == nil {
 		return false
 	}
-	if vw.ctrlPressed {
-		return true
-	}
-	if vw.Window == nil {
-		return false
-	}
-	return vw.Window.GetKey(glfw.KeyLeftControl) == glfw.Press ||
-		vw.Window.GetKey(glfw.KeyRightControl) == glfw.Press
+	// StickyKeys 有効時は GetKey が解除直後の押下を一度だけ返すため、
+	// コールバックで同期した状態を正として扱う。
+	return vw.ctrlPressed
 }
 
 // updateCameraAngleByCursor はカーソル移動でカメラ角度を更新する。
@@ -2498,6 +2488,12 @@ func (vw *ViewerWindow) shouldSkipCameraManualOperation(operationKey string) boo
 
 // focusCallback はフォーカス連動の通知を行う。
 func (vw *ViewerWindow) focusCallback(_ *glfw.Window, focused bool) {
+	if !focused {
+		// フォーカス喪失時に修飾キー状態を明示的に初期化し、
+		// キーイベント取りこぼし時の張り付きを防ぐ。
+		vw.shiftPressed = false
+		vw.ctrlPressed = false
+	}
 	if !vw.list.shared.IsFocusLinkEnabled() {
 		return
 	}

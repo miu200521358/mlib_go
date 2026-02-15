@@ -33,3 +33,4 @@
 - キャッシュ疑い時は `mlib_go_t4/internal/scripts/run_go_test_wsl.sh clean-testcache` を使い、`go clean --modcache` は原則実行しない
 - 特に指定がない場合、ルートディレクトリは /mnt/c/Codex/mlib 、SKILLSディレクトリは /mnt/c/Codex/mlib/mlib_skills とする
 - Windows 形式パス（例: `C:\...`）が渡された場合は、対応する WSL パス（例: `/mnt/c/...`）へ自動変換して参照する
+- 実装完了報告前に、「コミットコメントに使える50文字以内の更新内容まとめ(改行OK)」を必ず出力する
