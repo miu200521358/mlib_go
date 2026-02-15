@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  test-ubuntu:
     runs-on: ubuntu-latest
 
     steps:
@@ -25,3 +25,22 @@ jobs:
 
       - name: Run tests
         run: go test ./...
+
+  test-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23.7"
+          cache: true
+
+      - name: Run mbullet targeted tests
+        run: go test ./pkg/infra/drivers/mbullet -run "TestResolveBulletCollisionMask|TestNormalizeRigidBodySize|TestResolveCcdParametersSphere" -count=1
+
+      - name: Run usecase targeted tests
+        run: go test ./pkg/usecase -run "TestLoadModelWithMeta|TestSaveModelAsPmx" -count=1

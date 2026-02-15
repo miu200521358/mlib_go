@@ -2,10 +2,11 @@
 package usecase
 
 import (
-	"fmt"
 	"path/filepath"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
+	"github.com/miu200521358/mlib_go/pkg/usecase/messages"
 	"github.com/miu200521358/mlib_go/pkg/usecase/port/io"
 )
 
@@ -45,7 +46,10 @@ func ValidateModelTextures(modelData *model.PmxModel, validator io.ITextureValid
 		}
 		exists, err := validator.ExistsFile(texturePath)
 		if err != nil {
-			result.Errors = append(result.Errors, fmt.Errorf("テクスチャの存在確認に失敗しました: %s: %w", texturePath, err))
+			result.Errors = append(
+				result.Errors,
+				merr.NewCommonError("", merr.ErrorKindValidate, messages.TextureExistsValidationFailed, err, texturePath),
+			)
 			texture.SetValid(false)
 			result.Issues = append(result.Issues, TextureValidationIssue{Name: name, Path: texturePath})
 			continue
@@ -56,7 +60,10 @@ func ValidateModelTextures(modelData *model.PmxModel, validator io.ITextureValid
 			continue
 		}
 		if err := validator.ValidateImage(texturePath); err != nil {
-			result.Errors = append(result.Errors, fmt.Errorf("テクスチャの読込に失敗しました: %s: %w", texturePath, err))
+			result.Errors = append(
+				result.Errors,
+				merr.NewCommonError("", merr.ErrorKindValidate, messages.TextureImageValidationFailed, err, texturePath),
+			)
 			texture.SetValid(false)
 			result.Issues = append(result.Issues, TextureValidationIssue{Name: name, Path: texturePath})
 			continue

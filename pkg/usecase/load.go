@@ -5,6 +5,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
 	"github.com/miu200521358/mlib_go/pkg/shared/base/merr"
+	"github.com/miu200521358/mlib_go/pkg/usecase/messages"
 	"github.com/miu200521358/mlib_go/pkg/usecase/port/io"
 )
 
@@ -14,17 +15,35 @@ type iOverrideBoneInserter interface {
 }
 
 const (
-	repositoryNotConfiguredErrorID = "95504"
+	repositoryNotConfiguredErrorID = "93501"
 	ioFormatNotSupportedErrorID    = "14103"
 )
 
+// runInsertShortageOverrideBones は不足ボーン補完の実行関数です。
+var runInsertShortageOverrideBones = func(inserter iOverrideBoneInserter) error {
+	return inserter.InsertShortageOverrideBones()
+}
+
 // LoadModel はモデルを読み込み、型を検証して返す。
 func LoadModel(rep io.IFileReader, path string) (*model.PmxModel, error) {
-	if path == "" {
+	result, err := LoadModelWithMeta(rep, path)
+	if err != nil {
+		return nil, err
+	}
+	if result == nil {
 		return nil, nil
 	}
+	return result.Model, nil
+}
+
+// LoadModelWithMeta はモデル読み込み結果と継続警告を返す。
+func LoadModelWithMeta(rep io.IFileReader, path string) (*ModelLoadResult, error) {
+	result := &ModelLoadResult{}
+	if path == "" {
+		return result, nil
+	}
 	if rep == nil {
-		return nil, newRepositoryNotConfiguredError("モデル")
+		return nil, newRepositoryNotConfiguredError(messages.LoadModelRepositoryNotConfigured)
 	}
 	data, err := rep.Load(path)
 	if err != nil {
@@ -32,15 +51,20 @@ func LoadModel(rep io.IFileReader, path string) (*model.PmxModel, error) {
 	}
 	modelData, ok := data.(*model.PmxModel)
 	if !ok {
-		return nil, newFormatNotSupportedError("モデル形式が不正です")
+		return nil, newFormatNotSupportedError(messages.LoadModelFormatNotSupported)
 	}
 	if modelData.Bones != nil {
 		if inserter, ok := any(modelData.Bones).(iOverrideBoneInserter); ok {
-			// システム用ボーンの追加に失敗しても処理は継続する。
-			inserter.InsertShortageOverrideBones()
+			if insertErr := runInsertShortageOverrideBones(inserter); insertErr != nil {
+				result.Warnings = append(
+					result.Warnings,
+					newModelLoadWarning(messages.LoadModelOverrideBoneInsertWarning, insertErr.Error()),
+				)
+			}
 		}
 	}
-	return modelData, nil
+	result.Model = modelData
+	return result, nil
 }
 
 // LoadMotion はモーションを読み込み、型を検証して返す。
@@ -49,7 +73,7 @@ func LoadMotion(rep io.IFileReader, path string) (*motion.VmdMotion, error) {
 		return nil, nil
 	}
 	if rep == nil {
-		return nil, newRepositoryNotConfiguredError("モーション")
+		return nil, newRepositoryNotConfiguredError(messages.LoadMotionRepositoryNotConfigured)
 	}
 	data, err := rep.Load(path)
 	if err != nil {
@@ -57,17 +81,25 @@ func LoadMotion(rep io.IFileReader, path string) (*motion.VmdMotion, error) {
 	}
 	motionData, ok := data.(*motion.VmdMotion)
 	if !ok {
-		return nil, newFormatNotSupportedError("モーション形式が不正です")
+		return nil, newFormatNotSupportedError(messages.LoadMotionFormatNotSupported)
 	}
 	return motionData, nil
 }
 
 // newRepositoryNotConfiguredError は読み込みリポジトリ未設定エラーを生成する。
-func newRepositoryNotConfiguredError(target string) error {
-	return merr.NewCommonError(repositoryNotConfiguredErrorID, merr.ErrorKindInternal, "読み込みリポジトリがありません: %s", nil, target)
+func newRepositoryNotConfiguredError(messageKey string) error {
+	return merr.NewCommonError(repositoryNotConfiguredErrorID, merr.ErrorKindInternal, messageKey, nil)
 }
 
 // newFormatNotSupportedError は形式未対応エラーを生成する。
-func newFormatNotSupportedError(message string) error {
-	return merr.NewCommonError(ioFormatNotSupportedErrorID, merr.ErrorKindValidate, message, nil)
+func newFormatNotSupportedError(messageKey string) error {
+	return merr.NewCommonError(ioFormatNotSupportedErrorID, merr.ErrorKindValidate, messageKey, nil)
+}
+
+// newModelLoadWarning はモデル読み込み継続時の警告情報を生成する。
+func newModelLoadWarning(messageKey string, messageParams ...any) ModelLoadWarning {
+	return ModelLoadWarning{
+		MessageKey:    messageKey,
+		MessageParams: messageParams,
+	}
 }

@@ -1650,5 +1650,33 @@
     {
         "id": "ファイル操作メッセージ",
         "translation": "Besides Open, you can set file paths via drag-and-drop or history."
+    },
+    {
+        "id": "不足ボーン補完に失敗したため処理を継続します: %s",
+        "translation": "Failed to insert shortage override bones; processing continues: %s"
+    },
+    {
+        "id": "XまたはPMDファイルが読み込まれていません",
+        "translation": "X or PMD file is not loaded."
+    },
+    {
+        "id": "保存先パスが不正です",
+        "translation": "Save path is invalid."
+    },
+    {
+        "id": "保存リポジトリがありません",
+        "translation": "Save repository is not configured."
+    },
+    {
+        "id": "保存先判定ができません",
+        "translation": "Save path service is not configured."
+    },
+    {
+        "id": "テクスチャの存在確認に失敗しました: %s",
+        "translation": "Failed to verify texture existence: %s"
+    },
+    {
+        "id": "テクスチャの読込に失敗しました: %s",
+        "translation": "Failed to load texture: %s"
     }
 ]

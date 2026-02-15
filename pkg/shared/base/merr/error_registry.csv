@@ -12,6 +12,8 @@ ID,Kind,Layer,Module,ErrorName,Summary,Remedy,SourcePaths
 99004,External,shared,99,FsPackageError,io/fsパッケージでエラーが発生,,mlib_go_t4/pkg/shared/base/merr/err.go
 99005,External,shared,99,DeepcopyPackageError,go-deepcopyパッケージでエラーが発生,,mlib_go_t4/pkg/shared/base/merr/err.go
 13001,Validate,usecase,39,PrerequisiteMissingError,前提不足で処理開始できない,前提を満たしてから再実行してください,-
+13501,Validate,usecase,39,ModelNotLoadedError,モデルが読み込まれていない,モデルを読み込んでから保存してください,mlib_go_t4/pkg/usecase/model_save.go
+13502,Validate,usecase,39,SavePathInvalidError,保存先パスが不正,保存先/権限/ファイル名を確認してください。絵文字/特殊記号が含まれる場合は英数字のみのパスに変更してください。,mlib_go_t4/pkg/usecase/model_save.go
 14101,Validate,adapter,41,IoFileNotFound,入力ファイルが存在しない,パスを確認して再指定してください。絵文字/特殊記号が含まれる場合は英数字のみのパスへ移動してください。,-
 14102,Validate,adapter,41,IoExtInvalid,拡張子が不正,拡張子を対応形式に修正してください。パスに絵文字/特殊記号がある場合は英数字のみのパスへ移動してください。,-
 14103,Validate,adapter,41,IoFormatNotSupported,形式/バージョンが非対応,対応形式/バージョンに変換してください,-
@@ -57,6 +59,6 @@ ID,Kind,Layer,Module,ErrorName,Summary,Remedy,SourcePaths
 95501,Internal,infra,55,ControllerWindowInitFailed,Controllerウィンドウ初期化に失敗,,-
 95502,Internal,infra,55,ConsoleViewInitFailed,ConsoleView初期化に失敗,,-
 95503,Internal,infra,55,ProgressBarInitFailed,ProgressBar初期化に失敗,,-
-95504,Internal,infra,55,RepositoryNotConfiguredError,読み込みリポジトリが未設定,cmd でリポジトリを注入してください,mlib_go_t4/cmd/pkg/infra/controller/ui/tab_page.go
-95505,Validate,infra,55,ModelNotLoadedError,モデルが読み込まれていない,モデルを読み込んでから保存してください,mu_model_viewer/pkg/infra/controller/ui/tab_page.go
-95506,Validate,infra,55,SavePathInvalidError,保存先パスが不正,保存先/権限/ファイル名を確認してください。絵文字/特殊記号が含まれる場合は英数字のみのパスに変更してください。,mu_model_viewer/pkg/infra/controller/ui/tab_page.go
+93501,Internal,usecase,39,RepositoryNotConfiguredError,読み込みリポジトリが未設定,usecase 実行前に読み込みリポジトリを注入してください,mlib_go_t4/pkg/usecase/load.go
+93502,Internal,usecase,39,SaveRepositoryNotConfiguredError,保存リポジトリが未設定,usecase 実行前に保存リポジトリを注入してください,mlib_go_t4/pkg/usecase/model_save.go
+93503,Internal,usecase,39,SavePathServiceNotConfiguredError,保存先判定サービスが未設定,usecase 実行前に保存先判定サービスを注入してください,mlib_go_t4/pkg/usecase/model_save.go

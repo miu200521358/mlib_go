@@ -12,6 +12,13 @@ import (
 type ModelLoadResult struct {
 	Model      *model.PmxModel
 	Validation *TextureValidationResult
+	Warnings   []ModelLoadWarning
+}
+
+// ModelLoadWarning はモデル読み込み継続時の警告情報を表す。
+type ModelLoadWarning struct {
+	MessageKey    string
+	MessageParams []any
 }
 
 // MotionLoadResult はモーション読み込み結果を表す。

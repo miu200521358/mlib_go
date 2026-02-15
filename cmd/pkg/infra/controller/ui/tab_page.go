@@ -378,7 +378,7 @@ func loadModel(logger logging.ILogger, translator i18n.II18n, cw *controller.Con
 		cw.SetModel(windowIndex, modelIndex, nil)
 		return
 	}
-	modelData, err := usecase.LoadModel(rep, path)
+	loadResult, err := usecase.LoadModelWithMeta(rep, path)
 	if err != nil {
 		logLoadFailed(logger, translator, err)
 		if materialView != nil {
@@ -390,7 +390,7 @@ func loadModel(logger logging.ILogger, translator i18n.II18n, cw *controller.Con
 		cw.SetModel(windowIndex, modelIndex, nil)
 		return
 	}
-	if modelData == nil {
+	if loadResult == nil || loadResult.Model == nil {
 		if materialView != nil {
 			materialView.ResetRows(nil)
 		}
@@ -400,12 +400,13 @@ func loadModel(logger logging.ILogger, translator i18n.II18n, cw *controller.Con
 		cw.SetModel(windowIndex, modelIndex, nil)
 		return
 	}
+	logModelLoadWarnings(logger, translator, loadResult)
 	if materialView != nil {
-		materialView.ResetRows(modelData)
+		materialView.ResetRows(loadResult.Model)
 	}
-	cw.SetModel(windowIndex, modelIndex, modelData)
+	cw.SetModel(windowIndex, modelIndex, loadResult.Model)
 	if vertexView != nil {
-		vertexView.ResetRows(modelData)
+		vertexView.ResetRows(loadResult.Model)
 	}
 }
 
@@ -568,6 +569,23 @@ func logLoadFailed(logger logging.ILogger, translator i18n.II18n, err error) {
 		logger = logging.DefaultLogger()
 	}
 	logErrorTitle(logger, i18n.TranslateOrMark(translator, messages.MessageLoadFailed), err)
+}
+
+// logModelLoadWarnings はモデル読み込み時の継続警告をログ出力する。
+func logModelLoadWarnings(logger logging.ILogger, translator i18n.II18n, result *usecase.ModelLoadResult) {
+	if logger == nil || result == nil || len(result.Warnings) == 0 {
+		return
+	}
+	for _, warning := range result.Warnings {
+		if warning.MessageKey == "" {
+			continue
+		}
+		message := i18n.TranslateOrMark(translator, warning.MessageKey)
+		if len(warning.MessageParams) > 0 {
+			message = fmt.Sprintf(message, warning.MessageParams...)
+		}
+		logger.Warn("%s", message)
+	}
 }
 
 // logErrorTitle はタイトル付きエラーを出力する。
