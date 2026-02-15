@@ -182,12 +182,12 @@ func NewPhysicsEngine(gravity *mmath.Vec3) *PhysicsEngine {
 		},
 		rigidBodies: make(map[int][]*RigidBodyValue),
 		joints:      make(map[int][]*jointValue),
-		// 既定では拘束を硬めにし、必要時のみモデル単位で上書きする。
+		// MMD(Bullet v2.75)寄りの既定値。
 		jointConfig: JointConstraintConfig{
-			ERP:                                float32(0.8),
-			StopERP:                            float32(0.8),
-			CFM:                                float32(0.01),
-			StopCFM:                            float32(0.01),
+			ERP:                                float32(0.5),
+			StopERP:                            float32(0.5),
+			CFM:                                float32(0.1),
+			StopCFM:                            float32(0.1),
 			DisableCollisionsBetweenLinkedBody: false,
 		},
 		modelJoints:                       make(map[int]JointConstraintConfig),
@@ -656,7 +656,7 @@ func createWorld(gravity mmath.Vec3) *worldResources {
 	dispatcher := bt.NewBtCollisionDispatcher(collisionConfiguration)
 	solver := bt.NewBtSequentialImpulseConstraintSolver()
 	world := bt.NewBtDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration)
-	applyWorldSolverConfig(world, newWorldSolverConfig())
+	// MMD(Bullet v2.75)寄せではワールドソルバを上書きせず、Bullet既定の挙動を使う。
 	// MMD互換の重力スケールに合わせるため、Y成分は10倍でBulletへ渡す。
 	gravityVector := bt.NewBtVector3(float32(gravity.X), float32(gravity.Y*10), float32(gravity.Z))
 	world.SetGravity(gravityVector)

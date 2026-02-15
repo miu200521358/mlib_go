@@ -872,6 +872,12 @@ MlibSample 1.0.0_beta_150
 
 MlibSample 1.0.0_beta_151
 - 全画面ツールチップ表示追加
+- static同期無効化（貫通原因機能のOFF）
+- 物理を Bullet v2.75寄りに
+  - ERP:      float32(0.5),
+    StopERP:  float32(0.5),
+    CFM:      float32(0.1),
+    StopCFM:  float32(0.1),
 
 
 
