@@ -6,17 +6,86 @@ import (
 	"sort"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
+	"github.com/miu200521358/mlib_go/pkg/domain/model"
 )
 
 const defaultFollowDeltaVelocityRotationMaxRadians = math.Pi / 6.0
 const boneLessReferencePreferredDepth = 2
 const boneLessReferenceSideThreshold = 0.2
 const boneLessReferenceScoreEpsilon = 1e-6
+const minCcdSweptSphereRadius = 0.005
+const minCcdMotionThreshold = 0.02
+const ccdSweptSphereRadiusScale = 0.2
+const ccdMotionThresholdScale = 0.5
 
 const boneLessResolveReasonPoseMoved = "pose_moved"
 const boneLessResolveReasonNoJointScore = "no_joint_score"
 const boneLessResolveReasonScoreThreshold = "score_over_threshold"
 const boneLessResolveReasonJointConnected = "joint_connected"
+
+// resolveBulletCollisionGroup はドメインの衝突グループを Bullet のグループビットへ変換する。
+func resolveBulletCollisionGroup(collisionGroup byte) int {
+	return 1 << int(collisionGroup)
+}
+
+// resolveBulletCollisionMask は PMX 由来の衝突マスク値を Bullet へそのまま渡す。
+func resolveBulletCollisionMask(collisionMask uint16) int {
+	return int(collisionMask)
+}
+
+// normalizeRigidBodySize は剛体サイズを物理計算で扱える安全範囲へ正規化する。
+func normalizeRigidBodySize(size mmath.Vec3) mmath.Vec3 {
+	return size.Clamped(mmath.ZERO_VEC3, mmath.VEC3_MAX_VAL)
+}
+
+// resolveCcdParameters は剛体属性からCCDのしきい値と半径を解決する。
+func resolveCcdParameters(
+	shape model.Shape,
+	size mmath.Vec3,
+	appliedMass float64,
+) (float32, float32, bool) {
+	if appliedMass <= 0 {
+		return 0, 0, false
+	}
+	characteristicLength := resolveCcdCharacteristicLength(shape, size)
+	if characteristicLength <= 0 || math.IsNaN(characteristicLength) || math.IsInf(characteristicLength, 0) {
+		return 0, 0, false
+	}
+
+	ccdRadius := math.Max(characteristicLength*ccdSweptSphereRadiusScale, minCcdSweptSphereRadius)
+	ccdMotionThreshold := math.Max(characteristicLength*ccdMotionThresholdScale, minCcdMotionThreshold)
+	return float32(ccdMotionThreshold), float32(ccdRadius), true
+}
+
+// resolveCcdCharacteristicLength はCCD判定に使う代表長を返す。
+func resolveCcdCharacteristicLength(shape model.Shape, size mmath.Vec3) float64 {
+	positiveMin := resolvePositiveMinSizeComponent(size)
+	switch shape {
+	case model.SHAPE_SPHERE:
+		return max(size.X, 0)
+	case model.SHAPE_CAPSULE:
+		return max(size.X, 0)
+	case model.SHAPE_BOX:
+		return positiveMin
+	default:
+		return positiveMin
+	}
+}
+
+// resolvePositiveMinSizeComponent は正のサイズ成分の最小値を返す。
+func resolvePositiveMinSizeComponent(size mmath.Vec3) float64 {
+	values := []float64{size.X, size.Y, size.Z}
+	minimum := math.MaxFloat64
+	for _, value := range values {
+		if value > 0 && value < minimum {
+			minimum = value
+		}
+	}
+	if minimum == math.MaxFloat64 {
+		return 0
+	}
+	return minimum
+}
 
 // referenceRigidBodyCandidate はボーン未紐付け剛体の参照候補を表す。
 type referenceRigidBodyCandidate struct {

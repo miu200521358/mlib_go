@@ -14,10 +14,15 @@ import (
 func (mp *PhysicsEngine) RayTest(
 	rayFrom, rayTo *mmath.Vec3,
 	filter *physics_api.RaycastFilter,
-) *physics_api.RaycastHit {
+) (raycastHit *physics_api.RaycastHit) {
 	if mp == nil || rayFrom == nil || rayTo == nil {
 		return nil
 	}
+	defer func() {
+		if recover() != nil {
+			raycastHit = nil
+		}
+	}()
 
 	// MMD座標系のレイを Bullet 座標系へ変換する。
 	btFrom := newBulletFromVec(*rayFrom)
@@ -44,11 +49,12 @@ func (mp *PhysicsEngine) RayTest(
 		return nil
 	}
 
-	return &physics_api.RaycastHit{
+	raycastHit = &physics_api.RaycastHit{
 		RigidBodyRef: physics_api.RigidBodyRef{
 			ModelIndex:     modelIndex,
 			RigidBodyIndex: rigidBodyIndex,
 		},
 		HitFraction: cb.GetHitFraction(),
 	}
+	return raycastHit
 }
