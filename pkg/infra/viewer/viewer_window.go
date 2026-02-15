@@ -117,6 +117,7 @@ type ViewerWindow struct {
 	motions              []*motion.VmdMotion
 	cameraMotion         *motion.VmdMotion
 	cameraManualOverride bool
+	cameraManualFrame    motion.Frame
 	vmdDeltas            []*delta.VmdDeltas
 	physicsModelHashes   []string
 
@@ -992,12 +993,14 @@ func (vw *ViewerWindow) loadCameraMotion() {
 			if vw.cameraMotion == nil || vw.cameraMotion.Hash() != cameraMotion.Hash() {
 				vw.cameraMotion = cameraMotion
 				vw.cameraManualOverride = false
+				vw.cameraManualFrame = 0
 			}
 			return
 		}
 	}
 	vw.cameraMotion = nil
 	vw.cameraManualOverride = false
+	vw.cameraManualFrame = 0
 }
 
 // applyCameraMotion は現在フレームのカメラモーションをカメラへ適用する。
@@ -1009,7 +1012,10 @@ func (vw *ViewerWindow) applyCameraMotion(frame motion.Frame) {
 	if cameraMotion == nil || cameraMotion.CameraFrames == nil || cameraMotion.CameraFrames.Len() == 0 {
 		return
 	}
-	if !vw.isPlaying() {
+	if vw.isPlaying() {
+		vw.cameraManualOverride = false
+	} else if vw.cameraManualOverride && frame != vw.cameraManualFrame {
+		// 停止中にフレームが変わったら、手動上書きを解除してモーション追従へ戻す。
 		vw.cameraManualOverride = false
 	}
 	if vw.cameraManualOverride {
@@ -2447,9 +2453,17 @@ func (vw *ViewerWindow) isPlaying() bool {
 	return vw.list.shared.HasFlag(state.STATE_FLAG_PLAYING)
 }
 
-// markCameraManualOverride は再生中の手動カメラ操作でモーション上書きを抑止する。
+// currentFrame は共有状態の現在フレームを返す。
+func (vw *ViewerWindow) currentFrame() motion.Frame {
+	if vw == nil || vw.list == nil || vw.list.shared == nil {
+		return 0
+	}
+	return motion.Frame(vw.list.shared.Frame())
+}
+
+// markCameraManualOverride は手動カメラ操作でモーション上書きを抑止する。
 func (vw *ViewerWindow) markCameraManualOverride() {
-	if vw == nil || !vw.isPlaying() {
+	if vw == nil {
 		return
 	}
 	cameraMotion := vw.resolveCameraMotion()
@@ -2457,6 +2471,7 @@ func (vw *ViewerWindow) markCameraManualOverride() {
 		return
 	}
 	vw.cameraManualOverride = true
+	vw.cameraManualFrame = vw.currentFrame()
 }
 
 // shouldSkipCameraManualOperation は再生中カメラモーション適用時に手動カメラ操作を抑止する。
