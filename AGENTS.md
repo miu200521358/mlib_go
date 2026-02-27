@@ -34,3 +34,38 @@
 - 特に指定がない場合、ルートディレクトリは /mnt/c/Codex/mlib 、SKILLSディレクトリは /mnt/c/Codex/mlib/mlib_skills とする
 - Windows 形式パス（例: `C:\...`）が渡された場合は、対応する WSL パス（例: `/mnt/c/...`）へ自動変換して参照する
 - 実装完了報告前に、「コミットコメントに使える50文字以内の更新内容まとめ(改行OK)」を必ず出力する
+
+## タスク進行コマンド（必須）
+
+- ユーザー向けコマンドは `td` / `tv` / `ti` に統一する。
+- 実体は共通スクリプト `/mnt/c/Codex/scripts/td` `/mnt/c/Codex/scripts/tv` `/mnt/c/Codex/scripts/ti` を使う。
+1. `td new [discussion...]`
+   `td {task_id} [discussion...]`
+- 要件定義フェーズ。
+- `ISSUE.md` の更新を必須とする。
+- コード実装（Markdown 以外の更新）は禁止。
+2. `tv {task_id} [discussion...]`
+- 設計フェーズ。
+- `DESIGN_{サブシステム}.md` の更新を必須とする。
+- コード実装（Markdown 以外の更新）は禁止。
+3. `ti {task_id} [discussion...]`
+- 実装フェーズ。
+- コード更新を必須とする。
+- 外部テストのテストデータ更新（`*_external_test.go` / `internal/integration_test/` / `testdata/`）は禁止。
+4. 上記以外
+- 未対応オプション・想定外入力はエラー終了でよい。
+
+## task_id 運用
+
+- task_id は原則 `yyyymmddhhmm` 形式とする。
+- 同一分で重複した場合は `_NN` サフィックスを付けて衝突回避する。
+- `td new` で新規採番し、`ISSUE.md` を起票する。
+- `tv` / `ti` は task_id 必須。
+
+## コマンド実体
+
+- ユーザー向けコマンド実体は `/mnt/c/Codex/scripts` 配下に統一する。
+- プロジェクトごとの `.envrc` で以下を設定する。
+  - `CODEX_SKILLS_DIR`
+  - `CODEX_TASKS_DIR`
+  - `CODEX_SUBSYSTEMS`
