@@ -65,7 +65,6 @@
 ## コマンド実体
 
 - ユーザー向けコマンド実体は `/mnt/c/Codex/scripts` 配下に統一する。
-- プロジェクトごとの `.envrc` で以下を設定する。
-  - `CODEX_SKILLS_DIR`
-  - `CODEX_TASKS_DIR`
-  - `CODEX_SUBSYSTEMS`
+- プロジェクトごとの `.envrc` では、`CODEX_SUBSYSTEM_REPO_MAP_FILE`（既定: `/mnt/c/Codex/subsystem_repo_map.json`）と `CODEX_SUBPRODUCT` を設定する。
+- `CODEX_SKILLS_DIR` / `CODEX_TASKS_DIR` / `CODEX_SUBSYSTEMS` は `td` / `tv` / `ti` 実行時に JSON から自動解決する。
+- `ti` は `DESIGN_*.md` の対象サブシステムと JSON の `repository.wsl` を preflight 照合し、不一致時は開始前に停止する。
