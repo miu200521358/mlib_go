@@ -32,7 +32,7 @@
 - テストキャッシュ無効化のため `-count=1` を必須とし、`GOPATH/GOCACHE/GOMODCACHE/GOTMPDIR` は `/tmp/mlib_go_t4_go_test/*` を使用する
 - キャッシュ疑い時は `mlib_go_t4/internal/scripts/run_go_test_wsl.sh clean-testcache` を使い、`go clean --modcache` は原則実行しない
 - 特に指定がない場合、ルートディレクトリは /mnt/c/Codex/mlib 、SKILLSディレクトリは /mnt/c/Codex/mlib/mlib_skills とする
-- Windows 形式パス（例: `C:\...`）が渡された場合は、対応する WSL パス（例: `/mnt/c/...`）へ自動変換して参照する
+- Windows 形式パス（例: `C:\...`）はユーザー入力の正本として扱う。discussion/議事録/報告には原文の Windows 形式を維持し、実ファイル参照時のみ内部的に WSL パスへ変換してよい
 - 実装完了報告前にコード更新がある場合は、次の形式で `コミットコメント` を必ず出力する。
   - `コミットコメント`
   - `- [候補1: 目的・作業先・対応内容が分かる1文]`
