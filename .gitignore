@@ -45,3 +45,5 @@ cmd/logs/
 *.zip
 
 review/
+.td_new_index.tsv
+.td_new.lock
