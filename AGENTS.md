@@ -38,6 +38,10 @@
 
 - ユーザー向けコマンドは `td` / `tv` / `ti` に統一する。
 - 実体は共通スクリプト `/mnt/c/Codex/scripts/td` `/mnt/c/Codex/scripts/tv` `/mnt/c/Codex/scripts/ti` を使う。
+- エージェントが `td` / `tv` / `ti` を実行する場合は、必ず `TASK_FLOW_ASYNC_MODE=off` を付けて同期実行し、コマンド終了まで待つこと。
+- 完了報告は `td` / `tv` / `ti` 本体の終了後に行う。`job_id` / `status=running` を返すだけの中間報告で終了してはならない。
+- 何らかの理由で非同期起動した場合は、`tjob latest {phase} {task_id}` で対象 job を特定し、`tjob status {job_id}` / `tjob tail {job_id}` で terminal status（`succeeded` / `failed`）になるまで追跡すること。
+- 非同期追跡時も、完了報告は terminal status 確認後に限定し、`td` / `tv` / `ti` 内で起動されたサブエージェントの完了待ちが終わる前にユーザーへ締め報告しないこと。
 1. `td new [discussion...]`
    `td {task_id} [discussion...]`
 - 要件定義フェーズ。
