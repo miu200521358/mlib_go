@@ -368,32 +368,34 @@ func TestVmdMotion_DeformArmIk_mobiusP_Test(t *testing.T) {
 	bakedVmdMotion := loadVmd(t, "../../../internal/test_resources/mobiusP_test.vmd")
 	pmxModel := loadPmx(t, "../../../internal/test_resources/膝丸内番mkmk009b.pmx")
 
-	// 焼き込み
-	{
-		boneName := model.ARM.Left()
-		q := boneDeltas.GetByName(boneName).FilledTotalRotation()
-		bakedVmdMotion.BoneFrames.Get(boneName).Get(motion.Frame(0)).Rotation = &q
+	// 両用腕IKは「ひじ -> 腕IK(位置は手首) -> 手捩 -> 手首」という構造になるため、
+	// 単純に回転だけ焼くと手首の先方向が一致しない。グローバル行列をFK側へ再分解し、
+	// 手捩まで確定後に手首を再度焼き直して先端方向を合わせる。
+	bakedBoneDeltas, _ := computeBoneDeltas(pmxModel, bakedVmdMotion, motion.Frame(0), nil, true, false, false)
+	for _, boneName := range []string{
+		model.ARM.Left(),
+		model.ARM_TWIST.Left(),
+		model.ELBOW.Left(),
+		model.WRIST_TWIST.Left(),
+	} {
+		BakeBoneFrameByGlobalMatrix(
+			pmxModel,
+			bakedBoneDeltas,
+			bakedVmdMotion,
+			boneName,
+			motion.Frame(0),
+			boneDeltas.GetByName(boneName).FilledGlobalMatrix(),
+		)
 	}
-	{
-		boneName := model.ARM_TWIST.Left()
-		q := boneDeltas.GetByName(boneName).FilledTotalRotation()
-		bakedVmdMotion.BoneFrames.Get(boneName).Get(motion.Frame(0)).Rotation = &q
-	}
-	{
-		boneName := model.ELBOW.Left()
-		q := boneDeltas.GetByName(boneName).FilledTotalRotation()
-		bakedVmdMotion.BoneFrames.Get(boneName).Get(motion.Frame(0)).Rotation = &q
-	}
-	{
-		boneName := model.WRIST_TWIST.Left()
-		q := boneDeltas.GetByName(boneName).FilledTotalRotation()
-		bakedVmdMotion.BoneFrames.Get(boneName).Get(motion.Frame(0)).Rotation = &q
-	}
-	{
-		boneName := model.WRIST.Left()
-		q := boneDeltas.GetByName(boneName).FilledTotalRotation()
-		bakedVmdMotion.BoneFrames.Get(boneName).Get(motion.Frame(0)).Rotation = &q
-	}
+	bakedBoneDeltas, _ = computeBoneDeltas(pmxModel, bakedVmdMotion, motion.Frame(0), nil, true, false, false)
+	BakeBoneFrameByGlobalMatrix(
+		pmxModel,
+		bakedBoneDeltas,
+		bakedVmdMotion,
+		model.WRIST.Left(),
+		motion.Frame(0),
+		boneDeltas.GetByName(model.WRIST.Left()).FilledGlobalMatrix(),
+	)
 
 	fkBoneDeltas, _ := computeBoneDeltas(pmxModel, bakedVmdMotion, motion.Frame(0), nil, true, false, false)
 

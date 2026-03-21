@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/deform"
-	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/infra/file/mfile"
 	"github.com/miu200521358/mlib_go/pkg/shared/contracts/mtime"
 
@@ -20,35 +19,56 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
 )
 
-// main はダミーボーン組み合わせPMXを生成して保存する。
+// main は腕IKモーションをFKボーンへ焼き込んで保存する。
 func main() {
 	vmdPath := flag.String("vmd", "", "VMDパス")
-	pmxPath := flag.String("pmx", "", "PMXパス")
+	pmxPath := flag.String("pmx", "", "変形元PMXパス")
+	dstPmxPath := flag.String("dst-pmx", "", "焼き込み先PMXパス(省略時は-pmxと同じ)")
 	flag.Parse()
+	if *vmdPath == "" || *pmxPath == "" {
+		log.Fatal("-vmd と -pmx は必須です")
+	}
+	if *dstPmxPath == "" {
+		*dstPmxPath = *pmxPath
+	}
 	outputPath := mfile.CreateOutputPath(*vmdPath, "baked")
 
 	motionData, err := loadVmd(*vmdPath)
 	if err != nil {
 		log.Fatalf("VMD読み込みに失敗しました: %v", err)
 	}
-	modelData, err := loadPmx(*pmxPath)
+	sourceModelData, err := loadPmx(*pmxPath)
 	if err != nil {
 		log.Fatalf("PMX読み込みに失敗しました: %v", err)
 	}
-
-	// 手首の角度がないやつ
-	wristInitialMotionData, err := loadVmd(*vmdPath)
+	targetModelData, err := loadPmx(*dstPmxPath)
 	if err != nil {
-		log.Fatalf("VMD読み込みに失敗しました: %v", err)
+		log.Fatalf("焼き込み先PMX読み込みに失敗しました: %v", err)
 	}
-	wristInitialMotionData.BoneFrames.Delete("左手首")
-	wristInitialMotionData.BoneFrames.Get("左腕ＩＫ").ForEach(func(frame motion.Frame, value *motion.BoneFrame) bool {
-		q := mmath.NewQuaternion()
-		value.Rotation = &q
-		return true
-	})
 
-	bakedMotion := motion.NewVmdMotion(outputPath)
+	copiedMotion, err := motionData.Copy()
+	if err != nil {
+		log.Fatalf("VMD複製に失敗しました: %v", err)
+	}
+	bakedMotion := &copiedMotion
+
+	armChains := [][]string{
+		{
+			model.ARM.Left(),
+			model.ARM_TWIST.Left(),
+			model.ELBOW.Left(),
+			model.WRIST_TWIST.Left(),
+			model.WRIST.Left(),
+		},
+		{
+			model.ARM.Right(),
+			model.ARM_TWIST.Right(),
+			model.ELBOW.Right(),
+			model.WRIST_TWIST.Right(),
+			model.WRIST.Right(),
+		},
+	}
+
 	for i := 0; i <= int(motionData.MaxFrame()); i++ {
 		if i%100 == 0 {
 			log.Printf("frame: %d", i)
@@ -56,65 +76,82 @@ func main() {
 
 		f := mtime.Frame(i)
 
-		boneDeltas, indexes := deform.ComputeBoneDeltas(
-			modelData,
+		sourceBoneDeltas, indexes := deform.ComputeBoneDeltas(
+			sourceModelData,
 			motionData,
 			f,
-			[]string{"左腕", "左腕捩", "左ひじ", "左手捩", "左手首"},
+			nil,
 			true,
 			false,
 			false,
 			nil,
 		)
-		deform.ApplyBoneMatricesWithIndexes(modelData, boneDeltas, indexes)
+		deform.ApplyBoneMatricesWithIndexes(sourceModelData, sourceBoneDeltas, indexes)
 
-		for _, boneName := range []string{"腕", "腕捩", "ひじ", "手捩", "手首"} {
-			for _, direction := range []string{"左"} {
-				directionBoneName := direction + boneName
-				// directionBone, _ := modelData.Bones.GetByName(directionBoneName)
-
-				d := boneDeltas.GetByName(directionBoneName)
-				bf := motion.NewBoneFrame(f)
-				q := d.FilledFrameRotation()
-				// if boneName == "手首" {
-				// 	// wristTailPosition, _ := directionBone.TailPosition.Copy()
-				// 	// if directionBone.TailIndex > 0 {
-				// 	// 	tailBone, _ := modelData.Bones.Get(directionBone.TailIndex)
-				// 	// 	wristTailPosition = tailBone.Position.Subed(wristTailPosition)
-				// 	// }
-
-				// 	// wristInitialGlobalPosition := wristInitialboneDeltas.GetByName("左手首").FilledGlobalPosition()
-				// 	// index1InitialGlobalPosition := wristInitialboneDeltas.GetByName("左人指１").FilledGlobalPosition()
-				// 	// index1InitialDiff := index1InitialGlobalPosition.Subed(wristInitialGlobalPosition).Normalized()
-
-				// 	// wristGlobalPosition := d.FilledGlobalPosition()
-				// 	// index1GlobalPosition := boneDeltas.GetByName("左人指１").FilledGlobalPosition()
-				// 	// index1Diff := index1GlobalPosition.Subed(wristGlobalPosition).Normalized()
-				// 	// // index1DiffCross := index1InitialDiff.Cross(index1Diff)
-
-				// 	// q = mmath.NewQuaternionFromDirection(index1InitialDiff, index1Diff)
-
-				// 	// ikDelta := boneDeltas.GetByName("左腕ＩＫ")
-				// 	// wristParentDelta := boneDeltas.Get(directionBone.ParentIndex)
-
-				// 	// q = (wristParentDelta.FilledGlobalMatrix().Inverted().Muled(ikDelta.FilledGlobalMatrix())).Inverted().Muled(d.FilledGlobalMatrix()).Quaternion()
-
-				// 	// index1Bone, _ := modelData.Bones.GetByName()
-				// 	// diffDelta := delta.NewBoneDeltaByGlobalMatrix(index1Bone, f, index1GlobalMat, d)
-				// 	// q = diffDelta.UnitMatrix.Quaternion()
-				// 	ikDelta := boneDeltas.GetByName("左腕ＩＫ")
-				// 	twistDelta := boneDeltas.GetByName("左手捩")
-				// 	// q = twistDelta.FilledFrameRotation().Muled(ikDelta.FilledFrameRotation()).Muled(q)
-				// 	q = q.Muled(ikDelta.FilledFrameRotation().Inverted()).Muled(twistDelta.FilledFrameRotation().Inverted())
-				// }
-				bf.Rotation = &q
-				bakedMotion.InsertBoneFrame(directionBoneName, bf)
+		targetBoneDeltas, _ := deform.ComputeBoneDeltas(
+			targetModelData,
+			bakedMotion,
+			f,
+			nil,
+			true,
+			false,
+			false,
+			nil,
+		)
+		for _, chain := range armChains {
+			for _, boneName := range chain[:len(chain)-1] {
+				if !hasBone(sourceModelData, boneName) || !hasBone(targetModelData, boneName) {
+					continue
+				}
+				deform.BakeBoneFrameByGlobalMatrix(
+					targetModelData,
+					targetBoneDeltas,
+					bakedMotion,
+					boneName,
+					f,
+					sourceBoneDeltas.GetByName(boneName).FilledGlobalMatrix(),
+				)
 			}
+		}
+
+		targetBoneDeltas, _ = deform.ComputeBoneDeltas(
+			targetModelData,
+			bakedMotion,
+			f,
+			nil,
+			true,
+			false,
+			false,
+			nil,
+		)
+		for _, chain := range armChains {
+			wristBoneName := chain[len(chain)-1]
+			if !hasBone(sourceModelData, wristBoneName) || !hasBone(targetModelData, wristBoneName) {
+				continue
+			}
+			deform.BakeBoneFrameByGlobalMatrix(
+				targetModelData,
+				targetBoneDeltas,
+				bakedMotion,
+				wristBoneName,
+				f,
+				sourceBoneDeltas.GetByName(wristBoneName).FilledGlobalMatrix(),
+			)
 		}
 	}
 
-	saveMotion(outputPath, bakedMotion)
+	if err := saveMotion(outputPath, bakedMotion); err != nil {
+		log.Fatalf("VMD保存に失敗しました: %v", err)
+	}
 	_, _ = fmt.Fprintf(os.Stdout, "VMD保存完了: %s\n", outputPath)
+}
+
+func hasBone(modelData *model.PmxModel, boneName string) bool {
+	if modelData == nil {
+		return false
+	}
+	bone, err := modelData.Bones.GetByName(boneName)
+	return err == nil && bone != nil
 }
 
 // loadVmd はVMDを読み込んで返す。
