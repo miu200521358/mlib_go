@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/deform"
+	"github.com/miu200521358/mlib_go/pkg/domain/delta"
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/infra/file/mfile"
 	"github.com/miu200521358/mlib_go/pkg/shared/contracts/mtime"
 
@@ -76,6 +78,8 @@ func main() {
 
 		f := mtime.Frame(i)
 
+		bakedBoneDeltas := delta.NewBoneDeltas(targetModelData.Bones)
+
 		sourceBoneDeltas, indexes := deform.ComputeBoneDeltas(
 			sourceModelData,
 			motionData,
@@ -103,7 +107,7 @@ func main() {
 				if !hasBone(sourceModelData, boneName) || !hasBone(targetModelData, boneName) {
 					continue
 				}
-				deform.BakeBoneFrameByGlobalMatrix(
+				d := deform.BakeBoneFrameByGlobalMatrix(
 					targetModelData,
 					targetBoneDeltas,
 					bakedMotion,
@@ -111,6 +115,21 @@ func main() {
 					f,
 					sourceBoneDeltas.GetByName(boneName).FilledGlobalMatrix(),
 				)
+				bakedBoneDeltas.Update(d)
+			}
+		}
+
+		for _, chain := range armChains {
+			for _, boneName := range chain[:len(chain)-1] {
+				if !hasBone(sourceModelData, boneName) || !hasBone(targetModelData, boneName) {
+					continue
+				}
+				bf := bakedMotion.BoneFrames.Get(boneName).Get(f)
+				v := mmath.NewVec3()
+				r := bakedBoneDeltas.GetByName(boneName).FilledFrameRotation()
+				bf.Position = &v
+				bf.Rotation = &r
+				bakedMotion.InsertBoneFrame(boneName, bf)
 			}
 		}
 
@@ -129,7 +148,7 @@ func main() {
 			if !hasBone(sourceModelData, wristBoneName) || !hasBone(targetModelData, wristBoneName) {
 				continue
 			}
-			deform.BakeBoneFrameByGlobalMatrix(
+			d := deform.BakeBoneFrameByGlobalMatrix(
 				targetModelData,
 				targetBoneDeltas,
 				bakedMotion,
@@ -137,6 +156,12 @@ func main() {
 				f,
 				sourceBoneDeltas.GetByName(wristBoneName).FilledGlobalMatrix(),
 			)
+			bf := bakedMotion.BoneFrames.Get(wristBoneName).Get(f)
+			v := mmath.NewVec3()
+			r := d.FilledFrameRotation()
+			bf.Position = &v
+			bf.Rotation = &r
+			bakedMotion.InsertBoneFrame(wristBoneName, bf)
 		}
 	}
 
