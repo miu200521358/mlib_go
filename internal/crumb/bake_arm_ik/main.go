@@ -12,7 +12,6 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/infra/file/mfile"
 	"github.com/miu200521358/mlib_go/pkg/shared/contracts/mtime"
-	"github.com/miu200521358/mlib_go/pkg/usecase/mdeform"
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_common"
 	"github.com/miu200521358/mlib_go/pkg/adapter/io_model/pmx"
@@ -57,63 +56,57 @@ func main() {
 
 		f := mtime.Frame(i)
 
-		vmdDeltas := mdeform.BuildBeforePhysics(
+		boneDeltas, indexes := deform.ComputeBoneDeltas(
 			modelData,
 			motionData,
-			nil,
 			f,
-			&mdeform.DeformOptions{EnableIK: true},
-		)
-		deform.ApplyBoneMatrices(modelData, vmdDeltas.Bones)
-
-		wristInitialVmdDeltas := mdeform.BuildBeforePhysics(
-			modelData,
-			wristInitialMotionData,
+			[]string{"左腕", "左腕捩", "左ひじ", "左手捩", "左手首"},
+			true,
+			false,
+			false,
 			nil,
-			f,
-			&mdeform.DeformOptions{EnableIK: true},
 		)
-		deform.ApplyBoneMatrices(modelData, wristInitialVmdDeltas.Bones)
+		deform.ApplyBoneMatricesWithIndexes(modelData, boneDeltas, indexes)
 
 		for _, boneName := range []string{"腕", "腕捩", "ひじ", "手捩", "手首"} {
 			for _, direction := range []string{"左"} {
 				directionBoneName := direction + boneName
 				// directionBone, _ := modelData.Bones.GetByName(directionBoneName)
 
-				d := vmdDeltas.Bones.GetByName(directionBoneName)
+				d := boneDeltas.GetByName(directionBoneName)
 				bf := motion.NewBoneFrame(f)
 				q := d.FilledFrameRotation()
-				if boneName == "手首" {
-					// wristTailPosition, _ := directionBone.TailPosition.Copy()
-					// if directionBone.TailIndex > 0 {
-					// 	tailBone, _ := modelData.Bones.Get(directionBone.TailIndex)
-					// 	wristTailPosition = tailBone.Position.Subed(wristTailPosition)
-					// }
+				// if boneName == "手首" {
+				// 	// wristTailPosition, _ := directionBone.TailPosition.Copy()
+				// 	// if directionBone.TailIndex > 0 {
+				// 	// 	tailBone, _ := modelData.Bones.Get(directionBone.TailIndex)
+				// 	// 	wristTailPosition = tailBone.Position.Subed(wristTailPosition)
+				// 	// }
 
-					// wristInitialGlobalPosition := wristInitialVmdDeltas.Bones.GetByName("左手首").FilledGlobalPosition()
-					// index1InitialGlobalPosition := wristInitialVmdDeltas.Bones.GetByName("左人指１").FilledGlobalPosition()
-					// index1InitialDiff := index1InitialGlobalPosition.Subed(wristInitialGlobalPosition).Normalized()
+				// 	// wristInitialGlobalPosition := wristInitialboneDeltas.GetByName("左手首").FilledGlobalPosition()
+				// 	// index1InitialGlobalPosition := wristInitialboneDeltas.GetByName("左人指１").FilledGlobalPosition()
+				// 	// index1InitialDiff := index1InitialGlobalPosition.Subed(wristInitialGlobalPosition).Normalized()
 
-					// wristGlobalPosition := d.FilledGlobalPosition()
-					// index1GlobalPosition := vmdDeltas.Bones.GetByName("左人指１").FilledGlobalPosition()
-					// index1Diff := index1GlobalPosition.Subed(wristGlobalPosition).Normalized()
-					// // index1DiffCross := index1InitialDiff.Cross(index1Diff)
+				// 	// wristGlobalPosition := d.FilledGlobalPosition()
+				// 	// index1GlobalPosition := boneDeltas.GetByName("左人指１").FilledGlobalPosition()
+				// 	// index1Diff := index1GlobalPosition.Subed(wristGlobalPosition).Normalized()
+				// 	// // index1DiffCross := index1InitialDiff.Cross(index1Diff)
 
-					// q = mmath.NewQuaternionFromDirection(index1InitialDiff, index1Diff)
+				// 	// q = mmath.NewQuaternionFromDirection(index1InitialDiff, index1Diff)
 
-					// ikDelta := vmdDeltas.Bones.GetByName("左腕ＩＫ")
-					// wristParentDelta := vmdDeltas.Bones.Get(directionBone.ParentIndex)
+				// 	// ikDelta := boneDeltas.GetByName("左腕ＩＫ")
+				// 	// wristParentDelta := boneDeltas.Get(directionBone.ParentIndex)
 
-					// q = (wristParentDelta.FilledGlobalMatrix().Inverted().Muled(ikDelta.FilledGlobalMatrix())).Inverted().Muled(d.FilledGlobalMatrix()).Quaternion()
+				// 	// q = (wristParentDelta.FilledGlobalMatrix().Inverted().Muled(ikDelta.FilledGlobalMatrix())).Inverted().Muled(d.FilledGlobalMatrix()).Quaternion()
 
-					// index1Bone, _ := modelData.Bones.GetByName()
-					// diffDelta := delta.NewBoneDeltaByGlobalMatrix(index1Bone, f, index1GlobalMat, d)
-					// q = diffDelta.UnitMatrix.Quaternion()
-					ikDelta := vmdDeltas.Bones.GetByName("左腕ＩＫ")
-					twistDelta := vmdDeltas.Bones.GetByName("左手捩")
-					// q = twistDelta.FilledFrameRotation().Muled(ikDelta.FilledFrameRotation()).Muled(q)
-					q = q.Muled(ikDelta.FilledFrameRotation().Inverted()).Muled(twistDelta.FilledFrameRotation().Inverted())
-				}
+				// 	// index1Bone, _ := modelData.Bones.GetByName()
+				// 	// diffDelta := delta.NewBoneDeltaByGlobalMatrix(index1Bone, f, index1GlobalMat, d)
+				// 	// q = diffDelta.UnitMatrix.Quaternion()
+				// 	ikDelta := boneDeltas.GetByName("左腕ＩＫ")
+				// 	twistDelta := boneDeltas.GetByName("左手捩")
+				// 	// q = twistDelta.FilledFrameRotation().Muled(ikDelta.FilledFrameRotation()).Muled(q)
+				// 	q = q.Muled(ikDelta.FilledFrameRotation().Inverted()).Muled(twistDelta.FilledFrameRotation().Inverted())
+				// }
 				bf.Rotation = &q
 				bakedMotion.InsertBoneFrame(directionBoneName, bf)
 			}
