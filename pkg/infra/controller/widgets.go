@@ -17,11 +17,17 @@ var (
 	user32          = windows.NewLazySystemDLL("user32.dll")
 	procMessageBeep = user32.NewProc("MessageBeep")
 	MB_ICONASTERISK = 0x00000040
+	MB_ICONERROR    = 0x00000010
 )
 
 // Beep は通知音を鳴らす。
 func Beep() {
 	procMessageBeep.Call(uintptr(MB_ICONASTERISK))
+}
+
+// BeepError は失敗通知音を鳴らす。
+func BeepError() {
+	procMessageBeep.Call(uintptr(MB_ICONERROR))
 }
 
 // FormatDuration は処理時間を hh:mm:ss / mm:ss 形式で返す。
