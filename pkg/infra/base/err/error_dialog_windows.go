@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -197,7 +198,81 @@ func buildErrorText(translator iTranslator, err error) string {
 			msg += "\n\n" + fmt.Sprintf("%s:\n%s", translateKey(translator, messages.ErrorCommonKey002), remedy)
 		}
 	}
+	if technical := buildTechnicalText(err); technical != "" {
+		msg += "\n\n------------\n" + technical
+	}
 	return msg
+}
+
+// buildTechnicalText は原因連鎖とスタックトレースを翻訳を通さず整形する。
+// 翻訳キーの整形だけでは失敗地点が分からず、利用者からの報告で原因を
+// 特定できないため、技術情報は生のまま必ず本文へ残す。
+func buildTechnicalText(err error) string {
+	if err == nil {
+		return ""
+	}
+	var lines []string
+	var stack string
+	// 連鎖が自己参照で循環しても停止するよう、深さへ上限を置く。
+	for depth, cause := 0, err; cause != nil && depth < 32; depth, cause = depth+1, unwrapCause(cause) {
+		line := causeMessage(cause)
+		if line != "" && (len(lines) == 0 || lines[len(lines)-1] != line) {
+			lines = append(lines, line)
+		}
+		// 深い側ほど失敗地点に近いスタックなので、後勝ちで採用する。
+		if provider, ok := cause.(interface{ Stack() []byte }); ok {
+			if s := provider.Stack(); len(s) > 0 {
+				stack = string(s)
+			}
+		}
+		if provider, ok := cause.(interface{ StackTrace() string }); ok {
+			if s := provider.StackTrace(); s != "" {
+				stack = s
+			}
+		}
+	}
+	if stack == "" {
+		// 連鎖のどこにもスタックが無い場合でも表示時点のスタックを出し、
+		// 「スタックが必ず出る」契約を守る。発生地点より浅いが手掛かりにはなる。
+		stack = string(debug.Stack())
+	}
+	return strings.Join(lines, "\n") + "\n\nStack:\n" + strings.TrimRight(stack, "\r\n")
+}
+
+// unwrapCause は Unwrap と walk.Error の Inner の両方の連鎖をたどる。
+// walk.Error は Unwrap を実装しないため、errors.Unwrap だけでは
+// 原因が walk の内側で途切れる。
+func unwrapCause(err error) error {
+	if unwrapper, ok := err.(interface{ Unwrap() error }); ok {
+		if inner := unwrapper.Unwrap(); inner != nil {
+			return inner
+		}
+	}
+	if provider, ok := err.(interface{ Inner() error }); ok {
+		return provider.Inner()
+	}
+	return nil
+}
+
+// causeMessage は連鎖 1 段ぶんのメッセージだけを返す。
+// Error() は多くの実装が原因側の文字列を再帰的に含むため、そのまま並べると
+// 同じ内容が段数ぶん重複する。段ごとの固有部分だけを取り出す。
+func causeMessage(err error) string {
+	if common, ok := err.(*merr.CommonError); ok {
+		if common.Message == "" {
+			return ""
+		}
+		if len(common.Params) > 0 {
+			return fmt.Sprintf(common.Message, common.Params...)
+		}
+		return common.Message
+	}
+	if provider, ok := err.(interface{ Message() string }); ok {
+		if msg := provider.Message(); msg != "" {
+			return msg
+		}
+	}
+	return err.Error()
 }
 
 // formatErrorMessage はエラーのメッセージキーを翻訳して返す。
