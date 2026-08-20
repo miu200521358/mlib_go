@@ -24,6 +24,7 @@ import (
 	"github.com/miu200521358/mlib_go/pkg/adapter/graphics_api"
 	"github.com/miu200521358/mlib_go/pkg/adapter/mpresenter/messages"
 	"github.com/miu200521358/mlib_go/pkg/adapter/physics_api"
+	"github.com/miu200521358/mlib_go/pkg/domain"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
@@ -333,6 +334,7 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 	vw.shader.Resize(fbW, fbH)
 
 	showSelectedVertex := vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX)
+	showSelectedFace := vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_FACE)
 	selectionEnabled := vw.isSelectionEnabledInWindow()
 	nonVertexHoverEnabled := vw.isNonVertexHoverEnabledInWindow()
 	selectionMode := vw.selectedVertexMode()
@@ -431,16 +433,18 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 	removeSelectedCursorDepths := []float32(nil)
 	cursorLinePositions := []float32(nil)
 	removeCursorLinePositions := []float32(nil)
+	faceCursorLineScreenPositions := []float32(nil)
+	removeFaceCursorLineScreenPositions := []float32(nil)
 	boxLinePositions := []float32(nil)
 	applyPointSelection := false
 	removePointSelection := false
-	if showSelectedVertex && selectionEnabled {
+	if (showSelectedVertex || showSelectedFace) && selectionEnabled {
 		if resolver, ok := vw.shader.Msaa().(interface {
 			ResolveDepth()
 		}); ok {
 			resolver.ResolveDepth()
 		}
-		if selectionMode == state.SELECTED_VERTEX_MODE_POINT {
+		if showSelectedFace || selectionMode == state.SELECTED_VERTEX_MODE_POINT {
 			leftCursorWorldPositions, leftCursorDepths, leftCursorRemoveWorldPositions, leftCursorRemoveDepths = vw.updateCursorPositions()
 		}
 		limit := 0
@@ -452,17 +456,21 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 		selectedCursorDepths = flattenCursorDepths(leftCursorDepths, limit)
 		removeSelectedCursorPositions = flattenCursorPositions(leftCursorRemoveWorldPositions, limit)
 		removeSelectedCursorDepths = flattenCursorDepths(leftCursorRemoveDepths, limit)
-		if selectionMode == state.SELECTED_VERTEX_MODE_POINT {
+		if showSelectedVertex && selectionMode == state.SELECTED_VERTEX_MODE_POINT {
 			// 軌跡表示は履歴全体を使うため、上限指定は行わない。
 			cursorLinePositions = flattenCursorPositions(vw.leftCursorWorldHistoryPositions, 0)
 			removeCursorLinePositions = flattenCursorPositions(vw.leftCursorRemoveWorldHistoryPositions, 0)
+		}
+		if showSelectedFace {
+			faceCursorLineScreenPositions = vw.buildCursorScreenLinePositions(fbW, fbH, false)
+			removeFaceCursorLineScreenPositions = vw.buildCursorScreenLinePositions(fbW, fbH, true)
 		}
 		if selectionMode == state.SELECTED_VERTEX_MODE_BOX &&
 			(vw.boxSelectionDragging || vw.boxSelectionPending) {
 			boxLinePositions = vw.buildBoxSelectionLinePositions(winW, winH, fbW, fbH)
 		}
-		applyPointSelection = len(selectedCursorPositions) > 0 || len(removeSelectedCursorPositions) > 0
-		removePointSelection = len(removeSelectedCursorPositions) > 0
+		applyPointSelection = len(selectedCursorPositions) > 0 || len(removeSelectedCursorPositions) > 0 || len(faceCursorLineScreenPositions) > 0 || len(removeFaceCursorLineScreenPositions) > 0
+		removePointSelection = len(removeSelectedCursorPositions) > 0 || len(removeFaceCursorLineScreenPositions) > 0
 	}
 
 	for i, renderer := range vw.modelRenderers {
@@ -555,6 +563,51 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 		if showSelectedVertex && selectionEnabled && i == 0 {
 			vw.updateSelectedVertexHover(i, hoverIndex)
 		}
+
+		selectedFaceIndexes := []int{}
+		selectedFaceVersion := uint64(0)
+		if showSelectedFace {
+			selectedFaceIndexes, selectedFaceVersion = vw.list.shared.SelectedFaceIndexesWithVersion(vw.windowIndex, i)
+		}
+		faceSelectionRequest := (*render.FaceSelectionRequest)(nil)
+		if showSelectedFace && selectionEnabled {
+			faceSelectionRequest = &render.FaceSelectionRequest{
+				DepthMode:                       selectionDepthMode,
+				Apply:                           false,
+				Remove:                          false,
+				CursorLinePositions:             nil,
+				RemoveCursorLinePositions:       nil,
+				CursorLineScreenPositions:       nil,
+				RemoveCursorLineScreenPositions: nil,
+				ScreenWidth:                     fbW,
+				ScreenHeight:                    fbH,
+				SelectionVersion:                selectedFaceVersion,
+			}
+		}
+		if showSelectedFace && selectionEnabled && i == 0 && faceSelectionRequest != nil {
+			faceSelectionRequest.CursorLinePositions = flattenCursorPositions(vw.leftCursorWorldHistoryPositions, 0)
+			faceSelectionRequest.RemoveCursorLinePositions = flattenCursorPositions(vw.leftCursorRemoveWorldHistoryPositions, 0)
+		}
+		if showSelectedFace && selectionEnabled && i == 0 && applyPointSelection && faceSelectionRequest != nil {
+			faceSelectionRequest.Apply = true
+			faceSelectionRequest.Remove = removePointSelection
+			if removePointSelection {
+				faceSelectionRequest.RemoveCursorLineScreenPositions = removeFaceCursorLineScreenPositions
+			} else {
+				faceSelectionRequest.CursorLineScreenPositions = faceCursorLineScreenPositions
+			}
+		}
+		updatedFaces := renderer.RenderFaceSelection(
+			vw.shader,
+			vw.list.shared,
+			selectedFaceIndexes,
+			selectedFaceVersion,
+			faceSelectionRequest,
+			base,
+		)
+		if showSelectedFace && selectionEnabled && i == 0 && faceSelectionRequest != nil && faceSelectionRequest.Apply {
+			vw.list.shared.SetSelectedFaceIndexes(vw.windowIndex, i, updatedFaces)
+		}
 	}
 	if !showSelectedVertex {
 		vw.clearSelectedVertexHover()
@@ -592,9 +645,9 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 	if !showSelectedVertex {
 		vw.resetBoxSelection()
 	}
-	if showSelectedVertex && !vw.leftButtonPressed {
+	if (showSelectedVertex || showSelectedFace) && !vw.leftButtonPressed {
 		vw.boxSelectionDragging = false
-		if selectionMode == state.SELECTED_VERTEX_MODE_POINT {
+		if showSelectedVertex && selectionMode == state.SELECTED_VERTEX_MODE_POINT || showSelectedFace {
 			vw.leftCursorWindowPositions = make(map[mmath.Vec2]float32)
 			vw.leftCursorRemoveWindowPositions = make(map[mmath.Vec2]float32)
 			vw.leftCursorWindowOrder = make([]mmath.Vec2, 0)
@@ -602,6 +655,14 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 			vw.leftCursorWorldHistoryPositions = make([]*mmath.Vec3, 0)
 			vw.leftCursorRemoveWorldHistoryPositions = make([]*mmath.Vec3, 0)
 		}
+	}
+	if !showSelectedVertex && !showSelectedFace && !vw.leftButtonPressed {
+		vw.leftCursorWindowPositions = make(map[mmath.Vec2]float32)
+		vw.leftCursorRemoveWindowPositions = make(map[mmath.Vec2]float32)
+		vw.leftCursorWindowOrder = make([]mmath.Vec2, 0)
+		vw.leftCursorRemoveWindowOrder = make([]mmath.Vec2, 0)
+		vw.leftCursorWorldHistoryPositions = make([]*mmath.Vec3, 0)
+		vw.leftCursorRemoveWorldHistoryPositions = make([]*mmath.Vec3, 0)
 	}
 }
 
@@ -1110,12 +1171,44 @@ func (vw *ViewerWindow) keyCallback(_ *glfw.Window, key glfw.Key, _ int, action 
 	if action != glfw.Press {
 		return
 	}
+	if key == glfw.KeyX && vw.isCtrlPressed() && vw.list != nil && vw.list.shared != nil && vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_FACE) {
+		vw.expandConnectedFaces()
+		return
+	}
 
 	if preset, ok := cameraPresets[key]; ok {
 		if vw.shouldSkipCameraManualOperation(messages.ViewerWindowKey001) {
 			return
 		}
 		vw.resetCameraPositionForPreset(preset.Yaw, preset.Pitch)
+	}
+}
+
+// expandConnectedFaces は選択面を同一材質の連続面へ拡張する。
+func (vw *ViewerWindow) expandConnectedFaces() {
+	if vw == nil || vw.list == nil || vw.list.shared == nil || !vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_FACE) {
+		return
+	}
+	for modelIndex := 0; modelIndex < vw.list.shared.ModelCount(vw.windowIndex); modelIndex++ {
+		modelData, ok := vw.list.shared.Model(vw.windowIndex, modelIndex).(*model.PmxModel)
+		if !ok || modelData == nil {
+			if modelIndex < len(vw.modelRenderers) && vw.modelRenderers[modelIndex] != nil {
+				modelData = vw.modelRenderers[modelIndex].Model
+			}
+		}
+		if modelData == nil {
+			continue
+		}
+		selected := vw.list.shared.SelectedFaceIndexes(vw.windowIndex, modelIndex)
+		if len(selected) == 0 {
+			continue
+		}
+		expanded, err := domain.ExpandConnectedFaceIndexes(modelData, selected)
+		if err != nil {
+			logging.DefaultLogger().Warn(i18n.T(messages.ControlWindowKey108), err.Error())
+			continue
+		}
+		vw.list.shared.SetSelectedFaceIndexes(vw.windowIndex, modelIndex, expanded)
 	}
 }
 
@@ -1156,6 +1249,10 @@ func (vw *ViewerWindow) mouseCallback(_ *glfw.Window, button glfw.MouseButton, a
 					return
 				}
 				vw.queueSelectedVertexSelection(vw.cursorX, vw.cursorY, vw.isCtrlPressed())
+				return
+			}
+			if vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_FACE) {
+				vw.queueSelectedFaceSelection(vw.cursorX, vw.cursorY, vw.isCtrlPressed())
 				return
 			}
 			drawRigidBody := vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_RIGID_BODY_FRONT) ||
@@ -1201,8 +1298,8 @@ func (vw *ViewerWindow) cursorPosCallback(_ *glfw.Window, xpos, ypos float64) {
 			vw.updateCameraPositionByCursor(xpos, ypos)
 		}
 	}
-	if selectionEnabled && vw.leftButtonPressed && vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) {
-		if vw.selectedVertexMode() == state.SELECTED_VERTEX_MODE_BOX {
+	if selectionEnabled && vw.leftButtonPressed && (vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) || vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_FACE)) {
+		if vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) && vw.selectedVertexMode() == state.SELECTED_VERTEX_MODE_BOX {
 			if vw.boxSelectionDragging {
 				vw.boxSelectionEnd = mmath.Vec2{X: xpos, Y: ypos}
 			}
@@ -1227,7 +1324,7 @@ func (vw *ViewerWindow) cursorPosCallback(_ *glfw.Window, xpos, ypos float64) {
 			vw.prevCursorPos.Y = ypos
 			return
 		}
-		if vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) {
+		if vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) || vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_FACE) {
 			vw.clearNonVertexHovers()
 			vw.prevCursorPos.X = xpos
 			vw.prevCursorPos.Y = ypos
@@ -1272,10 +1369,10 @@ func (vw *ViewerWindow) updateCursorPositions() ([]*mmath.Vec3, []float32, []*mm
 	if !vw.isSelectionEnabledInWindow() {
 		return nil, nil, nil, nil
 	}
-	if !vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) {
+	if !vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) && !vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_FACE) {
 		return nil, nil, nil, nil
 	}
-	if vw.selectedVertexMode() != state.SELECTED_VERTEX_MODE_POINT {
+	if vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) && vw.selectedVertexMode() != state.SELECTED_VERTEX_MODE_POINT {
 		return nil, nil, nil, nil
 	}
 	leftCursorWorldPositions := make([]*mmath.Vec3, 0)
@@ -1385,6 +1482,47 @@ func (vw *ViewerWindow) queueSelectedVertexSelection(xpos, ypos float64, remove 
 		vw.leftCursorWindowOrder = append(vw.leftCursorWindowOrder, screenPos)
 	}
 	vw.leftCursorWindowPositions[screenPos] = 0
+}
+
+// queueSelectedFaceSelection は選択面の更新用カーソル位置をキューに積む。
+func (vw *ViewerWindow) queueSelectedFaceSelection(xpos, ypos float64, remove bool) {
+	if !vw.isSelectionEnabledInWindow() {
+		return
+	}
+	screenPos := mmath.Vec2{X: xpos, Y: ypos}
+	if remove {
+		if _, exists := vw.leftCursorRemoveWindowPositions[screenPos]; !exists {
+			vw.leftCursorRemoveWindowOrder = append(vw.leftCursorRemoveWindowOrder, screenPos)
+		}
+		vw.leftCursorRemoveWindowPositions[screenPos] = 0
+		return
+	}
+	if _, exists := vw.leftCursorWindowPositions[screenPos]; !exists {
+		vw.leftCursorWindowOrder = append(vw.leftCursorWindowOrder, screenPos)
+	}
+	vw.leftCursorWindowPositions[screenPos] = 0
+}
+
+// buildCursorScreenLinePositions は記録したカーソル軌跡をフレームバッファ座標へ変換する。
+func (vw *ViewerWindow) buildCursorScreenLinePositions(framebufferWidth, framebufferHeight int, remove bool) []float32 {
+	if vw == nil || framebufferWidth <= 0 || framebufferHeight <= 0 {
+		return nil
+	}
+	windowWidth, windowHeight := vw.GetSize()
+	if windowWidth <= 0 || windowHeight <= 0 {
+		return nil
+	}
+	order := vw.leftCursorWindowOrder
+	if remove {
+		order = vw.leftCursorRemoveWindowOrder
+	}
+	scaleX := float64(framebufferWidth) / float64(windowWidth)
+	scaleY := float64(framebufferHeight) / float64(windowHeight)
+	positions := make([]float32, 0, len(order)*2)
+	for _, screenPos := range order {
+		positions = append(positions, float32(screenPos.X*scaleX), float32(screenPos.Y*scaleY))
+	}
+	return positions
 }
 
 // updateBoneHoverExpire はボーンホバー終了後のツールチップ消去を遅延する。

@@ -46,6 +46,12 @@ type ModelDrawer struct {
 	selectedVertexIbo          *mgl.IndexBuffer
 	selectedVertexCount        int
 
+	// selectedFaceIbo は選択面の三角形だけを保持する動的インデックスバッファ。
+	selectedFaceIbo     *mgl.IndexBuffer
+	selectedFaceCount   int
+	selectedFaceVersion uint64
+	selectedFaceIndexes []int
+
 	cursorPositionBufferHandle *mgl.VertexBufferHandle
 
 	// 頂点情報（SSBOから読み出す場合など）
@@ -89,6 +95,9 @@ func (md *ModelDrawer) delete() {
 	}
 	if md.selectedVertexIbo != nil {
 		md.selectedVertexIbo.Delete()
+	}
+	if md.selectedFaceIbo != nil {
+		md.selectedFaceIbo.Delete()
 	}
 
 	if md.cursorPositionBufferHandle != nil {
@@ -661,6 +670,393 @@ func (mr *ModelRenderer) drawSelectedVertex(
 
 	// 選択頂点インデックスの更新結果を返す。
 	return selectedSetToSlice(selectedSet), hoverIndex
+}
+
+// drawSelectedFace は選択面をスクリーン空間で判定し、半透明の面として描画する。
+// 頂点変形後の位置は既存の頂点選択用シェーダーで SSBO へ書き込み、判定そのものは
+// CPU 側で行う。これにより、面の材質帰属と辺共有判定を同じドメイン索引で扱える。
+func (mr *ModelRenderer) drawSelectedFace(
+	windowIndex int,
+	selectedMaterialIndexes []int,
+	nowSelectedFaces []int,
+	selectionVersion uint64,
+	shader graphics_api.IShader,
+	paddedMatrixes []float32,
+	width, height int,
+	selectionRequest *FaceSelectionRequest,
+) []int {
+	screenWidth, screenHeight := width, height
+	if selectionRequest != nil && selectionRequest.ScreenWidth > 0 && selectionRequest.ScreenHeight > 0 {
+		screenWidth = selectionRequest.ScreenWidth
+		screenHeight = selectionRequest.ScreenHeight
+	}
+	selectedSet := make(map[int]struct{}, len(nowSelectedFaces))
+	faceCount := 0
+	if mr != nil && mr.Model != nil && mr.Model.Faces != nil {
+		faceCount = mr.Model.Faces.Len()
+	}
+	for _, faceIndex := range nowSelectedFaces {
+		if faceIndex >= 0 && faceIndex < faceCount {
+			selectedSet[faceIndex] = struct{}{}
+		}
+	}
+
+	// 材質未選択時は面選択を無効にする。既存の頂点選択と同じ規則である。
+	if len(selectedMaterialIndexes) == 0 || faceCount == 0 {
+		mr.updateSelectedFaceIndexBuffer(selectedSet, selectionVersion)
+		return selectedSetToSlice(selectedSet)
+	}
+
+	if !mr.faceMaterialIndexReady {
+		mr.faceMaterialIndex, _ = model.NewFaceMaterialIndex(mr.Model)
+		mr.faceMaterialIndexReady = true
+	}
+	faceMaterialIndex := mr.faceMaterialIndex
+	if faceMaterialIndex == nil {
+		mr.updateSelectedFaceIndexBuffer(selectedSet, selectionVersion)
+		return selectedSetToSlice(selectedSet)
+	}
+	selectedMaterialSet := make(map[int]struct{}, len(selectedMaterialIndexes))
+	for _, materialIndex := range selectedMaterialIndexes {
+		selectedMaterialSet[materialIndex] = struct{}{}
+	}
+	// 材質選択が切り替わった場合も、既存の選択集合を現在の材質に限定する。
+	for faceIndex := range selectedSet {
+		materialIndex, ok := faceMaterialIndex.MaterialIndex(faceIndex)
+		if !ok {
+			delete(selectedSet, faceIndex)
+			continue
+		}
+		if _, ok := selectedMaterialSet[materialIndex]; !ok {
+			delete(selectedSet, faceIndex)
+		}
+	}
+
+	// 選択要求がある時だけ SSBO とスクリーン投影を読み戻す。
+	if selectionRequest != nil && selectionRequest.Apply {
+		path := selectionRequest.CursorLineScreenPositions
+		remove := false
+		if selectionRequest.Remove {
+			path = selectionRequest.RemoveCursorLineScreenPositions
+			remove = true
+		}
+		if len(path) >= 2 && screenWidth > 0 && screenHeight > 0 {
+			positions, ok := mr.readSelectionVertexPositions(windowIndex, shader, paddedMatrixes, width, height)
+			if ok {
+				view, projection, projectionOK := selectionViewProjection(shader, screenWidth, screenHeight)
+				if projectionOK {
+					depthFront := selectionRequest.DepthMode == state.SELECTED_VERTEX_DEPTH_MODE_FRONT
+					for faceIndex, faceData := range mr.Model.Faces.Values() {
+						if faceData == nil {
+							continue
+						}
+						materialIndex, materialOK := faceMaterialIndex.MaterialIndex(faceIndex)
+						if !materialOK {
+							continue
+						}
+						if _, materialSelected := selectedMaterialSet[materialIndex]; !materialSelected {
+							continue
+						}
+						vertices := faceData.VertexIndexes
+						triangle, triangleOK := projectSelectionTriangle(vertices, positions, view, projection, screenWidth, screenHeight)
+						if !triangleOK || !selectionPathIntersectsTriangle(path, triangle) {
+							continue
+						}
+						if depthFront && !isFrontSelectionTriangle(shader, triangle, screenWidth, screenHeight) {
+							continue
+						}
+						if remove {
+							delete(selectedSet, faceIndex)
+						} else {
+							selectedSet[faceIndex] = struct{}{}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	mr.updateSelectedFaceIndexBuffer(selectedSet, selectionVersion)
+	mr.drawSelectedFaceGeometry(windowIndex, shader, paddedMatrixes, width, height)
+	if selectionRequest != nil {
+		lineColor := mgl32.Vec4{0.95, 1.0, 0.75, 0.8}
+		if len(selectionRequest.CursorLinePositions) > 0 {
+			mr.drawCursorLine(shader, selectionRequest.CursorLinePositions, lineColor)
+		}
+		if len(selectionRequest.RemoveCursorLinePositions) > 0 {
+			mr.drawCursorLine(shader, selectionRequest.RemoveCursorLinePositions, lineColor)
+		}
+	}
+	return selectedSetToSlice(selectedSet)
+}
+
+// readSelectionVertexPositions は選択頂点用シェーダーで変形後の頂点位置を SSBO から取得する。
+func (mr *ModelRenderer) readSelectionVertexPositions(
+	windowIndex int,
+	shader graphics_api.IShader,
+	paddedMatrixes []float32,
+	width, height int,
+) ([]float32, bool) {
+	if mr == nil || mr.ssbo == 0 || mr.selectedVertexBufferHandle == nil || mr.selectedVertexIbo == nil || shader == nil {
+		return nil, false
+	}
+	program := shader.Program(graphics_api.ProgramTypeSelectedVertex)
+	if program == 0 {
+		return nil, false
+	}
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.ALWAYS)
+	gl.DepthMask(false)
+	defer func() {
+		gl.DepthMask(true)
+		gl.DepthFunc(gl.LEQUAL)
+	}()
+	gl.UseProgram(program)
+	bindBoneMatrixes(windowIndex, paddedMatrixes, width, height, shader, program)
+	defer unbindBoneMatrixes()
+
+	thresholdUniform := mgl.GetUniformLocation(program, mgl.ShaderCursorThreshold)
+	gl.Uniform1f(thresholdUniform, 1.0e9)
+	cursorUniform := mgl.GetUniformLocation(program, mgl.ShaderCursorPositions)
+	var cursorValues [300]float32
+	gl.Uniform3fv(cursorUniform, 100, &cursorValues[0])
+
+	mr.selectedVertexBufferHandle.Bind()
+	mr.selectedVertexIbo.Bind()
+	gl.DrawElements(gl.POINTS, int32(mr.selectedVertexCount), gl.UNSIGNED_INT, nil)
+	mr.selectedVertexIbo.Unbind()
+	mr.selectedVertexBufferHandle.Unbind()
+	gl.UseProgram(0)
+
+	gl.MemoryBarrier(gl.SHADER_STORAGE_BARRIER_BIT)
+	gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, mr.ssbo)
+	positions := make([]float32, mr.Model.Vertices.Len()*4)
+	if len(positions) > 0 {
+		gl.GetBufferSubData(gl.SHADER_STORAGE_BUFFER, 0, len(positions)*4, gl.Ptr(&positions[0]))
+	}
+	gl.BindBuffer(gl.SHADER_STORAGE_BUFFER, 0)
+	return positions, true
+}
+
+// updateSelectedFaceIndexBuffer は選択面集合を動的 IBO へ転送する。
+func (mr *ModelRenderer) updateSelectedFaceIndexBuffer(selectedSet map[int]struct{}, version uint64) {
+	if mr == nil || mr.selectedFaceIbo == nil {
+		return
+	}
+	indexes := selectedSetToSlice(selectedSet)
+	if mr.selectedFaceVersion == version && slices.Equal(mr.selectedFaceIndexes, indexes) {
+		return
+	}
+	data := make([]uint32, 0, len(indexes)*3)
+	if mr.Model != nil && mr.Model.Faces != nil {
+		faces := mr.Model.Faces.Values()
+		for _, faceIndex := range indexes {
+			if faceIndex < 0 || faceIndex >= len(faces) || faces[faceIndex] == nil {
+				continue
+			}
+			vertices := faces[faceIndex].VertexIndexes
+			// 通常メッシュ描画と同じ OpenGL の面向きへ反転する。
+			data = append(data, uint32(vertices[2]), uint32(vertices[1]), uint32(vertices[0]))
+		}
+	}
+	mr.selectedFaceIbo.Bind()
+	if len(data) == 0 {
+		mr.selectedFaceIbo.BufferData(0, nil, graphics_api.BufferUsageDynamic)
+	} else {
+		mr.selectedFaceIbo.BufferData(len(data)*4, gl.Ptr(&data[0]), graphics_api.BufferUsageDynamic)
+	}
+	mr.selectedFaceIbo.Unbind()
+	mr.selectedFaceCount = len(data)
+	mr.selectedFaceVersion = version
+	mr.selectedFaceIndexes = slices.Clone(indexes)
+}
+
+// drawSelectedFaceGeometry は選択面を半透明の赤系色で描画する。
+func (mr *ModelRenderer) drawSelectedFaceGeometry(
+	windowIndex int,
+	shader graphics_api.IShader,
+	paddedMatrixes []float32,
+	width, height int,
+) {
+	if mr == nil || shader == nil || mr.selectedFaceIbo == nil || mr.selectedFaceCount == 0 || mr.bufferHandle == nil {
+		return
+	}
+	program := shader.Program(graphics_api.ProgramTypeSelectedFace)
+	if program == 0 {
+		return
+	}
+	gl.Enable(gl.DEPTH_TEST)
+	gl.DepthFunc(gl.LEQUAL)
+	gl.DepthMask(false)
+	gl.Enable(gl.BLEND)
+	gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+	gl.Disable(gl.CULL_FACE)
+	defer gl.DepthMask(true)
+	defer gl.Disable(gl.CULL_FACE)
+	gl.UseProgram(program)
+	bindBoneMatrixes(windowIndex, paddedMatrixes, width, height, shader, program)
+	defer unbindBoneMatrixes()
+	color := mgl32.Vec4{1.0, 0.2, 0.1, 0.4}
+	colorUniform := mgl.GetUniformLocation(program, mgl.ShaderColor)
+	gl.Uniform4fv(colorUniform, 1, &color[0])
+	mr.bufferHandle.Bind()
+	mr.selectedFaceIbo.Bind()
+	gl.DrawElements(gl.TRIANGLES, int32(mr.selectedFaceCount), gl.UNSIGNED_INT, nil)
+	mr.selectedFaceIbo.Unbind()
+	mr.bufferHandle.Unbind()
+	gl.UseProgram(0)
+}
+
+// selectionTriangle はスクリーン空間の三角形と投影深度を表す。
+type selectionTriangle [3]selectionScreenPoint
+
+// selectionScreenPoint はスクリーン座標と深度を表す。
+type selectionScreenPoint struct {
+	x     float64
+	y     float64
+	depth float32
+}
+
+// projectSelectionTriangle は面の三頂点をスクリーン空間へ投影する。
+func projectSelectionTriangle(
+	vertices [3]int,
+	positions []float32,
+	view, projection mgl32.Mat4,
+	width, height int,
+) (selectionTriangle, bool) {
+	var triangle selectionTriangle
+	for i, vertexIndex := range vertices {
+		if vertexIndex < 0 {
+			return selectionTriangle{}, false
+		}
+		base := vertexIndex * 4
+		if base+3 >= len(positions) || positions[base+3] < 0 {
+			return selectionTriangle{}, false
+		}
+		pos := mmath.Vec3{Vec: r3.Vec{X: float64(positions[base]), Y: float64(positions[base+1]), Z: float64(positions[base+2])}}
+		x, y, depth, ok := projectToScreenForSelection(pos, view, projection, width, height)
+		if !ok {
+			return selectionTriangle{}, false
+		}
+		triangle[i] = selectionScreenPoint{x: x, y: y, depth: depth}
+	}
+	return triangle, true
+}
+
+// selectionPathIntersectsTriangle は軌跡の線分列と三角形の交差を判定する。
+func selectionPathIntersectsTriangle(path []float32, triangle selectionTriangle) bool {
+	if len(path) < 2 {
+		return false
+	}
+	pointCount := len(path) / 2
+	for i := 0; i < pointCount; i++ {
+		point := selectionScreenPoint{x: float64(path[i*2]), y: float64(path[i*2+1])}
+		if pointInSelectionTriangle(point, triangle) {
+			return true
+		}
+		if i+1 >= pointCount {
+			break
+		}
+		next := selectionScreenPoint{x: float64(path[(i+1)*2]), y: float64(path[(i+1)*2+1])}
+		for edge := 0; edge < 3; edge++ {
+			if selectionSegmentsIntersect(point, next, triangle[edge], triangle[(edge+1)%3]) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// pointInSelectionTriangle は点が三角形内または辺上にあるか判定する。
+func pointInSelectionTriangle(point selectionScreenPoint, triangle selectionTriangle) bool {
+	const epsilon = 1.0e-6
+	positive := false
+	negative := false
+	for i := 0; i < 3; i++ {
+		value := selectionCross(triangle[i], triangle[(i+1)%3], point)
+		if value > epsilon {
+			positive = true
+		} else if value < -epsilon {
+			negative = true
+		}
+	}
+	return !(positive && negative)
+}
+
+// selectionSegmentsIntersect は二線分の交差を判定する。
+func selectionSegmentsIntersect(first, second, third, fourth selectionScreenPoint) bool {
+	const epsilon = 1.0e-6
+	o1 := selectionCross(first, second, third)
+	o2 := selectionCross(first, second, fourth)
+	o3 := selectionCross(third, fourth, first)
+	o4 := selectionCross(third, fourth, second)
+	if ((o1 > epsilon && o2 < -epsilon) || (o1 < -epsilon && o2 > epsilon)) &&
+		((o3 > epsilon && o4 < -epsilon) || (o3 < -epsilon && o4 > epsilon)) {
+		return true
+	}
+	return selectionOnSegment(first, second, third, epsilon) ||
+		selectionOnSegment(first, second, fourth, epsilon) ||
+		selectionOnSegment(third, fourth, first, epsilon) ||
+		selectionOnSegment(third, fourth, second, epsilon)
+}
+
+// selectionOnSegment は点が線分上にあるか判定する。
+func selectionOnSegment(first, second, point selectionScreenPoint, epsilon float64) bool {
+	if math.Abs(selectionCross(first, second, point)) > epsilon {
+		return false
+	}
+	return point.x >= math.Min(first.x, second.x)-epsilon && point.x <= math.Max(first.x, second.x)+epsilon &&
+		point.y >= math.Min(first.y, second.y)-epsilon && point.y <= math.Max(first.y, second.y)+epsilon
+}
+
+// selectionCross は二次元外積を返す。
+func selectionCross(first, second, third selectionScreenPoint) float64 {
+	return (second.x-first.x)*(third.y-first.y) - (second.y-first.y)*(third.x-first.x)
+}
+
+// isFrontSelectionTriangle は三角形重心の深度を深度バッファと比較する。
+func isFrontSelectionTriangle(shader graphics_api.IShader, triangle selectionTriangle, width, height int) bool {
+	if shader == nil || shader.Msaa() == nil || width <= 0 || height <= 0 {
+		return false
+	}
+	x := (triangle[0].x + triangle[1].x + triangle[2].x) / 3
+	y := (triangle[0].y + triangle[1].y + triangle[2].y) / 3
+	depth, ok := readSelectionDepth(shader, int(x), int(y), width, height)
+	if !ok {
+		return false
+	}
+	if depth <= 0 || depth >= 1 {
+		return false
+	}
+	triangleDepth := (triangle[0].depth + triangle[1].depth + triangle[2].depth) / 3
+	return math.Abs(float64(triangleDepth-depth)) <= float64(depthToleranceFromBuffer()*2)
+}
+
+// readSelectionDepth は最前面判定用の深度を1ピクセル領域として読み取る。
+// MSAA 実装が領域読み出しを提供しない場合は、既存の単一点 API へフォールバックする。
+func readSelectionDepth(shader graphics_api.IShader, x, y, width, height int) (float32, bool) {
+	if shader == nil || shader.Msaa() == nil || width <= 0 || height <= 0 {
+		return 0, false
+	}
+	if x < 0 {
+		x = 0
+	} else if x >= width {
+		x = width - 1
+	}
+	if y < 0 {
+		y = 0
+	} else if y >= height {
+		y = height - 1
+	}
+	if reader, ok := shader.Msaa().(interface {
+		ReadDepthRegion(x, y, width, height, framebufferHeight int) []float32
+	}); ok {
+		depths := reader.ReadDepthRegion(x, y, 1, 1, height)
+		if len(depths) > 0 {
+			return depths[0], true
+		}
+	}
+	return shader.Msaa().ReadDepthAt(x, y, width, height), true
 }
 
 // truncateCursorDepths はカーソル深度配列をカーソル位置数に合わせて切り詰める。

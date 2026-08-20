@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/miu200521358/mlib_go/pkg/adapter/mpresenter/messages"
+	"github.com/miu200521358/mlib_go/pkg/domain"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/motion"
 	"github.com/miu200521358/mlib_go/pkg/infra/base/err"
@@ -90,6 +91,8 @@ type ControlWindow struct {
 	showSelectedVertexBoxAction        *walk.Action
 	showSelectedVertexAllDepthAction   *walk.Action
 	showSelectedVertexFrontDepthAction *walk.Action
+	showSelectedFaceAction             *walk.Action
+	showSelectedFaceExpandAction       *walk.Action
 	showBoneAllAction                  *walk.Action
 	showBoneIkAction                   *walk.Action
 	showBoneEffectorAction             *walk.Action
@@ -519,6 +522,16 @@ func (cw *ControlWindow) SetDisplayFlag(flag state.StateFlag, enabled bool) {
 			cw.setDisplayFlag(state.STATE_FLAG_CAMERA_SYNC, false)
 			cw.updateDisplayAction(state.STATE_FLAG_CAMERA_SYNC, false)
 		}
+	case state.STATE_FLAG_SHOW_SELECTED_VERTEX:
+		if enabled {
+			cw.setDisplayFlag(state.STATE_FLAG_SHOW_SELECTED_FACE, false)
+			cw.updateDisplayAction(state.STATE_FLAG_SHOW_SELECTED_FACE, false)
+		}
+	case state.STATE_FLAG_SHOW_SELECTED_FACE:
+		if enabled {
+			cw.setDisplayFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX, false)
+			cw.updateDisplayAction(state.STATE_FLAG_SHOW_SELECTED_VERTEX, false)
+		}
 	}
 	cw.setDisplayFlag(flag, enabled)
 	cw.updateDisplayAction(flag, enabled)
@@ -665,6 +678,16 @@ func (cw *ControlWindow) SelectedVertexIndexes(windowIndex, modelIndex int) []in
 	return cw.shared.SelectedVertexIndexes(windowIndex, modelIndex)
 }
 
+// SetSelectedFaceIndexes は選択面を設定する。
+func (cw *ControlWindow) SetSelectedFaceIndexes(windowIndex, modelIndex int, indexes []int) {
+	cw.shared.SetSelectedFaceIndexes(windowIndex, modelIndex, indexes)
+}
+
+// SelectedFaceIndexes は選択面を取得する。
+func (cw *ControlWindow) SelectedFaceIndexes(windowIndex, modelIndex int) []int {
+	return cw.shared.SelectedFaceIndexes(windowIndex, modelIndex)
+}
+
 // SetDeltaMotion は差分モーションを設定する。
 func (cw *ControlWindow) SetDeltaMotion(windowIndex, modelIndex, deltaIndex int, motionData *motion.VmdMotion) {
 	cw.shared.SetDeltaMotion(windowIndex, modelIndex, deltaIndex, motionData)
@@ -806,6 +829,8 @@ func (cw *ControlWindow) buildViewerMenu() declarative.Menu {
 			declarative.Menu{Text: cw.t(messages.ControlWindowKey030), Items: []declarative.MenuItem{
 				declarative.Action{Text: cw.t(messages.ControlWindowKey031), Checkable: true, OnTriggered: cw.TriggerShowSelectedVertexBox, AssignTo: &cw.showSelectedVertexBoxAction},
 				declarative.Action{Text: cw.t(messages.ControlWindowKey032), Checkable: true, OnTriggered: cw.TriggerShowSelectedVertexPoint, AssignTo: &cw.showSelectedVertexPointAction},
+				declarative.Action{Text: cw.t(messages.LabelSelectedFaceLine), Checkable: true, OnTriggered: cw.TriggerShowSelectedFace, AssignTo: &cw.showSelectedFaceAction},
+				declarative.Action{Text: cw.t(messages.LabelSelectedFaceExpand), Enabled: false, OnTriggered: cw.TriggerExpandConnectedFaces, AssignTo: &cw.showSelectedFaceExpandAction},
 				declarative.Separator{},
 				declarative.Action{Text: cw.t(messages.LabelSelectedVertexDepthAll), Checkable: true, OnTriggered: cw.TriggerShowSelectedVertexDepthAll, AssignTo: &cw.showSelectedVertexAllDepthAction},
 				declarative.Action{Text: cw.t(messages.LabelSelectedVertexDepthFront), Checkable: true, OnTriggered: cw.TriggerShowSelectedVertexDepthFront, AssignTo: &cw.showSelectedVertexFrontDepthAction},
@@ -992,6 +1017,8 @@ func (cw *ControlWindow) TriggerShowSelectedVertexPoint() {
 	enabled := cw.actionChecked(cw.showSelectedVertexPointAction)
 	wasEnabled := cw.shared != nil && cw.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX)
 	if enabled {
+		cw.SetDisplayFlag(state.STATE_FLAG_SHOW_SELECTED_FACE, false)
+		cw.updateActionChecked(cw.showSelectedFaceAction, false)
 		cw.updateActionChecked(cw.showSelectedVertexBoxAction, false)
 		cw.shared.SetSelectedVertexMode(state.SELECTED_VERTEX_MODE_POINT)
 	}
@@ -1011,6 +1038,8 @@ func (cw *ControlWindow) TriggerShowSelectedVertexBox() {
 	enabled := cw.actionChecked(cw.showSelectedVertexBoxAction)
 	wasEnabled := cw.shared != nil && cw.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX)
 	if enabled {
+		cw.SetDisplayFlag(state.STATE_FLAG_SHOW_SELECTED_FACE, false)
+		cw.updateActionChecked(cw.showSelectedFaceAction, false)
 		cw.updateActionChecked(cw.showSelectedVertexPointAction, false)
 		cw.shared.SetSelectedVertexMode(state.SELECTED_VERTEX_MODE_BOX)
 	}
@@ -1025,12 +1054,50 @@ func (cw *ControlWindow) TriggerShowSelectedVertexBox() {
 	}
 }
 
+// TriggerShowSelectedFace は面ライン選択表示を切り替える。
+func (cw *ControlWindow) TriggerShowSelectedFace() {
+	enabled := cw.actionChecked(cw.showSelectedFaceAction)
+	if enabled {
+		// 面選択を有効にした時点で頂点選択を解除し、両モードの同時表示を防ぐ。
+		cw.SetDisplayFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX, false)
+		cw.updateActionChecked(cw.showSelectedVertexPointAction, false)
+		cw.updateActionChecked(cw.showSelectedVertexBoxAction, false)
+		cw.updateActionChecked(cw.showSelectedVertexAllDepthAction, false)
+		cw.updateActionChecked(cw.showSelectedVertexFrontDepthAction, false)
+	}
+	cw.SetDisplayFlag(state.STATE_FLAG_SHOW_SELECTED_FACE, enabled)
+	cw.SetDisplayFlag(state.STATE_FLAG_SHOW_WIRE, enabled)
+}
+
+// TriggerExpandConnectedFaces は選択済み面を同一材質の連続面へ拡張する。
+func (cw *ControlWindow) TriggerExpandConnectedFaces() {
+	if cw == nil || cw.shared == nil || !cw.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_FACE) {
+		return
+	}
+	for modelIndex := 0; modelIndex < cw.shared.ModelCount(0); modelIndex++ {
+		modelData, ok := cw.shared.Model(0, modelIndex).(*model.PmxModel)
+		if !ok || modelData == nil {
+			continue
+		}
+		selected := cw.shared.SelectedFaceIndexes(0, modelIndex)
+		if len(selected) == 0 {
+			continue
+		}
+		expanded, err := domain.ExpandConnectedFaceIndexes(modelData, selected)
+		if err != nil {
+			cw.loggerOrDefault().Warn(cw.t(messages.ControlWindowKey108), err.Error())
+			continue
+		}
+		cw.shared.SetSelectedFaceIndexes(0, modelIndex, expanded)
+	}
+}
+
 // ensureSelectedVertexBoxSelectionForDepth は深度選択時に頂点選択モードが未選択ならボックス選択を有効にする。
 func (cw *ControlWindow) ensureSelectedVertexBoxSelectionForDepth() {
 	if cw == nil || cw.shared == nil {
 		return
 	}
-	if cw.actionChecked(cw.showSelectedVertexPointAction) || cw.actionChecked(cw.showSelectedVertexBoxAction) {
+	if cw.actionChecked(cw.showSelectedVertexPointAction) || cw.actionChecked(cw.showSelectedVertexBoxAction) || cw.actionChecked(cw.showSelectedFaceAction) {
 		return
 	}
 	cw.shared.SetSelectedVertexMode(state.SELECTED_VERTEX_MODE_BOX)
@@ -1326,6 +1393,11 @@ func (cw *ControlWindow) updateDisplayAction(flag state.StateFlag, enabled bool)
 			cw.updateActionChecked(cw.showSelectedVertexBoxAction, false)
 		}
 		cw.updateSelectedVertexDepthActions()
+	case state.STATE_FLAG_SHOW_SELECTED_FACE:
+		cw.updateActionChecked(cw.showSelectedFaceAction, enabled)
+		if cw.showSelectedFaceExpandAction != nil {
+			_ = cw.showSelectedFaceExpandAction.SetEnabled(enabled)
+		}
 	case state.STATE_FLAG_SHOW_BONE_ALL:
 		cw.updateActionChecked(cw.showBoneAllAction, enabled)
 	case state.STATE_FLAG_SHOW_BONE_IK:

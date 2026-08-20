@@ -6,6 +6,8 @@ package messages
 const (
 	LabelSelectedVertexDepthAll   = "&全面"
 	LabelSelectedVertexDepthFront = "&最前面"
+	LabelSelectedFaceLine         = "&面ライン選択"
+	LabelSelectedFaceExpand       = "連続面の選択"
 	ControlWindowKey001           = "&コントローラーウィンドウ"
 	ControlWindowKey002           = "&ツールについて"
 	ControlWindowKey003           = "&言語"
@@ -155,6 +157,7 @@ const (
 	ControlWindowKey105           = "言語変更メッセージ"
 	ControlWindowKey106           = "スクリーンショット要求に失敗しました"
 	ControlWindowKey107           = "スクリーンショット保存先が未指定です"
+	ControlWindowKey108           = "連続面の選択に失敗しました: %s"
 	ViewerWindowKey001            = "カメラ手動操作(テンキー視点切替)"
 	ViewerWindowKey002            = "カメラ手動操作(右ドラッグ回転)"
 	ViewerWindowKey003            = "カメラ手動操作(中クリックドラッグ移動)"

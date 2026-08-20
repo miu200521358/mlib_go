@@ -69,6 +69,7 @@ var SHADER_PROGRAM_CONFIGS = map[graphics_api.ProgramType]ShaderProgramConfig{
 	graphics_api.ProgramTypeFloor:          {"glsl/floor.vert", "glsl/floor.frag"},
 	graphics_api.ProgramTypeWire:           {"glsl/vertex.vert", "glsl/vertex.frag"},
 	graphics_api.ProgramTypeSelectedVertex: {"glsl/vertex.vert", "glsl/vertex.frag"},
+	graphics_api.ProgramTypeSelectedFace:   {"glsl/vertex.vert", "glsl/vertex.frag"},
 	graphics_api.ProgramTypeOverride:       {"glsl/override.vert", "glsl/override.frag"},
 	graphics_api.ProgramTypeCursor:         {"glsl/cursor.vert", "glsl/cursor.frag"},
 }

@@ -660,6 +660,18 @@
         "translation": "&Point Selection"
     },
     {
+        "id": "&面ライン選択",
+        "translation": "&Face Line Selection"
+    },
+    {
+        "id": "連続面の選択",
+        "translation": "Select Connected Faces"
+    },
+    {
+        "id": "連続面の選択に失敗しました: %s",
+        "translation": "Failed to select connected faces: %s"
+    },
+    {
         "id": "音楽ファイル",
         "translation": "Audio File"
     },

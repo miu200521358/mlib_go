@@ -433,6 +433,22 @@ func (mr *ModelRenderer) ensureSelectedVertexBuffers() bool {
 	return true
 }
 
+// ensureSelectedFaceBuffer は選択面描画用の動的インデックスバッファを生成する。
+func (mr *ModelRenderer) ensureSelectedFaceBuffer() bool {
+	if mr == nil || mr.Model == nil {
+		return false
+	}
+	if mr.selectedFaceIbo != nil {
+		return true
+	}
+	factory := mgl.NewBufferFactory()
+	// 実データは選択状態が変わった時に BufferData で差し替える。
+	mr.selectedFaceIbo = factory.NewIndexBuffer(nil, 0)
+	mr.selectedFaceCount = 0
+	mr.selectedFaceVersion = ^uint64(0)
+	return mr.selectedFaceIbo != nil
+}
+
 // ensureBoneBuffers はボーン描画用バッファを必要に応じて生成する。
 func (mr *ModelRenderer) ensureBoneBuffers() bool {
 	if mr == nil || mr.Model == nil {

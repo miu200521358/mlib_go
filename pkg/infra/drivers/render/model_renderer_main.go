@@ -35,6 +35,21 @@ type VertexSelectionRequest struct {
 	HasRect                   bool
 }
 
+// FaceSelectionRequest は選択面の更新要求をまとめる。
+// 軌跡座標はフレームバッファのピクセル座標を x,y の順で保持する。
+type FaceSelectionRequest struct {
+	DepthMode                       state.SelectedVertexDepthMode
+	Apply                           bool
+	Remove                          bool
+	CursorLinePositions             []float32
+	RemoveCursorLinePositions       []float32
+	CursorLineScreenPositions       []float32
+	RemoveCursorLineScreenPositions []float32
+	ScreenWidth                     int
+	ScreenHeight                    int
+	SelectionVersion                uint64
+}
+
 // ModelRenderer は、PMXモデル全体の描画処理を統括する構造体です。
 // バッファの初期化は model_renderer_buffer.go に、描画処理は model_renderer_draw.go に分割して実装します。
 type ModelRenderer struct {
@@ -63,6 +78,9 @@ type ModelRenderer struct {
 	selectedMaterialMask []bool
 	// 選択材質の更新バージョン
 	selectedMaterialVersion uint64
+	// 面と材質の対応索引（モデルごとに一度だけ構築する）。
+	faceMaterialIndex      *model.FaceMaterialIndex
+	faceMaterialIndexReady bool
 }
 
 // ModelRenderBaseResult はベース描画の結果を表す。
@@ -298,6 +316,37 @@ func (mr *ModelRenderer) RenderSelection(
 		base.SelectedMaterialIndexes,
 		selectedVertexIndexes,
 		nil,
+		shader,
+		base.PaddedMatrixes,
+		base.MatrixWidth,
+		base.MatrixHeight,
+		selectionRequest,
+	)
+}
+
+// RenderFaceSelection は選択面の描画と選択結果の更新を行う。
+func (mr *ModelRenderer) RenderFaceSelection(
+	shader graphics_api.IShader,
+	shared *state.SharedState,
+	selectedFaceIndexes []int,
+	selectionVersion uint64,
+	selectionRequest *FaceSelectionRequest,
+	base *ModelRenderBaseResult,
+) []int {
+	if mr == nil || shader == nil || shared == nil || base == nil {
+		return selectedFaceIndexes
+	}
+	if !shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_FACE) {
+		return selectedFaceIndexes
+	}
+	if !mr.ensureSelectedVertexBuffers() || !mr.ensureSelectedFaceBuffer() {
+		return selectedFaceIndexes
+	}
+	return mr.drawSelectedFace(
+		mr.windowIndex,
+		base.SelectedMaterialIndexes,
+		selectedFaceIndexes,
+		selectionVersion,
 		shader,
 		base.PaddedMatrixes,
 		base.MatrixWidth,

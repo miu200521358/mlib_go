@@ -58,6 +58,15 @@ func TestFlagUpdate(t *testing.T) {
 	if ss.HasFlag(STATE_FLAG_FRAME_DROP) {
 		t.Errorf("DisableFlag failed")
 	}
+	ss.EnableFlag(STATE_FLAG_SHOW_SELECTED_VERTEX)
+	ss.EnableFlag(STATE_FLAG_SHOW_SELECTED_FACE)
+	if ss.HasFlag(STATE_FLAG_SHOW_SELECTED_VERTEX) || !ss.HasFlag(STATE_FLAG_SHOW_SELECTED_FACE) {
+		t.Errorf("face selection should be exclusive with vertex selection")
+	}
+	ss.EnableFlag(STATE_FLAG_SHOW_SELECTED_VERTEX)
+	if !ss.HasFlag(STATE_FLAG_SHOW_SELECTED_VERTEX) || ss.HasFlag(STATE_FLAG_SHOW_SELECTED_FACE) {
+		t.Errorf("vertex selection should be exclusive with face selection")
+	}
 }
 
 // TestSetModelInitializesSelected は材質選択初期化を確認する。
@@ -78,6 +87,23 @@ func TestSetModelInitializesSelected(t *testing.T) {
 	}
 	if len(vertexIdxs) != 0 {
 		t.Errorf("SelectedVertexIndexes length: got=%v", len(vertexIdxs))
+	}
+	faceIdxs := ss.SelectedFaceIndexes(0, 0)
+	if faceIdxs == nil {
+		t.Errorf("SelectedFaceIndexes should not be nil")
+	}
+	if len(faceIdxs) != 0 {
+		t.Errorf("SelectedFaceIndexes length: got=%v", len(faceIdxs))
+	}
+	ss.SetSelectedFaceIndexes(0, 0, []int{7, 8})
+	faceIdxs, version := ss.SelectedFaceIndexesWithVersion(0, 0)
+	if len(faceIdxs) != 2 || faceIdxs[0] != 7 || version == 0 {
+		t.Errorf("SelectedFaceIndexesWithVersion mismatch: indexes=%v version=%d", faceIdxs, version)
+	}
+	faceCopy := ss.SelectedFaceIndexes(0, 0)
+	faceCopy[0] = 99
+	if ss.SelectedFaceIndexes(0, 0)[0] == 99 {
+		t.Errorf("SelectedFaceIndexes should be cloned")
 	}
 }
 

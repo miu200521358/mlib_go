@@ -71,6 +71,9 @@ const (
 	STATE_FLAG_WINDOW_LINKAGE
 	// STATE_FLAG_CHANGED_ENABLE_FRAME_DROP はフレームドロップ変更通知。
 	STATE_FLAG_CHANGED_ENABLE_FRAME_DROP
+	// STATE_FLAG_SHOW_SELECTED_FACE は選択面表示。
+	// 既存フラグのビット位置を維持するため末尾へ追加する。
+	STATE_FLAG_SHOW_SELECTED_FACE
 )
 
 // StateFlagSet はフラグ集合。
@@ -188,6 +191,9 @@ type ISharedState interface {
 	SetSelectedMaterialIndexes(viewerIndex, modelIndex int, indexes []int)
 	SelectedVertexIndexes(viewerIndex, modelIndex int) []int
 	SetSelectedVertexIndexes(viewerIndex, modelIndex int, indexes []int)
+	SelectedFaceIndexes(viewerIndex, modelIndex int) []int
+	SetSelectedFaceIndexes(viewerIndex, modelIndex int, indexes []int)
+	SelectedFaceIndexesWithVersion(viewerIndex, modelIndex int) ([]int, uint64)
 	SelectedVertexMode() SelectedVertexMode
 	SetSelectedVertexMode(mode SelectedVertexMode)
 	SelectedVertexDepthMode() SelectedVertexDepthMode
@@ -260,6 +266,7 @@ type SharedState struct {
 	motions                 [][]atomic.Value
 	selectedIndexes         [][]atomic.Value
 	selectedVertexIndexes   [][]atomic.Value
+	selectedFaceIndexes     [][]atomic.Value
 	selectedVertexMode      atomic.Int32
 	selectedVertexDepthMode atomic.Int32
 	deltaSaveEnabled        []atomic.Bool
@@ -286,6 +293,7 @@ func NewSharedState(viewerCount int) *SharedState {
 		motions:               make([][]atomic.Value, viewerCount),
 		selectedIndexes:       make([][]atomic.Value, viewerCount),
 		selectedVertexIndexes: make([][]atomic.Value, viewerCount),
+		selectedFaceIndexes:   make([][]atomic.Value, viewerCount),
 		deltaSaveEnabled:      make([]atomic.Bool, viewerCount),
 		deltaSaveIndexes:      make([]atomic.Int32, viewerCount),
 		deltaMotions:          make([][][]atomic.Value, viewerCount),
@@ -330,6 +338,10 @@ func (ss *SharedState) Flags() StateFlagSet {
 
 // SetFlags はフラグ集合を置換する。
 func (ss *SharedState) SetFlags(flags StateFlagSet) {
+	// 頂点選択と面選択は同時に表示しない。既存の頂点選択を優先する。
+	if flags&StateFlagSet(STATE_FLAG_SHOW_SELECTED_VERTEX) != 0 {
+		flags &^= StateFlagSet(STATE_FLAG_SHOW_SELECTED_FACE)
+	}
 	for {
 		current := ss.flags.Load()
 		if ss.flags.CompareAndSwap(current, uint64(flags)) {
@@ -343,6 +355,11 @@ func (ss *SharedState) EnableFlag(flag StateFlag) {
 	for {
 		current := ss.flags.Load()
 		next := current | uint64(flag)
+		if flag&STATE_FLAG_SHOW_SELECTED_VERTEX != 0 {
+			next &^= uint64(STATE_FLAG_SHOW_SELECTED_FACE)
+		} else if flag&STATE_FLAG_SHOW_SELECTED_FACE != 0 {
+			next &^= uint64(STATE_FLAG_SHOW_SELECTED_VERTEX)
+		}
 		if ss.flags.CompareAndSwap(current, next) {
 			return
 		}
@@ -672,6 +689,10 @@ func (ss *SharedState) SetModel(viewerIndex, modelIndex int, model IStateModel) 
 	if vertexSlot != nil {
 		vertexSlot.Store(stateIndexSlot{Indexes: []int{}})
 	}
+	faceSlot := ss.ensureFaceIndexSlot(viewerIndex, modelIndex)
+	if faceSlot != nil {
+		faceSlot.Store(stateIndexSlot{Indexes: []int{}})
+	}
 }
 
 // Model はモデルを取得する。
@@ -790,6 +811,44 @@ func (ss *SharedState) SelectedVertexIndexesWithVersion(viewerIndex, modelIndex 
 // SetSelectedVertexIndexes は選択頂点インデックスを設定する。
 func (ss *SharedState) SetSelectedVertexIndexes(viewerIndex, modelIndex int, indexes []int) {
 	slot := ss.ensureVertexIndexSlot(viewerIndex, modelIndex)
+	if slot == nil {
+		return
+	}
+	nextVersion := uint64(1)
+	if current, ok := slot.Load().(stateIndexSlot); ok {
+		nextVersion = current.Version + 1
+	}
+	slot.Store(stateIndexSlot{Indexes: cloneIntSlice(indexes), Version: nextVersion})
+}
+
+// SelectedFaceIndexes は選択面インデックスを返す。
+func (ss *SharedState) SelectedFaceIndexes(viewerIndex, modelIndex int) []int {
+	if viewerIndex < 0 || viewerIndex >= len(ss.selectedFaceIndexes) {
+		return nil
+	}
+	if modelIndex < 0 || modelIndex >= len(ss.selectedFaceIndexes[viewerIndex]) {
+		return nil
+	}
+	slot := ss.selectedFaceIndexes[viewerIndex][modelIndex].Load().(stateIndexSlot)
+	return cloneIntSlice(slot.Indexes)
+}
+
+// SelectedFaceIndexesWithVersion は選択面インデックスと更新バージョンを返す。
+// 返却するスライスは内部共有参照のため、呼び出し側で変更しないこと。
+func (ss *SharedState) SelectedFaceIndexesWithVersion(viewerIndex, modelIndex int) ([]int, uint64) {
+	if viewerIndex < 0 || viewerIndex >= len(ss.selectedFaceIndexes) {
+		return nil, 0
+	}
+	if modelIndex < 0 || modelIndex >= len(ss.selectedFaceIndexes[viewerIndex]) {
+		return nil, 0
+	}
+	slot := ss.selectedFaceIndexes[viewerIndex][modelIndex].Load().(stateIndexSlot)
+	return slot.Indexes, slot.Version
+}
+
+// SetSelectedFaceIndexes は選択面インデックスを設定する。
+func (ss *SharedState) SetSelectedFaceIndexes(viewerIndex, modelIndex int, indexes []int) {
+	slot := ss.ensureFaceIndexSlot(viewerIndex, modelIndex)
 	if slot == nil {
 		return
 	}
@@ -1046,6 +1105,7 @@ func (ss *SharedState) ensureModelSlot(viewerIndex, modelIndex int) *atomic.Valu
 	ss.motions[viewerIndex] = ensureSlotSlice(ss.motions[viewerIndex], modelIndex, stateMotionSlot{})
 	ss.selectedIndexes[viewerIndex] = ensureSlotSlice(ss.selectedIndexes[viewerIndex], modelIndex, stateIndexSlot{Indexes: []int{}, Version: 0})
 	ss.selectedVertexIndexes[viewerIndex] = ensureSlotSlice(ss.selectedVertexIndexes[viewerIndex], modelIndex, stateIndexSlot{Indexes: []int{}, Version: 0})
+	ss.selectedFaceIndexes[viewerIndex] = ensureSlotSlice(ss.selectedFaceIndexes[viewerIndex], modelIndex, stateIndexSlot{Indexes: []int{}, Version: 0})
 	return &ss.models[viewerIndex][modelIndex]
 }
 
@@ -1080,6 +1140,17 @@ func (ss *SharedState) ensureVertexIndexSlot(viewerIndex, modelIndex int) *atomi
 	}
 	ss.selectedVertexIndexes[viewerIndex] = ensureSlotSlice(ss.selectedVertexIndexes[viewerIndex], modelIndex, stateIndexSlot{Indexes: []int{}, Version: 0})
 	return &ss.selectedVertexIndexes[viewerIndex][modelIndex]
+}
+
+// ensureFaceIndexSlot は選択面インデックススロットを確保する。
+func (ss *SharedState) ensureFaceIndexSlot(viewerIndex, modelIndex int) *atomic.Value {
+	ss.mu.Lock()
+	defer ss.mu.Unlock()
+	if !ss.ensureViewerIndex(viewerIndex) {
+		return nil
+	}
+	ss.selectedFaceIndexes[viewerIndex] = ensureSlotSlice(ss.selectedFaceIndexes[viewerIndex], modelIndex, stateIndexSlot{Indexes: []int{}, Version: 0})
+	return &ss.selectedFaceIndexes[viewerIndex][modelIndex]
 }
 
 // ensureDeltaMotionSlot は差分モーションスロットを確保する。
@@ -1123,6 +1194,9 @@ func (ss *SharedState) ensureViewerIndex(viewerIndex int) bool {
 	}
 	if ss.selectedVertexIndexes[viewerIndex] == nil {
 		ss.selectedVertexIndexes[viewerIndex] = []atomic.Value{}
+	}
+	if ss.selectedFaceIndexes[viewerIndex] == nil {
+		ss.selectedFaceIndexes[viewerIndex] = []atomic.Value{}
 	}
 	if ss.deltaMotions[viewerIndex] == nil {
 		ss.deltaMotions[viewerIndex] = [][]atomic.Value{}

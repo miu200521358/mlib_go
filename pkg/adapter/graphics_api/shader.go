@@ -21,6 +21,8 @@ const (
 	ProgramTypeWire
 	// ProgramTypeSelectedVertex は選択頂点用。
 	ProgramTypeSelectedVertex
+	// ProgramTypeSelectedFace は選択面用。
+	ProgramTypeSelectedFace
 	// ProgramTypeOverride はオーバーライド用。
 	ProgramTypeOverride
 	// ProgramTypeCursor はカーソル用。
