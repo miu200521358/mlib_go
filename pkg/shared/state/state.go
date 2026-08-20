@@ -121,6 +121,18 @@ const (
 	SELECTED_VERTEX_DEPTH_MODE_FRONT
 )
 
+// SelectedFaceMode は選択面の選択モードを表す。
+//
+// 頂点選択モードとは独立して保持する。
+type SelectedFaceMode int
+
+const (
+	// SELECTED_FACE_MODE_LINE は軌跡によるライン選択。
+	SELECTED_FACE_MODE_LINE SelectedFaceMode = iota
+	// SELECTED_FACE_MODE_BOX は矩形によるボックス選択。
+	SELECTED_FACE_MODE_BOX
+)
+
 // SelectedFaceDepthMode は選択面の深度判定モードを表す。
 //
 // 頂点選択の深度モードとは独立して保持し、面選択メニューの変更が頂点選択へ
@@ -213,6 +225,8 @@ type ISharedState interface {
 	SetSelectedVertexDepthMode(mode SelectedVertexDepthMode)
 	SelectedFaceDepthMode() SelectedFaceDepthMode
 	SetSelectedFaceDepthMode(mode SelectedFaceDepthMode)
+	SelectedFaceMode() SelectedFaceMode
+	SetSelectedFaceMode(mode SelectedFaceMode)
 	IsDeltaSaveEnabled(viewerIndex int) bool
 	SetDeltaSaveEnabled(viewerIndex int, enabled bool)
 	DeltaSaveIndex(viewerIndex int) int
@@ -284,6 +298,7 @@ type SharedState struct {
 	selectedFaceIndexes     [][]atomic.Value
 	selectedVertexMode      atomic.Int32
 	selectedVertexDepthMode atomic.Int32
+	selectedFaceMode        atomic.Int32
 	selectedFaceDepthMode   atomic.Int32
 	deltaSaveEnabled        []atomic.Bool
 	deltaSaveIndexes        []atomic.Int32
@@ -334,6 +349,7 @@ func NewSharedState(viewerCount int) *SharedState {
 	ss.closed.Store(false)
 	ss.selectedVertexMode.Store(int32(SELECTED_VERTEX_MODE_POINT))
 	ss.selectedVertexDepthMode.Store(int32(SELECTED_VERTEX_DEPTH_MODE_ALL))
+	ss.selectedFaceMode.Store(int32(SELECTED_FACE_MODE_LINE))
 	ss.selectedFaceDepthMode.Store(int32(SELECTED_FACE_DEPTH_MODE_ALL))
 	ss.focusLinkEnabled.Store(true)
 	ss.linkingFocus.Store(false)
@@ -904,6 +920,16 @@ func (ss *SharedState) SelectedFaceDepthMode() SelectedFaceDepthMode {
 // SetSelectedFaceDepthMode は選択面の深度判定モードを設定する。
 func (ss *SharedState) SetSelectedFaceDepthMode(mode SelectedFaceDepthMode) {
 	ss.selectedFaceDepthMode.Store(int32(mode))
+}
+
+// SelectedFaceMode は選択面の選択モードを返す。
+func (ss *SharedState) SelectedFaceMode() SelectedFaceMode {
+	return SelectedFaceMode(ss.selectedFaceMode.Load())
+}
+
+// SetSelectedFaceMode は選択面の選択モードを設定する。
+func (ss *SharedState) SetSelectedFaceMode(mode SelectedFaceMode) {
+	ss.selectedFaceMode.Store(int32(mode))
 }
 
 // IsDeltaSaveEnabled は差分保存が有効か判定する。

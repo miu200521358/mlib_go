@@ -92,6 +92,7 @@ type ControlWindow struct {
 	showSelectedVertexAllDepthAction   *walk.Action
 	showSelectedVertexFrontDepthAction *walk.Action
 	showSelectedFaceAction             *walk.Action
+	showSelectedFaceBoxAction          *walk.Action
 	showSelectedFaceExpandAction       *walk.Action
 	showSelectedFaceDeselectAction     *walk.Action
 	showSelectedFaceAllDepthAction     *walk.Action
@@ -691,6 +692,25 @@ func (cw *ControlWindow) SelectedFaceIndexes(windowIndex, modelIndex int) []int 
 	return cw.shared.SelectedFaceIndexes(windowIndex, modelIndex)
 }
 
+// SetSelectedFaceMode は面選択モードを設定する。
+func (cw *ControlWindow) SetSelectedFaceMode(mode state.SelectedFaceMode) {
+	if cw == nil || cw.shared == nil {
+		return
+	}
+	cw.shared.SetSelectedFaceMode(mode)
+	if cw.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_FACE) {
+		cw.updateDisplayAction(state.STATE_FLAG_SHOW_SELECTED_FACE, true)
+	}
+}
+
+// SelectedFaceMode は面選択モードを取得する。
+func (cw *ControlWindow) SelectedFaceMode() state.SelectedFaceMode {
+	if cw == nil || cw.shared == nil {
+		return state.SELECTED_FACE_MODE_LINE
+	}
+	return cw.shared.SelectedFaceMode()
+}
+
 // SetDeltaMotion は差分モーションを設定する。
 func (cw *ControlWindow) SetDeltaMotion(windowIndex, modelIndex, deltaIndex int, motionData *motion.VmdMotion) {
 	cw.shared.SetDeltaMotion(windowIndex, modelIndex, deltaIndex, motionData)
@@ -838,6 +858,7 @@ func (cw *ControlWindow) buildViewerMenu() declarative.Menu {
 			}},
 			declarative.Menu{Text: cw.t(messages.LabelSelectedFaceMenu), Items: []declarative.MenuItem{
 				declarative.Action{Text: cw.t(messages.LabelSelectedFaceLine), Checkable: true, OnTriggered: cw.TriggerShowSelectedFace, AssignTo: &cw.showSelectedFaceAction},
+				declarative.Action{Text: cw.t(messages.LabelSelectedFaceBox), Checkable: true, OnTriggered: cw.TriggerShowSelectedFaceBox, AssignTo: &cw.showSelectedFaceBoxAction},
 				declarative.Action{Text: cw.t(messages.LabelSelectedFaceExpand), Enabled: false, OnTriggered: cw.TriggerExpandConnectedFaces, AssignTo: &cw.showSelectedFaceExpandAction},
 				declarative.Action{Text: cw.t(messages.LabelSelectedFaceDeselect), Enabled: false, OnTriggered: cw.TriggerDeselectConnectedFaces, AssignTo: &cw.showSelectedFaceDeselectAction},
 				declarative.Separator{},
@@ -1068,7 +1089,32 @@ func (cw *ControlWindow) TriggerShowSelectedFace() {
 	enabled := cw.actionChecked(cw.showSelectedFaceAction)
 	wasEnabled := cw.shared != nil && cw.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_FACE)
 	if enabled {
+		cw.shared.SetSelectedFaceMode(state.SELECTED_FACE_MODE_LINE)
+		cw.updateActionChecked(cw.showSelectedFaceBoxAction, false)
 		// 面選択を有効にした時点で頂点選択を解除し、両モードの同時表示を防ぐ。
+		cw.SetDisplayFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX, false)
+		cw.updateActionChecked(cw.showSelectedVertexPointAction, false)
+		cw.updateActionChecked(cw.showSelectedVertexBoxAction, false)
+		cw.updateActionChecked(cw.showSelectedVertexAllDepthAction, false)
+		cw.updateActionChecked(cw.showSelectedVertexFrontDepthAction, false)
+	}
+	cw.SetDisplayFlag(state.STATE_FLAG_SHOW_SELECTED_FACE, enabled)
+	cw.SetDisplayFlag(state.STATE_FLAG_SHOW_WIRE, enabled)
+	if enabled {
+		if !wasEnabled && cw.shared != nil {
+			cw.shared.SetSelectedFaceDepthMode(state.SELECTED_FACE_DEPTH_MODE_ALL)
+		}
+		cw.updateSelectedFaceDepthActions()
+	}
+}
+
+// TriggerShowSelectedFaceBox は面ボックス選択表示を切り替える。
+func (cw *ControlWindow) TriggerShowSelectedFaceBox() {
+	enabled := cw.actionChecked(cw.showSelectedFaceBoxAction)
+	wasEnabled := cw.shared != nil && cw.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_FACE)
+	if enabled {
+		cw.shared.SetSelectedFaceMode(state.SELECTED_FACE_MODE_BOX)
+		cw.updateActionChecked(cw.showSelectedFaceAction, false)
 		cw.SetDisplayFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX, false)
 		cw.updateActionChecked(cw.showSelectedVertexPointAction, false)
 		cw.updateActionChecked(cw.showSelectedVertexBoxAction, false)
@@ -1136,7 +1182,7 @@ func (cw *ControlWindow) ensureSelectedVertexBoxSelectionForDepth() {
 	if cw == nil || cw.shared == nil {
 		return
 	}
-	if cw.actionChecked(cw.showSelectedVertexPointAction) || cw.actionChecked(cw.showSelectedVertexBoxAction) || cw.actionChecked(cw.showSelectedFaceAction) {
+	if cw.actionChecked(cw.showSelectedVertexPointAction) || cw.actionChecked(cw.showSelectedVertexBoxAction) || cw.actionChecked(cw.showSelectedFaceAction) || cw.actionChecked(cw.showSelectedFaceBoxAction) {
 		return
 	}
 	cw.shared.SetSelectedVertexMode(state.SELECTED_VERTEX_MODE_BOX)
@@ -1179,9 +1225,14 @@ func (cw *ControlWindow) TriggerShowSelectedFaceDepthAll() {
 	if cw == nil || cw.shared == nil {
 		return
 	}
-	if !cw.actionChecked(cw.showSelectedFaceAction) {
-		cw.updateActionChecked(cw.showSelectedFaceAction, true)
-		cw.TriggerShowSelectedFace()
+	if !cw.actionChecked(cw.showSelectedFaceAction) && !cw.actionChecked(cw.showSelectedFaceBoxAction) {
+		if cw.shared.SelectedFaceMode() == state.SELECTED_FACE_MODE_BOX {
+			cw.updateActionChecked(cw.showSelectedFaceBoxAction, true)
+			cw.TriggerShowSelectedFaceBox()
+		} else {
+			cw.updateActionChecked(cw.showSelectedFaceAction, true)
+			cw.TriggerShowSelectedFace()
+		}
 	}
 	enabled := cw.actionChecked(cw.showSelectedFaceAllDepthAction)
 	if !enabled {
@@ -1197,9 +1248,14 @@ func (cw *ControlWindow) TriggerShowSelectedFaceDepthFront() {
 	if cw == nil || cw.shared == nil {
 		return
 	}
-	if !cw.actionChecked(cw.showSelectedFaceAction) {
-		cw.updateActionChecked(cw.showSelectedFaceAction, true)
-		cw.TriggerShowSelectedFace()
+	if !cw.actionChecked(cw.showSelectedFaceAction) && !cw.actionChecked(cw.showSelectedFaceBoxAction) {
+		if cw.shared.SelectedFaceMode() == state.SELECTED_FACE_MODE_BOX {
+			cw.updateActionChecked(cw.showSelectedFaceBoxAction, true)
+			cw.TriggerShowSelectedFaceBox()
+		} else {
+			cw.updateActionChecked(cw.showSelectedFaceAction, true)
+			cw.TriggerShowSelectedFace()
+		}
 	}
 	enabled := cw.actionChecked(cw.showSelectedFaceFrontDepthAction)
 	if !enabled {
@@ -1469,7 +1525,17 @@ func (cw *ControlWindow) updateDisplayAction(flag state.StateFlag, enabled bool)
 		}
 		cw.updateSelectedVertexDepthActions()
 	case state.STATE_FLAG_SHOW_SELECTED_FACE:
-		cw.updateActionChecked(cw.showSelectedFaceAction, enabled)
+		if !enabled {
+			cw.updateActionChecked(cw.showSelectedFaceAction, false)
+			cw.updateActionChecked(cw.showSelectedFaceBoxAction, false)
+		} else {
+			mode := state.SELECTED_FACE_MODE_LINE
+			if cw.shared != nil {
+				mode = cw.shared.SelectedFaceMode()
+			}
+			cw.updateActionChecked(cw.showSelectedFaceAction, mode == state.SELECTED_FACE_MODE_LINE)
+			cw.updateActionChecked(cw.showSelectedFaceBoxAction, mode == state.SELECTED_FACE_MODE_BOX)
+		}
 		if cw.showSelectedFaceExpandAction != nil {
 			_ = cw.showSelectedFaceExpandAction.SetEnabled(enabled)
 		}

@@ -668,6 +668,10 @@
         "translation": "&Face Line Selection"
     },
     {
+        "id": "&面ボックス選択",
+        "translation": "Face &Box Select"
+    },
+    {
         "id": "連続面の選択",
         "translation": "Select Connected Faces"
     },

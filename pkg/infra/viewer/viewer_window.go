@@ -340,15 +340,18 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 	selectionMode := vw.selectedVertexMode()
 	vertexSelectionDepthMode := state.SELECTED_VERTEX_DEPTH_MODE_ALL
 	faceSelectionDepthMode := state.SELECTED_FACE_DEPTH_MODE_ALL
+	faceSelectionMode := state.SELECTED_FACE_MODE_LINE
 	if vw.list != nil && vw.list.shared != nil {
 		vertexSelectionDepthMode = vw.list.shared.SelectedVertexDepthMode()
 		faceSelectionDepthMode = vw.list.shared.SelectedFaceDepthMode()
+		faceSelectionMode = vw.list.shared.SelectedFaceMode()
 	}
 	applyBoxSelection := false
 	boxSelectionRemove := false
 	boxSelectionMin := mmath.Vec2{}
 	boxSelectionMax := mmath.Vec2{}
-	if showSelectedVertex && selectionEnabled && selectionMode == state.SELECTED_VERTEX_MODE_BOX {
+	if showSelectedVertex && selectionEnabled && selectionMode == state.SELECTED_VERTEX_MODE_BOX ||
+		showSelectedFace && selectionEnabled && faceSelectionMode == state.SELECTED_FACE_MODE_BOX {
 		if minPos, maxPos, remove, ok := vw.consumeBoxSelectionRect(winW, winH, fbW, fbH); ok {
 			applyBoxSelection = true
 			boxSelectionRemove = remove
@@ -463,11 +466,12 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 			cursorLinePositions = flattenCursorPositions(vw.leftCursorWorldHistoryPositions, 0)
 			removeCursorLinePositions = flattenCursorPositions(vw.leftCursorRemoveWorldHistoryPositions, 0)
 		}
-		if showSelectedFace {
+		if showSelectedFace && faceSelectionMode == state.SELECTED_FACE_MODE_LINE {
 			faceCursorLineScreenPositions = vw.buildCursorScreenLinePositions(fbW, fbH, false)
 			removeFaceCursorLineScreenPositions = vw.buildCursorScreenLinePositions(fbW, fbH, true)
 		}
-		if selectionMode == state.SELECTED_VERTEX_MODE_BOX &&
+		if (showSelectedVertex && selectionMode == state.SELECTED_VERTEX_MODE_BOX ||
+			showSelectedFace && faceSelectionMode == state.SELECTED_FACE_MODE_BOX) &&
 			(vw.boxSelectionDragging || vw.boxSelectionPending) {
 			boxLinePositions = vw.buildBoxSelectionLinePositions(winW, winH, fbW, fbH)
 		}
@@ -577,6 +581,9 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 				DepthMode:                       faceSelectionDepthMode,
 				Apply:                           false,
 				Remove:                          false,
+				HasRect:                         false,
+				RectMin:                         boxSelectionMin,
+				RectMax:                         boxSelectionMax,
 				CursorLinePositions:             nil,
 				RemoveCursorLinePositions:       nil,
 				CursorLineScreenPositions:       nil,
@@ -587,16 +594,25 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 			}
 		}
 		if showSelectedFace && selectionEnabled && i == 0 && faceSelectionRequest != nil {
-			faceSelectionRequest.CursorLinePositions = flattenCursorPositions(vw.leftCursorWorldHistoryPositions, 0)
-			faceSelectionRequest.RemoveCursorLinePositions = flattenCursorPositions(vw.leftCursorRemoveWorldHistoryPositions, 0)
-		}
-		if showSelectedFace && selectionEnabled && i == 0 && applyPointSelection && faceSelectionRequest != nil {
-			faceSelectionRequest.Apply = true
-			faceSelectionRequest.Remove = removePointSelection
-			if removePointSelection {
-				faceSelectionRequest.RemoveCursorLineScreenPositions = removeFaceCursorLineScreenPositions
+			if faceSelectionMode == state.SELECTED_FACE_MODE_BOX {
+				faceSelectionRequest.CursorLinePositions = boxLinePositions
+				if applyBoxSelection {
+					faceSelectionRequest.Apply = true
+					faceSelectionRequest.Remove = boxSelectionRemove
+					faceSelectionRequest.HasRect = true
+				}
 			} else {
-				faceSelectionRequest.CursorLineScreenPositions = faceCursorLineScreenPositions
+				faceSelectionRequest.CursorLinePositions = flattenCursorPositions(vw.leftCursorWorldHistoryPositions, 0)
+				faceSelectionRequest.RemoveCursorLinePositions = flattenCursorPositions(vw.leftCursorRemoveWorldHistoryPositions, 0)
+				if applyPointSelection {
+					faceSelectionRequest.Apply = true
+					faceSelectionRequest.Remove = removePointSelection
+					if removePointSelection {
+						faceSelectionRequest.RemoveCursorLineScreenPositions = removeFaceCursorLineScreenPositions
+					} else {
+						faceSelectionRequest.CursorLineScreenPositions = faceCursorLineScreenPositions
+					}
+				}
 			}
 		}
 		updatedFaces := renderer.RenderFaceSelection(
@@ -644,12 +660,13 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 
 	vw.captureScreenshotIfRequested(fbW, fbH)
 	vw.SwapBuffers()
-	if !showSelectedVertex {
+	if !showSelectedVertex && (!showSelectedFace || faceSelectionMode == state.SELECTED_FACE_MODE_LINE) {
 		vw.resetBoxSelection()
 	}
 	if (showSelectedVertex || showSelectedFace) && !vw.leftButtonPressed {
 		vw.boxSelectionDragging = false
-		if showSelectedVertex && selectionMode == state.SELECTED_VERTEX_MODE_POINT || showSelectedFace {
+		if (showSelectedVertex && selectionMode == state.SELECTED_VERTEX_MODE_POINT) ||
+			(showSelectedFace && faceSelectionMode == state.SELECTED_FACE_MODE_LINE) {
 			vw.leftCursorWindowPositions = make(map[mmath.Vec2]float32)
 			vw.leftCursorRemoveWindowPositions = make(map[mmath.Vec2]float32)
 			vw.leftCursorWindowOrder = make([]mmath.Vec2, 0)
@@ -1254,8 +1271,9 @@ func (vw *ViewerWindow) mouseCallback(_ *glfw.Window, button glfw.MouseButton, a
 		switch button {
 		case glfw.MouseButtonLeft:
 			vw.leftButtonPressed = true
-			if selectionEnabled && vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) &&
-				vw.selectedVertexMode() == state.SELECTED_VERTEX_MODE_BOX {
+			if selectionEnabled &&
+				((vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) && vw.selectedVertexMode() == state.SELECTED_VERTEX_MODE_BOX) ||
+					(vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_FACE) && vw.list.shared.SelectedFaceMode() == state.SELECTED_FACE_MODE_BOX)) {
 				vw.boxSelectionDragging = true
 				vw.boxSelectionStart = mmath.Vec2{X: vw.cursorX, Y: vw.cursorY}
 				vw.boxSelectionEnd = vw.boxSelectionStart
@@ -1286,6 +1304,13 @@ func (vw *ViewerWindow) mouseCallback(_ *glfw.Window, button glfw.MouseButton, a
 				return
 			}
 			if vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_FACE) {
+				if vw.list.shared.SelectedFaceMode() == state.SELECTED_FACE_MODE_BOX {
+					vw.boxSelectionDragging = false
+					vw.boxSelectionPending = true
+					vw.boxSelectionRemove = vw.isCtrlPressed()
+					vw.boxSelectionEnd = mmath.Vec2{X: vw.cursorX, Y: vw.cursorY}
+					return
+				}
 				vw.queueSelectedFaceSelection(vw.cursorX, vw.cursorY, vw.isCtrlPressed())
 				return
 			}
@@ -1333,7 +1358,8 @@ func (vw *ViewerWindow) cursorPosCallback(_ *glfw.Window, xpos, ypos float64) {
 		}
 	}
 	if selectionEnabled && vw.leftButtonPressed && (vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) || vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_FACE)) {
-		if vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) && vw.selectedVertexMode() == state.SELECTED_VERTEX_MODE_BOX {
+		if (vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) && vw.selectedVertexMode() == state.SELECTED_VERTEX_MODE_BOX) ||
+			(vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_FACE) && vw.list.shared.SelectedFaceMode() == state.SELECTED_FACE_MODE_BOX) {
 			if vw.boxSelectionDragging {
 				vw.boxSelectionEnd = mmath.Vec2{X: xpos, Y: ypos}
 			}
@@ -1407,6 +1433,9 @@ func (vw *ViewerWindow) updateCursorPositions() ([]*mmath.Vec3, []float32, []*mm
 		return nil, nil, nil, nil
 	}
 	if vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) && vw.selectedVertexMode() != state.SELECTED_VERTEX_MODE_POINT {
+		return nil, nil, nil, nil
+	}
+	if vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_FACE) && vw.list.shared.SelectedFaceMode() == state.SELECTED_FACE_MODE_BOX {
 		return nil, nil, nil, nil
 	}
 	leftCursorWorldPositions := make([]*mmath.Vec3, 0)

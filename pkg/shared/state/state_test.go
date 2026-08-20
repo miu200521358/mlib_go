@@ -33,6 +33,9 @@ func TestNewSharedStateDefaults(t *testing.T) {
 	if ss.SelectedFaceDepthMode() != SELECTED_FACE_DEPTH_MODE_ALL {
 		t.Errorf("SelectedFaceDepthMode default mismatch: got=%v", ss.SelectedFaceDepthMode())
 	}
+	if ss.SelectedFaceMode() != SELECTED_FACE_MODE_LINE {
+		t.Errorf("SelectedFaceMode default mismatch: got=%v", ss.SelectedFaceMode())
+	}
 	ss.SetSelectedVertexDepthMode(SELECTED_VERTEX_DEPTH_MODE_FRONT)
 	if ss.SelectedFaceDepthMode() != SELECTED_FACE_DEPTH_MODE_ALL {
 		t.Errorf("face depth mode changed with vertex mode: got=%v", ss.SelectedFaceDepthMode())
@@ -40,6 +43,14 @@ func TestNewSharedStateDefaults(t *testing.T) {
 	ss.SetSelectedFaceDepthMode(SELECTED_FACE_DEPTH_MODE_FRONT)
 	if ss.SelectedVertexDepthMode() != SELECTED_VERTEX_DEPTH_MODE_FRONT {
 		t.Errorf("vertex depth mode changed with face mode: got=%v", ss.SelectedVertexDepthMode())
+	}
+	ss.SetSelectedFaceMode(SELECTED_FACE_MODE_BOX)
+	if ss.SelectedFaceMode() != SELECTED_FACE_MODE_BOX {
+		t.Errorf("SelectedFaceMode setter mismatch: got=%v", ss.SelectedFaceMode())
+	}
+	ss.SetSelectedFaceMode(SELECTED_FACE_MODE_LINE)
+	if ss.SelectedFaceMode() != SELECTED_FACE_MODE_LINE {
+		t.Errorf("SelectedFaceMode roundtrip mismatch: got=%v", ss.SelectedFaceMode())
 	}
 
 	phys, ok := ss.PhysicsWorldMotion(0).(*defaultMotion)

@@ -740,7 +740,11 @@ func (mr *ModelRenderer) drawSelectedFace(
 			path = selectionRequest.RemoveCursorLineScreenPositions
 			remove = true
 		}
-		if len(path) >= 2 && screenWidth > 0 && screenHeight > 0 {
+		hasRect := selectionRequest.HasRect
+		rectMin, rectMax := selectionRequest.RectMin, selectionRequest.RectMax
+		rectValid := hasRect && screenWidth > 0 && screenHeight > 0
+		pathValid := !hasRect && len(path) >= 2 && screenWidth > 0 && screenHeight > 0
+		if (rectValid || pathValid) && screenWidth > 0 && screenHeight > 0 {
 			positions, ok := mr.readSelectionVertexPositions(windowIndex, shader, paddedMatrixes, width, height)
 			if ok {
 				view, projection, projectionOK := selectionViewProjection(shader, screenWidth, screenHeight)
@@ -759,7 +763,14 @@ func (mr *ModelRenderer) drawSelectedFace(
 						}
 						vertices := faceData.VertexIndexes
 						triangle, triangleOK := projectSelectionTriangle(vertices, positions, view, projection, screenWidth, screenHeight)
-						if !triangleOK || !selectionPathIntersectsTriangle(path, triangle) {
+						if !triangleOK {
+							continue
+						}
+						intersects := selectionPathIntersectsTriangle(path, triangle)
+						if hasRect {
+							intersects = selectionRectIntersectsTriangle(rectMin, rectMax, triangle)
+						}
+						if !intersects {
 							continue
 						}
 						if depthFront && !isFrontSelectionTriangle(shader, triangle, screenWidth, screenHeight) {
@@ -960,6 +971,44 @@ func selectionPathIntersectsTriangle(path []float32, triangle selectionTriangle)
 		next := selectionScreenPoint{x: float64(path[(i+1)*2]), y: float64(path[(i+1)*2+1])}
 		for edge := 0; edge < 3; edge++ {
 			if selectionSegmentsIntersect(point, next, triangle[edge], triangle[(edge+1)%3]) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// selectionRectIntersectsTriangle は矩形と投影三角形の重なりを判定する。
+// 座標は FaceSelectionRequest と同じフレームバッファピクセル座標系を用いる。
+// 三角形頂点の矩形内包含、矩形頂点の三角形内包含、辺同士の交差のいずれかを
+// 満たした場合に重なりとみなす。
+func selectionRectIntersectsTriangle(rectMin, rectMax mmath.Vec2, triangle selectionTriangle) bool {
+	minX, maxX := math.Min(rectMin.X, rectMax.X), math.Max(rectMin.X, rectMax.X)
+	minY, maxY := math.Min(rectMin.Y, rectMax.Y), math.Max(rectMin.Y, rectMax.Y)
+	const epsilon = 1.0e-6
+	pointInRect := func(point selectionScreenPoint) bool {
+		return point.x >= minX-epsilon && point.x <= maxX+epsilon && point.y >= minY-epsilon && point.y <= maxY+epsilon
+	}
+	for _, point := range triangle {
+		if pointInRect(point) {
+			return true
+		}
+	}
+	rectangle := [4]selectionScreenPoint{
+		{x: minX, y: minY},
+		{x: maxX, y: minY},
+		{x: maxX, y: maxY},
+		{x: minX, y: maxY},
+	}
+	for _, point := range rectangle {
+		if pointInSelectionTriangle(point, triangle) {
+			return true
+		}
+	}
+	for edge := 0; edge < 3; edge++ {
+		triangleStart, triangleEnd := triangle[edge], triangle[(edge+1)%3]
+		for rectEdge := 0; rectEdge < 4; rectEdge++ {
+			if selectionSegmentsIntersect(triangleStart, triangleEnd, rectangle[rectEdge], rectangle[(rectEdge+1)%4]) {
 				return true
 			}
 		}

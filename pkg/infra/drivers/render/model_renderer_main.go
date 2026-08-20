@@ -41,6 +41,9 @@ type FaceSelectionRequest struct {
 	DepthMode                       state.SelectedFaceDepthMode
 	Apply                           bool
 	Remove                          bool
+	HasRect                         bool
+	RectMin                         mmath.Vec2
+	RectMax                         mmath.Vec2
 	CursorLinePositions             []float32
 	RemoveCursorLinePositions       []float32
 	CursorLineScreenPositions       []float32

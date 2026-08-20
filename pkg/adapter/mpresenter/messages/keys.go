@@ -7,6 +7,7 @@ const (
 	LabelSelectedVertexDepthAll   = "&全面"
 	LabelSelectedVertexDepthFront = "&最前面"
 	LabelSelectedFaceLine         = "&面ライン選択"
+	LabelSelectedFaceBox          = "&面ボックス選択"
 	LabelSelectedFaceExpand       = "連続面の選択"
 	LabelSelectedFaceMenu         = "&面選択"
 	LabelSelectedFaceDeselect     = "連続選択面の解除"

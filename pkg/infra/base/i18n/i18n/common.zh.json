@@ -668,6 +668,10 @@
         "translation": "&面线选择"
     },
     {
+        "id": "&面ボックス選択",
+        "translation": "面框选(&B)"
+    },
+    {
         "id": "連続面の選択",
         "translation": "选择连续面"
     },
