@@ -644,6 +644,10 @@
         "translation": "&Vertex Selection"
     },
     {
+        "id": "&面選択",
+        "translation": "&Face Selection"
+    },
+    {
         "id": "&全面",
         "translation": "&All"
     },
@@ -668,8 +672,16 @@
         "translation": "Select Connected Faces"
     },
     {
+        "id": "連続選択面の解除",
+        "translation": "Deselect Connected Faces"
+    },
+    {
         "id": "連続面の選択に失敗しました: %s",
         "translation": "Failed to select connected faces: %s"
+    },
+    {
+        "id": "連続選択面の解除に失敗しました: %s",
+        "translation": "Failed to deselect connected faces: %s"
     },
     {
         "id": "音楽ファイル",

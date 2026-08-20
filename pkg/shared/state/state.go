@@ -121,6 +121,19 @@ const (
 	SELECTED_VERTEX_DEPTH_MODE_FRONT
 )
 
+// SelectedFaceDepthMode は選択面の深度判定モードを表す。
+//
+// 頂点選択の深度モードとは独立して保持し、面選択メニューの変更が頂点選択へ
+// 波及しないようにする。
+type SelectedFaceDepthMode int
+
+const (
+	// SELECTED_FACE_DEPTH_MODE_ALL は全面選択。
+	SELECTED_FACE_DEPTH_MODE_ALL SelectedFaceDepthMode = iota
+	// SELECTED_FACE_DEPTH_MODE_FRONT は最前面のみ選択。
+	SELECTED_FACE_DEPTH_MODE_FRONT
+)
+
 // IStateModel は共有状態で扱うモデルI/F。
 type IStateModel interface {
 	hashable.IHashable
@@ -198,6 +211,8 @@ type ISharedState interface {
 	SetSelectedVertexMode(mode SelectedVertexMode)
 	SelectedVertexDepthMode() SelectedVertexDepthMode
 	SetSelectedVertexDepthMode(mode SelectedVertexDepthMode)
+	SelectedFaceDepthMode() SelectedFaceDepthMode
+	SetSelectedFaceDepthMode(mode SelectedFaceDepthMode)
 	IsDeltaSaveEnabled(viewerIndex int) bool
 	SetDeltaSaveEnabled(viewerIndex int, enabled bool)
 	DeltaSaveIndex(viewerIndex int) int
@@ -269,6 +284,7 @@ type SharedState struct {
 	selectedFaceIndexes     [][]atomic.Value
 	selectedVertexMode      atomic.Int32
 	selectedVertexDepthMode atomic.Int32
+	selectedFaceDepthMode   atomic.Int32
 	deltaSaveEnabled        []atomic.Bool
 	deltaSaveIndexes        []atomic.Int32
 	deltaMotions            [][][]atomic.Value
@@ -318,6 +334,7 @@ func NewSharedState(viewerCount int) *SharedState {
 	ss.closed.Store(false)
 	ss.selectedVertexMode.Store(int32(SELECTED_VERTEX_MODE_POINT))
 	ss.selectedVertexDepthMode.Store(int32(SELECTED_VERTEX_DEPTH_MODE_ALL))
+	ss.selectedFaceDepthMode.Store(int32(SELECTED_FACE_DEPTH_MODE_ALL))
 	ss.focusLinkEnabled.Store(true)
 	ss.linkingFocus.Store(false)
 	ss.physicsResetType.Store(int32(PHYSICS_RESET_TYPE_NONE))
@@ -877,6 +894,16 @@ func (ss *SharedState) SelectedVertexDepthMode() SelectedVertexDepthMode {
 // SetSelectedVertexDepthMode は選択頂点の深度判定モードを設定する。
 func (ss *SharedState) SetSelectedVertexDepthMode(mode SelectedVertexDepthMode) {
 	ss.selectedVertexDepthMode.Store(int32(mode))
+}
+
+// SelectedFaceDepthMode は選択面の深度判定モードを返す。
+func (ss *SharedState) SelectedFaceDepthMode() SelectedFaceDepthMode {
+	return SelectedFaceDepthMode(ss.selectedFaceDepthMode.Load())
+}
+
+// SetSelectedFaceDepthMode は選択面の深度判定モードを設定する。
+func (ss *SharedState) SetSelectedFaceDepthMode(mode SelectedFaceDepthMode) {
+	ss.selectedFaceDepthMode.Store(int32(mode))
 }
 
 // IsDeltaSaveEnabled は差分保存が有効か判定する。

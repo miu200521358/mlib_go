@@ -93,6 +93,9 @@ type ControlWindow struct {
 	showSelectedVertexFrontDepthAction *walk.Action
 	showSelectedFaceAction             *walk.Action
 	showSelectedFaceExpandAction       *walk.Action
+	showSelectedFaceDeselectAction     *walk.Action
+	showSelectedFaceAllDepthAction     *walk.Action
+	showSelectedFaceFrontDepthAction   *walk.Action
 	showBoneAllAction                  *walk.Action
 	showBoneIkAction                   *walk.Action
 	showBoneEffectorAction             *walk.Action
@@ -829,11 +832,17 @@ func (cw *ControlWindow) buildViewerMenu() declarative.Menu {
 			declarative.Menu{Text: cw.t(messages.ControlWindowKey030), Items: []declarative.MenuItem{
 				declarative.Action{Text: cw.t(messages.ControlWindowKey031), Checkable: true, OnTriggered: cw.TriggerShowSelectedVertexBox, AssignTo: &cw.showSelectedVertexBoxAction},
 				declarative.Action{Text: cw.t(messages.ControlWindowKey032), Checkable: true, OnTriggered: cw.TriggerShowSelectedVertexPoint, AssignTo: &cw.showSelectedVertexPointAction},
-				declarative.Action{Text: cw.t(messages.LabelSelectedFaceLine), Checkable: true, OnTriggered: cw.TriggerShowSelectedFace, AssignTo: &cw.showSelectedFaceAction},
-				declarative.Action{Text: cw.t(messages.LabelSelectedFaceExpand), Enabled: false, OnTriggered: cw.TriggerExpandConnectedFaces, AssignTo: &cw.showSelectedFaceExpandAction},
 				declarative.Separator{},
 				declarative.Action{Text: cw.t(messages.LabelSelectedVertexDepthAll), Checkable: true, OnTriggered: cw.TriggerShowSelectedVertexDepthAll, AssignTo: &cw.showSelectedVertexAllDepthAction},
 				declarative.Action{Text: cw.t(messages.LabelSelectedVertexDepthFront), Checkable: true, OnTriggered: cw.TriggerShowSelectedVertexDepthFront, AssignTo: &cw.showSelectedVertexFrontDepthAction},
+			}},
+			declarative.Menu{Text: cw.t(messages.LabelSelectedFaceMenu), Items: []declarative.MenuItem{
+				declarative.Action{Text: cw.t(messages.LabelSelectedFaceLine), Checkable: true, OnTriggered: cw.TriggerShowSelectedFace, AssignTo: &cw.showSelectedFaceAction},
+				declarative.Action{Text: cw.t(messages.LabelSelectedFaceExpand), Enabled: false, OnTriggered: cw.TriggerExpandConnectedFaces, AssignTo: &cw.showSelectedFaceExpandAction},
+				declarative.Action{Text: cw.t(messages.LabelSelectedFaceDeselect), Enabled: false, OnTriggered: cw.TriggerDeselectConnectedFaces, AssignTo: &cw.showSelectedFaceDeselectAction},
+				declarative.Separator{},
+				declarative.Action{Text: cw.t(messages.LabelSelectedFaceDepthAll), Checkable: true, OnTriggered: cw.TriggerShowSelectedFaceDepthAll, AssignTo: &cw.showSelectedFaceAllDepthAction},
+				declarative.Action{Text: cw.t(messages.LabelSelectedFaceDepthFront), Checkable: true, OnTriggered: cw.TriggerShowSelectedFaceDepthFront, AssignTo: &cw.showSelectedFaceFrontDepthAction},
 			}},
 			declarative.Separator{},
 			declarative.Action{Text: cw.t(messages.ControlWindowKey033), Checkable: true, OnTriggered: cw.TriggerCameraSync, AssignTo: &cw.cameraSyncAction},
@@ -1057,6 +1066,7 @@ func (cw *ControlWindow) TriggerShowSelectedVertexBox() {
 // TriggerShowSelectedFace は面ライン選択表示を切り替える。
 func (cw *ControlWindow) TriggerShowSelectedFace() {
 	enabled := cw.actionChecked(cw.showSelectedFaceAction)
+	wasEnabled := cw.shared != nil && cw.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_FACE)
 	if enabled {
 		// 面選択を有効にした時点で頂点選択を解除し、両モードの同時表示を防ぐ。
 		cw.SetDisplayFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX, false)
@@ -1067,6 +1077,12 @@ func (cw *ControlWindow) TriggerShowSelectedFace() {
 	}
 	cw.SetDisplayFlag(state.STATE_FLAG_SHOW_SELECTED_FACE, enabled)
 	cw.SetDisplayFlag(state.STATE_FLAG_SHOW_WIRE, enabled)
+	if enabled {
+		if !wasEnabled && cw.shared != nil {
+			cw.shared.SetSelectedFaceDepthMode(state.SELECTED_FACE_DEPTH_MODE_ALL)
+		}
+		cw.updateSelectedFaceDepthActions()
+	}
 }
 
 // TriggerExpandConnectedFaces は選択済み面を同一材質の連続面へ拡張する。
@@ -1089,6 +1105,29 @@ func (cw *ControlWindow) TriggerExpandConnectedFaces() {
 			continue
 		}
 		cw.shared.SetSelectedFaceIndexes(0, modelIndex, expanded)
+	}
+}
+
+// TriggerDeselectConnectedFaces は選択面から同一材質の連続面を解除する。
+func (cw *ControlWindow) TriggerDeselectConnectedFaces() {
+	if cw == nil || cw.shared == nil || !cw.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_FACE) {
+		return
+	}
+	for modelIndex := 0; modelIndex < cw.shared.ModelCount(0); modelIndex++ {
+		modelData, ok := cw.shared.Model(0, modelIndex).(*model.PmxModel)
+		if !ok || modelData == nil {
+			continue
+		}
+		selected := cw.shared.SelectedFaceIndexes(0, modelIndex)
+		if len(selected) == 0 {
+			continue
+		}
+		remaining, err := domain.DeselectConnectedFaceIndexes(modelData, selected)
+		if err != nil {
+			cw.loggerOrDefault().Warn(cw.t(messages.ControlWindowKey109), err.Error())
+			continue
+		}
+		cw.shared.SetSelectedFaceIndexes(0, modelIndex, remaining)
 	}
 }
 
@@ -1133,6 +1172,42 @@ func (cw *ControlWindow) TriggerShowSelectedVertexDepthFront() {
 	if cw.shared != nil {
 		cw.shared.SetSelectedVertexDepthMode(state.SELECTED_VERTEX_DEPTH_MODE_FRONT)
 	}
+}
+
+// TriggerShowSelectedFaceDepthAll は面選択の深度判定を全面に切り替える。
+func (cw *ControlWindow) TriggerShowSelectedFaceDepthAll() {
+	if cw == nil || cw.shared == nil {
+		return
+	}
+	if !cw.actionChecked(cw.showSelectedFaceAction) {
+		cw.updateActionChecked(cw.showSelectedFaceAction, true)
+		cw.SetDisplayFlag(state.STATE_FLAG_SHOW_SELECTED_FACE, true)
+	}
+	enabled := cw.actionChecked(cw.showSelectedFaceAllDepthAction)
+	if !enabled {
+		cw.updateActionChecked(cw.showSelectedFaceAllDepthAction, true)
+		return
+	}
+	cw.updateActionChecked(cw.showSelectedFaceFrontDepthAction, false)
+	cw.shared.SetSelectedFaceDepthMode(state.SELECTED_FACE_DEPTH_MODE_ALL)
+}
+
+// TriggerShowSelectedFaceDepthFront は面選択の深度判定を最前面に切り替える。
+func (cw *ControlWindow) TriggerShowSelectedFaceDepthFront() {
+	if cw == nil || cw.shared == nil {
+		return
+	}
+	if !cw.actionChecked(cw.showSelectedFaceAction) {
+		cw.updateActionChecked(cw.showSelectedFaceAction, true)
+		cw.SetDisplayFlag(state.STATE_FLAG_SHOW_SELECTED_FACE, true)
+	}
+	enabled := cw.actionChecked(cw.showSelectedFaceFrontDepthAction)
+	if !enabled {
+		cw.updateActionChecked(cw.showSelectedFaceFrontDepthAction, true)
+		return
+	}
+	cw.updateActionChecked(cw.showSelectedFaceAllDepthAction, false)
+	cw.shared.SetSelectedFaceDepthMode(state.SELECTED_FACE_DEPTH_MODE_FRONT)
 }
 
 // TriggerShowBoneAll は全ボーン表示を切り替える。
@@ -1398,6 +1473,15 @@ func (cw *ControlWindow) updateDisplayAction(flag state.StateFlag, enabled bool)
 		if cw.showSelectedFaceExpandAction != nil {
 			_ = cw.showSelectedFaceExpandAction.SetEnabled(enabled)
 		}
+		if cw.showSelectedFaceDeselectAction != nil {
+			_ = cw.showSelectedFaceDeselectAction.SetEnabled(enabled)
+		}
+		if !enabled {
+			cw.updateActionChecked(cw.showSelectedFaceAllDepthAction, false)
+			cw.updateActionChecked(cw.showSelectedFaceFrontDepthAction, false)
+			return
+		}
+		cw.updateSelectedFaceDepthActions()
 	case state.STATE_FLAG_SHOW_BONE_ALL:
 		cw.updateActionChecked(cw.showBoneAllAction, enabled)
 	case state.STATE_FLAG_SHOW_BONE_IK:
@@ -1444,6 +1528,21 @@ func (cw *ControlWindow) updateSelectedVertexDepthActions() {
 	}
 	cw.updateActionChecked(cw.showSelectedVertexAllDepthAction, true)
 	cw.updateActionChecked(cw.showSelectedVertexFrontDepthAction, false)
+}
+
+// updateSelectedFaceDepthActions は面選択の深度判定メニュー状態を同期する。
+func (cw *ControlWindow) updateSelectedFaceDepthActions() {
+	if cw == nil || cw.shared == nil {
+		return
+	}
+	mode := cw.shared.SelectedFaceDepthMode()
+	if mode == state.SELECTED_FACE_DEPTH_MODE_FRONT {
+		cw.updateActionChecked(cw.showSelectedFaceFrontDepthAction, true)
+		cw.updateActionChecked(cw.showSelectedFaceAllDepthAction, false)
+		return
+	}
+	cw.updateActionChecked(cw.showSelectedFaceAllDepthAction, true)
+	cw.updateActionChecked(cw.showSelectedFaceFrontDepthAction, false)
 }
 
 // actionChecked はアクションのチェック状態を返す。

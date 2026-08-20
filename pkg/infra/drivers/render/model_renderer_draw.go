@@ -745,7 +745,7 @@ func (mr *ModelRenderer) drawSelectedFace(
 			if ok {
 				view, projection, projectionOK := selectionViewProjection(shader, screenWidth, screenHeight)
 				if projectionOK {
-					depthFront := selectionRequest.DepthMode == state.SELECTED_VERTEX_DEPTH_MODE_FRONT
+					depthFront := selectionRequest.DepthMode == state.SELECTED_FACE_DEPTH_MODE_FRONT
 					for faceIndex, faceData := range mr.Model.Faces.Values() {
 						if faceData == nil {
 							continue

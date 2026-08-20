@@ -3,6 +3,7 @@ package domain
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 )
@@ -113,6 +114,49 @@ func ExpandConnectedFaceIndexes(modelData *model.PmxModel, seedFaceIndexes []int
 // 仕様書の「連続面」表現に合わせた呼び出し名を提供する。
 func ExpandContinuousFaceIndexes(modelData *model.PmxModel, seedFaceIndexes []int) ([]int, error) {
 	return ExpandConnectedFaceIndexes(modelData, seedFaceIndexes)
+}
+
+// DeselectConnectedFaceIndexes は選択済み面から辺共有で連続する面を選択解除する。
+//
+// 入力された選択面を起点に、同じ材質内で辺を共有する連結成分を求め、その
+// 成分に含まれる面 index を入力集合から除外して返す。入力スライスは変更せず、
+// 戻り値は重複を除いた昇順の面 index になる。不正な面 index やモデル構造は
+// ExpandConnectedFaceIndexes と同じ規則でエラーにする。
+func DeselectConnectedFaceIndexes(modelData *model.PmxModel, selectedFaceIndexes []int) ([]int, error) {
+	connected, err := ExpandConnectedFaceIndexes(modelData, selectedFaceIndexes)
+	if err != nil {
+		return nil, err
+	}
+	if len(selectedFaceIndexes) == 0 {
+		return []int{}, nil
+	}
+
+	connectedSet := make(map[int]struct{}, len(connected))
+	for _, faceIndex := range connected {
+		connectedSet[faceIndex] = struct{}{}
+	}
+	remainingSet := make(map[int]struct{}, len(selectedFaceIndexes))
+	for _, faceIndex := range selectedFaceIndexes {
+		if _, remove := connectedSet[faceIndex]; remove {
+			continue
+		}
+		remainingSet[faceIndex] = struct{}{}
+	}
+
+	remaining := make([]int, 0, len(remainingSet))
+	for faceIndex := range remainingSet {
+		remaining = append(remaining, faceIndex)
+	}
+	sort.Ints(remaining)
+	return remaining, nil
+}
+
+// RemoveConnectedFaceIndexes は DeselectConnectedFaceIndexes の別名である。
+//
+// 既存コードで「Remove」を動詞として扱う呼び出し側にも同じ OS 非依存の
+// 連結成分解除処理を提供する。
+func RemoveConnectedFaceIndexes(modelData *model.PmxModel, selectedFaceIndexes []int) ([]int, error) {
+	return DeselectConnectedFaceIndexes(modelData, selectedFaceIndexes)
 }
 
 // normalizeFaceEdge は辺の端点順を正規化して返す。

@@ -27,6 +27,20 @@ func TestNewSharedStateDefaults(t *testing.T) {
 	if ss.IsClosed() {
 		t.Errorf("IsClosed: expected false")
 	}
+	if ss.SelectedVertexDepthMode() != SELECTED_VERTEX_DEPTH_MODE_ALL {
+		t.Errorf("SelectedVertexDepthMode default mismatch: got=%v", ss.SelectedVertexDepthMode())
+	}
+	if ss.SelectedFaceDepthMode() != SELECTED_FACE_DEPTH_MODE_ALL {
+		t.Errorf("SelectedFaceDepthMode default mismatch: got=%v", ss.SelectedFaceDepthMode())
+	}
+	ss.SetSelectedVertexDepthMode(SELECTED_VERTEX_DEPTH_MODE_FRONT)
+	if ss.SelectedFaceDepthMode() != SELECTED_FACE_DEPTH_MODE_ALL {
+		t.Errorf("face depth mode changed with vertex mode: got=%v", ss.SelectedFaceDepthMode())
+	}
+	ss.SetSelectedFaceDepthMode(SELECTED_FACE_DEPTH_MODE_FRONT)
+	if ss.SelectedVertexDepthMode() != SELECTED_VERTEX_DEPTH_MODE_FRONT {
+		t.Errorf("vertex depth mode changed with face mode: got=%v", ss.SelectedVertexDepthMode())
+	}
 
 	phys, ok := ss.PhysicsWorldMotion(0).(*defaultMotion)
 	if !ok {

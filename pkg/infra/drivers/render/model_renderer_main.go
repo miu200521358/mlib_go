@@ -38,7 +38,7 @@ type VertexSelectionRequest struct {
 // FaceSelectionRequest は選択面の更新要求をまとめる。
 // 軌跡座標はフレームバッファのピクセル座標を x,y の順で保持する。
 type FaceSelectionRequest struct {
-	DepthMode                       state.SelectedVertexDepthMode
+	DepthMode                       state.SelectedFaceDepthMode
 	Apply                           bool
 	Remove                          bool
 	CursorLinePositions             []float32

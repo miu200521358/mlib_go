@@ -338,9 +338,11 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 	selectionEnabled := vw.isSelectionEnabledInWindow()
 	nonVertexHoverEnabled := vw.isNonVertexHoverEnabledInWindow()
 	selectionMode := vw.selectedVertexMode()
-	selectionDepthMode := state.SELECTED_VERTEX_DEPTH_MODE_ALL
+	vertexSelectionDepthMode := state.SELECTED_VERTEX_DEPTH_MODE_ALL
+	faceSelectionDepthMode := state.SELECTED_FACE_DEPTH_MODE_ALL
 	if vw.list != nil && vw.list.shared != nil {
-		selectionDepthMode = vw.list.shared.SelectedVertexDepthMode()
+		vertexSelectionDepthMode = vw.list.shared.SelectedVertexDepthMode()
+		faceSelectionDepthMode = vw.list.shared.SelectedFaceDepthMode()
 	}
 	applyBoxSelection := false
 	boxSelectionRemove := false
@@ -497,7 +499,7 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 		if showSelectedVertex && selectionEnabled {
 			selectionRequest = &render.VertexSelectionRequest{
 				Mode:                      selectionMode,
-				DepthMode:                 selectionDepthMode,
+				DepthMode:                 vertexSelectionDepthMode,
 				Apply:                     false,
 				Remove:                    false,
 				CursorPositions:           cursorPositions,
@@ -572,7 +574,7 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 		faceSelectionRequest := (*render.FaceSelectionRequest)(nil)
 		if showSelectedFace && selectionEnabled {
 			faceSelectionRequest = &render.FaceSelectionRequest{
-				DepthMode:                       selectionDepthMode,
+				DepthMode:                       faceSelectionDepthMode,
 				Apply:                           false,
 				Remove:                          false,
 				CursorLinePositions:             nil,
@@ -1172,7 +1174,11 @@ func (vw *ViewerWindow) keyCallback(_ *glfw.Window, key glfw.Key, _ int, action 
 		return
 	}
 	if key == glfw.KeyX && vw.isCtrlPressed() && vw.list != nil && vw.list.shared != nil && vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_FACE) {
-		vw.expandConnectedFaces()
+		if vw.isShiftPressed() {
+			vw.deselectConnectedFaces()
+		} else {
+			vw.expandConnectedFaces()
+		}
 		return
 	}
 
@@ -1209,6 +1215,34 @@ func (vw *ViewerWindow) expandConnectedFaces() {
 			continue
 		}
 		vw.list.shared.SetSelectedFaceIndexes(vw.windowIndex, modelIndex, expanded)
+	}
+}
+
+// deselectConnectedFaces は選択面から同一材質の連続面を解除する。
+func (vw *ViewerWindow) deselectConnectedFaces() {
+	if vw == nil || vw.list == nil || vw.list.shared == nil || !vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_FACE) {
+		return
+	}
+	for modelIndex := 0; modelIndex < vw.list.shared.ModelCount(vw.windowIndex); modelIndex++ {
+		modelData, ok := vw.list.shared.Model(vw.windowIndex, modelIndex).(*model.PmxModel)
+		if !ok || modelData == nil {
+			if modelIndex < len(vw.modelRenderers) && vw.modelRenderers[modelIndex] != nil {
+				modelData = vw.modelRenderers[modelIndex].Model
+			}
+		}
+		if modelData == nil {
+			continue
+		}
+		selected := vw.list.shared.SelectedFaceIndexes(vw.windowIndex, modelIndex)
+		if len(selected) == 0 {
+			continue
+		}
+		remaining, err := domain.DeselectConnectedFaceIndexes(modelData, selected)
+		if err != nil {
+			logging.DefaultLogger().Warn(i18n.T(messages.ControlWindowKey109), err.Error())
+			continue
+		}
+		vw.list.shared.SetSelectedFaceIndexes(vw.windowIndex, modelIndex, remaining)
 	}
 }
 
