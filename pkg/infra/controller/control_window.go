@@ -1181,7 +1181,7 @@ func (cw *ControlWindow) TriggerShowSelectedFaceDepthAll() {
 	}
 	if !cw.actionChecked(cw.showSelectedFaceAction) {
 		cw.updateActionChecked(cw.showSelectedFaceAction, true)
-		cw.SetDisplayFlag(state.STATE_FLAG_SHOW_SELECTED_FACE, true)
+		cw.TriggerShowSelectedFace()
 	}
 	enabled := cw.actionChecked(cw.showSelectedFaceAllDepthAction)
 	if !enabled {
@@ -1199,7 +1199,7 @@ func (cw *ControlWindow) TriggerShowSelectedFaceDepthFront() {
 	}
 	if !cw.actionChecked(cw.showSelectedFaceAction) {
 		cw.updateActionChecked(cw.showSelectedFaceAction, true)
-		cw.SetDisplayFlag(state.STATE_FLAG_SHOW_SELECTED_FACE, true)
+		cw.TriggerShowSelectedFace()
 	}
 	enabled := cw.actionChecked(cw.showSelectedFaceFrontDepthAction)
 	if !enabled {
