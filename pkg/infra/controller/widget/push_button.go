@@ -13,6 +13,7 @@ import (
 // MPushButton はコールバック付きボタンを表す。
 type MPushButton struct {
 	*walk.PushButton
+	composite     *walk.Composite
 	window        *controller.ControlWindow
 	label         string
 	minSize       declarative.Size
@@ -62,6 +63,17 @@ func (b *MPushButton) SetEnabledInPlaying(playing bool) {
 	b.PushButton.SetEnabled(!playing)
 }
 
+// SetFrameBackground はボタンを包む Composite の背景を設定する。
+// ネイティブのプッシュボタン面はテーマが自前で描くため、PushButton へ
+// SetBackground しても色は出ない。枠(HBox の既定 margin)を塗ることで、
+// 押下・フォーカス・無効の描画を壊さずに状態を示す。nil で既定へ戻す。
+func (b *MPushButton) SetFrameBackground(background walk.Brush) {
+	if b.composite == nil {
+		return
+	}
+	b.composite.SetBackground(background)
+}
+
 // SetWindow はウィンドウ参照を設定する。
 func (b *MPushButton) SetWindow(window *controller.ControlWindow) {
 	b.window = window
@@ -70,7 +82,8 @@ func (b *MPushButton) SetWindow(window *controller.ControlWindow) {
 // Widgets はUI構成を返す。
 func (b *MPushButton) Widgets() declarative.Composite {
 	return declarative.Composite{
-		Layout: declarative.HBox{},
+		AssignTo: &b.composite,
+		Layout:   declarative.HBox{},
 		Children: []declarative.Widget{
 			declarative.PushButton{
 				AssignTo:      &b.PushButton,
