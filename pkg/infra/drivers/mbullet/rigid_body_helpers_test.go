@@ -5,6 +5,7 @@ import (
 	"math"
 	"testing"
 
+	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 )
@@ -250,5 +251,128 @@ func TestResolveCcdParametersStaticMass(t *testing.T) {
 	}
 	if threshold != 0 || radius != 0 {
 		t.Fatalf("静的相当剛体のCCD値が不正です: threshold=%f radius=%f", threshold, radius)
+	}
+}
+
+func TestCalculateModelMassScale(t *testing.T) {
+	tests := []struct {
+		name    string
+		maxMass float64
+		want    float64
+	}{
+		{name: "上限未満", maxMass: 5000, want: 1.0},
+		{name: "上限一致", maxMass: modelMassScaleCap, want: 1.0},
+		{name: "上限超過", maxMass: 25000, want: modelMassScaleCap / 25000},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := calculateModelMassScale(tt.maxMass)
+			if !mmath.NearEquals(got, tt.want, 1e-12) {
+				t.Fatalf("質量スケールが不正です: got=%g want=%g", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestResolveModelMaxDynamicMassExcludesStatic(t *testing.T) {
+	pmxModel := model.NewPmxModel()
+	staticBody := &model.RigidBody{
+		Param:       model.RigidBodyParam{Mass: 1e12},
+		PhysicsType: model.PHYSICS_TYPE_STATIC,
+	}
+	dynamicBody := &model.RigidBody{
+		Param:       model.RigidBodyParam{Mass: 25000},
+		PhysicsType: model.PHYSICS_TYPE_DYNAMIC,
+	}
+	pmxModel.RigidBodies.Append(staticBody)
+	pmxModel.RigidBodies.Append(dynamicBody)
+
+	got := resolveModelMaxDynamicMass(pmxModel, nil)
+	if got != dynamicBody.Param.Mass {
+		t.Fatalf("STATIC 剛体を除外した最大質量が不正です: got=%g want=%g", got, dynamicBody.Param.Mass)
+	}
+}
+
+func TestResolveModelMaxDynamicMassUsesDelta(t *testing.T) {
+	pmxModel := model.NewPmxModel()
+	rigidBody := &model.RigidBody{
+		Param:       model.RigidBodyParam{Mass: 100},
+		PhysicsType: model.PHYSICS_TYPE_DYNAMIC,
+	}
+	pmxModel.RigidBodies.Append(rigidBody)
+	rigidBodyDeltas := delta.NewRigidBodyDeltas(pmxModel.RigidBodies)
+	rigidBodyDelta := delta.NewRigidBodyDelta(rigidBody, 0)
+	rigidBodyDelta.Mass = 50000
+	rigidBodyDeltas.Update(rigidBodyDelta)
+
+	got := resolveModelMaxDynamicMass(pmxModel, rigidBodyDeltas)
+	if got != rigidBodyDelta.Mass {
+		t.Fatalf("デルタ適用時の最大質量が不正です: got=%g want=%g", got, rigidBodyDelta.Mass)
+	}
+}
+
+func TestDeleteModelDiscardsMassScale(t *testing.T) {
+	mp := &PhysicsEngine{
+		joints:          make(map[int][]*jointValue),
+		rigidBodies:     make(map[int][]*RigidBodyValue),
+		modelJoints:     make(map[int]JointConstraintConfig),
+		modelMassScales: map[int]float64{7: 0.25},
+	}
+
+	mp.DeleteModel(7)
+
+	if _, ok := mp.modelMassScales[7]; ok {
+		t.Fatalf("DeleteModel 後も質量スケールが残っています")
+	}
+	if got := mp.resolveModelMassScale(7); got != 1.0 {
+		t.Fatalf("削除済みモデルの既定係数が不正です: got=%g want=1", got)
+	}
+}
+
+func TestAppliedMassAndJointSpringsDoNotMutateModelData(t *testing.T) {
+	springTranslation := mmath.NewVec3()
+	springTranslation.X = 10
+	springTranslation.Y = 20
+	springTranslation.Z = 30
+	springRotation := mmath.NewVec3()
+	springRotation.X = 40
+	springRotation.Y = 50
+	springRotation.Z = 60
+	rigidBody := &model.RigidBody{
+		Param:       model.RigidBodyParam{Mass: 25000},
+		PhysicsType: model.PHYSICS_TYPE_DYNAMIC,
+	}
+	joint := &model.Joint{
+		Param: model.JointParam{
+			SpringConstantTranslation: springTranslation,
+			SpringConstantRotation:    springRotation,
+		},
+	}
+	mp := &PhysicsEngine{modelMassScales: map[int]float64{3: 0.4}}
+	originalMass := rigidBody.Param.Mass
+	originalTranslation := joint.Param.SpringConstantTranslation
+	originalRotation := joint.Param.SpringConstantRotation
+
+	_, appliedMass := mp.resolveAppliedShapeMass(3, rigidBody, nil)
+	appliedTranslation, appliedRotation := mp.resolveAppliedJointSpringConstants(3, joint, nil)
+
+	if !mmath.NearEquals(appliedMass, 10000, 1e-12) {
+		t.Fatalf("適用質量が不正です: got=%g want=10000", appliedMass)
+	}
+	if !appliedTranslation.NearEquals(originalTranslation.MuledScalar(0.4), 1e-12) {
+		t.Fatalf("適用並進バネ定数が不正です: got=%v", appliedTranslation)
+	}
+	if !appliedRotation.NearEquals(originalRotation.MuledScalar(0.4), 1e-12) {
+		t.Fatalf("適用回転バネ定数が不正です: got=%v", appliedRotation)
+	}
+	if rigidBody.Param.Mass != originalMass {
+		t.Fatalf("モデルの質量が書き換わりました: got=%g want=%g", rigidBody.Param.Mass, originalMass)
+	}
+	if !joint.Param.SpringConstantTranslation.NearEquals(originalTranslation, 1e-12) {
+		t.Fatalf("モデルの並進バネ定数が書き換わりました: got=%v want=%v", joint.Param.SpringConstantTranslation, originalTranslation)
+	}
+	if !joint.Param.SpringConstantRotation.NearEquals(originalRotation, 1e-12) {
+		t.Fatalf("モデルの回転バネ定数が書き換わりました: got=%v want=%v", joint.Param.SpringConstantRotation, originalRotation)
 	}
 }

@@ -542,7 +542,7 @@ func (mp *PhysicsEngine) initRigidBody(
 	}
 	appliedPosition := mp.resolveAppliedPosition(rigidBody, rigidBodyDelta)
 	btCollisionShape := mp.createCollisionShape(rigidBody, rigidBodyDelta)
-	mass, localInertia := mp.calculateMassAndInertia(rigidBody, btCollisionShape, rigidBodyDelta)
+	mass, localInertia := mp.calculateMassAndInertia(modelIndex, rigidBody, btCollisionShape, rigidBodyDelta)
 	defer bt.DeleteBtVector3(localInertia)
 
 	bonePos := mp.getBonePosition(bones, rigidBody)
@@ -553,7 +553,7 @@ func (mp *PhysicsEngine) initRigidBody(
 
 	motionState := bt.NewBtDefaultMotionState(btRigidBodyTransform)
 	btRigidBody := bt.NewBtRigidBody(mass, motionState, btCollisionShape, localInertia)
-	appliedSize, appliedMass := mp.resolveAppliedShapeMass(rigidBody, rigidBodyDelta)
+	appliedSize, appliedMass := mp.resolveAppliedShapeMass(modelIndex, rigidBody, rigidBodyDelta)
 	mp.configureRigidBody(btRigidBody, modelIndex, rigidBody, appliedSize, appliedMass)
 
 	group := resolveBulletCollisionGroup(rigidBody.CollisionGroup.Group)
@@ -633,6 +633,7 @@ func (mp *PhysicsEngine) resolveAppliedSize(
 
 // calculateMassAndInertia は剛体の質量と慣性を計算します。
 func (mp *PhysicsEngine) calculateMassAndInertia(
+	modelIndex int,
 	rigidBody *model.RigidBody,
 	btCollisionShape bt.BtCollisionShape,
 	rigidBodyDelta *delta.RigidBodyDelta,
@@ -641,11 +642,8 @@ func (mp *PhysicsEngine) calculateMassAndInertia(
 	localInertia := bt.NewBtVector3(float32(0.0), float32(0.0), float32(0.0))
 
 	if rigidBody.PhysicsType != model.PHYSICS_TYPE_STATIC {
-		baseMass := rigidBody.Param.Mass
-		if rigidBodyDelta != nil {
-			baseMass = rigidBodyDelta.Mass
-		}
-		mass = float32(mmath.Clamped(baseMass, 0, math.MaxFloat64))
+		_, appliedMass := mp.resolveAppliedShapeMass(modelIndex, rigidBody, rigidBodyDelta)
+		mass = float32(mmath.Clamped(appliedMass, 0, math.MaxFloat64))
 	}
 
 	if mass != 0 {
@@ -657,6 +655,7 @@ func (mp *PhysicsEngine) calculateMassAndInertia(
 
 // resolveAppliedShapeMass は剛体に適用すべきサイズと質量を返します。
 func (mp *PhysicsEngine) resolveAppliedShapeMass(
+	modelIndex int,
 	rigidBody *model.RigidBody,
 	rigidBodyDelta *delta.RigidBodyDelta,
 ) (mmath.Vec3, float64) {
@@ -668,6 +667,7 @@ func (mp *PhysicsEngine) resolveAppliedShapeMass(
 	if rigidBody.PhysicsType == model.PHYSICS_TYPE_STATIC {
 		mass = 0
 	}
+	mass *= mp.resolveModelMassScale(modelIndex)
 	return size, mass
 }
 
@@ -1030,7 +1030,7 @@ func (mp *PhysicsEngine) UpdateRigidBodyShapeMass(
 		return
 	}
 	nextPosition := mp.resolveAppliedPosition(rigidBody, rigidBodyDelta)
-	nextSize, nextMass := mp.resolveAppliedShapeMass(rigidBody, rigidBodyDelta)
+	nextSize, nextMass := mp.resolveAppliedShapeMass(modelIndex, rigidBody, rigidBodyDelta)
 	if r.HasAppliedParams &&
 		nextPosition.NearEquals(r.AppliedPosition, 1e-10) &&
 		nextSize.NearEquals(r.AppliedSize, 1e-10) &&

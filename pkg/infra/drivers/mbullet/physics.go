@@ -7,10 +7,21 @@ package mbullet
 import (
 	"math"
 
+	"github.com/miu200521358/mlib_go/pkg/adapter/mpresenter/messages"
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
 	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/mbullet/bt"
+	"github.com/miu200521358/mlib_go/pkg/shared/base/logging"
+)
+
+const (
+	// modelMassScaleCap は Bullet へ渡すモデル内の最大動的質量です。
+	// 2026-08-23 にシーシィアの尻尾で実機確認した 10000 を採用します。
+	// 単精度ソルバでは質量 2.5e11 に由来する 1e12 規模の力積と 1e-3 規模の
+	// 速度補正を同時に扱えず拘束が収束しません。CFM 系の切り分けとして StopCFM
+	// または GlobalCfm を 0 にしても改善しなかったため、ソルバ設定は変更しません。
+	modelMassScaleCap = 10000.0
 )
 
 // PhysicsConfig は物理エンジンの設定パラメータ。
@@ -80,6 +91,8 @@ type PhysicsEngine struct {
 	rigidBodies map[int][]*RigidBodyValue
 	jointConfig JointConstraintConfig
 	modelJoints map[int]JointConstraintConfig
+	// modelMassScales はモデルごとに Bullet へ適用する質量・バネ定数の共通係数を保持する。
+	modelMassScales map[int]float64
 	// FollowDeltaTransform で速度回転を許容する最大角度[rad]。
 	// キーフレームの大ジャンプで速度まで回すとエネルギー注入が起きやすいため、しきい値で抑制する。
 	followDeltaVelocityRotationMaxRad float64
@@ -191,6 +204,7 @@ func NewPhysicsEngine(gravity *mmath.Vec3) *PhysicsEngine {
 			DisableCollisionsBetweenLinkedBody: false,
 		},
 		modelJoints:                       make(map[int]JointConstraintConfig),
+		modelMassScales:                   make(map[int]float64),
 		followDeltaVelocityRotationMaxRad: defaultFollowDeltaVelocityRotationMaxRadians,
 		windCfg: WindConfig{
 			Enabled:          false,
@@ -590,6 +604,7 @@ func (mp *PhysicsEngine) AddModel(modelIndex int, model *model.PmxModel) {
 	if model == nil || model.RigidBodies == nil || model.Joints == nil {
 		return
 	}
+	mp.registerModelMassScale(modelIndex, model, nil)
 	mp.initRigidBodies(modelIndex, model)
 	mp.initJoints(modelIndex, model)
 }
@@ -611,8 +626,72 @@ func (mp *PhysicsEngine) AddModelByDeltas(
 		jointDeltas = physicsDeltas.Joints
 	}
 
+	mp.registerModelMassScale(modelIndex, model, rigidBodyDeltas)
 	mp.initRigidBodiesByBoneDeltas(modelIndex, model, boneDeltas, rigidBodyDeltas)
 	mp.initJointsByBoneDeltas(modelIndex, model, boneDeltas, jointDeltas)
+}
+
+// registerModelMassScale はモデルの最大動的質量から共通係数を算出して保持する。
+func (mp *PhysicsEngine) registerModelMassScale(
+	modelIndex int,
+	pmxModel *model.PmxModel,
+	rigidBodyDeltas *delta.RigidBodyDeltas,
+) {
+	maxMass := resolveModelMaxDynamicMass(pmxModel, rigidBodyDeltas)
+	massScale := calculateModelMassScale(maxMass)
+	if mp.modelMassScales == nil {
+		mp.modelMassScales = make(map[int]float64)
+	}
+	mp.modelMassScales[modelIndex] = massScale
+	if massScale != 1.0 {
+		logging.DefaultLogger().Info(messages.PhysicsEngineKey001, modelIndex, maxMass, massScale)
+	}
+}
+
+// resolveModelMaxDynamicMass はモデル追加時に適用される非 STATIC 剛体の最大質量を返す。
+func resolveModelMaxDynamicMass(
+	pmxModel *model.PmxModel,
+	rigidBodyDeltas *delta.RigidBodyDeltas,
+) float64 {
+	if pmxModel == nil || pmxModel.RigidBodies == nil {
+		return 0
+	}
+
+	maxMass := 0.0
+	for _, rigidBody := range pmxModel.RigidBodies.Values() {
+		if rigidBody == nil || rigidBody.PhysicsType == model.PHYSICS_TYPE_STATIC {
+			continue
+		}
+		mass := rigidBody.Param.Mass
+		if rigidBodyDeltas != nil {
+			if rigidBodyDelta := rigidBodyDeltas.Get(rigidBody.Index()); rigidBodyDelta != nil {
+				mass = rigidBodyDelta.Mass
+			}
+		}
+		if mass > maxMass {
+			maxMass = mass
+		}
+	}
+	return maxMass
+}
+
+// calculateModelMassScale は最大動的質量を上限内へ収める共通係数を返す。
+func calculateModelMassScale(maxMass float64) float64 {
+	if maxMass <= modelMassScaleCap {
+		return 1.0
+	}
+	return modelMassScaleCap / maxMass
+}
+
+// resolveModelMassScale は登録済みのモデル係数を返し、未登録時は従来互換の 1.0 を返す。
+func (mp *PhysicsEngine) resolveModelMassScale(modelIndex int) float64 {
+	if mp == nil || mp.modelMassScales == nil {
+		return 1.0
+	}
+	if massScale, ok := mp.modelMassScales[modelIndex]; ok {
+		return massScale
+	}
+	return 1.0
 }
 
 // DeleteModel はモデルを物理エンジンから削除する。
@@ -620,6 +699,7 @@ func (mp *PhysicsEngine) DeleteModel(modelIndex int) {
 	mp.deleteJoints(modelIndex)
 	mp.deleteRigidBodies(modelIndex)
 	delete(mp.modelJoints, modelIndex)
+	delete(mp.modelMassScales, modelIndex)
 }
 
 // clearModelFollowBoneCache はモデル単位の追従行列キャッシュを破棄する。
@@ -707,6 +787,7 @@ func (mp *PhysicsEngine) disposeAllModels() {
 		mp.deleteJoints(modelIndex)
 		delete(mp.modelJoints, modelIndex)
 	}
+	clear(mp.modelMassScales)
 }
 
 // disposeWorldResources はワールド構成要素を破棄する。

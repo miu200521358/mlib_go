@@ -185,4 +185,5 @@ const (
 	LoggingKey005                 = "!!!!!!!!!! %s !!!!!!!!!!"
 	LoggingKey006                 = "エラーメッセージ: %s"
 	LoggingKey007                 = "スタックトレース:\n%s"
+	PhysicsEngineKey001           = "物理計算の質量をモデル単位で縮小します: modelIndex=%d 最大質量=%g 係数=%g"
 )

@@ -6,6 +6,7 @@ package mbullet
 
 import (
 	"github.com/miu200521358/mlib_go/pkg/domain/delta"
+	"github.com/miu200521358/mlib_go/pkg/domain/mmath"
 	"github.com/miu200521358/mlib_go/pkg/domain/model"
 	"github.com/miu200521358/mlib_go/pkg/domain/model/collection"
 	"github.com/miu200521358/mlib_go/pkg/infra/drivers/mbullet/bt"
@@ -196,7 +197,7 @@ func (mp *PhysicsEngine) initJoint(
 	constraint := mp.createJointConstraint(btRigidBodyA, btRigidBodyB, jointLocalTransformA, jointLocalTransformB)
 	constraintConfig := mp.resolveJointConstraintConfig(modelIndex)
 
-	mp.configureJointConstraint(constraint, joint, rigidBodyB, jointDelta, constraintConfig)
+	mp.configureJointConstraint(modelIndex, constraint, joint, rigidBodyB, jointDelta, constraintConfig)
 
 	// 連結剛体同士の自己衝突有無はモデル単位設定で切り替える。
 	mp.world.AddConstraint(constraint, constraintConfig.DisableCollisionsBetweenLinkedBody)
@@ -258,6 +259,7 @@ func (mp *PhysicsEngine) createJointConstraint(
 
 // configureJointConstraint はジョイント拘束のパラメータを設定します。
 func (mp *PhysicsEngine) configureJointConstraint(
+	modelIndex int,
 	constraint bt.BtGeneric6DofSpringConstraint,
 	joint *model.Joint,
 	rigidBodyB *model.RigidBody,
@@ -307,23 +309,23 @@ func (mp *PhysicsEngine) configureJointConstraint(
 	defer bt.DeleteBtVector3(angularUpperLimit)
 	constraint.SetAngularUpperLimit(angularUpperLimit)
 
-	mp.configureJointSprings(constraint, joint, rigidBodyB, jointDelta)
+	mp.configureJointSprings(modelIndex, constraint, joint, rigidBodyB, jointDelta)
 	mp.configureBasicJointParams(constraint, constraintConfig)
 }
 
 // configureJointSprings はジョイントのバネパラメータを設定します。
 func (mp *PhysicsEngine) configureJointSprings(
+	modelIndex int,
 	constraint bt.BtGeneric6DofSpringConstraint,
 	joint *model.Joint,
 	rigidBodyB *model.RigidBody,
 	jointDelta *delta.JointDelta,
 ) {
-	springConstantTranslation := joint.Param.SpringConstantTranslation
-	springConstantRotation := joint.Param.SpringConstantRotation
-	if jointDelta != nil {
-		springConstantTranslation = jointDelta.SpringConstantTranslation
-		springConstantRotation = jointDelta.SpringConstantRotation
-	}
+	springConstantTranslation, springConstantRotation := mp.resolveAppliedJointSpringConstants(
+		modelIndex,
+		joint,
+		jointDelta,
+	)
 
 	if rigidBodyB.PhysicsType != model.PHYSICS_TYPE_STATIC {
 		constraint.EnableSpring(0, true)
@@ -340,6 +342,28 @@ func (mp *PhysicsEngine) configureJointSprings(
 		constraint.EnableSpring(5, true)
 		constraint.SetStiffness(5, float32(springConstantRotation.Z))
 	}
+}
+
+// resolveAppliedJointSpringConstants はモデル係数を適用した並進・回転バネ定数を返す。
+func (mp *PhysicsEngine) resolveAppliedJointSpringConstants(
+	modelIndex int,
+	joint *model.Joint,
+	jointDelta *delta.JointDelta,
+) (mmath.Vec3, mmath.Vec3) {
+	if joint == nil {
+		return mmath.ZERO_VEC3, mmath.ZERO_VEC3
+	}
+	springConstantTranslation := joint.Param.SpringConstantTranslation
+	springConstantRotation := joint.Param.SpringConstantRotation
+	if jointDelta != nil {
+		springConstantTranslation = jointDelta.SpringConstantTranslation
+		springConstantRotation = jointDelta.SpringConstantRotation
+	}
+
+	// 質量だけを縮小すると運動方程式に対するバネ力の比率が変わり、元モデルの動きが壊れる。
+	// 質量とバネ定数へ同じ係数を掛ければ、慣性・重力・拘束力・バネ力が同率で縮小される。
+	massScale := mp.resolveModelMassScale(modelIndex)
+	return springConstantTranslation.MuledScalar(massScale), springConstantRotation.MuledScalar(massScale)
 }
 
 // configureBasicJointParams はジョイントの基本パラメータを設定します。
@@ -415,21 +439,7 @@ func (mp *PhysicsEngine) UpdateJointParameters(
 	defer bt.DeleteBtVector3(angularUpperLimit)
 	constraint.SetAngularUpperLimit(angularUpperLimit)
 
-	if rigidBodyB.PhysicsType != model.PHYSICS_TYPE_STATIC {
-		constraint.EnableSpring(0, true)
-		constraint.SetStiffness(0, float32(jointDelta.SpringConstantTranslation.X))
-		constraint.EnableSpring(1, true)
-		constraint.SetStiffness(1, float32(jointDelta.SpringConstantTranslation.Y))
-		constraint.EnableSpring(2, true)
-		constraint.SetStiffness(2, float32(jointDelta.SpringConstantTranslation.Z))
-
-		constraint.EnableSpring(3, true)
-		constraint.SetStiffness(3, float32(jointDelta.SpringConstantRotation.X))
-		constraint.EnableSpring(4, true)
-		constraint.SetStiffness(4, float32(jointDelta.SpringConstantRotation.Y))
-		constraint.EnableSpring(5, true)
-		constraint.SetStiffness(5, float32(jointDelta.SpringConstantRotation.Z))
-	}
+	mp.configureJointSprings(modelIndex, constraint, joint, rigidBodyB, jointDelta)
 	mp.configureBasicJointParams(constraint, mp.resolveJointConstraintConfig(modelIndex))
 }
 
