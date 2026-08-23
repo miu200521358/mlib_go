@@ -78,6 +78,24 @@ type modelRendererLoadResult struct {
 	err         error
 }
 
+// operationPointDragState は一回の操作点ドラッグで固定する投影条件を保持する。
+type operationPointDragState struct {
+	active        bool
+	cancelled     bool
+	handle        state.OperationPointHandle
+	handleVersion uint64
+	event         state.OperationPointDragEvent
+	position      mmath.Vec3
+	planePoint    mmath.Vec3
+	planeNormal   mmath.Vec3
+	view          mgl32.Mat4
+	projection    mgl32.Mat4
+	width         int
+	height        int
+	cursorScaleX  float64
+	cursorScaleY  float64
+}
+
 // CameraPreset はカメラ視点プリセットを表す。
 type CameraPreset struct {
 	Name  string
@@ -104,6 +122,8 @@ type ViewerWindow struct {
 	physics     *mbullet.PhysicsEngine
 
 	tooltipRenderer               *mgl.TooltipRenderer
+	trajectoryRenderer            *mgl.TrajectoryRenderer
+	operationPointRenderer        *mgl.OperationPointRenderer
 	boneHighlighter               *mgl.BoneHighlighter
 	boneHoverActive               bool
 	lastBoneHoverAt               time.Time
@@ -150,6 +170,7 @@ type ViewerWindow struct {
 	boxSelectionRemove                    bool
 	boxSelectionStart                     mmath.Vec2
 	boxSelectionEnd                       mmath.Vec2
+	operationPointDrag                    operationPointDragState
 }
 
 // newViewerWindow はビューワーウィンドウを生成して初期化する。
@@ -202,6 +223,8 @@ func newViewerWindow(windowIndex int, title string, width, height, positionX, po
 		shader:                                shader,
 		physics:                               physics,
 		tooltipRenderer:                       tooltipRenderer,
+		trajectoryRenderer:                    mgl.NewTrajectoryRenderer(),
+		operationPointRenderer:                mgl.NewOperationPointRenderer(),
 		boneHighlighter:                       mgl.NewBoneHighlighter(),
 		rigidBodyHighlighter:                  mgl.NewRigidBodyHighlighter(),
 		modelRenderers:                        make([]*render.ModelRenderer, 0),
@@ -645,6 +668,12 @@ func (vw *ViewerWindow) render(frame motion.Frame) {
 		}
 		vw.rigidBodyHighlighter.CheckAndClearHighlightOnDebugChange(drawRigidBody)
 	}
+	if vw.trajectoryRenderer != nil {
+		vw.trajectoryRenderer.Render(vw.shader, vw.list.shared, vw.windowIndex, fbW, fbH)
+	}
+	if handles, _ := vw.list.shared.OperationPointHandlesWithVersion(vw.windowIndex); len(handles) > 0 {
+		vw.renderOperationPointHandles(handles, fbW, fbH)
+	}
 
 	vw.renderTooltip(drawRigidBody, drawJoint, winW, winH)
 
@@ -805,6 +834,12 @@ func (vw *ViewerWindow) cleanupResources() {
 
 	if vw.tooltipRenderer != nil {
 		vw.tooltipRenderer.Delete()
+	}
+	if vw.trajectoryRenderer != nil {
+		vw.trajectoryRenderer.Delete()
+	}
+	if vw.operationPointRenderer != nil {
+		vw.operationPointRenderer.Delete()
 	}
 
 	if vw.shader != nil {
@@ -1270,6 +1305,14 @@ func (vw *ViewerWindow) mouseCallback(_ *glfw.Window, button glfw.MouseButton, a
 	case glfw.Press:
 		switch button {
 		case glfw.MouseButtonLeft:
+			// フォーカス喪失後に release が届かなかった場合、新しい press を
+			// 旧ドラッグの継続として扱わない。
+			if vw.operationPointDrag.active && vw.operationPointDrag.cancelled {
+				vw.operationPointDrag = operationPointDragState{}
+			}
+			if vw.beginOperationPointDrag(vw.cursorX, vw.cursorY) {
+				return
+			}
 			vw.leftButtonPressed = true
 			if selectionEnabled &&
 				((vw.list.shared.HasFlag(state.STATE_FLAG_SHOW_SELECTED_VERTEX) && vw.selectedVertexMode() == state.SELECTED_VERTEX_MODE_BOX) ||
@@ -1286,6 +1329,10 @@ func (vw *ViewerWindow) mouseCallback(_ *glfw.Window, button glfw.MouseButton, a
 	case glfw.Release:
 		switch button {
 		case glfw.MouseButtonLeft:
+			if vw.operationPointDrag.active {
+				vw.endOperationPointDrag(vw.cursorX, vw.cursorY)
+				return
+			}
 			vw.leftButtonPressed = false
 			if !selectionEnabled {
 				vw.boxSelectionDragging = false
@@ -1339,6 +1386,12 @@ func (vw *ViewerWindow) mouseCallback(_ *glfw.Window, button glfw.MouseButton, a
 func (vw *ViewerWindow) cursorPosCallback(_ *glfw.Window, xpos, ypos float64) {
 	vw.cursorX = xpos
 	vw.cursorY = ypos
+	if vw.operationPointDrag.active {
+		vw.updateOperationPointDrag(xpos, ypos)
+		vw.prevCursorPos.X = xpos
+		vw.prevCursorPos.Y = ypos
+		return
+	}
 	selectionEnabled := vw.isSelectionEnabledInWindow()
 	nonVertexHoverEnabled := vw.isNonVertexHoverEnabledInWindow()
 
@@ -2334,6 +2387,180 @@ func (vw *ViewerWindow) selectJointByCursor(xpos, ypos float64) {
 	}
 }
 
+// beginOperationPointDrag は設定済み操作点から最寄りを掴み、投影条件を固定する。
+func (vw *ViewerWindow) beginOperationPointDrag(xpos, ypos float64) bool {
+	if vw == nil || vw.list == nil || vw.list.shared == nil || vw.shader == nil {
+		return false
+	}
+	handles, handleVersion := vw.list.shared.OperationPointHandlesWithVersion(vw.windowIndex)
+	// 空一覧ではカメラ行列の生成、ボーン探索、描画処理を一切行わない。
+	if len(handles) == 0 {
+		return false
+	}
+	windowWidth, windowHeight := vw.GetSize()
+	framebufferWidth, framebufferHeight := vw.GetFramebufferSize()
+	if windowWidth <= 0 || windowHeight <= 0 || framebufferWidth <= 0 || framebufferHeight <= 0 ||
+		xpos < 0 || ypos < 0 || xpos > float64(windowWidth) || ypos > float64(windowHeight) {
+		return false
+	}
+	cam := vw.shader.Camera()
+	if cam == nil || cam.Position == nil || cam.LookAtCenter == nil || cam.Up == nil {
+		return false
+	}
+	cursorScaleX := float64(framebufferWidth) / float64(windowWidth)
+	cursorScaleY := float64(framebufferHeight) / float64(windowHeight)
+	projection := mgl32.Perspective(
+		mgl32.DegToRad(cam.FieldOfView), float32(framebufferWidth)/float32(framebufferHeight), cam.NearPlane, cam.FarPlane,
+	)
+	view := mgl32.LookAtV(mgl.NewGlVec3(cam.Position), mgl.NewGlVec3(cam.LookAtCenter), mgl.NewGlVec3(cam.Up))
+
+	closestIndex := -1
+	closestDistance := math.MaxFloat64
+	closestPosition := mmath.Vec3{}
+	for index, handle := range handles {
+		position, ok := vw.operationPointWorldPosition(handle)
+		if !ok {
+			continue
+		}
+		screenX, screenY, ok := projectToScreen(position, view, projection, framebufferWidth, framebufferHeight)
+		if !ok {
+			continue
+		}
+		// pick 半径は GLFW の論理ピクセル単位なので、投影結果を window 座標へ戻して比較する。
+		distance := math.Hypot(screenX/cursorScaleX-xpos, screenY/cursorScaleY-ypos)
+		if distance <= boneHoverMaxScreenDistance && distance < closestDistance {
+			closestIndex = index
+			closestDistance = distance
+			closestPosition = position
+		}
+	}
+	if closestIndex < 0 {
+		return false
+	}
+	normal := cam.LookAtCenter.Subed(*cam.Position).Normalized()
+	if normal.LengthSqr() <= 1e-12 {
+		return false
+	}
+	handle := handles[closestIndex]
+	event := state.OperationPointDragEvent{
+		Phase: state.OPERATION_POINT_DRAG_PHASE_GRABBED, ModelIndex: handle.ModelIndex,
+		BoneName: handle.BoneName, Frame: vw.list.shared.Frame(), HandleVersion: handleVersion,
+		WorldPosition: operationPointPositionArray(closestPosition),
+	}
+	vw.operationPointDrag = operationPointDragState{
+		active: true, handle: handle, handleVersion: handleVersion, event: event, position: closestPosition,
+		planePoint: closestPosition, planeNormal: normal,
+		view: view, projection: projection, width: framebufferWidth, height: framebufferHeight,
+		cursorScaleX: cursorScaleX, cursorScaleY: cursorScaleY,
+	}
+	vw.clearAllHovers()
+	vw.list.shared.PublishOperationPointDragEvent(vw.windowIndex, event)
+	return true
+}
+
+// updateOperationPointDrag はカーソルを開始位置のカメラ正対平面へ投影して移動通知を送る。
+func (vw *ViewerWindow) updateOperationPointDrag(xpos, ypos float64) {
+	if vw == nil || !vw.operationPointDrag.active || vw.list == nil || vw.list.shared == nil {
+		return
+	}
+	drag := &vw.operationPointDrag
+	if drag.cancelled {
+		return
+	}
+	handles, version := vw.list.shared.OperationPointHandlesWithVersion(vw.windowIndex)
+	if version != drag.handleVersion || !operationPointHandleExists(handles, drag.handle) {
+		drag.cancelled = true
+		return
+	}
+	// カメラ正対平面なら画面の二自由度を一定の奥行きへ一意に写せ、視線方向へ意図せず逃げない。
+	position, ok := mgl.ScreenToCameraFacingPlane(
+		xpos*drag.cursorScaleX, ypos*drag.cursorScaleY,
+		drag.width, drag.height, drag.view, drag.projection, drag.planePoint, drag.planeNormal,
+	)
+	if !ok {
+		return
+	}
+	drag.position = position
+	drag.event.Phase = state.OPERATION_POINT_DRAG_PHASE_MOVED
+	drag.event.WorldPosition = operationPointPositionArray(position)
+	vw.list.shared.PublishOperationPointDragEvent(vw.windowIndex, drag.event)
+}
+
+// endOperationPointDrag は最後の有効位置を release 通知として送り、ドラッグ状態を破棄する。
+func (vw *ViewerWindow) endOperationPointDrag(xpos, ypos float64) {
+	if vw == nil || !vw.operationPointDrag.active {
+		return
+	}
+	vw.updateOperationPointDrag(xpos, ypos)
+	drag := vw.operationPointDrag
+	if drag.cancelled {
+		vw.operationPointDrag = operationPointDragState{}
+		return
+	}
+	drag.event.Phase = state.OPERATION_POINT_DRAG_PHASE_RELEASED
+	drag.event.WorldPosition = operationPointPositionArray(drag.position)
+	if vw.list != nil && vw.list.shared != nil {
+		vw.list.shared.PublishOperationPointDragEvent(vw.windowIndex, drag.event)
+	}
+	vw.operationPointDrag = operationPointDragState{}
+}
+
+// renderOperationPointHandles は現在フレームのボーン位置へ操作点ハンドルを描画する。
+func (vw *ViewerWindow) renderOperationPointHandles(handles []state.OperationPointHandle, width, height int) {
+	if vw == nil || vw.operationPointRenderer == nil || len(handles) == 0 {
+		return
+	}
+	points := make([]mgl.OperationPointRenderPoint, 0, len(handles))
+	for _, handle := range handles {
+		active := vw.operationPointDrag.active && vw.operationPointDrag.handle == handle
+		position := vw.operationPointDrag.position
+		if !active {
+			var ok bool
+			position, ok = vw.operationPointWorldPosition(handle)
+			if !ok {
+				continue
+			}
+		}
+		points = append(points, mgl.OperationPointRenderPoint{Position: position, Active: active})
+	}
+	vw.operationPointRenderer.Render(vw.shader, points, width, height)
+}
+
+// operationPointWorldPosition は操作点が指す現在フレームのボーン世界位置を返す。
+func (vw *ViewerWindow) operationPointWorldPosition(handle state.OperationPointHandle) (mmath.Vec3, bool) {
+	if vw == nil || handle.BoneName == "" || handle.ModelIndex < 0 || handle.ModelIndex >= len(vw.vmdDeltas) {
+		return mmath.Vec3{}, false
+	}
+	deltas := vw.vmdDeltas[handle.ModelIndex]
+	if deltas == nil || deltas.Bones == nil {
+		return mmath.Vec3{}, false
+	}
+	boneDelta := deltas.Bones.GetByName(handle.BoneName)
+	if boneDelta == nil {
+		return mmath.Vec3{}, false
+	}
+	position := boneDelta.FilledGlobalPosition()
+	if isInvalidViewerVec3(position) {
+		return mmath.Vec3{}, false
+	}
+	return position, true
+}
+
+// operationPointPositionArray は世界位置を通知用の値へ変換する。
+func operationPointPositionArray(position mmath.Vec3) [3]float64 {
+	return [3]float64{position.X, position.Y, position.Z}
+}
+
+// operationPointHandleExists は操作点一覧に同じハンドルが残っているか判定する。
+func operationPointHandleExists(handles []state.OperationPointHandle, target state.OperationPointHandle) bool {
+	for _, handle := range handles {
+		if handle == target {
+			return true
+		}
+	}
+	return false
+}
+
 // selectBoneByCursor はカーソル位置に最も近いボーンを検出してハイライトを更新する。
 func (vw *ViewerWindow) selectBoneByCursor(xpos, ypos float64) {
 	if vw.boneHighlighter == nil || vw.shader == nil || vw.shader.Msaa() == nil {
@@ -2731,6 +2958,11 @@ func (vw *ViewerWindow) focusCallback(_ *glfw.Window, focused bool) {
 		// キーイベント取りこぼし時の張り付きを防ぐ。
 		vw.shiftPressed = false
 		vw.ctrlPressed = false
+		// キャンセル状態を次の左 release まで保持し、ハンドル操作として
+		// consume する。ここで破棄すると release が通常選択へ流れてしまう。
+		if vw.operationPointDrag.active {
+			vw.operationPointDrag.cancelled = true
+		}
 	}
 	if !vw.list.shared.IsFocusLinkEnabled() {
 		return

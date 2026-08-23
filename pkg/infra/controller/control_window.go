@@ -602,6 +602,46 @@ func (cw *ControlWindow) Motion(windowIndex, modelIndex int) *motion.VmdMotion {
 	return nil
 }
 
+// SetTrajectoryPolylines は指定 viewer に軌跡を設定する。
+func (cw *ControlWindow) SetTrajectoryPolylines(windowIndex int, polylines []state.TrajectoryPolyline) {
+	if cw == nil || cw.shared == nil {
+		return
+	}
+	cw.shared.SetTrajectoryPolylines(windowIndex, polylines)
+}
+
+// ClearTrajectoryPolylines は指定 viewer の軌跡を消去する。
+func (cw *ControlWindow) ClearTrajectoryPolylines(windowIndex int) {
+	if cw == nil || cw.shared == nil {
+		return
+	}
+	cw.shared.ClearTrajectoryPolylines(windowIndex)
+}
+
+// SetOperationPointHandles は指定 viewer に操作点一覧を設定する。
+func (cw *ControlWindow) SetOperationPointHandles(windowIndex int, handles []state.OperationPointHandle) {
+	if cw == nil || cw.shared == nil {
+		return
+	}
+	cw.shared.SetOperationPointHandles(windowIndex, handles)
+}
+
+// ClearOperationPointHandles は指定 viewer の操作点一覧と未処理通知を消去する。
+func (cw *ControlWindow) ClearOperationPointHandles(windowIndex int) {
+	if cw == nil || cw.shared == nil {
+		return
+	}
+	cw.shared.ClearOperationPointHandles(windowIndex)
+}
+
+// DrainOperationPointDragEvents は指定 viewer の未処理ドラッグ通知を取り出す。
+func (cw *ControlWindow) DrainOperationPointDragEvents(windowIndex int) []state.OperationPointDragEvent {
+	if cw == nil || cw.shared == nil {
+		return nil
+	}
+	return cw.shared.DrainOperationPointDragEvents(windowIndex)
+}
+
 // SetCameraMotion はカメラ専用モーションを設定する。
 func (cw *ControlWindow) SetCameraMotion(windowIndex int, motionData *motion.VmdMotion) {
 	cw.shared.SetCameraMotion(windowIndex, motionData)

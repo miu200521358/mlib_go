@@ -72,6 +72,7 @@ var SHADER_PROGRAM_CONFIGS = map[graphics_api.ProgramType]ShaderProgramConfig{
 	graphics_api.ProgramTypeSelectedFace:   {"glsl/vertex.vert", "glsl/vertex.frag"},
 	graphics_api.ProgramTypeOverride:       {"glsl/override.vert", "glsl/override.frag"},
 	graphics_api.ProgramTypeCursor:         {"glsl/cursor.vert", "glsl/cursor.frag"},
+	graphics_api.ProgramTypeTrajectory:     {"glsl/trajectory.vert", "glsl/trajectory.frag"},
 }
 
 // NewGlVec3 はOpenGL座標系へ変換したVec3を返す。

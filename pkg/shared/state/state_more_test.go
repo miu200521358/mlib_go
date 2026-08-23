@@ -220,6 +220,105 @@ func TestSharedStateModelsAndSelections(t *testing.T) {
 	}
 }
 
+// TestSharedStateTrajectoryPolylines は軌跡の viewer 分離と複製境界を確認する。
+func TestSharedStateTrajectoryPolylines(t *testing.T) {
+	ss := NewSharedState(2)
+	src := []TrajectoryPolyline{{
+		Width: 2, GroundedWidth: 7, CurrentMarkerSize: 11,
+		Points: []TrajectoryPoint{{
+			Frame: 3, Position: [3]float32{1, 2, 3},
+			Color: TrajectoryColor{R: 1, A: 1}, Grounded: true,
+			GroundColor: TrajectoryColor{G: 1, A: 1}, Current: true,
+		}},
+	}}
+
+	ss.SetTrajectoryPolylines(1, src)
+	src[0].Width = 99
+	src[0].Points[0].Position[0] = 99
+	got := ss.TrajectoryPolylines(1)
+	if len(got) != 1 || got[0].Width != 2 || got[0].Points[0].Position[0] != 1 {
+		t.Fatalf("設定時の複製が保持されていません: %+v", got)
+	}
+	if ss.TrajectoryPolylines(0) != nil {
+		t.Fatal("別 viewer に軌跡が漏れています")
+	}
+
+	got[0].Points[0].Color.R = 0
+	if ss.TrajectoryPolylines(1)[0].Points[0].Color.R != 1 {
+		t.Fatal("取得値の変更が共有状態へ漏れています")
+	}
+	_, versionBefore := ss.TrajectoryPolylinesWithVersion(1)
+	ss.ClearTrajectoryPolylines(1)
+	cleared, versionAfter := ss.TrajectoryPolylinesWithVersion(1)
+	if cleared != nil || versionAfter <= versionBefore {
+		t.Fatalf("clear/version = %v/%d, before=%d", cleared, versionAfter, versionBefore)
+	}
+	ss.SetTrajectoryPolylines(-1, src)
+	if ss.TrajectoryPolylines(-1) != nil {
+		t.Fatal("範囲外 viewer は空である必要があります")
+	}
+}
+
+// TestSharedStateOperationPointHandles は操作点の viewer 分離、複製、消去を確認する。
+func TestSharedStateOperationPointHandles(t *testing.T) {
+	ss := NewSharedState(2)
+	src := []OperationPointHandle{{ModelIndex: 0, BoneName: "首"}}
+	ss.SetOperationPointHandles(1, src)
+	_, handleVersion := ss.OperationPointHandlesWithVersion(1)
+	src[0].BoneName = "変更済み"
+
+	got := ss.OperationPointHandles(1)
+	if len(got) != 1 || got[0].BoneName != "首" {
+		t.Fatalf("設定時の複製が保持されていません: %+v", got)
+	}
+	if ss.OperationPointHandles(0) != nil {
+		t.Fatal("別 viewer に操作点が漏れています")
+	}
+	got[0].BoneName = "取得後変更"
+	if ss.OperationPointHandles(1)[0].BoneName != "首" {
+		t.Fatal("取得値の変更が共有状態へ漏れています")
+	}
+
+	baseEvent := OperationPointDragEvent{ModelIndex: 0, BoneName: "首", HandleVersion: handleVersion}
+	grabbed := baseEvent
+	grabbed.Phase = OPERATION_POINT_DRAG_PHASE_GRABBED
+	ss.PublishOperationPointDragEvent(1, grabbed)
+	moved := baseEvent
+	moved.Phase, moved.WorldPosition = OPERATION_POINT_DRAG_PHASE_MOVED, [3]float64{1, 2, 3}
+	ss.PublishOperationPointDragEvent(1, moved)
+	moved.WorldPosition = [3]float64{4, 5, 6}
+	ss.PublishOperationPointDragEvent(1, moved)
+	released := baseEvent
+	released.Phase, released.WorldPosition = OPERATION_POINT_DRAG_PHASE_RELEASED, [3]float64{4, 5, 6}
+	ss.PublishOperationPointDragEvent(1, released)
+	events := ss.DrainOperationPointDragEvents(1)
+	if len(events) != 3 || events[0].Phase != OPERATION_POINT_DRAG_PHASE_GRABBED ||
+		events[1].Phase != OPERATION_POINT_DRAG_PHASE_MOVED || events[1].WorldPosition != [3]float64{4, 5, 6} ||
+		events[2].Phase != OPERATION_POINT_DRAG_PHASE_RELEASED {
+		t.Fatalf("通知キューの move 集約が不正です: %+v", events)
+	}
+	if ss.DrainOperationPointDragEvents(1) != nil {
+		t.Fatal("取得済み通知が残っています")
+	}
+	if ss.DrainOperationPointDragEvents(0) != nil {
+		t.Fatal("別 viewer に通知が漏れています")
+	}
+
+	ss.PublishOperationPointDragEvent(1, moved)
+	_, versionBefore := ss.OperationPointHandlesWithVersion(1)
+	ss.ClearOperationPointHandles(1)
+	ss.PublishOperationPointDragEvent(1, released)
+	cleared, versionAfter := ss.OperationPointHandlesWithVersion(1)
+	remaining := ss.DrainOperationPointDragEvents(1)
+	if cleared != nil || versionAfter <= versionBefore || remaining != nil {
+		t.Fatalf("clear/version/events = %v/%d/%v, before=%d", cleared, versionAfter, remaining, versionBefore)
+	}
+	ss.SetOperationPointHandles(-1, src)
+	if ss.OperationPointHandles(-1) != nil {
+		t.Fatal("範囲外 viewer は空である必要があります")
+	}
+}
+
 // TestSharedStateDeltaAndPhysics は差分/物理系を確認する。
 func TestSharedStateDeltaAndPhysics(t *testing.T) {
 	ss := NewSharedState(1)

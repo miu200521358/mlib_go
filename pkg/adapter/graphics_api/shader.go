@@ -27,6 +27,8 @@ const (
 	ProgramTypeOverride
 	// ProgramTypeCursor はカーソル用。
 	ProgramTypeCursor
+	// ProgramTypeTrajectory は画面幅を保つ軌跡線用。
+	ProgramTypeTrajectory
 )
 
 // IShader はシェーダー機能の抽象インターフェース。

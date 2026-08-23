@@ -87,6 +87,62 @@ type PlaybackState struct {
 	Playing       bool
 }
 
+// TrajectoryColor は軌跡描画で使う 0..1 の RGBA 色を表す。
+type TrajectoryColor struct {
+	R float32
+	G float32
+	B float32
+	A float32
+}
+
+// TrajectoryPoint は軌跡上の一点と、その点から始まる線分の表示属性を表す。
+type TrajectoryPoint struct {
+	Frame       mtime.Frame
+	Position    [3]float32
+	Color       TrajectoryColor
+	Grounded    bool
+	GroundColor TrajectoryColor
+	Current     bool
+}
+
+// TrajectoryPolyline は一本の軌跡と画面ピクセル単位の表示幅を表す。
+type TrajectoryPolyline struct {
+	Points             []TrajectoryPoint
+	Width              float32
+	GroundedWidth      float32
+	CurrentMarkerSize  float32
+	CurrentMarkerColor TrajectoryColor
+}
+
+// OperationPointHandle は viewer 上で掴める操作ボーンを表す。
+type OperationPointHandle struct {
+	ModelIndex int
+	BoneName   string
+}
+
+// OperationPointDragPhase は操作点ドラッグの段階を表す。
+type OperationPointDragPhase uint8
+
+const (
+	// OPERATION_POINT_DRAG_PHASE_GRABBED は操作点を掴んだ段階。
+	OPERATION_POINT_DRAG_PHASE_GRABBED OperationPointDragPhase = iota + 1
+	// OPERATION_POINT_DRAG_PHASE_MOVED は操作点を移動した段階。
+	OPERATION_POINT_DRAG_PHASE_MOVED
+	// OPERATION_POINT_DRAG_PHASE_RELEASED は操作点を離した段階。
+	OPERATION_POINT_DRAG_PHASE_RELEASED
+)
+
+// OperationPointDragEvent は操作点ドラッグをアプリへ通知する値である。
+// Frame はドラッグ開始時に固定し、再生中でも release 先のフレームがずれないようにする。
+type OperationPointDragEvent struct {
+	Phase         OperationPointDragPhase
+	ModelIndex    int
+	BoneName      string
+	Frame         mtime.Frame
+	HandleVersion uint64
+	WorldPosition [3]float64
+}
+
 // PhysicsResetType は物理リセット種別。
 type PhysicsResetType int
 
@@ -258,6 +314,16 @@ type stateIndexSlot struct {
 	Version uint64
 }
 
+type stateTrajectorySlot struct {
+	Polylines []TrajectoryPolyline
+	Version   uint64
+}
+
+type stateOperationPointSlot struct {
+	Handles []OperationPointHandle
+	Version uint64
+}
+
 // ScreenshotRequest はスクリーンショット要求を表す。
 type ScreenshotRequest struct {
 	ID   uint64
@@ -307,7 +373,11 @@ type SharedState struct {
 	physicsWorldMotions     []atomic.Value
 	physicsModelMotions     [][]atomic.Value
 	windMotions             []atomic.Value
+	trajectoryPolylines     []atomic.Value
+	operationPointHandles   []atomic.Value
 	physicsResetType        atomic.Int32
+	operationPointEventMu   sync.Mutex
+	operationPointEvents    [][]OperationPointDragEvent
 	screenshotMu            sync.Mutex
 	screenshotSeq           uint64
 	screenshotQueues        [][]ScreenshotRequest
@@ -332,6 +402,9 @@ func NewSharedState(viewerCount int) *SharedState {
 		physicsWorldMotions:   make([]atomic.Value, viewerCount),
 		physicsModelMotions:   make([][]atomic.Value, viewerCount),
 		windMotions:           make([]atomic.Value, viewerCount),
+		trajectoryPolylines:   make([]atomic.Value, viewerCount),
+		operationPointHandles: make([]atomic.Value, viewerCount),
+		operationPointEvents:  make([][]OperationPointDragEvent, viewerCount),
 		screenshotQueues:      make([][]ScreenshotRequest, viewerCount),
 		screenshotResults:     map[uint64]ScreenshotResult{},
 	}
@@ -359,6 +432,8 @@ func NewSharedState(viewerCount int) *SharedState {
 		ss.cameraMotions[i].Store(stateMotionSlot{Motion: nil})
 		ss.physicsWorldMotions[i].Store(stateMotionSlot{Motion: newDefaultPhysicsWorldMotion()})
 		ss.windMotions[i].Store(stateMotionSlot{Motion: newDefaultWindMotion()})
+		ss.trajectoryPolylines[i].Store(stateTrajectorySlot{Polylines: nil, Version: 0})
+		ss.operationPointHandles[i].Store(stateOperationPointSlot{Handles: nil, Version: 0})
 	}
 
 	return ss
@@ -1067,6 +1142,113 @@ func (ss *SharedState) WindMotion(viewerIndex int) IStateMotion {
 	return slot.Motion
 }
 
+// SetTrajectoryPolylines は viewer ごとの軌跡を複製して設定する。
+func (ss *SharedState) SetTrajectoryPolylines(viewerIndex int, polylines []TrajectoryPolyline) {
+	if viewerIndex < 0 || viewerIndex >= len(ss.trajectoryPolylines) {
+		return
+	}
+	slot := &ss.trajectoryPolylines[viewerIndex]
+	nextVersion := uint64(1)
+	if current, ok := slot.Load().(stateTrajectorySlot); ok {
+		nextVersion = current.Version + 1
+	}
+	slot.Store(stateTrajectorySlot{Polylines: cloneTrajectoryPolylines(polylines), Version: nextVersion})
+}
+
+// TrajectoryPolylines は viewer ごとの軌跡を複製して返す。
+func (ss *SharedState) TrajectoryPolylines(viewerIndex int) []TrajectoryPolyline {
+	polylines, _ := ss.TrajectoryPolylinesWithVersion(viewerIndex)
+	return cloneTrajectoryPolylines(polylines)
+}
+
+// TrajectoryPolylinesWithVersion は renderer 用に軌跡と更新版を返す。
+// 返却するスライスは共有状態が保持する読み取り専用値なので、呼び出し側で変更しないこと。
+func (ss *SharedState) TrajectoryPolylinesWithVersion(viewerIndex int) ([]TrajectoryPolyline, uint64) {
+	if viewerIndex < 0 || viewerIndex >= len(ss.trajectoryPolylines) {
+		return nil, 0
+	}
+	slot := ss.trajectoryPolylines[viewerIndex].Load().(stateTrajectorySlot)
+	return slot.Polylines, slot.Version
+}
+
+// ClearTrajectoryPolylines は viewer ごとの軌跡を消去する。
+func (ss *SharedState) ClearTrajectoryPolylines(viewerIndex int) {
+	ss.SetTrajectoryPolylines(viewerIndex, nil)
+}
+
+// SetOperationPointHandles は viewer ごとの操作点一覧を複製して設定する。
+func (ss *SharedState) SetOperationPointHandles(viewerIndex int, handles []OperationPointHandle) {
+	if viewerIndex < 0 || viewerIndex >= len(ss.operationPointHandles) {
+		return
+	}
+	ss.operationPointEventMu.Lock()
+	defer ss.operationPointEventMu.Unlock()
+	slot := &ss.operationPointHandles[viewerIndex]
+	nextVersion := uint64(1)
+	if current, ok := slot.Load().(stateOperationPointSlot); ok {
+		nextVersion = current.Version + 1
+	}
+	slot.Store(stateOperationPointSlot{Handles: cloneOperationPointHandles(handles), Version: nextVersion})
+	// 一覧の世代が変わる前に発生した通知は、新しい操作契約へ持ち越さない。
+	ss.operationPointEvents[viewerIndex] = nil
+}
+
+// OperationPointHandles は viewer ごとの操作点一覧を複製して返す。
+func (ss *SharedState) OperationPointHandles(viewerIndex int) []OperationPointHandle {
+	handles, _ := ss.OperationPointHandlesWithVersion(viewerIndex)
+	return cloneOperationPointHandles(handles)
+}
+
+// OperationPointHandlesWithVersion は viewer 用に操作点一覧と更新版を返す。
+// 返却するスライスは共有状態が保持する読み取り専用値なので、呼び出し側で変更しないこと。
+func (ss *SharedState) OperationPointHandlesWithVersion(viewerIndex int) ([]OperationPointHandle, uint64) {
+	if viewerIndex < 0 || viewerIndex >= len(ss.operationPointHandles) {
+		return nil, 0
+	}
+	slot := ss.operationPointHandles[viewerIndex].Load().(stateOperationPointSlot)
+	return slot.Handles, slot.Version
+}
+
+// ClearOperationPointHandles は viewer ごとの操作点一覧と未処理通知を消去する。
+func (ss *SharedState) ClearOperationPointHandles(viewerIndex int) {
+	ss.SetOperationPointHandles(viewerIndex, nil)
+}
+
+// PublishOperationPointDragEvent は viewer から操作点ドラッグ通知を追加する。
+// 高頻度の move は末尾を置換し、アプリが未取得でもキューが増え続けないようにする。
+func (ss *SharedState) PublishOperationPointDragEvent(viewerIndex int, event OperationPointDragEvent) {
+	if viewerIndex < 0 || viewerIndex >= len(ss.operationPointEvents) {
+		return
+	}
+	ss.operationPointEventMu.Lock()
+	defer ss.operationPointEventMu.Unlock()
+	slot := ss.operationPointHandles[viewerIndex].Load().(stateOperationPointSlot)
+	if event.HandleVersion == 0 || event.HandleVersion != slot.Version ||
+		!containsOperationPointHandle(slot.Handles, event.ModelIndex, event.BoneName) {
+		return
+	}
+	queue := ss.operationPointEvents[viewerIndex]
+	if event.Phase == OPERATION_POINT_DRAG_PHASE_MOVED && len(queue) > 0 &&
+		queue[len(queue)-1].Phase == OPERATION_POINT_DRAG_PHASE_MOVED {
+		queue[len(queue)-1] = event
+		ss.operationPointEvents[viewerIndex] = queue
+		return
+	}
+	ss.operationPointEvents[viewerIndex] = append(queue, event)
+}
+
+// DrainOperationPointDragEvents は未処理の操作点ドラッグ通知を複製して取り出す。
+func (ss *SharedState) DrainOperationPointDragEvents(viewerIndex int) []OperationPointDragEvent {
+	if viewerIndex < 0 || viewerIndex >= len(ss.operationPointEvents) {
+		return nil
+	}
+	ss.operationPointEventMu.Lock()
+	defer ss.operationPointEventMu.Unlock()
+	events := append([]OperationPointDragEvent(nil), ss.operationPointEvents[viewerIndex]...)
+	ss.operationPointEvents[viewerIndex] = nil
+	return events
+}
+
 // PhysicsResetType は物理リセット種別を返す。
 func (ss *SharedState) PhysicsResetType() PhysicsResetType {
 	return PhysicsResetType(ss.physicsResetType.Load())
@@ -1283,6 +1465,42 @@ func cloneIntSlice(src []int) []int {
 	dst := make([]int, len(src))
 	copy(dst, src)
 	return dst
+}
+
+// cloneTrajectoryPolylines は軌跡と点列を複製する。
+func cloneTrajectoryPolylines(src []TrajectoryPolyline) []TrajectoryPolyline {
+	if src == nil {
+		return nil
+	}
+	dst := make([]TrajectoryPolyline, len(src))
+	for i := range src {
+		dst[i] = src[i]
+		if src[i].Points != nil {
+			dst[i].Points = make([]TrajectoryPoint, len(src[i].Points))
+			copy(dst[i].Points, src[i].Points)
+		}
+	}
+	return dst
+}
+
+// cloneOperationPointHandles は操作点一覧を複製する。
+func cloneOperationPointHandles(src []OperationPointHandle) []OperationPointHandle {
+	if src == nil {
+		return nil
+	}
+	dst := make([]OperationPointHandle, len(src))
+	copy(dst, src)
+	return dst
+}
+
+// containsOperationPointHandle は指定ボーンが現行の操作点一覧に含まれるか判定する。
+func containsOperationPointHandle(handles []OperationPointHandle, modelIndex int, boneName string) bool {
+	for _, handle := range handles {
+		if handle.ModelIndex == modelIndex && handle.BoneName == boneName {
+			return true
+		}
+	}
+	return false
 }
 
 type defaultMotion struct {
