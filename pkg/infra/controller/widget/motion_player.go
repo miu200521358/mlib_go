@@ -174,7 +174,9 @@ func (mp *MotionPlayer) Widgets() declarative.Composite {
 		audioChildren := declarative.Composite{
 			Layout: declarative.HBox{
 				MarginsZero: true,
-				Alignment:   declarative.AlignHCenterVFar,
+				// 音声ピッカーもモデル・モーションと同じ左端から始める。
+				// FilePicker は共有部品のため、ここで親レイアウトだけを揃える。
+				Alignment: declarative.AlignHNearVFar,
 			},
 			Children: []declarative.Widget{
 				mp.volumeWidgets(),
