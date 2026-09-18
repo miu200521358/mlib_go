@@ -48,3 +48,4 @@ review/
 .td_new_index.tsv
 .td_new.lock
 .env
+internal/crumb/bone_names/out/
