@@ -636,6 +636,10 @@
         "translation": "&Link Window Movement"
     },
     {
+        "id": "&最前面化",
+        "translation": "&Focus Link"
+    },
+    {
         "id": "&選択頂点表示",
         "translation": "&Selected Vertex Display"
     },

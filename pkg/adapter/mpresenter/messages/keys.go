@@ -164,6 +164,7 @@ const (
 	ControlWindowKey107           = "スクリーンショット保存先が未指定です"
 	ControlWindowKey108           = "連続面の選択に失敗しました: %s"
 	ControlWindowKey109           = "連続選択面の解除に失敗しました: %s"
+	ControlWindowKey110           = "&最前面化"
 	ViewerWindowKey001            = "カメラ手動操作(テンキー視点切替)"
 	ViewerWindowKey002            = "カメラ手動操作(右ドラッグ回転)"
 	ViewerWindowKey003            = "カメラ手動操作(中クリックドラッグ移動)"

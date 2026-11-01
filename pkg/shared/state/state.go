@@ -723,9 +723,15 @@ func (ss *SharedState) IsFocusLinkEnabled() bool {
 	return ss.focusLinkEnabled.Load()
 }
 
-// SetFocusLinkEnabled はフォーカス連動の有効化を設定する。
+// SetFocusLinkEnabled はフォーカス連動を設定し、切替時に保留中の通知を破棄する。
 func (ss *SharedState) SetFocusLinkEnabled(enabled bool) {
-	ss.focusLinkEnabled.Store(enabled)
+	if ss.focusLinkEnabled.Swap(enabled) == enabled {
+		return
+	}
+	// 古い通知を残すと、再有効化後に無効中の操作が前面化へ反映されるため破棄する。
+	ss.SetControlWindowFocused(false)
+	ss.SetAllViewerWindowsFocused(false)
+	ss.KeepFocus()
 }
 
 // TriggerLinkedFocus は連動フォーカスを開始する。

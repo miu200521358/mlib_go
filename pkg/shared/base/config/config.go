@@ -170,6 +170,8 @@ const (
 	UserConfigKeyLang = "lang"
 	// UserConfigKeyWindowLinkage は画面連動キー。
 	UserConfigKeyWindowLinkage = "window_linkage"
+	// UserConfigKeyFocusLink は開発ビルドの最前面化連動キー。
+	UserConfigKeyFocusLink = "focus_link"
 	// UserConfigKeyFrameDrop はフレームドロップキー。
 	UserConfigKeyFrameDrop = "frame_drop"
 	// UserConfigKeyAudio は音楽ファイル履歴キー。

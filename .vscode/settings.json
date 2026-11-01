@@ -1,0 +1,13 @@
+{
+  // タスク(preLaunchTask 含む)は WSL ではなく Windows の cmd.exe で実行する
+  "terminal.integrated.automationProfile.windows": {
+    "path": "${env:windir}\\System32\\cmd.exe"
+  },
+  "python-envs.pythonProjects": [
+    {
+      "path": ".",
+      "envManager": "ms-python.python:conda",
+      "packageManager": "ms-python.python:conda"
+    }
+  ]
+}

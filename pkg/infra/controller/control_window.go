@@ -118,6 +118,7 @@ type ControlWindow struct {
 	logLevelPhysicsVerboseAction       *walk.Action
 	logLevelViewerVerboseAction        *walk.Action
 	linkWindowAction                   *walk.Action
+	focusLinkAction                    *walk.Action
 
 	verboseSinks map[logging.VerboseIndex]logging.IVerboseSink
 }
@@ -209,6 +210,9 @@ func NewControlWindow(shared *state.SharedState, baseServices base.IBaseServices
 		return nil, NewControllerWindowInitFailed(cw.t(messages.ControlWindowKey004), err)
 	}
 
+	// ビューワーの初回ループが通知を処理する前に設定を反映する。
+	cw.applyFocusLinkUserConfig()
+	cw.updateActionChecked(cw.focusLinkAction, cw.shared.IsFocusLinkEnabled())
 	cw.SetPos(positionX, positionY)
 	cw.shared.SetControlWindowPosition(state.WindowPosition{X: positionX, Y: positionY})
 	cw.shared.SetControlWindowHandle(state.WindowHandle(uintptr(cw.Handle())))
@@ -504,6 +508,37 @@ func (cw *ControlWindow) SetWindowLinkageEnabled(enabled bool) {
 	cw.updateActionChecked(cw.linkWindowAction, enabled)
 	cw.setDisplayFlag(state.STATE_FLAG_WINDOW_LINKAGE, enabled)
 	cw.saveUserBool(config.UserConfigKeyWindowLinkage, enabled)
+}
+
+// SetFocusLinkEnabled は開発ビルドの最前面化連動を設定して保存する。
+func (cw *ControlWindow) SetFocusLinkEnabled(enabled bool) {
+	if !cw.isDevBuild() {
+		return
+	}
+	cw.updateActionChecked(cw.focusLinkAction, enabled)
+	cw.shared.SetFocusLinkEnabled(enabled)
+	cw.saveUserBool(config.UserConfigKeyFocusLink, enabled)
+}
+
+// triggerFocusLink は最前面化連動を切り替える。
+func (cw *ControlWindow) triggerFocusLink() {
+	cw.SetFocusLinkEnabled(cw.actionChecked(cw.focusLinkAction))
+}
+
+// isDevBuild は開発ビルドか判定する。
+func (cw *ControlWindow) isDevBuild() bool {
+	return cw.appConfig != nil && cw.appConfig.IsDev()
+}
+
+// applyFocusLinkUserConfig は開発ビルドの最前面化連動設定を共有状態へ反映する。
+func (cw *ControlWindow) applyFocusLinkUserConfig() {
+	if !cw.isDevBuild() || cw.userConfig == nil {
+		return
+	}
+	enabled, err := cw.userConfig.GetBool(config.UserConfigKeyFocusLink, true)
+	if err == nil {
+		cw.shared.SetFocusLinkEnabled(enabled)
+	}
 }
 
 // SetShowInfoEnabled は情報表示を設定する。
@@ -977,8 +1012,10 @@ func (cw *ControlWindow) buildControllerMenuItems() []declarative.MenuItem {
 		declarative.Action{Text: cw.t(messages.ControlWindowKey041), OnTriggered: cw.triggerSaveLog},
 	}
 
-	if cw.appConfig != nil && cw.appConfig.IsDev() {
+	// 設定の保存も含め、切り分け用の操作は開発ビルドだけに公開する。
+	if cw.isDevBuild() {
 		items = append(items,
+			declarative.Action{Text: cw.t(messages.ControlWindowKey110), Checkable: true, OnTriggered: cw.triggerFocusLink, AssignTo: &cw.focusLinkAction},
 			declarative.Action{Text: cw.t(messages.ControlWindowKey042), Checkable: true, OnTriggered: cw.triggerLogLevelVerbose, AssignTo: &cw.logLevelVerboseAction},
 			declarative.Action{Text: cw.t(messages.ControlWindowKey043), Checkable: true, OnTriggered: cw.triggerLogLevelIkVerbose, AssignTo: &cw.logLevelIkVerboseAction},
 			declarative.Action{Text: cw.t(messages.ControlWindowKey044), Checkable: true, OnTriggered: cw.triggerLogLevelPhysicsVerbose, AssignTo: &cw.logLevelPhysicsVerboseAction},

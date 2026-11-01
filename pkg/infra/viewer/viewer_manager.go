@@ -45,6 +45,8 @@ type ViewerManager struct {
 	appConfig               *config.AppConfig
 	userConfig              config.IUserConfig
 	windowList              []*ViewerWindow
+	// setWindowPos は前面化のOS呼び出しを差し替える検証用の境界。
+	setWindowPos            func(win.HWND, win.HWND, int32, int32, int32, int32, uint32) bool
 	physicsMotionsScratch   []*motion.VmdMotion
 	timeStepsScratch        []float32
 	fixedTimeStepsScratch   []float32
@@ -72,10 +74,11 @@ func NewViewerManager(shared *state.SharedState, baseServices base.IBaseServices
 		}
 	}
 	return &ViewerManager{
-		shared:     shared,
-		appConfig:  appConfig,
-		userConfig: userConfig,
-		windowList: make([]*ViewerWindow, 0),
+		shared:       shared,
+		appConfig:    appConfig,
+		userConfig:   userConfig,
+		windowList:   make([]*ViewerWindow, 0),
+		setWindowPos: win.SetWindowPos,
 	}
 }
 
@@ -310,6 +313,10 @@ func (vl *ViewerManager) handleWindowLinkage() {
 // handleWindowFocus はフォーカス連動の前面化を処理する。
 func (vl *ViewerManager) handleWindowFocus() {
 	if !vl.shared.IsFocusLinkEnabled() {
+		// 無効中の通知を残すと、再有効化後に古い前面化が実行されるため破棄する。
+		vl.shared.SetControlWindowFocused(false)
+		vl.shared.SetAllViewerWindowsFocused(false)
+		vl.shared.KeepFocus()
 		return
 	}
 	if !vl.shared.IsControlWindowReady() || !vl.shared.IsAllViewerWindowsReady() {
@@ -367,8 +374,12 @@ func (vl *ViewerManager) bringWindowToFrontNoActivate(handle state.WindowHandle)
 	hwnd := win.HWND(uintptr(handle))
 	flags := uint32(win.SWP_NOMOVE | win.SWP_NOSIZE | win.SWP_NOACTIVATE)
 	// 他アプリの前面でも可視になるよう、TOPMOSTの付け外しで前面化する。
-	win.SetWindowPos(hwnd, win.HWND_TOPMOST, 0, 0, 0, 0, flags)
-	win.SetWindowPos(hwnd, win.HWND_NOTOPMOST, 0, 0, 0, 0, flags)
+	setWindowPos := vl.setWindowPos
+	if setWindowPos == nil {
+		setWindowPos = win.SetWindowPos
+	}
+	setWindowPos(hwnd, win.HWND_TOPMOST, 0, 0, 0, 0, flags)
+	setWindowPos(hwnd, win.HWND_NOTOPMOST, 0, 0, 0, 0, flags)
 }
 
 // handleVSync はVSyncの切り替えを処理する。

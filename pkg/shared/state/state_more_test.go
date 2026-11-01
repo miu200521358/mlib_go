@@ -149,6 +149,37 @@ func TestSharedStateFlagsAndWindows(t *testing.T) {
 	}
 }
 
+func TestFocusLinkDisabledDoesNotCreateNotifications(t *testing.T) {
+	ss := NewSharedState(1)
+	ss.SetFocusLinkEnabled(false)
+	ss.TriggerLinkedFocus(0)
+
+	if ss.IsControlWindowFocused() || ss.IsViewerWindowFocused(0) || ss.linkingFocus.Load() {
+		t.Fatalf("無効中にフォーカス連動通知が作られました")
+	}
+}
+
+func TestSetFocusLinkEnabledClearsPendingNotificationsOnToggle(t *testing.T) {
+	ss := NewSharedState(1)
+	ss.SetViewerWindowHandle(0, 10)
+	ss.TriggerLinkedFocus(0)
+	if !ss.linkingFocus.Load() {
+		t.Fatalf("有効中の連動フォーカスが開始されていません")
+	}
+
+	ss.SetFocusLinkEnabled(false)
+	if ss.IsControlWindowFocused() || ss.IsViewerWindowFocused(0) || ss.linkingFocus.Load() {
+		t.Fatalf("無効化時に既存通知が破棄されていません")
+	}
+
+	ss.SetControlWindowFocused(true)
+	ss.SetViewerWindowFocused(0, true)
+	ss.SetFocusLinkEnabled(true)
+	if ss.IsControlWindowFocused() || ss.IsViewerWindowFocused(0) || ss.linkingFocus.Load() {
+		t.Fatalf("再有効化時に保留通知が破棄されていません")
+	}
+}
+
 // TestSharedStateModelsAndSelections はモデル/モーションを確認する。
 func TestSharedStateModelsAndSelections(t *testing.T) {
 	ss := NewSharedState(1)
